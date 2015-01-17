@@ -1,0 +1,25 @@
+version: 0.1.{build}
+skip_tags: true
+configuration: Release
+platform: Any CPU
+shallow_clone: true
+assembly_info:
+  patch: true
+  file: '**\AssemblyInfo.*'
+  assembly_version: '{version}'
+  assembly_file_version: '{version}'
+  assembly_informational_version: '{version}'
+build:
+  project: Dapplo.Config.sln
+  publish_nuget: true
+  verbosity: minimal
+artifacts:
+- path: '*.nupkg'
+  name: NuGet package
+notifications:
+- provider: Email
+  to:
+  - robin@dapplo.net
+  on_build_success: true
+  on_build_failure: true
+  on_build_status_changed: false
