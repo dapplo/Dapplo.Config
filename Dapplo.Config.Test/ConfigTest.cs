@@ -1,6 +1,6 @@
 ﻿/*
  * dapplo - building blocks for desktop applications
- * Copyright (C) 2014 Robin Krom
+ * Copyright (C) 2015 Robin Krom
  * 
  * For more information see: http://dapplo.net/
  * dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -26,11 +26,11 @@ using System;
 namespace Dapplo.Config.Test {
 	[TestClass]
 	public class ConfigTest {
-		private IPropertyProxy<IMyTestProperties> _propertyProxy;
+		private IPropertyProxy<IPersonProperties> _propertyProxy;
 
 		[TestInitialize]
 		public void Initialize() {
-			_propertyProxy = ProxyBuilder.CreateProxy<IMyTestProperties>();
+			_propertyProxy = ProxyBuilder.CreateProxy<IPersonProperties>();
 		}
 
 		[TestMethod]

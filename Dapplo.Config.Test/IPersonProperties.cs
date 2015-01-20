@@ -1,6 +1,6 @@
 ﻿/*
  * dapplo - building blocks for desktop applications
- * Copyright (C) 2014 Robin Krom
+ * Copyright (C) 2015 Robin Krom
  * 
  * For more information see: http://dapplo.net/
  * dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -23,7 +23,7 @@ using System.ComponentModel;
 using Dapplo.Config.Extensions;
 
 namespace Dapplo.Config.Test {
-	public interface IMyTestProperties : IExpert<IMyTestProperties>, INotifyPropertyChanged, ITransactionalProperties, IWriteProtectProperties<IMyTestProperties> {
+	public interface IPersonProperties : IExpert<IPersonProperties>, INotifyPropertyChanged, ITransactionalProperties, IWriteProtectProperties<IPersonProperties> {
 		string Name {
 			get;
 			set;
