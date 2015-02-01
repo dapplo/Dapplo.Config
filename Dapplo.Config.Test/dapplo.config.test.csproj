@@ -53,9 +53,14 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="ExpertAttributeTest.cs" />
     <Compile Include="IPersonProperties.cs" />
-    <Compile Include="ConfigTest.cs" />
+    <Compile Include="BasicAssignTest.cs" />
+    <Compile Include="NotifyPropertyChangedTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="DefaultValueTest.cs" />
+    <Compile Include="TransactionTest.cs" />
+    <Compile Include="WriteProtectTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\dapplo.config\Dapplo.Config.csproj">

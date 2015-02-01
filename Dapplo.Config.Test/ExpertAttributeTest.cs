@@ -19,22 +19,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.ComponentModel;
-using Dapplo.Config.Extensions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dapplo.Config.Test {
 	/// <summary>
-	/// This is the interface under test
+	/// This test class shows how the expert attribute can be used
 	/// </summary>
-	public interface IPersonProperties : IExpert<IPersonProperties>, INotifyPropertyChanged, ITransactionalProperties, IWriteProtectProperties<IPersonProperties> {
-		string Name {
-			get;
-			set;
+	[TestClass]
+	public class ExpertAttributeTest {
+		private IPropertyProxy<IPersonProperties> _propertyProxy;
+
+		[TestInitialize]
+		public void Initialize() {
+			_propertyProxy = ProxyBuilder.CreateProxy<IPersonProperties>();
 		}
-		[Expert, DefaultValue(21)]
-		int Age {
-			get;
-			set;
+
+		[TestMethod]
+		public void TestExpert() {
+			var properties = _propertyProxy.PropertyObject;
+			Assert.IsFalse(properties.IsExpert(x => x.Name));
+			Assert.IsTrue(properties.IsExpert(x => x.Age));
 		}
 	}
 }
