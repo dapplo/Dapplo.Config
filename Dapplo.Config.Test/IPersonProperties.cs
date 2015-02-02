@@ -26,13 +26,19 @@ namespace Dapplo.Config.Test {
 	/// <summary>
 	/// This is the interface under test
 	/// </summary>
-	public interface IPersonProperties : IExpert<IPersonProperties>, INotifyPropertyChanged, ITransactionalProperties, IWriteProtectProperties<IPersonProperties> {
+	public interface IPersonProperties : ITagging<IPersonProperties>, INotifyPropertyChanged, ITransactionalProperties, IWriteProtectProperties<IPersonProperties> {
 		string Name {
 			get;
 			set;
 		}
-		[Expert, DefaultValue(21)]
+		[Tag("Expert"), DefaultValue(21)]
 		int Age {
+			get;
+			set;
+		}
+
+		[Tag("Optional"), Tag("NoExpert")]
+		string FirstName {
 			get;
 			set;
 		}

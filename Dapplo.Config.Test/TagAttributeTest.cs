@@ -26,7 +26,7 @@ namespace Dapplo.Config.Test {
 	/// This test class shows how the expert attribute can be used
 	/// </summary>
 	[TestClass]
-	public class ExpertAttributeTest {
+	public class TagAttributeTest {
 		private IPropertyProxy<IPersonProperties> _propertyProxy;
 
 		[TestInitialize]
@@ -35,10 +35,14 @@ namespace Dapplo.Config.Test {
 		}
 
 		[TestMethod]
-		public void TestExpert() {
+		public void TestTagging() {
 			var properties = _propertyProxy.PropertyObject;
-			Assert.IsFalse(properties.IsExpert(x => x.Name));
-			Assert.IsTrue(properties.IsExpert(x => x.Age));
+			Assert.IsFalse(properties.IsTaggedWith(x => x.Name, "Expert"));
+			Assert.IsTrue(properties.IsTaggedWith(x => x.Age, "Expert"));
+			Assert.IsFalse(properties.IsTaggedWith(x => x.Age, "Expert2"));
+			Assert.IsTrue(properties.IsTaggedWith(x => x.FirstName, "Optional"));
+			Assert.IsTrue(properties.IsTaggedWith(x => x.FirstName, "NoExpert"));
+			Assert.IsFalse(properties.IsTaggedWith(x => x.FirstName, "Expert"));
 		}
 	}
 }

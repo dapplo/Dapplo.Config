@@ -23,9 +23,17 @@ using System;
 
 namespace Dapplo.Config.Extensions {
 	/// <summary>
-	///     Attribute to mark properties as "expert" relevant
+	///		Attribute to "Tag" properties as with certain information
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-	public class ExpertAttribute : Attribute {
+	[AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
+	public class TagAttribute : Attribute {
+		public string Tag {
+			get;
+			set;
+		}
+
+		public TagAttribute(string tag) {
+			Tag = tag;
+		}
 	}
 }

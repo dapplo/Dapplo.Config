@@ -35,8 +35,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ExtensionAttribute.cs" />
-    <Compile Include="Extensions\ExpertAttribute.cs" />
-    <Compile Include="Extensions\ExpertPropertyExtension.cs" />
+    <Compile Include="Extensions\TagExtension.cs" />
+    <Compile Include="Extensions\TagAttribute.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Extensions\IWriteProtectProperties.cs" />
     <Compile Include="Extensions\ITransactionalProperties.cs" />

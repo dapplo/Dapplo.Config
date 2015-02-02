@@ -53,7 +53,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="ExpertAttributeTest.cs" />
+    <Compile Include="TagAttributeTest.cs" />
     <Compile Include="IPersonProperties.cs" />
     <Compile Include="BasicAssignTest.cs" />
     <Compile Include="NotifyPropertyChangedTest.cs" />
