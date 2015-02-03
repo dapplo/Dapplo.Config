@@ -40,9 +40,9 @@ namespace Dapplo.Config.Test {
 			Assert.IsFalse(properties.IsTaggedWith(x => x.Name, "Expert"));
 			Assert.IsTrue(properties.IsTaggedWith(x => x.Age, "Expert"));
 			Assert.IsFalse(properties.IsTaggedWith(x => x.Age, "Expert2"));
-			Assert.IsTrue(properties.IsTaggedWith(x => x.FirstName, "Optional"));
-			Assert.IsTrue(properties.IsTaggedWith(x => x.FirstName, "NoExpert"));
-			Assert.IsFalse(properties.IsTaggedWith(x => x.FirstName, "Expert"));
+			Assert.IsTrue(properties.IsTaggedWith(x => x.FirstName, TestTags.Tag2));
+			Assert.IsTrue(properties.IsTaggedWith(x => x.FirstName, TestTags.Tag1));
+			Assert.IsFalse(properties.IsTaggedWith(x => x.FirstName, TestTags.Expert));
 		}
 	}
 }

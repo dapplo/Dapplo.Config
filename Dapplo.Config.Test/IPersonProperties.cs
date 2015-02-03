@@ -37,7 +37,7 @@ namespace Dapplo.Config.Test {
 			set;
 		}
 
-		[Tag("Optional"), Tag("NoExpert")]
+		[Tag(TestTags.Tag2), Tag(TestTags.Tag1)]
 		string FirstName {
 			get;
 			set;

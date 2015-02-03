@@ -39,25 +39,25 @@ namespace Dapplo.Config.Extensions {
 		/// <param name="propertyExpression"></param>
 		/// <param name="tag">Tag to check if the property is tagged with</param>
 		/// <returns>true if the property has the expert attribute, else false</returns>
-		bool IsTaggedWith<TProp>(Expression<Func<T, TProp>> propertyExpression, string tag);
+		bool IsTaggedWith<TProp>(Expression<Func<T, TProp>> propertyExpression, object tag);
 	}
 
 	[Extension(typeof (ITagging<>))]
 	public class TagExtension<T> : IPropertyProxyExtension<T> {
 		// The set of found expert properties
-		private readonly IDictionary<string, ISet<string>> _taggedProperties = new Dictionary<string, ISet<string>>();
+		private readonly IDictionary<string, ISet<object>> _taggedProperties = new Dictionary<string, ISet<object>>();
 
 		public TagExtension(IPropertyProxy<T> proxy) {
 			Type proxiedType = typeof (T);
-			// Loop over all the properties, and check if they have an expert attribute.
+			// Loop over all the properties, and check if they have the TagAttribute.
 			foreach (PropertyInfo propertyInfo in proxiedType.GetProperties()) {
 				Attribute[] customAttributes = Attribute.GetCustomAttributes(propertyInfo);
 				foreach (Attribute customAttribute in customAttributes) {
 					TagAttribute tagAttribute = customAttribute as TagAttribute;
 					if (tagAttribute != null) {
-						ISet<string> tags;
+						ISet<object> tags;
 						if (!_taggedProperties.TryGetValue(propertyInfo.Name, out tags)) {
-							tags = new HashSet<string>();
+							tags = new HashSet<object>();
 							_taggedProperties.Add(propertyInfo.Name, tags);
 						}
 						tags.Add(tagAttribute.Tag);
@@ -77,7 +77,7 @@ namespace Dapplo.Config.Extensions {
 		/// </summary>
 		/// <param name="methodCallInfo">IMethodCallMessage</param>
 		private void HandleIsTaggedWith(MethodCallInfo methodCallInfo) {
-			methodCallInfo.ReturnValue = IsTaggedWith((LambdaExpression)methodCallInfo.Arguments[0], (string)methodCallInfo.Arguments[1]);
+			methodCallInfo.ReturnValue = IsTaggedWith((LambdaExpression)methodCallInfo.Arguments[0], methodCallInfo.Arguments[1]);
 		}
 
 		/// <summary>
@@ -86,9 +86,9 @@ namespace Dapplo.Config.Extensions {
 		/// <param name="propertyExpression"></param>
 		/// <param name="tag">tag to test for</param>
 		/// <returns></returns>
-		private bool IsTaggedWith(LambdaExpression propertyExpression, string tag) {
+		private bool IsTaggedWith(LambdaExpression propertyExpression, object tag) {
 			string property = propertyExpression.GetMemberName();
-			ISet<string> tags;
+			ISet<object> tags;
 			if (_taggedProperties.TryGetValue(property, out tags)) {
 				return tags.Contains(tag);				
 			}

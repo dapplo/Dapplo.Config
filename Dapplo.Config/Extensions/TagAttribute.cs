@@ -23,16 +23,16 @@ using System;
 
 namespace Dapplo.Config.Extensions {
 	/// <summary>
-	///		Attribute to "Tag" properties as with certain information
+	///	 Attribute to "Tag" properties as with certain information
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
 	public class TagAttribute : Attribute {
-		public string Tag {
+		public object Tag {
 			get;
 			set;
 		}
 
-		public TagAttribute(string tag) {
+		public TagAttribute(object tag) {
 			Tag = tag;
 		}
 	}
