@@ -23,3 +23,10 @@ notifications:
   on_build_success: true
   on_build_failure: true
   on_build_status_changed: false
+deploy:
+- provider: GitHub
+  release: Dapplo.Config-v$(appveyor_build_version)
+  auth_token:
+    secure: eBQPtXg53XgcvdcVY3wQAw6kkwNh+QhcsTDwzyQLLh6IOPyiePEaEhJR0D2YBjAj
+  artifact: /.*\.nupkg/
+  draft: true
