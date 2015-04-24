@@ -26,19 +26,19 @@ using Dapplo.Config.Support;
 
 namespace Dapplo.Config.Extensions {
 	/// <summary>
-	///     This class implements the NotifyPropertyChanged (NPC) extension logic, which automatically generates NPC events
-	///     when set is called.
+	///     This class implements the NotifyPropertyChanged extension logic,
+	///     which automatically generates NotifyPropertyChanged events when set is called.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	[Extension(typeof (INotifyPropertyChanged))]
-	public class NpcProxyExtension<T> : IPropertyProxyExtension<T> {
+	public class NotifyPropertyChangedExtension<T> : IPropertyProxyExtension<T> {
 		// Reference to the property object, which is supplied in the PropertyChanged event
 		private readonly T _propertyObject;
 
 		// The "backing" event
 		private event PropertyChangedEventHandler PropertyChanged;
 
-		public NpcProxyExtension(IPropertyProxy<T> proxy) {
+		public NotifyPropertyChangedExtension(IPropertyProxy<T> proxy) {
 			if (!typeof (T).GetInterfaces().Contains(typeof (INotifyPropertyChanged))) {
 				throw new NotSupportedException("Type needs to implement INotifyPropertyChanged");
 			}
