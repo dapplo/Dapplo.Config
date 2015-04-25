@@ -64,7 +64,7 @@ namespace Dapplo.Config {
 		/// </summary>
 		/// <param name="methodname"></param>
 		/// <param name="methodAction"></param>
-		/// <returns></returns>
+		/// <returns>Proxy, used for fluent expressions</returns>
 		public IPropertyProxy<T> RegisterMethod(string methodname, Action<MethodCallInfo> methodAction) {
 			List<Action<MethodCallInfo>> functions;
 			if (!_methodMap.TryGetValue(methodname, out functions)) {
@@ -80,7 +80,7 @@ namespace Dapplo.Config {
 		/// </summary>
 		/// <param name="order"></param>
 		/// <param name="setterAction"></param>
-		/// <returns></returns>
+		/// <returns>Proxy, used for fluent expressions</returns>
 		public IPropertyProxy<T> RegisterSetter(int order, Action<SetInfo> setterAction) {
 			_setters.Add(new Setter {
 				Order = order, SetterAction = setterAction
@@ -94,7 +94,7 @@ namespace Dapplo.Config {
 		/// </summary>
 		/// <param name="order"></param>
 		/// <param name="getterAction"></param>
-		/// <returns></returns>
+		/// <returns>Proxy, used for fluent expressions</returns>
 		public IPropertyProxy<T> RegisterGetter(int order, Action<GetInfo> getterAction) {
 			_getters.Add(new Getter {
 				Order = order, GetterAction = getterAction
@@ -103,30 +103,52 @@ namespace Dapplo.Config {
 			return this;
 		}
 
+		/// <summary>
+		/// Add an extension to the proxy, these extensions contain logic which enhances the proxy
+		/// </summary>
+		/// <typeparam name="TE">Type of Extension</typeparam>
+		/// <returns>Proxy, used for fluent expressions</returns>
 		public IPropertyProxy<T> AddExtension<TE>() where TE : IPropertyProxyExtension<T> {
 			var extension = (TE) Activator.CreateInstance(typeof (TE), this);
 			_extensions.Add(extension);
 			return this;
 		}
 
+		/// <summary>
+		/// Add an extension to the proxy, these extensions contain logic which enhances the proxy
+		/// </summary>
+		/// <param name="extensionType">Type for the extension</param>
+		/// <returns>Proxy, used for fluent expressions</returns>
 		public IPropertyProxy<T> AddExtension(Type extensionType) {
 			var extension = (IPropertyProxyExtension<T>) Activator.CreateInstance(extensionType.MakeGenericType(typeof (T)), this);
 			_extensions.Add(extension);
 			return this;
 		}
 
+		/// <summary>
+		/// Get the property object which this Proxy maintains
+		/// </summary>
 		public T PropertyObject {
 			get {
 				return (T) GetTransparentProxy();
 			}
 		}
 
+		/// <summary>
+		/// The raw property values of the property object
+		/// Can be used to modify the directly, or for load/save
+		/// </summary>
 		public IDictionary<string, object> Properties {
 			get {
 				return _properties;
 			}
 		}
 
+		/// <summary>
+		/// Use a directory to set multiple name/value pairs at a time
+		/// </summary>
+		/// <param name="properties"></param>
+		/// <returns>Proxy, used for fluent expressions</returns>
 		public IPropertyProxy<T> SetProperties(IDictionary<string, object> properties) {
 			foreach (string propertyName in properties.Keys) {
 				object propertyValue = properties[propertyName];
@@ -168,7 +190,7 @@ namespace Dapplo.Config {
 		///     etc.
 		/// </summary>
 		/// <param name="msg"></param>
-		/// <returns></returns>
+		/// <returns>IMessage</returns>
 		public override IMessage Invoke(IMessage msg) {
 			var methodCallMessage = msg as IMethodCallMessage;
 			if (methodCallMessage == null) {

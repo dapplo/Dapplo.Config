@@ -24,15 +24,17 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Dapplo.Config {
-	public class ProxyBuilder {
+	/// <summary>
+	/// This is the proxy builder
+	/// The ProxyBuilder is used to create instances of interfaces with implementations depending on
+	/// the extended interfaces. Especially useful for configurations.
+	/// </summary>
+	public static class ProxyBuilder {
 		private static readonly List<Type> ExtensionTypes = new List<Type>();
 
 		static ProxyBuilder() {
 			IEnumerable<Type> types = from someAssembly in AppDomain.CurrentDomain.GetAssemblies() from someType in someAssembly.GetTypes() where someType.GetCustomAttributes(typeof (ExtensionAttribute), true).Length > 0 select someType;
 			ExtensionTypes.AddRange(types);
-		}
-
-		private ProxyBuilder() {
 		}
 
 		/// <summary>
