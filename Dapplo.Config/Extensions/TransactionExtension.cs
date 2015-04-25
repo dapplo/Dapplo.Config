@@ -43,8 +43,8 @@ namespace Dapplo.Config.Extensions {
 			if (!typeof (T).GetInterfaces().Contains(typeof (ITransactionalProperties))) {
 				throw new NotSupportedException("Type needs to implement ITransactionalProperties");
 			}
-			proxy.RegisterSetter(int.MinValue, TransactionalSetter);
-			proxy.RegisterGetter(int.MinValue, TransactionalGetter);
+			proxy.RegisterSetter((int)CallOrder.First, TransactionalSetter);
+			proxy.RegisterGetter((int)CallOrder.First, TransactionalGetter);
 			proxy.RegisterMethod("StartTransaction", StartTransaction);
 			proxy.RegisterMethod("CommitTransaction", CommitTransaction);
 			proxy.RegisterMethod("RollbackTransaction", RollbackTransaction);

@@ -54,9 +54,9 @@ namespace Dapplo.Config {
 				}
 			}
 			// Make sure the default set logic is registered
-			RegisterSetter(0, DefaultSet);
+			RegisterSetter((int)CallOrder.Middle, DefaultSet);
 			// Make sure the default get logic is registered
-			RegisterGetter(0, DefaultGet);
+			RegisterGetter((int)CallOrder.Middle, DefaultGet);
 		}
 
 		/// <summary>

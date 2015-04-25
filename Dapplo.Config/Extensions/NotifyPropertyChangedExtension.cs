@@ -46,7 +46,7 @@ namespace Dapplo.Config.Extensions {
 			proxy.RegisterMethod("add_PropertyChanged", AddPropertyChanged);
 			proxy.RegisterMethod("remove_PropertyChanged", RemovePropertyChanged);
 			// Register the NotifyPropertyChangedSetter as a last setter, it will call the NPC event
-			proxy.RegisterSetter(int.MaxValue, NotifyPropertyChangedSetter);
+			proxy.RegisterSetter((int)CallOrder.Last, NotifyPropertyChangedSetter);
 		}
 
 		/// <summary>

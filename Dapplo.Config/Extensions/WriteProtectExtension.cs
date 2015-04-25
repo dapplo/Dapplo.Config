@@ -43,7 +43,7 @@ namespace Dapplo.Config.Extensions {
 			if (!typeof(T).GetInterfaces().Contains(typeof(IWriteProtectProperties<T>))) {
 				throw new NotSupportedException("Type needs to implement IWriteProtectProperties");
 			}
-			proxy.RegisterSetter(int.MinValue, WriteProtectSetter);
+			proxy.RegisterSetter((int)CallOrder.First, WriteProtectSetter);
 			proxy.RegisterMethod("StartWriteProtecting", StartWriteProtecting);
 			proxy.RegisterMethod("StopWriteProtecting", StopWriteProtecting);
 			proxy.RegisterMethod("IsWriteProtected", IsWriteProtected);

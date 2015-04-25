@@ -25,6 +25,15 @@ using Dapplo.Config.Support;
 
 namespace Dapplo.Config {
 	/// <summary>
+	/// Helper enum for the call order, used when registering the setter
+	/// </summary>
+	public enum CallOrder : int {
+		First = int.MinValue,
+		Middle = 0,
+		Last = int.MaxValue
+	}
+
+	/// <summary>
 	///     The property proxy is implemented with this interface.
 	/// </summary>
 	/// <typeparam name="T">The type of the interface with the properties</typeparam>
@@ -76,7 +85,7 @@ namespace Dapplo.Config {
 		/// <summary>
 		///     Register a setter
 		/// </summary>
-		/// <param name="order">Int used for sorting</param>
+		/// <param name="order">int used for sorting, lower is before higher is after</param>
 		/// <param name="setterAction">Function to be called</param>
 		/// <returns>The proxy, so it can be fluently called.</returns>
 		IPropertyProxy<T> RegisterSetter(int order, Action<SetInfo> setterAction);
@@ -84,7 +93,7 @@ namespace Dapplo.Config {
 		/// <summary>
 		///     Register a getter
 		/// </summary>
-		/// <param name="order">Int used for sorting</param>
+		/// <param name="order">int used for sorting, lower is before higher is after</param>
 		/// <param name="getterAction">Function to be called</param>
 		/// <returns>The proxy, so it can be fluently called.</returns>
 		IPropertyProxy<T> RegisterGetter(int order, Action<GetInfo> getterAction);
