@@ -34,16 +34,59 @@ namespace Dapplo.Config {
 	}
 
 	/// <summary>
-	///     The property proxy is implemented with this interface.
+	/// Base interface for the generic IPropertyProxy
+	/// This can be used to store in Lists etc
 	/// </summary>
-	/// <typeparam name="T">The type of the interface with the properties</typeparam>
-	public interface IPropertyProxy<T> {
+	public interface IPropertyProxy {
 		/// <summary>
 		///     Direct access to the dictionary backing store.
 		/// </summary>
 		IDictionary<string, object> Properties {
 			get;
 		}
+
+		/// <summary>
+		/// This can be used to access the property object
+		/// via the non generic interface.
+		/// </summary>
+		object UntypedPropertyObject {
+			get;
+		}
+
+		/// <summary>
+		/// Return the type of the property object
+		/// </summary>
+		Type PropertyObjectType {
+			get;
+		}
+
+		/// <summary>
+		///     This method overwrites all properties in the proxy with the supplied values.
+		///     The extensions are not "triggered".
+		/// </summary>
+		/// <param name="properties">IDictionary with values</param>
+		void SetProperties(IDictionary<string, object> properties);
+
+		/// <summary>
+		///     Add extension
+		/// </summary>
+		/// <param name="extensionType">Type of the extension to add</param>
+		/// <returns>The proxy, so it can be fluently called.</returns>
+		void AddExtension(Type extensionType);
+
+		/// <summary>
+		///     Register a method
+		/// </summary>
+		/// <param name="methodname">Name of the method to add</param>
+		/// <param name="methodAction">Action to be called</param>
+		void RegisterMethod(string methodname, Action<MethodCallInfo> methodAction);
+	}
+
+	/// <summary>
+	///     The property proxy is implemented with this interface.
+	/// </summary>
+	/// <typeparam name="T">The type of the interface with the properties</typeparam>
+	public interface IPropertyProxy<T> : IPropertyProxy {
 
 		/// <summary>
 		///     Get the proxy object which "implements" the interface.
@@ -54,48 +97,22 @@ namespace Dapplo.Config {
 		}
 
 		/// <summary>
-		///     This method overwrites all properties in the proxy with the supplied values.
-		///     The extensions are not "triggered".
-		/// </summary>
-		/// <param name="properties">IDictionary with values</param>
-		/// <returns>The proxy, so it can be fluently called.</returns>
-		IPropertyProxy<T> SetProperties(IDictionary<string, object> properties);
-
-		/// <summary>
 		///     Add the extension of type TE
 		/// </summary>
-		/// <returns>The proxy, so it can be fluently called.</returns>
-		IPropertyProxy<T> AddExtension<TE>() where TE : IPropertyProxyExtension<T>;
-
-		/// <summary>
-		///     Add extension
-		/// </summary>
-		/// <param name="extensionType">Type of the extension to add</param>
-		/// <returns>The proxy, so it can be fluently called.</returns>
-		IPropertyProxy<T> AddExtension(Type extensionType);
-
-		/// <summary>
-		///     Register a method
-		/// </summary>
-		/// <param name="methodname">Name of the method to add</param>
-		/// <param name="methodAction">Action to be called</param>
-		/// <returns>The proxy, so it can be fluently called.</returns>
-		IPropertyProxy<T> RegisterMethod(string methodname, Action<MethodCallInfo> methodAction);
+		void AddExtension<TE>() where TE : IPropertyProxyExtension<T>;
 
 		/// <summary>
 		///     Register a setter
 		/// </summary>
 		/// <param name="order">int used for sorting, lower is before higher is after</param>
 		/// <param name="setterAction">Function to be called</param>
-		/// <returns>The proxy, so it can be fluently called.</returns>
-		IPropertyProxy<T> RegisterSetter(int order, Action<SetInfo> setterAction);
+		void RegisterSetter(int order, Action<SetInfo> setterAction);
 
 		/// <summary>
 		///     Register a getter
 		/// </summary>
 		/// <param name="order">int used for sorting, lower is before higher is after</param>
 		/// <param name="getterAction">Function to be called</param>
-		/// <returns>The proxy, so it can be fluently called.</returns>
-		IPropertyProxy<T> RegisterGetter(int order, Action<GetInfo> getterAction);
+		void RegisterGetter(int order, Action<GetInfo> getterAction);
 	}
 }

@@ -39,7 +39,9 @@ namespace Dapplo.Config {
 		private readonly IDictionary<string, object> _properties = new Dictionary<string, object>();
 		private readonly List<Setter> _setters = new List<Setter>();
 
-
+		/// <summary>
+		/// Constructor
+		/// </summary>
 		public PropertyProxy() : base(typeof (T)) {
 			Type proxiedType = typeof (T);
 			foreach (PropertyInfo propertyInfo in proxiedType.GetProperties()) {
@@ -53,6 +55,9 @@ namespace Dapplo.Config {
 					}
 				}
 			}
+			// Register the GetType handler
+			RegisterMethod("GetType", HandleGetType);
+
 			// Make sure the default set logic is registered
 			RegisterSetter((int)CallOrder.Middle, DefaultSet);
 			// Make sure the default get logic is registered
@@ -64,15 +69,13 @@ namespace Dapplo.Config {
 		/// </summary>
 		/// <param name="methodname"></param>
 		/// <param name="methodAction"></param>
-		/// <returns>Proxy, used for fluent expressions</returns>
-		public IPropertyProxy<T> RegisterMethod(string methodname, Action<MethodCallInfo> methodAction) {
+		public void RegisterMethod(string methodname, Action<MethodCallInfo> methodAction) {
 			List<Action<MethodCallInfo>> functions;
 			if (!_methodMap.TryGetValue(methodname, out functions)) {
 				functions = new List<Action<MethodCallInfo>>();
 				_methodMap.Add(methodname, functions);
 			}
 			functions.Add(methodAction);
-			return this;
 		}
 
 		/// <summary>
@@ -80,13 +83,11 @@ namespace Dapplo.Config {
 		/// </summary>
 		/// <param name="order"></param>
 		/// <param name="setterAction"></param>
-		/// <returns>Proxy, used for fluent expressions</returns>
-		public IPropertyProxy<T> RegisterSetter(int order, Action<SetInfo> setterAction) {
+		public void RegisterSetter(int order, Action<SetInfo> setterAction) {
 			_setters.Add(new Setter {
 				Order = order, SetterAction = setterAction
 			});
 			_setters.Sort();
-			return this;
 		}
 
 		/// <summary>
@@ -94,35 +95,57 @@ namespace Dapplo.Config {
 		/// </summary>
 		/// <param name="order"></param>
 		/// <param name="getterAction"></param>
-		/// <returns>Proxy, used for fluent expressions</returns>
-		public IPropertyProxy<T> RegisterGetter(int order, Action<GetInfo> getterAction) {
+		public void RegisterGetter(int order, Action<GetInfo> getterAction) {
 			_getters.Add(new Getter {
 				Order = order, GetterAction = getterAction
 			});
 			_getters.Sort();
-			return this;
 		}
+
+		/// <summary>
+		/// This is an implementation of the GetType which returns the interface
+		/// </summary>
+		/// <param name="methodCallInfo">IMethodCallMessage</param>
+		private void HandleGetType(MethodCallInfo methodCallInfo) {
+			methodCallInfo.ReturnValue = typeof(T);
+		}
+
 
 		/// <summary>
 		/// Add an extension to the proxy, these extensions contain logic which enhances the proxy
 		/// </summary>
 		/// <typeparam name="TE">Type of Extension</typeparam>
-		/// <returns>Proxy, used for fluent expressions</returns>
-		public IPropertyProxy<T> AddExtension<TE>() where TE : IPropertyProxyExtension<T> {
+		public void AddExtension<TE>() where TE : IPropertyProxyExtension<T> {
 			var extension = (TE) Activator.CreateInstance(typeof (TE), this);
 			_extensions.Add(extension);
-			return this;
 		}
 
 		/// <summary>
 		/// Add an extension to the proxy, these extensions contain logic which enhances the proxy
 		/// </summary>
 		/// <param name="extensionType">Type for the extension</param>
-		/// <returns>Proxy, used for fluent expressions</returns>
-		public IPropertyProxy<T> AddExtension(Type extensionType) {
+		public void AddExtension(Type extensionType) {
 			var extension = (IPropertyProxyExtension<T>) Activator.CreateInstance(extensionType.MakeGenericType(typeof (T)), this);
 			_extensions.Add(extension);
-			return this;
+		}
+
+		/// <summary>
+		/// Get the property object which this Proxy maintains
+		/// Without using the generic type
+		/// </summary>
+		public object UntypedPropertyObject {
+			get {
+				return GetTransparentProxy();
+			}
+		}
+
+		/// <summary>
+		/// Return the Type of the PropertyObject
+		/// </summary>
+		public Type PropertyObjectType {
+			get {
+				return typeof(T);
+			}
 		}
 
 		/// <summary>
@@ -148,8 +171,7 @@ namespace Dapplo.Config {
 		/// Use a directory to set multiple name/value pairs at a time
 		/// </summary>
 		/// <param name="properties"></param>
-		/// <returns>Proxy, used for fluent expressions</returns>
-		public IPropertyProxy<T> SetProperties(IDictionary<string, object> properties) {
+		public void SetProperties(IDictionary<string, object> properties) {
 			foreach (string propertyName in properties.Keys) {
 				object propertyValue = properties[propertyName];
 				if (_properties.ContainsKey(propertyName)) {
@@ -158,7 +180,6 @@ namespace Dapplo.Config {
 					_properties.Add(propertyName, propertyValue);
 				}
 			}
-			return this;
 		}
 
 		/// <summary>
