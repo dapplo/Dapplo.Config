@@ -38,7 +38,6 @@
     <Compile Include="Extensions\NotifyPropertyChangingExtension.cs" />
     <Compile Include="Extensions\TagExtension.cs" />
     <Compile Include="Extensions\TagAttribute.cs" />
-    <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Extensions\IWriteProtectProperties.cs" />
     <Compile Include="Extensions\ITransactionalProperties.cs" />
     <Compile Include="Extensions\WriteProtectExtension.cs" />
@@ -54,6 +53,7 @@
     <Compile Include="Support\Getter.cs" />
     <Compile Include="Support\GetterSetter.cs" />
     <Compile Include="Support\MethodCallInfo.cs" />
+    <Compile Include="Support\SupportingExtensionMethods.cs" />
     <Compile Include="Support\SetInfo.cs" />
     <Compile Include="Support\Setter.cs" />
   </ItemGroup>

@@ -84,9 +84,7 @@ namespace Dapplo.Config.Extensions {
 		/// </summary>
 		/// <param name="methodCallInfo">IMethodCallMessage</param>
 		private void IsWriteProtected(MethodCallInfo methodCallInfo) {
-			LambdaExpression propertyExpression = (LambdaExpression)methodCallInfo.Arguments[0];
-			string property = propertyExpression.GetMemberName();
-			methodCallInfo.ReturnValue = _writeProtectedProperties.Contains(property);
+			methodCallInfo.ReturnValue = _writeProtectedProperties.Contains(methodCallInfo.PropertyNameOf(0));
 		}
 
 		/// <summary>
@@ -94,9 +92,7 @@ namespace Dapplo.Config.Extensions {
 		/// </summary>
 		/// <param name="methodCallInfo">IMethodCallMessage</param>
 		private void WriteProtect(MethodCallInfo methodCallInfo) {
-			LambdaExpression propertyExpression = (LambdaExpression)methodCallInfo.Arguments[0];
-			string property = propertyExpression.GetMemberName();
-			_writeProtectedProperties.Add(property);
+			_writeProtectedProperties.Add(methodCallInfo.PropertyNameOf(0));
 		}
 	}
 }

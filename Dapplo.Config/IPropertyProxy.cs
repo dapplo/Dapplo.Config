@@ -39,10 +39,15 @@ namespace Dapplo.Config {
 	/// </summary>
 	public interface IPropertyProxy {
 		/// <summary>
-		///     Direct access to the dictionary backing store.
+		/// Direct access to the raw property values of the property object
+		/// Can be used to modify the directly, or for load/save
+		/// Assignment to this property will COPY all the supplied properties one-by-one. 
+		/// It will keep the current values, that are not supplied.
+		/// Call clean iF you want to make sure it only has the supplied values.
 		/// </summary>
 		IDictionary<string, object> Properties {
 			get;
+			set;
 		}
 
 		/// <summary>
@@ -59,13 +64,6 @@ namespace Dapplo.Config {
 		Type PropertyObjectType {
 			get;
 		}
-
-		/// <summary>
-		///     This method overwrites all properties in the proxy with the supplied values.
-		///     The extensions are not "triggered".
-		/// </summary>
-		/// <param name="properties">IDictionary with values</param>
-		void SetProperties(IDictionary<string, object> properties);
 
 		/// <summary>
 		///     Add extension

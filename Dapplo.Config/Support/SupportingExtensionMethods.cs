@@ -22,10 +22,24 @@
 using System;
 using System.Linq.Expressions;
 
-namespace Dapplo.Config {
-	public static class ExtensionMethods {
+namespace Dapplo.Config.Support {
+	/// <summary>
+	/// Extension methods
+	/// </summary>
+	public static class SupportingExtensionMethods {
 		/// <summary>
-		///     Get the name of the member in a Lambda expression
+		/// Get the property name from the LambdaExpression inside parameter "index" of the MethodCallInfo
+		/// </summary>
+		/// <param name="methodCallInfo">Has a LambdaExpression in the parameter</param>
+		/// <param name="index">Index of the parameter</param>
+		/// <returns>Property name</returns>
+		public static string PropertyNameOf(this MethodCallInfo methodCallInfo, int index) {
+			LambdaExpression propertyExpression = (LambdaExpression)methodCallInfo.Arguments[index];
+			return propertyExpression.GetMemberName();
+		}
+
+		/// <summary>
+		/// Get the name of the member in a Lambda expression
 		/// </summary>
 		/// <param name="memberSelector">LambdaExpression</param>
 		/// <returns>string with the member name</returns>
@@ -35,16 +49,16 @@ namespace Dapplo.Config {
 				//or move the entire thing to a separate recursive method
 				switch (e.NodeType) {
 					case ExpressionType.Parameter:
-						return ((ParameterExpression) e).Name;
+						return ((ParameterExpression)e).Name;
 					case ExpressionType.MemberAccess:
-						return ((MemberExpression) e).Member.Name;
+						return ((MemberExpression)e).Member.Name;
 					case ExpressionType.Call:
-						return ((MethodCallExpression) e).Method.Name;
+						return ((MethodCallExpression)e).Method.Name;
 					case ExpressionType.Convert:
 					case ExpressionType.ConvertChecked:
-						return nameSelector(((UnaryExpression) e).Operand);
+						return nameSelector(((UnaryExpression)e).Operand);
 					case ExpressionType.Invoke:
-						return nameSelector(((InvocationExpression) e).Expression);
+						return nameSelector(((InvocationExpression)e).Expression);
 					case ExpressionType.ArrayLength:
 						return "Length";
 					default:

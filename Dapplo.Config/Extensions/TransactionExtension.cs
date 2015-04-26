@@ -122,7 +122,7 @@ namespace Dapplo.Config.Extensions {
 		/// <param name="methodCallInfo">MethodCallInfo</param>
 		private void CommitTransaction(MethodCallInfo methodCallInfo) {
 			if (_inTransaction) {
-				_proxy.SetProperties(_transactionProperties);
+				_proxy.Properties = _transactionProperties;
 				_transactionProperties.Clear();
 				_inTransaction = false;
 			}

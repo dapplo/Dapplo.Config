@@ -110,7 +110,6 @@ namespace Dapplo.Config {
 			methodCallInfo.ReturnValue = typeof(T);
 		}
 
-
 		/// <summary>
 		/// Add an extension to the proxy, these extensions contain logic which enhances the proxy
 		/// </summary>
@@ -158,26 +157,22 @@ namespace Dapplo.Config {
 		}
 
 		/// <summary>
-		/// The raw property values of the property object
+		/// Get the raw property values of the property object
 		/// Can be used to modify the directly, or for load/save
+		/// Assignment to this will copy all the supplied properties.
 		/// </summary>
 		public IDictionary<string, object> Properties {
 			get {
 				return _properties;
 			}
-		}
-
-		/// <summary>
-		/// Use a directory to set multiple name/value pairs at a time
-		/// </summary>
-		/// <param name="properties"></param>
-		public void SetProperties(IDictionary<string, object> properties) {
-			foreach (string propertyName in properties.Keys) {
-				object propertyValue = properties[propertyName];
-				if (_properties.ContainsKey(propertyName)) {
-					_properties[propertyName] = propertyValue;
-				} else {
-					_properties.Add(propertyName, propertyValue);
+			set {
+				foreach (string propertyName in value.Keys) {
+					object propertyValue = value[propertyName];
+					if (_properties.ContainsKey(propertyName)) {
+						_properties[propertyName] = propertyValue;
+					} else {
+						_properties.Add(propertyName, propertyValue);
+					}
 				}
 			}
 		}

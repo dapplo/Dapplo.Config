@@ -77,22 +77,11 @@ namespace Dapplo.Config.Extensions {
 		/// </summary>
 		/// <param name="methodCallInfo">IMethodCallMessage</param>
 		private void HandleIsTaggedWith(MethodCallInfo methodCallInfo) {
-			methodCallInfo.ReturnValue = IsTaggedWith((LambdaExpression)methodCallInfo.Arguments[0], methodCallInfo.Arguments[1]);
-		}
-
-		/// <summary>
-		/// This is the logic which resolves the supplied expression, and checks if the property is tagged
-		/// </summary>
-		/// <param name="propertyExpression"></param>
-		/// <param name="tag">tag to test for</param>
-		/// <returns></returns>
-		private bool IsTaggedWith(LambdaExpression propertyExpression, object tag) {
-			string property = propertyExpression.GetMemberName();
+			methodCallInfo.ReturnValue = false;
 			ISet<object> tags;
-			if (_taggedProperties.TryGetValue(property, out tags)) {
-				return tags.Contains(tag);				
+			if (_taggedProperties.TryGetValue(methodCallInfo.PropertyNameOf(0), out tags)) {
+				methodCallInfo.ReturnValue = tags.Contains(methodCallInfo.Arguments[1]);
 			}
-			return false;
 		}
 	}
 }
