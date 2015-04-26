@@ -40,5 +40,11 @@ namespace Dapplo.Config.Test {
 			IPersonProperties properties = _propertyProxy.PropertyObject;
 			Assert.AreEqual(properties.Age, 21);
 		}
+
+		[TestMethod]
+		public void TestDefaultValueAtrribute() {
+			var defaultValue = _propertyProxy.DefaultValue(x => x.Age);
+			Assert.AreEqual(defaultValue, 21);
+		}
 	}
 }

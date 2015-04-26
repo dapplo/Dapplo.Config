@@ -26,6 +26,7 @@ using System.Reflection;
 using System.Runtime.Remoting.Messaging;
 using System.Runtime.Remoting.Proxies;
 using Dapplo.Config.Support;
+using System.Linq.Expressions;
 
 namespace Dapplo.Config {
 	/// <summary>
@@ -268,6 +269,43 @@ namespace Dapplo.Config {
 				return new ReturnMessage(methodCallInfo.ReturnValue, null, 0, null, methodCallMessage);
 			}
 			return new ReturnMessage(new NotImplementedException("No implementation for " + methodName), methodCallMessage);
+		}
+
+		/// <summary>
+		/// Return the default value for a property
+		/// </summary>
+		/// <typeparam name="TProp"></typeparam>
+		/// <param name="propertyExpression"></param>
+		/// <returns>default value object</returns>
+		public object DefaultValue<TProp>(Expression<Func<T, TProp>> propertyExpression) {
+			string propertyName = (propertyExpression as LambdaExpression).GetMemberName();
+
+			Type proxiedType = typeof(T);
+			PropertyInfo propertyInfo = proxiedType.GetProperty(propertyName);
+			var defaultValueAttribute = propertyInfo.GetCustomAttribute<DefaultValueAttribute>();
+			if (defaultValueAttribute != null) {
+				return defaultValueAttribute.Value;
+			}
+			return null;
+		}
+
+		/// <summary>
+		/// Get the description attribute for a property
+		/// </summary>
+		/// <typeparam name="TProp"></typeparam>
+		/// <param name="propertyExpression"></param>
+		/// <returns>description</returns>
+		public string Description<TProp>(Expression<Func<T, TProp>> propertyExpression) {
+			string propertyName = (propertyExpression as LambdaExpression).GetMemberName();
+
+			Type proxiedType = typeof(T);
+			PropertyInfo propertyInfo = proxiedType.GetProperty(propertyName);
+			var descriptionAttribute = propertyInfo.GetCustomAttribute<DescriptionAttribute>();
+			if (descriptionAttribute != null) {
+				return descriptionAttribute.Description;
+			}
+
+			return null;
 		}
 	}
 }

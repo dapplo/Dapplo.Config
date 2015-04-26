@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using Dapplo.Config.Support;
+using System.Linq.Expressions;
 
 namespace Dapplo.Config {
 	/// <summary>
@@ -85,7 +86,6 @@ namespace Dapplo.Config {
 	/// </summary>
 	/// <typeparam name="T">The type of the interface with the properties</typeparam>
 	public interface IPropertyProxy<T> : IPropertyProxy {
-
 		/// <summary>
 		///     Get the proxy object which "implements" the interface.
 		///     Use this to access the values.
@@ -112,5 +112,21 @@ namespace Dapplo.Config {
 		/// <param name="order">int used for sorting, lower is before higher is after</param>
 		/// <param name="getterAction">Function to be called</param>
 		void RegisterGetter(int order, Action<GetInfo> getterAction);
+
+		/// <summary>
+		/// Return the default value of the property
+		/// </summary>
+		/// <typeparam name="TProp"></typeparam>
+		/// <param name="propertyExpression"></param>
+		/// <returns>the default value, null if none</returns>
+		object DefaultValue<TProp>(Expression<Func<T, TProp>> propertyExpression);
+
+		/// <summary>
+		/// Return the description of the DescriptionAttribute
+		/// </summary>
+		/// <typeparam name="TProp"></typeparam>
+		/// <param name="propertyExpression"></param>
+		/// <returns>the default value, null if none</returns>
+		string Description<TProp>(Expression<Func<T, TProp>> propertyExpression);
 	}
 }

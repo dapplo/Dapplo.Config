@@ -27,6 +27,7 @@ namespace Dapplo.Config.Test {
 	/// This is the interface under test
 	/// </summary>
 	public interface IPersonProperties : ITagging<IPersonProperties>, INotifyPropertyChanged, INotifyPropertyChanging, ITransactionalProperties, IWriteProtectProperties<IPersonProperties> {
+		[Description("Name of the person")]
 		string Name {
 			get;
 			set;
