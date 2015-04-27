@@ -19,16 +19,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Dapplo.Config.Ini;
-using Dapplo.Config.Support;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
+using Dapplo.Config.Support;
 
-namespace Dapplo.Config.Extensions {
+namespace Dapplo.Config.Ini {
 	/// <summary>
 	/// Extend the PropertyProxy with Ini functionality
 	/// </summary>
@@ -52,11 +49,11 @@ namespace Dapplo.Config.Extensions {
 		/// Supply the iniSection name
 		/// </summary>
 		private void GetSectionName(MethodCallInfo methodCallInfo) {
-			var dataContractAttribute = this.GetType().GetCustomAttribute<DataContractAttribute>();
+			var dataContractAttribute = GetType().GetCustomAttribute<DataContractAttribute>();
 			if (dataContractAttribute != null && !string.IsNullOrEmpty(dataContractAttribute.Name)) {
 				methodCallInfo.ReturnValue = dataContractAttribute.Name;
 			} else {
-				methodCallInfo.ReturnValue = this.GetType().Name;
+				methodCallInfo.ReturnValue = GetType().Name;
 			}
 		}
 
@@ -67,14 +64,6 @@ namespace Dapplo.Config.Extensions {
 			// return a linq which loops over all the properties and generates IniValues
 			methodCallInfo.ReturnValue = from propertyInfo in typeof(T).GetProperties()
 										 select GenerateIniValue(propertyInfo);
-		}
-
-		/// <summary>
-		/// IniValueFor returns the IniValue object for a certain property
-		/// </summary>
-		/// <param name="methodCallInfo">IMethodCallMessage</param>
-		private void IniValueFor(MethodCallInfo methodCallInfo) {
-			methodCallInfo.ReturnValue = GenerateIniValue(typeof(T).GetProperty(methodCallInfo.PropertyNameOf(0)));
 		}
 
 		/// <summary>

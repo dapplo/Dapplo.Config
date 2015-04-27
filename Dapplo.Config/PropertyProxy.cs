@@ -33,7 +33,7 @@ namespace Dapplo.Config {
 	///     Implementation of the PropertyProxy
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	internal class PropertyProxy<T> : RealProxy, IPropertyProxy<T> {
+	internal sealed class PropertyProxy<T> : RealProxy, IPropertyProxy<T> {
 		private readonly List<IPropertyProxyExtension<T>> _extensions = new List<IPropertyProxyExtension<T>>();
 		private readonly List<Getter> _getters = new List<Getter>();
 		private readonly IDictionary<string, List<Action<MethodCallInfo>>> _methodMap = new Dictionary<string, List<Action<MethodCallInfo>>>();
@@ -268,7 +268,7 @@ namespace Dapplo.Config {
 		/// <param name="propertyExpression"></param>
 		/// <returns>default value object</returns>
 		public object DefaultValue<TProp>(Expression<Func<T, TProp>> propertyExpression) {
-			string propertyName = (propertyExpression as LambdaExpression).GetMemberName();
+			string propertyName = propertyExpression.GetMemberName();
 
 			Type proxiedType = typeof(T);
 			PropertyInfo propertyInfo = proxiedType.GetProperty(propertyName);
@@ -282,7 +282,7 @@ namespace Dapplo.Config {
 		/// <param name="propertyExpression"></param>
 		/// <returns>description</returns>
 		public string Description<TProp>(Expression<Func<T, TProp>> propertyExpression) {
-			string propertyName = (propertyExpression as LambdaExpression).GetMemberName();
+			string propertyName = propertyExpression.GetMemberName();
 
 			Type proxiedType = typeof(T);
 			PropertyInfo propertyInfo = proxiedType.GetProperty(propertyName);

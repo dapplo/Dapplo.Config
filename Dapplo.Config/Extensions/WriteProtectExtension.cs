@@ -22,9 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dapplo.Config.Extensions;
 using Dapplo.Config.Support;
-using System.Linq.Expressions;
 
 namespace Dapplo.Config.Extensions {
 	/// <summary>
@@ -33,13 +31,11 @@ namespace Dapplo.Config.Extensions {
 	/// <typeparam name="T"></typeparam>
 	[Extension(typeof(IWriteProtectProperties<>))]
 	internal class WriteProtectExtension<T> : IPropertyProxyExtension<T> {
-		private readonly IPropertyProxy<T> _proxy;
 		// A store for the values that are write protected
 		private readonly ISet<string> _writeProtectedProperties = new HashSet<string>();
 		private bool _isProtecting;
 
 		public WriteProtectExtension(IPropertyProxy<T> proxy) {
-			_proxy = proxy;
 			if (!typeof(T).GetInterfaces().Contains(typeof(IWriteProtectProperties<T>))) {
 				throw new NotSupportedException("Type needs to implement IWriteProtectProperties");
 			}
@@ -48,8 +44,8 @@ namespace Dapplo.Config.Extensions {
 			// Use Lambdas to make refactoring possible
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties<T>>(x => x.StartWriteProtecting()), StartWriteProtecting);
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties<T>>(x => x.StopWriteProtecting()), StopWriteProtecting);
-			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties<T>>(x => x.WriteProtect<T>(y => default(T))), WriteProtect);
-			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties<T>>(x => x.IsWriteProtected<T>(y => default(T))), IsWriteProtected);
+			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties<T>>(x => x.WriteProtect(y => default(T))), WriteProtect);
+			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties<T>>(x => x.IsWriteProtected(y => default(T))), IsWriteProtected);
 		}
 
 		/// <summary>

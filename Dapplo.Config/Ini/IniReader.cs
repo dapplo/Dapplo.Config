@@ -30,10 +30,10 @@ namespace Dapplo.Config.Ini {
 	/// Functionality to read a .ini file
 	/// </summary>
 	internal static class IniReader {
-		private const string SECTION_START = "[";
-		private const string SECTION_END = "]";
-		private const string COMMENT = ";";
-		private static readonly char[] ASSIGNMENT = new char[] { '=' };
+		private const string SectionStart = "[";
+		private const string SectionEnd = "]";
+		private const string Comment = ";";
+		private static readonly char[] Assignment = { '=' };
 
 		/// <summary>
 		/// Read an ini file to a Dictionary, each key is a iniSection and the value is a Dictionary with name and values.
@@ -63,15 +63,15 @@ namespace Dapplo.Config.Ini {
 					string line = await reader.ReadLineAsync();
 					if (line != null) {
 						string cleanLine = line.Trim();
-						if (cleanLine.Length == 0 || cleanLine.StartsWith(COMMENT)) {
+						if (cleanLine.Length == 0 || cleanLine.StartsWith(Comment)) {
 							continue;
 						}
-						if (cleanLine.StartsWith(SECTION_START)) {
-							string section = line.Replace(SECTION_START, "").Replace(SECTION_END, "").Trim();
+						if (cleanLine.StartsWith(SectionStart)) {
+							string section = line.Replace(SectionStart, "").Replace(SectionEnd, "").Trim();
 							nameValues = new Dictionary<string, string>();
 							ini.Add(section, nameValues);
 						} else {
-							string[] keyvalueSplitter = line.Split(ASSIGNMENT, 2);
+							string[] keyvalueSplitter = line.Split(Assignment, 2);
 							string name = keyvalueSplitter[0];
 							string inivalue = keyvalueSplitter.Length > 1 ? keyvalueSplitter[1] : null;
 							inivalue = ConvertSpecialCharacters(inivalue);

@@ -31,8 +31,8 @@ namespace Dapplo.Config.Ini {
 	/// The IniConfig is used to bind IIniSection proxy objects to an ini file.
 	/// </summary>
 	public class IniConfig {
-		private string _filename;
-		private IDictionary<string, IIniSection> _sections = new Dictionary<string, IIniSection>();
+		private readonly string _filename;
+		private readonly IDictionary<string, IIniSection> _sections = new Dictionary<string, IIniSection>();
 
 		/// <summary>
 		/// Create a binding between the specified files and the IIniSection proxy objects in this instance
@@ -92,7 +92,7 @@ namespace Dapplo.Config.Ini {
 					Type destinationType = iniValue.ValueType;
 					if (destinationType != sourceType) {
 						var converter = TypeDescriptor.GetConverter(destinationType);
-						if (converter != null && converter.CanConvertFrom(typeof(string))) {
+						if (converter.CanConvertFrom(typeof(string))) {
 							iniValue.Value = converter.ConvertFrom(stringValue);
 						} else if (iniValue.Converter != null && iniValue.Converter.CanConvertFrom(sourceType)) {
 							iniValue.Value = iniValue.Converter.ConvertFrom(stringValue);

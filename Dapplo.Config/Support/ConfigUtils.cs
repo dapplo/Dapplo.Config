@@ -56,6 +56,7 @@ namespace Dapplo.Config.Support {
 		/// Non extension helper method to get a refactorable name of a member.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
+		/// <typeparam name="TProp"></typeparam>
 		/// <param name="expression"></param>
 		/// <returns>Name of member</returns>
 		public static string GetMemberName<T, TProp>(Expression<Func<T, TProp>> expression) {
@@ -115,7 +116,9 @@ namespace Dapplo.Config.Support {
 			var typeConverterAttribute = propertyInfo.GetCustomAttribute<TypeConverterAttribute>();
 			if (typeConverterAttribute != null && !string.IsNullOrEmpty(typeConverterAttribute.ConverterTypeName)) {
 				Type typeConverterType = Type.GetType(typeConverterAttribute.ConverterTypeName);
-				return (TypeConverter)Activator.CreateInstance(typeConverterType);
+				if (typeConverterType != null) {
+					return (TypeConverter)Activator.CreateInstance(typeConverterType);
+				}
 			}
 			return null;
 		}
@@ -190,11 +193,13 @@ namespace Dapplo.Config.Support {
 		/// <summary>
 		/// Safely retrieve a value from the dictionary, by using a key
 		/// </summary>
-		/// <param name="propertyName">string propertyName</param>
+		/// <param name="dictionary"></param>
+		/// <param name="key"></param>
 		/// <returns>object</returns>
 		public static object SafeGet(this IDictionary<string, object> dictionary, string key) {
-			if (dictionary.ContainsKey(key)) {
-				return dictionary[key];
+			object value;
+			if (dictionary.TryGetValue(key, out value)) {
+				return value;
 			}
 			return null;
 		}
@@ -202,6 +207,7 @@ namespace Dapplo.Config.Support {
 		/// <summary>
 		/// Safely add or overwrite a value in the dictionary, supply the key & value
 		/// </summary>
+		/// <param name="dictionary"></param>
 		/// <param name="key">string key</param>
 		/// <param name="newValue">object</param>
 		/// <returns>dictionary for fluent API calls</returns>
@@ -213,6 +219,5 @@ namespace Dapplo.Config.Support {
 			}
 			return dictionary;
 		}
-
 	}
 }
