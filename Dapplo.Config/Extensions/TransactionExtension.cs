@@ -31,7 +31,7 @@ namespace Dapplo.Config.Extensions {
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	[Extension(typeof (ITransactionalProperties))]
-	public class TransactionExtension<T> : IPropertyProxyExtension<T> {
+	internal class TransactionExtension<T> : IPropertyProxyExtension<T> {
 		private readonly IPropertyProxy<T> _proxy;
 		// A store for the values that are set during the transaction
 		private readonly IDictionary<string, object> _transactionProperties = new Dictionary<string, object>();
@@ -45,10 +45,12 @@ namespace Dapplo.Config.Extensions {
 			}
 			proxy.RegisterSetter((int)CallOrder.First, TransactionalSetter);
 			proxy.RegisterGetter((int)CallOrder.First, TransactionalGetter);
-			proxy.RegisterMethod("StartTransaction", StartTransaction);
-			proxy.RegisterMethod("CommitTransaction", CommitTransaction);
-			proxy.RegisterMethod("RollbackTransaction", RollbackTransaction);
-			proxy.RegisterMethod("IsTransactionDirty", IsTransactionDirty);
+
+			// Use Lambdas to make refactoring possible
+			proxy.RegisterMethod(ConfigUtils.GetMemberName<ITransactionalProperties>(x => x.StartTransaction()), StartTransaction);
+			proxy.RegisterMethod(ConfigUtils.GetMemberName<ITransactionalProperties>(x => x.CommitTransaction()), CommitTransaction);
+			proxy.RegisterMethod(ConfigUtils.GetMemberName<ITransactionalProperties>(x => x.RollbackTransaction()), RollbackTransaction);
+			proxy.RegisterMethod(ConfigUtils.GetMemberName<ITransactionalProperties>(x => x.IsTransactionDirty()), IsTransactionDirty);
 		}
 
 		/// <summary>

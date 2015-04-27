@@ -19,31 +19,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Dapplo.Config.Support;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
-using Dapplo.Config.Support;
 
 namespace Dapplo.Config.Extensions {
-	/// <summary>
-	///     Interface which your interface needs to implement to be able to see if a property is tagged
-	/// </summary>
-	/// <typeparam name="T"></typeparam>
-	public interface ITagging<T> {
-		/// <summary>
-		///     Checks if the supplied expression resolves to a property which has the expert attribute
-		/// </summary>
-		/// <typeparam name="TProp">Your interfaces</typeparam>
-		/// <param name="propertyExpression"></param>
-		/// <param name="tag">Tag to check if the property is tagged with</param>
-		/// <returns>true if the property has the expert attribute, else false</returns>
-		bool IsTaggedWith<TProp>(Expression<Func<T, TProp>> propertyExpression, object tag);
-	}
-
 	[Extension(typeof (ITagging<>))]
-	public class TagExtension<T> : IPropertyProxyExtension<T> {
+	internal class TagExtension<T> : IPropertyProxyExtension<T> {
 		// The set of found expert properties
 		private readonly IDictionary<string, ISet<object>> _taggedProperties = new Dictionary<string, ISet<object>>();
 
@@ -68,15 +52,16 @@ namespace Dapplo.Config.Extensions {
 			if (!typeof (T).GetInterfaces().Contains(typeof (ITagging<T>))) {
 				throw new NotSupportedException("Type needs to implement ITagging");
 			}
-			proxy.RegisterMethod("IsTaggedWith", HandleIsTaggedWith);
+
+			// Use Lambda to make refactoring possible
+			proxy.RegisterMethod(ConfigUtils.GetMemberName<ITagging<T>>(x => x.IsTaggedWith(y => default(T), null)), IsTaggedWith);
 		}
 
 		/// <summary>
-		///     This is the invoke "handler" which gets the parameters, and returns a message.
-		///     The real logic is in the IsTagged method.
+		/// Check if a property is tagged with a certain tag
 		/// </summary>
 		/// <param name="methodCallInfo">IMethodCallMessage</param>
-		private void HandleIsTaggedWith(MethodCallInfo methodCallInfo) {
+		private void IsTaggedWith(MethodCallInfo methodCallInfo) {
 			methodCallInfo.ReturnValue = false;
 			ISet<object> tags;
 			if (_taggedProperties.TryGetValue(methodCallInfo.PropertyNameOf(0), out tags)) {

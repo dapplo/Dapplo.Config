@@ -20,6 +20,7 @@
  */
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -31,10 +32,26 @@ namespace Dapplo.Config {
 	/// </summary>
 	public static class ProxyBuilder {
 		private static readonly List<Type> ExtensionTypes = new List<Type>();
-
+		private static readonly IDictionary<Type, IPropertyProxy> Cache = new ConcurrentDictionary<Type, IPropertyProxy>();
 		static ProxyBuilder() {
 			IEnumerable<Type> types = from someAssembly in AppDomain.CurrentDomain.GetAssemblies() from someType in someAssembly.GetTypes() where someType.GetCustomAttributes(typeof (ExtensionAttribute), true).Length > 0 select someType;
 			ExtensionTypes.AddRange(types);
+		}
+
+		/// <summary>
+		/// This can be used for Caching the Proxy generation, if there is only one proxy instance needed you want to call this!
+		/// </summary>
+		/// <typeparam name="T">Should be an interface</typeparam>
+		/// <returns>proxy</returns>
+		public static IPropertyProxy<T> GetOrCreateProxy<T>() {
+			IPropertyProxy proxy;
+			lock (Cache) {
+				if (!Cache.TryGetValue(typeof(T), out proxy)) {
+					proxy = CreateProxy<T>();
+					Cache.Add(typeof(T), proxy);
+				}
+			}
+			return (IPropertyProxy<T>)proxy;
 		}
 
 		/// <summary>

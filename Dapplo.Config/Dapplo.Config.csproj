@@ -32,9 +32,11 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ExtensionAttribute.cs" />
+    <Compile Include="Extensions\ITagging.cs" />
     <Compile Include="Extensions\NotifyPropertyChangingExtension.cs" />
     <Compile Include="Extensions\TagExtension.cs" />
     <Compile Include="Extensions\TagAttribute.cs" />
@@ -42,6 +44,11 @@
     <Compile Include="Extensions\ITransactionalProperties.cs" />
     <Compile Include="Extensions\WriteProtectExtension.cs" />
     <Compile Include="Extensions\TransactionExtension.cs" />
+    <Compile Include="Ini\IIniSection.cs" />
+    <Compile Include="Ini\IniReader.cs" />
+    <Compile Include="Ini\IniValue.cs" />
+    <Compile Include="Ini\IniConfig.cs" />
+    <Compile Include="Ini\IniExtension.cs" />
     <Compile Include="IPropertyProxy.cs" />
     <Compile Include="IPropertyProxyExtension.cs" />
     <Compile Include="Extensions\NotifyPropertyChangedExtension.cs" />
@@ -53,7 +60,7 @@
     <Compile Include="Support\Getter.cs" />
     <Compile Include="Support\GetterSetter.cs" />
     <Compile Include="Support\MethodCallInfo.cs" />
-    <Compile Include="Support\SupportingExtensionMethods.cs" />
+    <Compile Include="Support\ConfigUtils.cs" />
     <Compile Include="Support\SetInfo.cs" />
     <Compile Include="Support\Setter.cs" />
   </ItemGroup>

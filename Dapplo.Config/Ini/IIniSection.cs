@@ -1,4 +1,4 @@
-/*
+﻿/*
  * dapplo - building blocks for desktop applications
  * Copyright (C) 2015 Robin Krom
  * 
@@ -20,16 +20,23 @@
  */
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Dapplo.Config.Extensions {
+namespace Dapplo.Config.Ini {
 	/// <summary>
-	///     Extending the to be property interface with this, adds write protection
+	/// By making your property proxy interface extend this, you will be able to write the property to an ini file
 	/// </summary>
-	public interface IWriteProtectProperties<T> {
-		bool IsWriteProtected<TProp>(Expression<Func<T, TProp>> propertyExpression);
-		void WriteProtect<TProp>(Expression<Func<T, TProp>> propertyExpression);
-		void StartWriteProtecting();
-		void StopWriteProtecting();
+	public interface IIniSection {
+		//IniValue IniValueFor<TProp>(Expression<Func<T, TProp>> propertyExpression);
+		IEnumerable<IniValue> IniValues {
+			get;
+		}
+		string SectionName {
+			get;
+		}
 	}
 }

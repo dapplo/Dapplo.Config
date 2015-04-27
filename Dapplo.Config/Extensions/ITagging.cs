@@ -1,4 +1,4 @@
-/*
+﻿/*
  * dapplo - building blocks for desktop applications
  * Copyright (C) 2015 Robin Krom
  * 
@@ -24,12 +24,17 @@ using System.Linq.Expressions;
 
 namespace Dapplo.Config.Extensions {
 	/// <summary>
-	///     Extending the to be property interface with this, adds write protection
+	/// Interface which your interface needs to implement to be able to see if a property is tagged
 	/// </summary>
-	public interface IWriteProtectProperties<T> {
-		bool IsWriteProtected<TProp>(Expression<Func<T, TProp>> propertyExpression);
-		void WriteProtect<TProp>(Expression<Func<T, TProp>> propertyExpression);
-		void StartWriteProtecting();
-		void StopWriteProtecting();
+	/// <typeparam name="T"></typeparam>
+	public interface ITagging<T> {
+		/// <summary>
+		///     Checks if the supplied expression resolves to a property which has the expert attribute
+		/// </summary>
+		/// <typeparam name="TProp">Your interfaces</typeparam>
+		/// <param name="propertyExpression"></param>
+		/// <param name="tag">Tag to check if the property is tagged with</param>
+		/// <returns>true if the property has the expert attribute, else false</returns>
+		bool IsTaggedWith<TProp>(Expression<Func<T, TProp>> propertyExpression, object tag);
 	}
 }

@@ -40,29 +40,28 @@ namespace Dapplo.Config {
 		private readonly IDictionary<string, object> _properties = new Dictionary<string, object>();
 		private readonly List<Setter> _setters = new List<Setter>();
 
+		// Cache the GetTransparentProxy value, as it makes more sense
+		private readonly T _transparentProxy;
+
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		public PropertyProxy() : base(typeof (T)) {
 			Type proxiedType = typeof (T);
 			foreach (PropertyInfo propertyInfo in proxiedType.GetProperties()) {
-				Attribute[] customAttributes = Attribute.GetCustomAttributes(propertyInfo);
-				foreach (Attribute customAttribute in customAttributes) {
-					if (customAttribute.GetType() == typeof (DefaultValueAttribute)) {
-						var defaultValueAttribute = customAttribute as DefaultValueAttribute;
-						if (defaultValueAttribute != null) {
-							_properties[propertyInfo.Name] = defaultValueAttribute.Value;
-						}
-					}
+				var defaultValueAttribute = propertyInfo.GetCustomAttribute<DefaultValueAttribute>();
+				if (defaultValueAttribute != null) {
+					_properties[propertyInfo.Name] = defaultValueAttribute.Value;
 				}
 			}
-			// Register the GetType handler
-			RegisterMethod("GetType", HandleGetType);
+			// Register the GetType handler, use Lambda to make refactoring possible
+			RegisterMethod(ConfigUtils.GetMemberName<object>(x => x.GetType()), HandleGetType);
 
 			// Make sure the default set logic is registered
 			RegisterSetter((int)CallOrder.Middle, DefaultSet);
 			// Make sure the default get logic is registered
 			RegisterGetter((int)CallOrder.Middle, DefaultGet);
+			_transparentProxy = (T)GetTransparentProxy();
 		}
 
 		/// <summary>
@@ -135,7 +134,7 @@ namespace Dapplo.Config {
 		/// </summary>
 		public object UntypedPropertyObject {
 			get {
-				return GetTransparentProxy();
+				return _transparentProxy;
 			}
 		}
 
@@ -153,7 +152,7 @@ namespace Dapplo.Config {
 		/// </summary>
 		public T PropertyObject {
 			get {
-				return (T) GetTransparentProxy();
+				return _transparentProxy;
 			}
 		}
 
@@ -167,13 +166,8 @@ namespace Dapplo.Config {
 				return _properties;
 			}
 			set {
-				foreach (string propertyName in value.Keys) {
-					object propertyValue = value[propertyName];
-					if (_properties.ContainsKey(propertyName)) {
-						_properties[propertyName] = propertyValue;
-					} else {
-						_properties.Add(propertyName, propertyValue);
-					}
+				foreach (string key in value.Keys) {
+					_properties.SafelyAddOrOverwrite(key, value[key]);
 				}
 			}
 		}
@@ -184,11 +178,7 @@ namespace Dapplo.Config {
 		/// <param name="setInfo"></param>
 		private void DefaultSet(SetInfo setInfo) {
 			// Add the value to the dictionary
-			if (_properties.ContainsKey(setInfo.PropertyName)) {
-				_properties[setInfo.PropertyName] = setInfo.NewValue;
-			} else {
-				_properties.Add(setInfo.PropertyName, setInfo.NewValue);
-			}
+			_properties.SafelyAddOrOverwrite(setInfo.PropertyName, setInfo.NewValue);
 		}
 
 		/// <summary>
@@ -282,11 +272,7 @@ namespace Dapplo.Config {
 
 			Type proxiedType = typeof(T);
 			PropertyInfo propertyInfo = proxiedType.GetProperty(propertyName);
-			var defaultValueAttribute = propertyInfo.GetCustomAttribute<DefaultValueAttribute>();
-			if (defaultValueAttribute != null) {
-				return defaultValueAttribute.Value;
-			}
-			return null;
+			return propertyInfo.GetDefaultValue();
 		}
 
 		/// <summary>
@@ -300,12 +286,7 @@ namespace Dapplo.Config {
 
 			Type proxiedType = typeof(T);
 			PropertyInfo propertyInfo = proxiedType.GetProperty(propertyName);
-			var descriptionAttribute = propertyInfo.GetCustomAttribute<DescriptionAttribute>();
-			if (descriptionAttribute != null) {
-				return descriptionAttribute.Description;
-			}
-
-			return null;
+			return propertyInfo.GetDescription();
 		}
 	}
 }
