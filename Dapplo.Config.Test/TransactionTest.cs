@@ -18,6 +18,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+using Dapplo.Config.Test.TestInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dapplo.Config.Test {
@@ -26,11 +28,11 @@ namespace Dapplo.Config.Test {
 	/// </summary>
 	[TestClass]
 	public class TransactionTest {
-		private IPropertyProxy<IPersonProperties> _propertyProxy;
+		private IPropertyProxy<ITransactionTest> _propertyProxy;
 
 		[TestInitialize]
 		public void Initialize() {
-			_propertyProxy = ProxyBuilder.CreateProxy<IPersonProperties>();
+			_propertyProxy = ProxyBuilder.CreateProxy<ITransactionTest>();
 		}
 
 		[TestMethod]

@@ -19,33 +19,31 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Dapplo.Config.Test.TestInterfaces;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Dapplo.Config.Ini;
+using System.ComponentModel;
+using System.Runtime.Serialization;
 
-namespace Dapplo.Config.Test {
+namespace Dapplo.Config.Test.TestInterfaces {
 	/// <summary>
-	/// Test case to show how the default value works
+	/// This is the interface under test
 	/// </summary>
-	[TestClass]
-	public class DefaultValueTest {
-		private IPropertyProxy<IDefaultValueTest> _propertyProxy;
-
-		[TestInitialize]
-		public void Initialize() {
-			_propertyProxy = ProxyBuilder.CreateProxy<IDefaultValueTest>();
+	[IniSection("Test")]
+	[Description("Test Configuration")]
+	public interface IIniTest : IIniSection {
+		[Description("Name of the person")]
+		string Name {
+			get;
+			set;
+		}
+		[DefaultValue(21), DataMember(EmitDefaultValue=true)]
+		int Age {
+			get;
+			set;
 		}
 
-
-		[TestMethod]
-		public void TestDefaultValue() {
-			IDefaultValueTest properties = _propertyProxy.PropertyObject;
-			Assert.AreEqual(properties.Age, 21);
-		}
-
-		[TestMethod]
-		public void TestDefaultValueAtrribute() {
-			var defaultValue = _propertyProxy.DefaultValue(x => x.Age);
-			Assert.AreEqual(defaultValue, 21);
+		string FirstName {
+			get;
+			set;
 		}
 	}
 }

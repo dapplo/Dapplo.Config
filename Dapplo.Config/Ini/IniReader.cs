@@ -93,7 +93,9 @@ namespace Dapplo.Config.Ini {
 		/// <param name="iniValue">string</param>
 		/// <returns>string</returns>
 		private static string ConvertSpecialCharacters(string iniValue) {
-			iniValue = iniValue.Replace("\\n", "\n");
+			if (!string.IsNullOrEmpty(iniValue)) {
+				iniValue = iniValue.Replace("\\n", "\n");
+			}
 			return iniValue;
 		}
 	}

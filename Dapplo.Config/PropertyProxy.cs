@@ -207,6 +207,23 @@ namespace Dapplo.Config {
 			object[] parameters = methodCallMessage.InArgs;
 			// Get the method name
 			string methodName = methodCallMessage.MethodName;
+
+			// First check the methods, so we can override all other access by specifying a method
+			List<Action<MethodCallInfo>> actions;
+			if (_methodMap.TryGetValue(methodName, out actions)) {
+				var methodCallInfo = new MethodCallInfo {
+					MethodName = methodName,
+					Arguments = parameters
+				};
+				foreach (var action in actions) {
+					action(methodCallInfo);
+				}
+				if (methodCallInfo.HasError) {
+					return new ReturnMessage(methodCallInfo.Error, methodCallMessage);
+				}
+				return new ReturnMessage(methodCallInfo.ReturnValue, null, 0, null, methodCallMessage);
+			}
+
 			// Preparations for the property access
 			string propertyName;
 			if (methodName.StartsWith("get_")) {
@@ -245,19 +262,6 @@ namespace Dapplo.Config {
 				return new ReturnMessage(null, null, 0, null, methodCallMessage);
 			}
 
-			List<Action<MethodCallInfo>> actions;
-			if (_methodMap.TryGetValue(methodName, out actions)) {
-				var methodCallInfo = new MethodCallInfo {
-					MethodName = methodName, Arguments = parameters
-				};
-				foreach (var action in actions) {
-					action(methodCallInfo);
-				}
-				if (methodCallInfo.HasError) {
-					return new ReturnMessage(methodCallInfo.Error, methodCallMessage);
-				}
-				return new ReturnMessage(methodCallInfo.ReturnValue, null, 0, null, methodCallMessage);
-			}
 			return new ReturnMessage(new NotImplementedException("No implementation for " + methodName), methodCallMessage);
 		}
 

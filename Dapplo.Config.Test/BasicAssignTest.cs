@@ -19,16 +19,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Dapplo.Config.Test.TestInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dapplo.Config.Test {
 	[TestClass]
 	public class BassicAssignTest {
-		private IPropertyProxy<IPersonProperties> _propertyProxy;
+		private IPropertyProxy<IBassicAssignTest> _propertyProxy;
 
 		[TestInitialize]
 		public void Initialize() {
-			_propertyProxy = ProxyBuilder.CreateProxy<IPersonProperties>();
+			_propertyProxy = ProxyBuilder.CreateProxy<IBassicAssignTest>();
 		}
 
 		[TestMethod]

@@ -117,5 +117,38 @@ namespace Dapplo.Config.Ini {
 			get;
 			set;
 		}
+
+		/// <summary>
+		/// Check if this IniValue has a value
+		/// </summary>
+		public bool HasValue {
+			get {
+				return _properties.ContainsKey(PropertyName);
+			}
+		}
+
+		/// <summary>
+		/// Check if this IniValue needs to be written.
+		/// This returns false if there is no value, or if the value is the default and if EmitDefaultValue is false (Default)
+		/// </summary>
+		public bool IsWriteNeeded {
+			get {
+				// if EmitDefaultValue is true, we should always write this value (without checking if it is default
+				if (EmitDefaultValue) {
+					return true;
+				}
+
+				// Don't write if there is no value
+				if (!_properties.ContainsKey(PropertyName)) {
+					return false;
+				}
+
+				object value = _properties.SafeGet(PropertyName);
+
+				// Check if our value is default
+				bool isDefault = object.Equals(value, DefaultValue);
+				return !isDefault;
+			}
+		}
 	}
 }

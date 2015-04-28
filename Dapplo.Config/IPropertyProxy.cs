@@ -67,18 +67,32 @@ namespace Dapplo.Config {
 		}
 
 		/// <summary>
-		///     Add extension
+		/// Add extension
 		/// </summary>
 		/// <param name="extensionType">Type of the extension to add</param>
 		/// <returns>The proxy, so it can be fluently called.</returns>
 		void AddExtension(Type extensionType);
 
 		/// <summary>
-		///     Register a method
+		/// Register a method
 		/// </summary>
 		/// <param name="methodname">Name of the method to add</param>
 		/// <param name="methodAction">Action to be called</param>
 		void RegisterMethod(string methodname, Action<MethodCallInfo> methodAction);
+
+		/// <summary>
+		///     Register a setter, currently there is only the generic "catch all" setter
+		/// </summary>
+		/// <param name="order">int used for sorting, lower is before higher is after</param>
+		/// <param name="setterAction">Function to be called</param>
+		void RegisterSetter(int order, Action<SetInfo> setterAction);
+
+		/// <summary>
+		///     Register a getter, currently there is only the generic "catch all" getter
+		/// </summary>
+		/// <param name="order">int used for sorting, lower is before higher is after</param>
+		/// <param name="getterAction">Function to be called</param>
+		void RegisterGetter(int order, Action<GetInfo> getterAction);
 	}
 
 	/// <summary>
@@ -98,20 +112,6 @@ namespace Dapplo.Config {
 		///     Add the extension of type TE
 		/// </summary>
 		void AddExtension<TE>() where TE : IPropertyProxyExtension<T>;
-
-		/// <summary>
-		///     Register a setter
-		/// </summary>
-		/// <param name="order">int used for sorting, lower is before higher is after</param>
-		/// <param name="setterAction">Function to be called</param>
-		void RegisterSetter(int order, Action<SetInfo> setterAction);
-
-		/// <summary>
-		///     Register a getter
-		/// </summary>
-		/// <param name="order">int used for sorting, lower is before higher is after</param>
-		/// <param name="getterAction">Function to be called</param>
-		void RegisterGetter(int order, Action<GetInfo> getterAction);
 
 		/// <summary>
 		/// Return the default value of the property

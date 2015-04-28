@@ -35,7 +35,18 @@ namespace Dapplo.Config.Ini {
 		IEnumerable<IniValue> IniValues {
 			get;
 		}
+
+		/// <summary>
+		/// Name of the Ini-Section, should be set on your property interface with
+		/// </summary>
 		string SectionName {
+			get;
+		}
+
+		/// <summary>
+		/// Description of the Ini-Section
+		/// </summary>
+		string Description {
 			get;
 		}
 	}

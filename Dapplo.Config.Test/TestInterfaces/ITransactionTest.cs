@@ -22,24 +22,12 @@
 using System.ComponentModel;
 using Dapplo.Config.Extensions;
 
-namespace Dapplo.Config.Test {
+namespace Dapplo.Config.Test.TestInterfaces {
 	/// <summary>
 	/// This is the interface under test
 	/// </summary>
-	public interface IPersonProperties : ITagging<IPersonProperties>, INotifyPropertyChanged, INotifyPropertyChanging, ITransactionalProperties, IWriteProtectProperties<IPersonProperties> {
-		[Description("Name of the person")]
-		string Name {
-			get;
-			set;
-		}
-		[Tag("Expert"), DefaultValue(21)]
+	public interface ITransactionTest : ITransactionalProperties {
 		int Age {
-			get;
-			set;
-		}
-
-		[Tag(TestTags.Tag2), Tag(TestTags.Tag1)]
-		string FirstName {
 			get;
 			set;
 		}

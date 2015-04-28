@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -55,23 +56,50 @@ namespace Dapplo.Config.Ini {
 		/// <summary>
 		/// Write all the IIniSections to the ini file
 		/// </summary>
-		public void Write() {
-
+		public async Task Write() {
+			using (var stream = new FileStream(_filename, FileMode.Create, FileAccess.Write))
+			using (var writer = new StreamWriter(stream, Encoding.UTF8)) {
+				foreach(var section in _sections.Values) {
+					await writer.WriteLineAsync();
+					string description = section.Description;
+					if (!string.IsNullOrEmpty(description)) {
+						await writer.WriteLineAsync(string.Format(";{0}", description));
+					}
+					await writer.WriteLineAsync(string.Format("[{0}]", section.SectionName));
+					foreach (var iniValue in section.IniValues) {
+						if (!iniValue.IsWriteNeeded) {
+							continue;
+						}
+						if (!string.IsNullOrEmpty(iniValue.Description)) {
+							await writer.WriteLineAsync(string.Format(";{0}", iniValue.Description));
+						}
+						TypeConverter converter = iniValue.Converter;
+						if (converter == null) {
+							converter = TypeDescriptor.GetConverter(iniValue.ValueType);
+						}
+						await writer.WriteLineAsync(string.Format("{0}={1}", iniValue.IniPropertyName, converter.ConvertToInvariantString(iniValue.Value)));
+					}
+				}
+			}
 		}
 
 		/// <summary>
 		/// Initialize the IniConfig by reading all the properties from the file and setting them on the IniSections
 		/// </summary>
-		/// <returns>Task</returns>
-		public async Task Init() {
-			var properties = await IniReader.ReadAsync(_filename, Encoding.UTF8);
-			foreach (var sectionName in properties.Keys) {
-				IIniSection section;
-				if (_sections.TryGetValue(sectionName, out section)) {
-					var iniProperties = properties[sectionName];
-					FillSection(iniProperties, section);
+		/// <returns>Task with bool indicating if the ini file was read</returns>
+		public async Task<bool> Init() {
+			if (File.Exists(_filename)) {
+				var properties = await IniReader.ReadAsync(_filename, Encoding.UTF8);
+				foreach (var sectionName in properties.Keys) {
+					IIniSection section;
+					if (_sections.TryGetValue(sectionName, out section)) {
+						var iniProperties = properties[sectionName];
+						FillSection(iniProperties, section);
+					}
 				}
+				return true;
 			}
+			return false;
 		}
 
 		/// <summary>

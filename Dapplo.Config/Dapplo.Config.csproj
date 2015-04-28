@@ -46,6 +46,7 @@
     <Compile Include="Extensions\TransactionExtension.cs" />
     <Compile Include="Ini\IIniSection.cs" />
     <Compile Include="Ini\IniReader.cs" />
+    <Compile Include="Ini\IniSectionAttribute.cs" />
     <Compile Include="Ini\IniValue.cs" />
     <Compile Include="Ini\IniConfig.cs" />
     <Compile Include="Ini\IniExtension.cs" />

@@ -21,6 +21,7 @@
 
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Dapplo.Config.Test.TestInterfaces;
 
 namespace Dapplo.Config.Test {
 	/// <summary>
@@ -29,11 +30,11 @@ namespace Dapplo.Config.Test {
 	[TestClass]
 	public class WriteProtectTest {
 		private const string TestValue1 = "VALUE1";
-		private IPropertyProxy<IPersonProperties> _propertyProxy;
+		private IPropertyProxy<IWriteProtectTest> _propertyProxy;
 	
 		[TestInitialize]
 		public void Initialize() {
-			_propertyProxy = ProxyBuilder.CreateProxy<IPersonProperties>();
+			_propertyProxy = ProxyBuilder.CreateProxy<IWriteProtectTest>();
 		}
 
 		[TestMethod]
@@ -44,16 +45,31 @@ namespace Dapplo.Config.Test {
 			properties.Age = 30;
 			Assert.IsTrue(properties.IsWriteProtected(x => x.Age));
 			properties.StopWriteProtecting();
+			Assert.IsTrue(properties.IsWriteProtected(x => x.Age));
 			properties.Name = TestValue1;
 			Assert.IsFalse(properties.IsWriteProtected(x => x.Name));
+		}
+
+		[TestMethod]
+		public void TestDisableWriteProtect() {
+			var properties = _propertyProxy.PropertyObject;
+			properties.StartWriteProtecting();
+			properties.Age = 30;
+			Assert.IsTrue(properties.IsWriteProtected(x => x.Age));
+			properties.StopWriteProtecting();
+			Assert.IsTrue(properties.IsWriteProtected(x => x.Age));
+			properties.DisableWriteProtect(x => x.Age);
+			Assert.IsFalse(properties.IsWriteProtected(x => x.Age));
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(AccessViolationException))]
+		public void TestAccessViolation() {
+			var properties = _propertyProxy.PropertyObject;
 			properties.WriteProtect(x => x.Name);
 			Assert.IsTrue(properties.IsWriteProtected(x => x.Name));
-			try {
-				properties.Name = TestValue1;
-				Assert.Fail("Exception expected!");
-			} catch(Exception ex) {
-				Assert.AreEqual(ex.GetType(), typeof(AccessViolationException));
-			}
+			// This should throw a AccessViolationException
+			properties.Name = TestValue1;
 		}
 	}
 }

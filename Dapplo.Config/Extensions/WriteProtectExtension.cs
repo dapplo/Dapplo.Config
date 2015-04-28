@@ -45,6 +45,7 @@ namespace Dapplo.Config.Extensions {
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties<T>>(x => x.StartWriteProtecting()), StartWriteProtecting);
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties<T>>(x => x.StopWriteProtecting()), StopWriteProtecting);
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties<T>>(x => x.WriteProtect(y => default(T))), WriteProtect);
+			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties<T>>(x => x.DisableWriteProtect(y => default(T))), DisableWriteProtect);
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties<T>>(x => x.IsWriteProtected(y => default(T))), IsWriteProtected);
 		}
 
@@ -91,6 +92,14 @@ namespace Dapplo.Config.Extensions {
 		/// <param name="methodCallInfo">IMethodCallMessage</param>
 		private void WriteProtect(MethodCallInfo methodCallInfo) {
 			_writeProtectedProperties.Add(methodCallInfo.PropertyNameOf(0));
+		}
+
+		/// <summary>
+		///     DisableWriteProtect removes the write protection of the supplied property in the LambdaExpression
+		/// </summary>
+		/// <param name="methodCallInfo">IMethodCallMessage</param>
+		private void DisableWriteProtect(MethodCallInfo methodCallInfo) {
+			_writeProtectedProperties.Remove(methodCallInfo.PropertyNameOf(0));
 		}
 	}
 }

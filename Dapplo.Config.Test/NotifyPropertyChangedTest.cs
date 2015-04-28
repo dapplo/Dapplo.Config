@@ -21,11 +21,12 @@
 
 using System.ComponentModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Dapplo.Config.Test.TestInterfaces;
 
 namespace Dapplo.Config.Test {
 	[TestClass]
 	public class NotifyPropertyChangedTest {
-		private IPropertyProxy<IPersonProperties> _propertyProxy;
+		private IPropertyProxy<INotifyPropertyChangedTest> _propertyProxy;
 
 		private const string NoChange = "NOCHANGE";
 		private const string TestValue1 = "VALUE1";
@@ -33,7 +34,7 @@ namespace Dapplo.Config.Test {
 
 		[TestInitialize]
 		public void Initialize() {
-			_propertyProxy = ProxyBuilder.CreateProxy<IPersonProperties>();
+			_propertyProxy = ProxyBuilder.CreateProxy<INotifyPropertyChangedTest>();
 		}
 
 		[TestMethod]
@@ -51,7 +52,7 @@ namespace Dapplo.Config.Test {
 			properties.Name = TestValue1;
 			Assert.AreEqual("Name", changedPropertyName);
 
-			// Test if the value doesn't change
+			// Ensure that if the value is the same, we don't get an event
 			changedPropertyName = NoChange;
 			properties.Name = TestValue1;
 			Assert.AreEqual(NoChange, changedPropertyName);

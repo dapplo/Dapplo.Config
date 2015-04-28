@@ -19,10 +19,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Dapplo.Config.Support;
 using System;
 using System.ComponentModel;
 using System.Linq;
-using Dapplo.Config.Support;
 
 namespace Dapplo.Config.Extensions {
 	/// <summary>
@@ -50,7 +50,7 @@ namespace Dapplo.Config.Extensions {
 		}
 
 		/// <summary>
-		///     This creates a NPC event if the values are changed
+		///     This creates a NPC event if the values are changing
 		/// </summary>
 		/// <param name="setInfo">SetInfo with all the set call information</param>
 		private void NotifyPropertyChangingSetter(SetInfo setInfo) {

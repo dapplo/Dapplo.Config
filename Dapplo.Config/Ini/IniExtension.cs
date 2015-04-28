@@ -24,6 +24,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using Dapplo.Config.Support;
+using System.ComponentModel;
 
 namespace Dapplo.Config.Ini {
 	/// <summary>
@@ -42,18 +43,28 @@ namespace Dapplo.Config.Ini {
 			//_proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection>(x => x.IniValueFor<T>(y => default(T))), IniValueFor);
 			_proxy.RegisterMethod("get_" + ConfigUtils.GetMemberName<IIniSection, object>(x => x.IniValues), GetIniValues);
 			_proxy.RegisterMethod("get_" + ConfigUtils.GetMemberName<IIniSection, object>(x => x.SectionName), GetSectionName);
-			_proxy.RegisterMethod("set_" + ConfigUtils.GetMemberName<IIniSection, object>(x => x.SectionName), GetSectionName);
+			_proxy.RegisterMethod("get_" + ConfigUtils.GetMemberName<IIniSection, object>(x => x.Description), GetDescription);
 		}
 
 		/// <summary>
 		/// Supply the iniSection name
 		/// </summary>
 		private void GetSectionName(MethodCallInfo methodCallInfo) {
-			var dataContractAttribute = GetType().GetCustomAttribute<DataContractAttribute>();
-			if (dataContractAttribute != null && !string.IsNullOrEmpty(dataContractAttribute.Name)) {
-				methodCallInfo.ReturnValue = dataContractAttribute.Name;
+			var iniSectionAttribute = typeof(T).GetCustomAttribute<IniSectionAttribute>();
+			if (iniSectionAttribute != null && !string.IsNullOrEmpty(iniSectionAttribute.Name)) {
+				methodCallInfo.ReturnValue = iniSectionAttribute.Name;
 			} else {
-				methodCallInfo.ReturnValue = GetType().Name;
+				methodCallInfo.ReturnValue = typeof(T).Name;
+			}
+		}
+
+		/// <summary>
+		/// Supply the Description
+		/// </summary>
+		private void GetDescription(MethodCallInfo methodCallInfo) {
+			var descriptionAttribute = typeof(T).GetCustomAttribute<DescriptionAttribute>();
+			if (descriptionAttribute != null && !string.IsNullOrEmpty(descriptionAttribute.Description)) {
+				methodCallInfo.ReturnValue = descriptionAttribute.Description;
 			}
 		}
 
@@ -77,7 +88,7 @@ namespace Dapplo.Config.Ini {
 			newIniValue.ValueType = propertyInfo.PropertyType;
 
 			newIniValue.IniPropertyName = propertyInfo.GetDataMemberName();
-			if (!string.IsNullOrEmpty(newIniValue.IniPropertyName)) {
+			if (string.IsNullOrEmpty(newIniValue.IniPropertyName)) {
 				newIniValue.IniPropertyName = newIniValue.PropertyName;
 			}
 			newIniValue.EmitDefaultValue = propertyInfo.GetEmitDefaultValue();
