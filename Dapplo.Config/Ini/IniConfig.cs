@@ -39,7 +39,7 @@ namespace Dapplo.Config.Ini {
 		/// Create a binding between the specified files and the IIniSection proxy objects in this instance
 		/// </summary>
 		/// <param name="filename">File to read from and write to</param>
-		public IniConfig(string filename) {
+		public IniConfig(string filename = null) {
 			_filename = filename;
 		}
 
@@ -57,30 +57,45 @@ namespace Dapplo.Config.Ini {
 		/// Write all the IIniSections to the ini file
 		/// </summary>
 		public async Task Write() {
-			using (var stream = new FileStream(_filename, FileMode.Create, FileAccess.Write))
-			using (var writer = new StreamWriter(stream, Encoding.UTF8)) {
-				foreach(var section in _sections.Values) {
-					await writer.WriteLineAsync();
-					string description = section.Description;
-					if (!string.IsNullOrEmpty(description)) {
-						await writer.WriteLineAsync(string.Format(";{0}", description));
+			if (string.IsNullOrEmpty(_filename)) {
+				throw new ArgumentNullException("_filename");
+			}
+			using (var stream = new FileStream(_filename, FileMode.Create, FileAccess.Write)) {
+				await Write(stream);
+			}
+
+		}
+
+		/// <summary>
+		/// Write all the IIniSections to the stream
+		/// </summary>
+		/// <param name="stream">Stream to write to</param>
+		/// <returns>Task</returns>
+		public async Task Write(Stream stream) {
+			// Do not dispose the writer, this will close the supplied stream and that is not our job!
+			var writer = new StreamWriter(stream, Encoding.UTF8);
+			foreach(var section in _sections.Values) {
+				await writer.WriteLineAsync();
+				string description = section.Description;
+				if (!string.IsNullOrEmpty(description)) {
+					await writer.WriteLineAsync(string.Format(";{0}", description));
+				}
+				await writer.WriteLineAsync(string.Format("[{0}]", section.SectionName));
+				foreach (var iniValue in section.IniValues) {
+					if (!iniValue.IsWriteNeeded) {
+						continue;
 					}
-					await writer.WriteLineAsync(string.Format("[{0}]", section.SectionName));
-					foreach (var iniValue in section.IniValues) {
-						if (!iniValue.IsWriteNeeded) {
-							continue;
-						}
-						if (!string.IsNullOrEmpty(iniValue.Description)) {
-							await writer.WriteLineAsync(string.Format(";{0}", iniValue.Description));
-						}
-						TypeConverter converter = iniValue.Converter;
-						if (converter == null) {
-							converter = TypeDescriptor.GetConverter(iniValue.ValueType);
-						}
-						await writer.WriteLineAsync(string.Format("{0}={1}", iniValue.IniPropertyName, converter.ConvertToInvariantString(iniValue.Value)));
+					if (!string.IsNullOrEmpty(iniValue.Description)) {
+						await writer.WriteLineAsync(string.Format(";{0}", iniValue.Description));
 					}
+					TypeConverter converter = iniValue.Converter;
+					if (converter == null) {
+						converter = TypeDescriptor.GetConverter(iniValue.ValueType);
+					}
+					await writer.WriteLineAsync(string.Format("{0}={1}", iniValue.IniPropertyName, converter.ConvertToInvariantString(iniValue.Value)));
 				}
 			}
+			writer.Flush();
 		}
 
 		/// <summary>
@@ -88,18 +103,39 @@ namespace Dapplo.Config.Ini {
 		/// </summary>
 		/// <returns>Task with bool indicating if the ini file was read</returns>
 		public async Task<bool> Init() {
+			if (string.IsNullOrEmpty(_filename)) {
+				throw new ArgumentNullException("_filename");
+			}
 			if (File.Exists(_filename)) {
 				var properties = await IniReader.ReadAsync(_filename, Encoding.UTF8);
-				foreach (var sectionName in properties.Keys) {
-					IIniSection section;
-					if (_sections.TryGetValue(sectionName, out section)) {
-						var iniProperties = properties[sectionName];
-						FillSection(iniProperties, section);
-					}
-				}
-				return true;
+				return FillSections(properties);
 			}
 			return false;
+		}
+
+		/// <summary>
+		/// Initialize the IniConfig by reading all the properties from the file and setting them on the IniSections
+		/// </summary>
+		/// <returns>Task with bool indicating if the ini file was read</returns>
+		public async Task<bool> Init(Stream stream) {
+			var properties = await IniReader.ReadAsync(stream, Encoding.UTF8);
+			return FillSections(properties);
+		}
+
+		/// <summary>
+		/// Internal method, use the supplied ini-sections & properties to fill the sectoins
+		/// </summary>
+		/// <param name="properties"></param>
+		/// <returns></returns>
+		private bool FillSections(Dictionary<string, Dictionary<string, string>> properties) {
+			foreach (var sectionName in properties.Keys) {
+				IIniSection section;
+				if (_sections.TryGetValue(sectionName, out section)) {
+					var iniProperties = properties[sectionName];
+					FillSection(iniProperties, section);
+				}
+			}
+			return true;
 		}
 
 		/// <summary>

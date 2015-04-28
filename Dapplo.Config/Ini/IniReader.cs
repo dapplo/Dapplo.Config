@@ -57,29 +57,30 @@ namespace Dapplo.Config.Ini {
 		/// <returns>dictionary of sections - dictionaries with the properties</returns>
 		public static async Task<Dictionary<string, Dictionary<string, string>>> ReadAsync(Stream stream, Encoding encoding, CancellationToken token = default(CancellationToken)) {
 			Dictionary<string, Dictionary<string, string>> ini = new Dictionary<string, Dictionary<string, string>>();
-			using (StreamReader reader = new StreamReader(stream, encoding)) {
-				Dictionary<string, string> nameValues = new Dictionary<string, string>();
-				while (!reader.EndOfStream && !token.IsCancellationRequested) {
-					string line = await reader.ReadLineAsync();
-					if (line != null) {
-						string cleanLine = line.Trim();
-						if (cleanLine.Length == 0 || cleanLine.StartsWith(Comment)) {
-							continue;
-						}
-						if (cleanLine.StartsWith(SectionStart)) {
-							string section = line.Replace(SectionStart, "").Replace(SectionEnd, "").Trim();
-							nameValues = new Dictionary<string, string>();
-							ini.Add(section, nameValues);
+
+			// Do not dispose the reader, this will close the supplied stream and that is not our job!
+			var reader = new StreamReader(stream, encoding);
+			Dictionary<string, string> nameValues = new Dictionary<string, string>();
+			while (!reader.EndOfStream && !token.IsCancellationRequested) {
+				string line = await reader.ReadLineAsync();
+				if (line != null) {
+					string cleanLine = line.Trim();
+					if (cleanLine.Length == 0 || cleanLine.StartsWith(Comment)) {
+						continue;
+					}
+					if (cleanLine.StartsWith(SectionStart)) {
+						string section = line.Replace(SectionStart, "").Replace(SectionEnd, "").Trim();
+						nameValues = new Dictionary<string, string>();
+						ini.Add(section, nameValues);
+					} else {
+						string[] keyvalueSplitter = line.Split(Assignment, 2);
+						string name = keyvalueSplitter[0];
+						string inivalue = keyvalueSplitter.Length > 1 ? keyvalueSplitter[1] : null;
+						inivalue = ConvertSpecialCharacters(inivalue);
+						if (nameValues.ContainsKey(name)) {
+							nameValues[name] = inivalue;
 						} else {
-							string[] keyvalueSplitter = line.Split(Assignment, 2);
-							string name = keyvalueSplitter[0];
-							string inivalue = keyvalueSplitter.Length > 1 ? keyvalueSplitter[1] : null;
-							inivalue = ConvertSpecialCharacters(inivalue);
-							if (nameValues.ContainsKey(name)) {
-								nameValues[name] = inivalue;
-							} else {
-								nameValues.Add(name, inivalue);
-							}
+							nameValues.Add(name, inivalue);
 						}
 					}
 				}

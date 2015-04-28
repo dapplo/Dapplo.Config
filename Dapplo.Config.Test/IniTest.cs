@@ -19,17 +19,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
 using Dapplo.Config.Ini;
 using Dapplo.Config.Test.TestInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Dapplo.Config.Test {
 	[TestClass]
 	public class IniTest {
 		private IPropertyProxy<IIniTest> _propertyProxy;
-		private const string FileName = @"C:\LocalData\test.ini";
+		private const string Name = "Robin";
 
 		[TestInitialize]
 		public void Initialize() {
@@ -38,21 +39,36 @@ namespace Dapplo.Config.Test {
 
 		[TestMethod]
 		public async Task TestIniInit() {
-			var iniConfig = new IniConfig(FileName);
+			var iniConfig = new IniConfig();
 
 			var iniTest = _propertyProxy.PropertyObject;
 			iniConfig.AddSection(iniTest);
-			await iniConfig.Init();
+			using (var testMemoryStream = new MemoryStream()) {
+				await iniConfig.Init(testMemoryStream);
+			}
 		}
 
-		public async Task TestIniWrite() {
-			var iniConfig = new IniConfig(FileName);
+		[TestMethod]
+		public async Task TestIniWriteRead() {
+			var iniConfig = new IniConfig();
 
 			var iniTest = _propertyProxy.PropertyObject;
 			iniConfig.AddSection(iniTest);
-			bool isFileRead = await iniConfig.Init();
-			iniTest.Name = "Robin";
-			await iniConfig.Write();
+			iniTest.Name = Name;
+			long ticks = DateTimeOffset.Now.UtcTicks;
+			iniTest.Age = ticks;
+			using (var writeStream = new MemoryStream()) {
+				await iniConfig.Write(writeStream);
+				iniTest.Age = 2;
+
+				// Test reading
+				writeStream.Seek(0, SeekOrigin.Begin);
+				var isFileRead = await iniConfig.Init(writeStream);
+				if (isFileRead) {
+					Assert.AreEqual(Name, iniTest.Name);
+					Assert.AreEqual(ticks, iniTest.Age);
+				}
+			}
 		}
 	}
 }

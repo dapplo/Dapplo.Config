@@ -36,7 +36,7 @@ namespace Dapplo.Config.Test.TestInterfaces {
 			set;
 		}
 		[DefaultValue(21), DataMember(EmitDefaultValue=true)]
-		int Age {
+		long Age {
 			get;
 			set;
 		}
