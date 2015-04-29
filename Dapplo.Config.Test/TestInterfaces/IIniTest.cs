@@ -20,6 +20,7 @@
  */
 
 using Dapplo.Config.Ini;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.Serialization;
 
@@ -45,5 +46,12 @@ namespace Dapplo.Config.Test.TestInterfaces {
 			get;
 			set;
 		}
+
+		[DefaultValue("5,3,2,1,1"), TypeConverter(typeof(GenericListTypeConverter<int>))]
+		List<int> WindowCornerCutShape {
+			get;
+			set;
+		}
+
 	}
 }

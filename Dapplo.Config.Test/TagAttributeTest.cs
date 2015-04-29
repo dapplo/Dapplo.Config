@@ -45,11 +45,22 @@ namespace Dapplo.Config.Test {
 		public void TestTagging() {
 			var properties = _propertyProxy.PropertyObject;
 			Assert.IsFalse(properties.IsTaggedWith(x => x.Name, "Expert"));
+			Assert.IsFalse(properties.IsTaggedWith("Name", "Expert"));
+
 			Assert.IsTrue(properties.IsTaggedWith(x => x.Age, "Expert"));
+			Assert.IsTrue(properties.IsTaggedWith("Age", "Expert"));
+
 			Assert.IsFalse(properties.IsTaggedWith(x => x.Age, "Expert2"));
+			Assert.IsFalse(properties.IsTaggedWith("Age", "Expert2"));
+
 			Assert.IsTrue(properties.IsTaggedWith(x => x.FirstName, TestTags.Tag2));
+			Assert.IsTrue(properties.IsTaggedWith("FirstName", TestTags.Tag2));
+
 			Assert.IsTrue(properties.IsTaggedWith(x => x.FirstName, TestTags.Tag1));
+			Assert.IsTrue(properties.IsTaggedWith("FirstName", TestTags.Tag1));
+
 			Assert.IsFalse(properties.IsTaggedWith(x => x.FirstName, TestTags.Expert));
+			Assert.IsFalse(properties.IsTaggedWith("FirstName", TestTags.Expert));
 		}
 	}
 }

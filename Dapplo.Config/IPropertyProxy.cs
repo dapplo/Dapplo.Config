@@ -112,21 +112,5 @@ namespace Dapplo.Config {
 		///     Add the extension of type TE
 		/// </summary>
 		void AddExtension<TE>() where TE : IPropertyProxyExtension<T>;
-
-		/// <summary>
-		/// Return the default value of the property
-		/// </summary>
-		/// <typeparam name="TProp"></typeparam>
-		/// <param name="propertyExpression"></param>
-		/// <returns>the default value, null if none</returns>
-		object DefaultValue<TProp>(Expression<Func<T, TProp>> propertyExpression);
-
-		/// <summary>
-		/// Return the description of the DescriptionAttribute
-		/// </summary>
-		/// <typeparam name="TProp"></typeparam>
-		/// <param name="propertyExpression"></param>
-		/// <returns>the default value, null if none</returns>
-		string Description<TProp>(Expression<Func<T, TProp>> propertyExpression);
 	}
 }

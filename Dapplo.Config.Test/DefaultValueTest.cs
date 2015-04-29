@@ -44,7 +44,10 @@ namespace Dapplo.Config.Test {
 
 		[TestMethod]
 		public void TestDefaultValueAtrribute() {
-			var defaultValue = _propertyProxy.DefaultValue(x => x.Age);
+			IDefaultValueTest properties = _propertyProxy.PropertyObject;
+			object defaultValue = properties.DefaultValueFor(x => x.Age);
+			Assert.AreEqual(defaultValue, 21);
+			defaultValue = properties.DefaultValueFor("Age");
 			Assert.AreEqual(defaultValue, 21);
 		}
 	}

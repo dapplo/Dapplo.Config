@@ -1,4 +1,4 @@
-/*
+﻿/*
  * dapplo - building blocks for desktop applications
  * Copyright (C) 2015 Robin Krom
  * 
@@ -19,14 +19,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Dapplo.Config.Extensions {
-	/// <summary>
-	///     Extending the to be property interface with this, adds transactional support
-	/// </summary>
-	public interface ITransactionalProperties {
-		void StartTransaction();
-		void CommitTransaction();
-		void RollbackTransaction();
-		bool IsTransactionDirty();
+using Dapplo.Config.Test.TestInterfaces;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace Dapplo.Config.Test {
+	[TestClass]
+	public class DescriptionTest {
+		private IPropertyProxy<IDescriptionTest> _propertyProxy;
+		public const string TestDescription = "Name of the person";
+
+		[TestInitialize]
+		public void Initialize() {
+			_propertyProxy = ProxyBuilder.CreateProxy<IDescriptionTest>();
+		}
+
+		[TestMethod]
+		public void TestDescriptionAttribute() {
+			string description = _propertyProxy.PropertyObject.DescriptionFor(x => x.Name);
+			Assert.AreEqual(description, TestDescription);
+			description = _propertyProxy.PropertyObject.DescriptionFor("Name");
+			Assert.AreEqual(description, TestDescription);
+		}
 	}
 }

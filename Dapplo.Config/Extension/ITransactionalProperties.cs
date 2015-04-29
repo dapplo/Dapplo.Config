@@ -1,4 +1,4 @@
-﻿/*
+/*
  * dapplo - building blocks for desktop applications
  * Copyright (C) 2015 Robin Krom
  * 
@@ -19,21 +19,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
-
-namespace Dapplo.Config.Extensions {
+namespace Dapplo.Config.Extension {
 	/// <summary>
-	///	 Attribute to "Tag" properties as with certain information
+	///     Extending the to be property interface with this, adds transactional support
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
-	public class TagAttribute : Attribute {
-		public object Tag {
-			get;
-			set;
-		}
-
-		public TagAttribute(object tag) {
-			Tag = tag;
-		}
+	public interface ITransactionalProperties {
+		void StartTransaction();
+		void CommitTransaction();
+		void RollbackTransaction();
+		bool IsTransactionDirty();
 	}
 }

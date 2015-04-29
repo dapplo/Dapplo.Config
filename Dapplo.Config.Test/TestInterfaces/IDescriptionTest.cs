@@ -19,16 +19,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.ComponentModel;
 using Dapplo.Config.Extension;
+using System.ComponentModel;
 
 namespace Dapplo.Config.Test.TestInterfaces {
 	/// <summary>
 	/// This is the interface under test
 	/// </summary>
-	public interface IDefaultValueTest : IDefaultValue<IDefaultValueTest> {
-		[DefaultValue(21)]
-		int Age {
+	interface IDescriptionTest : IDescription<IDescriptionTest> {
+		[Description(DescriptionTest.TestDescription)]
+		string Name {
 			get;
 			set;
 		}

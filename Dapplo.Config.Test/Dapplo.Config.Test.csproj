@@ -54,7 +54,9 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="DescriptionTest.cs" />
     <Compile Include="NotifyPropertyChangingTest.cs" />
+    <Compile Include="TestInterfaces\IDescriptionTest.cs" />
     <Compile Include="TestInterfaces\IBassicAssignTest.cs" />
     <Compile Include="TestInterfaces\IDefaultValueTest.cs" />
     <Compile Include="TestInterfaces\INotifyPropertyChangedTest.cs" />

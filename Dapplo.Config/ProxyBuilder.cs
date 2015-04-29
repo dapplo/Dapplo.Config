@@ -61,7 +61,7 @@ namespace Dapplo.Config {
 		/// <typeparam name="T">Should be an interface</typeparam>
 		/// <returns>proxy</returns>
 		public static IPropertyProxy<T> CreateProxy<T>() {
-			IPropertyProxy<T> proxy = new PropertyProxy<T>();
+			var proxy = new PropertyProxy<T>();
 			Type[] interfaces = typeof (T).GetInterfaces();
 			foreach (Type extensionType in ExtensionTypes) {
 				var extensionAttributes = (ExtensionAttribute[]) extensionType.GetCustomAttributes(typeof (ExtensionAttribute), false);
@@ -77,7 +77,8 @@ namespace Dapplo.Config {
 					}
 				}
 			}
-
+			// Call the init, this will also proceyy any extensions
+			proxy.Init();
 			return proxy;
 		}
 	}

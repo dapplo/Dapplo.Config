@@ -23,30 +23,38 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dapplo.Config.Support;
+using System.Reflection;
 
-namespace Dapplo.Config.Extensions {
+namespace Dapplo.Config.Extension.Implementation {
 	/// <summary>
 	///     This implements logic to add write protect support to your proxied interface.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	[Extension(typeof(IWriteProtectProperties<>))]
+	[Extension(typeof(IWriteProtectProperties))]
 	internal class WriteProtectExtension<T> : IPropertyProxyExtension<T> {
 		// A store for the values that are write protected
 		private readonly ISet<string> _writeProtectedProperties = new HashSet<string>();
 		private bool _isProtecting;
 
 		public WriteProtectExtension(IPropertyProxy<T> proxy) {
-			if (!typeof(T).GetInterfaces().Contains(typeof(IWriteProtectProperties<T>))) {
+			if (!typeof(T).GetInterfaces().Contains(typeof(IWriteProtectProperties))) {
 				throw new NotSupportedException("Type needs to implement IWriteProtectProperties");
 			}
 			proxy.RegisterSetter((int)CallOrder.First, WriteProtectSetter);
 
 			// Use Lambdas to make refactoring possible
-			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties<T>>(x => x.StartWriteProtecting()), StartWriteProtecting);
-			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties<T>>(x => x.StopWriteProtecting()), StopWriteProtecting);
-			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties<T>>(x => x.WriteProtect(y => default(T))), WriteProtect);
-			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties<T>>(x => x.DisableWriteProtect(y => default(T))), DisableWriteProtect);
-			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties<T>>(x => x.IsWriteProtected(y => default(T))), IsWriteProtected);
+			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties>(x => x.StartWriteProtecting()), StartWriteProtecting);
+			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties>(x => x.StopWriteProtecting()), StopWriteProtecting);
+			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties>(x => x.WriteProtect("")), WriteProtect);
+			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties>(x => x.DisableWriteProtect("")), DisableWriteProtect);
+			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties>(x => x.IsWriteProtected("")), IsWriteProtected);
+		}
+
+		/// <summary>
+		/// Process the property, in our case we do nothing
+		/// </summary>
+		/// <param name="propertyInfo"></param>
+		public void InitProperty(PropertyInfo propertyInfo) {
 		}
 
 		/// <summary>

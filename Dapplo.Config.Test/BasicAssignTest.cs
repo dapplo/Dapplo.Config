@@ -39,11 +39,5 @@ namespace Dapplo.Config.Test {
 			properties.Name = testValue;
 			Assert.AreEqual(testValue, properties.Name);
 		}
-
-		[TestMethod]
-		public void TestDescriptionAttribute() {
-			var description = _propertyProxy.Description(x => x.Name);
-			Assert.AreEqual(description, "Name of the person");
-		}
 	}
 }

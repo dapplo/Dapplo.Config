@@ -19,11 +19,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Reflection;
 namespace Dapplo.Config {
 	/// <summary>
 	///     Extensions need to extend this interface.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	public interface IPropertyProxyExtension<T> {
+		/// <summary>
+		/// This is called for every Property on type T, so we only have 1x reflection
+		/// </summary>
+		/// <param name="propertyInfo"></param>
+		void InitProperty(PropertyInfo propertyInfo);
 	}
 }

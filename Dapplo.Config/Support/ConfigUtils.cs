@@ -32,14 +32,20 @@ namespace Dapplo.Config.Support {
 	/// </summary>
 	public static class ConfigUtils {
 		/// <summary>
-		/// Get the property name from the LambdaExpression inside parameter "index" of the MethodCallInfo
+		/// Get the property name from the argument "index" of the MethodCallInfo
+		/// If the argument is a string, it will be returned.
+		/// If the arugment is a LambdaExpression, the member name will be retrieved
 		/// </summary>
-		/// <param name="methodCallInfo">Has a LambdaExpression in the parameter</param>
-		/// <param name="index">Index of the parameter</param>
+		/// <param name="methodCallInfo">MethodCallInfo</param>
+		/// <param name="index">Index of the argument</param>
 		/// <returns>Property name</returns>
 		public static string PropertyNameOf(this MethodCallInfo methodCallInfo, int index) {
-			LambdaExpression propertyExpression = (LambdaExpression)methodCallInfo.Arguments[index];
-			return propertyExpression.GetMemberName();
+			string propertyName = methodCallInfo.Arguments[index] as string;
+			if (propertyName == null) {
+				LambdaExpression propertyExpression = (LambdaExpression)methodCallInfo.Arguments[index];
+				propertyName = propertyExpression.GetMemberName();
+			}
+			return propertyName;
 		}
 
 		/// <summary>
@@ -95,10 +101,10 @@ namespace Dapplo.Config.Support {
 		}
 
 		/// <summary>
-		/// Retrieve the DefaultValue from the DefaultValueAttribute for the supplied PropertyInfo
+		/// Retrieve the DefaultValueFor from the DefaultValueAttribute for the supplied PropertyInfo
 		/// </summary>
 		/// <param name="propertyInfo">PropertyInfo</param>
-		/// <returns>DefaultValue</returns>
+		/// <returns>DefaultValueFor</returns>
 		public static object GetDefaultValue(this PropertyInfo propertyInfo) {
 			var defaultValueAttribute = propertyInfo.GetCustomAttribute<DefaultValueAttribute>();
 			if (defaultValueAttribute != null) {

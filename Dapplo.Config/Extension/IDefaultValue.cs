@@ -19,36 +19,32 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Dapplo.Config.Extension;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Dapplo.Config.Ini {
+namespace Dapplo.Config.Extension {
 	/// <summary>
-	/// By making your property proxy interface extend this, you will be able to write the property to an ini file
+	/// Extend your property interface with this, and all default values specified with the DefaultValueAttribute will be applied
 	/// </summary>
-	public interface IIniSection : IDefaultValue {
-		//IniValue IniValueFor<TProp>(Expression<Func<T, TProp>> propertyExpression);
-		IEnumerable<IniValue> IniValues {
-			get;
-		}
-
+	public interface IDefaultValue {
 		/// <summary>
-		/// Name of the Ini-Section, should be set on your property interface with
+		/// Return the default value of the property
 		/// </summary>
-		string SectionName {
-			get;
-		}
+		/// <param name="propertyName"></param>
+		/// <returns>the default value, null if none</returns>
+		object DefaultValueFor(string propertyName);
+	}
 
+	/// <summary>
+	/// Extend your property interface with this, and all default values specified with the DefaultValueAttribute will be applied
+	/// </summary>
+	public interface IDefaultValue<T> : IDefaultValue {
 		/// <summary>
-		/// Description of the Ini-Section
+		/// Return the default value of the property
 		/// </summary>
-		string Description {
-			get;
-		}
+		/// <typeparam name="TProp"></typeparam>
+		/// <param name="propertyExpression"></param>
+		/// <returns>the default value, null if none</returns>
+		object DefaultValueFor<TProp>(Expression<Func<T, TProp>> propertyExpression);
 	}
 }

@@ -47,6 +47,13 @@ namespace Dapplo.Config.Ini {
 		}
 
 		/// <summary>
+		/// Process the property, in our case we do nothing
+		/// </summary>
+		/// <param name="propertyInfo"></param>
+		public void InitProperty(PropertyInfo propertyInfo) {
+		}
+
+		/// <summary>
 		/// Supply the iniSection name
 		/// </summary>
 		private void GetSectionName(MethodCallInfo methodCallInfo) {

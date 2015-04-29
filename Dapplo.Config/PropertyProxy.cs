@@ -38,6 +38,7 @@ namespace Dapplo.Config {
 		private readonly List<Getter> _getters = new List<Getter>();
 		private readonly IDictionary<string, List<Action<MethodCallInfo>>> _methodMap = new Dictionary<string, List<Action<MethodCallInfo>>>();
 		private readonly IDictionary<string, object> _properties = new Dictionary<string, object>();
+		private readonly IDictionary<string, Type> _propertyTypes = new Dictionary<string, Type>();
 		private readonly List<Setter> _setters = new List<Setter>();
 
 		// Cache the GetTransparentProxy value, as it makes more sense
@@ -47,13 +48,6 @@ namespace Dapplo.Config {
 		/// Constructor
 		/// </summary>
 		public PropertyProxy() : base(typeof (T)) {
-			Type proxiedType = typeof (T);
-			foreach (PropertyInfo propertyInfo in proxiedType.GetProperties()) {
-				var defaultValueAttribute = propertyInfo.GetCustomAttribute<DefaultValueAttribute>();
-				if (defaultValueAttribute != null) {
-					_properties[propertyInfo.Name] = defaultValueAttribute.Value;
-				}
-			}
 			// Register the GetType handler, use Lambda to make refactoring possible
 			RegisterMethod(ConfigUtils.GetMemberName<object>(x => x.GetType()), HandleGetType);
 
@@ -62,6 +56,19 @@ namespace Dapplo.Config {
 			// Make sure the default get logic is registered
 			RegisterGetter((int)CallOrder.Middle, DefaultGet);
 			_transparentProxy = (T)GetTransparentProxy();
+		}
+
+		/// <summary>
+		/// Initialize, make sure every property is processed by the extensions
+		/// </summary>
+		public void Init() {
+			Type proxiedType = typeof(T);
+			foreach (PropertyInfo propertyInfo in proxiedType.GetProperties()) {
+				_propertyTypes[propertyInfo.Name] = propertyInfo.PropertyType;
+				foreach (var extension in _extensions) {
+					extension.InitProperty(propertyInfo);
+				}
+			}
 		}
 
 		/// <summary>
@@ -173,6 +180,15 @@ namespace Dapplo.Config {
 		}
 
 		/// <summary>
+		/// Get the Type for a property
+		/// </summary>
+		public IDictionary<string, Type> PropertyTypes {
+			get {
+				return _propertyTypes;
+			}
+		}
+
+		/// <summary>
 		///     A default implementation of the set logic
 		/// </summary>
 		/// <param name="setInfo"></param>
@@ -189,6 +205,12 @@ namespace Dapplo.Config {
 			object value;
 			if (getInfo.PropertyName != null && _properties.TryGetValue(getInfo.PropertyName, out value)) {
 				getInfo.Value = value;
+			} else {
+				// Make sure we return the right default value
+				Type propType = _propertyTypes[getInfo.PropertyName];
+				if (propType.IsValueType) {
+					getInfo.Value = Activator.CreateInstance(propType);
+				}
 			}
 		}
 
@@ -229,7 +251,8 @@ namespace Dapplo.Config {
 			if (methodName.StartsWith("get_")) {
 				propertyName = methodName.Substring(4);
 				var getInfo = new GetInfo {
-					PropertyName = propertyName, CanContinue = true
+					PropertyName = propertyName,
+					CanContinue = true
 				};
 				foreach (Getter getter in _getters) {
 					getter.GetterAction(getInfo);
@@ -248,7 +271,11 @@ namespace Dapplo.Config {
 				object oldValue;
 				bool hasOldValue = _properties.TryGetValue(propertyName, out oldValue);
 				var setInfo = new SetInfo {
-					NewValue = parameters[0], PropertyName = propertyName, HasOldValue = hasOldValue, CanContinue = true, OldValue = oldValue
+					NewValue = parameters[0],
+					PropertyName = propertyName,
+					HasOldValue = hasOldValue,
+					CanContinue = true,
+					OldValue = oldValue
 				};
 				foreach (Setter setter in _setters) {
 					setter.SetterAction(setInfo);
@@ -263,20 +290,6 @@ namespace Dapplo.Config {
 			}
 
 			return new ReturnMessage(new NotImplementedException("No implementation for " + methodName), methodCallMessage);
-		}
-
-		/// <summary>
-		/// Return the default value for a property
-		/// </summary>
-		/// <typeparam name="TProp"></typeparam>
-		/// <param name="propertyExpression"></param>
-		/// <returns>default value object</returns>
-		public object DefaultValue<TProp>(Expression<Func<T, TProp>> propertyExpression) {
-			string propertyName = propertyExpression.GetMemberName();
-
-			Type proxiedType = typeof(T);
-			PropertyInfo propertyInfo = proxiedType.GetProperty(propertyName);
-			return propertyInfo.GetDefaultValue();
 		}
 
 		/// <summary>

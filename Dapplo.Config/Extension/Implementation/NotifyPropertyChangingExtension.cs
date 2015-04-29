@@ -23,8 +23,9 @@ using Dapplo.Config.Support;
 using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 
-namespace Dapplo.Config.Extensions {
+namespace Dapplo.Config.Extension.Implementation {
 	/// <summary>
 	///     This class implements the NotifyPropertyChanging extension logic,
 	///     which automatically generates NotifyPropertyChanging events when set is called.
@@ -47,6 +48,13 @@ namespace Dapplo.Config.Extensions {
 			proxy.RegisterMethod("remove_PropertyChanging", RemovePropertyChanging);
 			// Register the NotifyPropertyChangingSetter as a last setter, it will call the NotifyPropertyChanging event
 			proxy.RegisterSetter((int)CallOrder.Middle - 1, NotifyPropertyChangingSetter);
+		}
+
+		/// <summary>
+		/// Process the property, in our case we do nothing
+		/// </summary>
+		/// <param name="propertyInfo"></param>
+		public void InitProperty(PropertyInfo propertyInfo) {
 		}
 
 		/// <summary>

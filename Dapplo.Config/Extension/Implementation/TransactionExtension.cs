@@ -22,10 +22,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dapplo.Config.Extensions;
+using Dapplo.Config.Extension;
 using Dapplo.Config.Support;
+using System.Reflection;
 
-namespace Dapplo.Config.Extensions {
+namespace Dapplo.Config.Extension.Implementation {
 	/// <summary>
 	///     This implements logic to add transactional support to your proxied interface.
 	/// </summary>
@@ -51,6 +52,13 @@ namespace Dapplo.Config.Extensions {
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<ITransactionalProperties>(x => x.CommitTransaction()), CommitTransaction);
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<ITransactionalProperties>(x => x.RollbackTransaction()), RollbackTransaction);
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<ITransactionalProperties>(x => x.IsTransactionDirty()), IsTransactionDirty);
+		}
+
+		/// <summary>
+		/// Process the property, in our case we do nothing
+		/// </summary>
+		/// <param name="propertyInfo"></param>
+		public void InitProperty(PropertyInfo propertyInfo) {
 		}
 
 		/// <summary>

@@ -36,14 +36,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ExtensionAttribute.cs" />
-    <Compile Include="Extensions\ITagging.cs" />
-    <Compile Include="Extensions\NotifyPropertyChangingExtension.cs" />
-    <Compile Include="Extensions\TagExtension.cs" />
-    <Compile Include="Extensions\TagAttribute.cs" />
-    <Compile Include="Extensions\IWriteProtectProperties.cs" />
-    <Compile Include="Extensions\ITransactionalProperties.cs" />
-    <Compile Include="Extensions\WriteProtectExtension.cs" />
-    <Compile Include="Extensions\TransactionExtension.cs" />
+    <Compile Include="Extension\IDescription.cs" />
+    <Compile Include="Extension\IDefaultValue.cs" />
+    <Compile Include="Extension\Implementation\DescriptionExtension.cs" />
+    <Compile Include="Extension\ITagging.cs" />
+    <Compile Include="Extension\Implementation\NotifyPropertyChangingExtension.cs" />
+    <Compile Include="Extension\Implementation\TagExtension.cs" />
+    <Compile Include="Extension\IWriteProtectProperties.cs" />
+    <Compile Include="Extension\ITransactionalProperties.cs" />
+    <Compile Include="Extension\Implementation\DefaultValueExtension.cs" />
+    <Compile Include="Extension\Implementation\WriteProtectExtension.cs" />
+    <Compile Include="Extension\Implementation\TransactionExtension.cs" />
+    <Compile Include="Ini\GenericListConverter.cs" />
     <Compile Include="Ini\IIniSection.cs" />
     <Compile Include="Ini\IniReader.cs" />
     <Compile Include="Ini\IniSectionAttribute.cs" />
@@ -52,7 +56,7 @@
     <Compile Include="Ini\IniExtension.cs" />
     <Compile Include="IPropertyProxy.cs" />
     <Compile Include="IPropertyProxyExtension.cs" />
-    <Compile Include="Extensions\NotifyPropertyChangedExtension.cs" />
+    <Compile Include="Extension\Implementation\NotifyPropertyChangedExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyProxy.cs" />
     <Compile Include="ProxyBuilder.cs" />

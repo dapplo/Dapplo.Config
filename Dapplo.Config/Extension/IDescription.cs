@@ -19,18 +19,32 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.ComponentModel;
-using Dapplo.Config.Extension;
+using System;
+using System.Linq.Expressions;
 
-namespace Dapplo.Config.Test.TestInterfaces {
+namespace Dapplo.Config.Extension {
 	/// <summary>
-	/// This is the interface under test
+	/// Extend your property interface with this, and you can read the DescriptionAttribute
 	/// </summary>
-	public interface IDefaultValueTest : IDefaultValue<IDefaultValueTest> {
-		[DefaultValue(21)]
-		int Age {
-			get;
-			set;
-		}
+	public interface IDescription {
+		/// <summary>
+		/// Return the description of the property
+		/// </summary>
+		/// <param name="propertyName"></param>
+		/// <returns>the description, null if none</returns>
+		string DescriptionFor(string propertyName);
+	}
+
+	/// <summary>
+	/// Extend your property interface with this, and you can read the DescriptionAttribute
+	/// </summary>
+	public interface IDescription<T> : IDescription {
+		/// <summary>
+		/// Return the description of the property
+		/// </summary>
+		/// <typeparam name="TProp"></typeparam>
+		/// <param name="propertyExpression"></param>
+		/// <returns>the description, null if none</returns>
+		string DescriptionFor<TProp>(Expression<Func<T, TProp>> propertyExpression);
 	}
 }
