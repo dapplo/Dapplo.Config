@@ -32,24 +32,19 @@ namespace Dapplo.Config.Extension.Implementation {
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	[Extension(typeof(IDefaultValue))]
-	internal class DefaultValueExtension<T> : IPropertyProxyExtension<T> {
-		private readonly IPropertyProxy<T> _proxy;
-		public DefaultValueExtension(IPropertyProxy<T> proxy) {
-			if (!typeof(T).GetInterfaces().Contains(typeof(IDefaultValue))) {
-				throw new NotSupportedException("Type needs to implement IDefaultValue");
-			}
-
-			_proxy = proxy;
+	internal class DefaultValueExtension<T> : AbstractPropertyProxyExtension<T> {
+		public DefaultValueExtension(IPropertyProxy<T> proxy) : base(proxy) {
+			CheckType(typeof(IDefaultValue));
 
 			// this registers one method and the overloading is handled in the GetDefaultValue
-			proxy.RegisterMethod(ConfigUtils.GetMemberName<IDefaultValue>(x => x.DefaultValueFor("")), GetDefaultValue);
+			_proxy.RegisterMethod(ConfigUtils.GetMemberName<IDefaultValue>(x => x.DefaultValueFor("")), GetDefaultValue);
 		}
 
 		/// <summary>
 		/// Process the property, in our case set the default
 		/// </summary>
 		/// <param name="propertyInfo"></param>
-		public void InitProperty(PropertyInfo propertyInfo) {
+		public override void InitProperty(PropertyInfo propertyInfo) {
 			var defaultValueAttribute = propertyInfo.GetCustomAttribute<DefaultValueAttribute>();
 			if (defaultValueAttribute != null) {
 				_proxy.Properties[propertyInfo.Name] = defaultValueAttribute.Value;

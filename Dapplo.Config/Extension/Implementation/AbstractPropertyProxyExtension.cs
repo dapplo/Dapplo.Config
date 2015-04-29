@@ -19,16 +19,36 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Reflection;
-namespace Dapplo.Config {
+using System.Linq;
+
+namespace Dapplo.Config.Extension.Implementation {
 	/// <summary>
-	///     Extensions need to extend this interface.
+	/// Base class for extensions, this should take away some default handling
 	/// </summary>
-	public interface IPropertyProxyExtension {
+	/// <typeparam name="T"></typeparam>
+	public abstract class AbstractPropertyProxyExtension<T> : IPropertyProxyExtension {
+		protected readonly IPropertyProxy<T> _proxy;
+		public AbstractPropertyProxyExtension(IPropertyProxy<T> proxy) {
+			_proxy = proxy;
+		}
+
 		/// <summary>
-		/// This is called for every Property on type T, so we only have 1x reflection
+		/// Force that the type extends the type we build an extension for
+		/// </summary>
+		/// <param name="extensionType"></param>
+		protected void CheckType(Type extensionType) {
+			if (!typeof(T).GetInterfaces().Contains(extensionType)) {
+				throw new NotSupportedException(string.Format("Type needs to implement {0}",extensionType.Name));
+			}
+		}
+
+		/// <summary>
+		/// Handle every property
 		/// </summary>
 		/// <param name="propertyInfo"></param>
-		void InitProperty(PropertyInfo propertyInfo);
+		public virtual void InitProperty(PropertyInfo propertyInfo) {
+		}
 	}
 }

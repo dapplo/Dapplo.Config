@@ -32,24 +32,12 @@ namespace Dapplo.Config.Extension.Implementation {
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	[Extension(typeof(IDescription))]
-	internal class DescriptionExtension<T> : IPropertyProxyExtension<T> {
-		private readonly IPropertyProxy<T> _proxy;
-		public DescriptionExtension(IPropertyProxy<T> proxy) {
-			if (!typeof(T).GetInterfaces().Contains(typeof(IDescription))) {
-				throw new NotSupportedException("Type needs to implement IDescription");
-			}
-
-			_proxy = proxy;
+	internal class DescriptionExtension<T> : AbstractPropertyProxyExtension<T> {
+		public DescriptionExtension(IPropertyProxy<T> proxy) : base(proxy){
+			CheckType(typeof(IDescription));
 
 			// this registers one method and the overloading is handled in the GetDescription
-			proxy.RegisterMethod(ConfigUtils.GetMemberName<IDescription>(x => x.DescriptionFor("")), GetDescription);
-		}
-
-		/// <summary>
-		/// Process the property, in our case we do nothing
-		/// </summary>
-		/// <param name="propertyInfo"></param>
-		public void InitProperty(PropertyInfo propertyInfo) {
+			_proxy.RegisterMethod(ConfigUtils.GetMemberName<IDescription>(x => x.DescriptionFor("")), GetDescription);
 		}
 
 		/// <summary>

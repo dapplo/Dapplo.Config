@@ -25,32 +25,22 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using Dapplo.Config.Support;
 using System.ComponentModel;
+using Dapplo.Config.Extension.Implementation;
 
-namespace Dapplo.Config.Ini {
+namespace Dapplo.Config.Ini.Implementation {
 	/// <summary>
 	/// Extend the PropertyProxy with Ini functionality
 	/// </summary>
 	[Extension(typeof(IIniSection))]
-	internal class IniExtension<T> : IPropertyProxyExtension<T> {
-		private readonly IPropertyProxy<T> _proxy;
+	internal class IniExtension<T> : AbstractPropertyProxyExtension<T> {
 
-		public IniExtension(IPropertyProxy<T> proxy) {
-			_proxy = proxy;
-			if (!typeof(T).GetInterfaces().Contains(typeof(IIniSection))) {
-				throw new NotSupportedException("Type needs to implement IIniSection<>");
-			}
+		public IniExtension(IPropertyProxy<T> proxy) : base(proxy) {
+			CheckType(typeof(IIniSection));
 
 			//_proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection>(x => x.IniValueFor<T>(y => default(T))), IniValueFor);
 			_proxy.RegisterMethod("get_" + ConfigUtils.GetMemberName<IIniSection, object>(x => x.IniValues), GetIniValues);
 			_proxy.RegisterMethod("get_" + ConfigUtils.GetMemberName<IIniSection, object>(x => x.SectionName), GetSectionName);
 			_proxy.RegisterMethod("get_" + ConfigUtils.GetMemberName<IIniSection, object>(x => x.Description), GetDescription);
-		}
-
-		/// <summary>
-		/// Process the property, in our case we do nothing
-		/// </summary>
-		/// <param name="propertyInfo"></param>
-		public void InitProperty(PropertyInfo propertyInfo) {
 		}
 
 		/// <summary>

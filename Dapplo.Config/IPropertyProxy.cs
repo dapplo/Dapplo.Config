@@ -67,13 +67,6 @@ namespace Dapplo.Config {
 		}
 
 		/// <summary>
-		/// Add extension
-		/// </summary>
-		/// <param name="extensionType">Type of the extension to add</param>
-		/// <returns>The proxy, so it can be fluently called.</returns>
-		void AddExtension(Type extensionType);
-
-		/// <summary>
 		/// Register a method
 		/// </summary>
 		/// <param name="methodname">Name of the method to add</param>
@@ -96,7 +89,7 @@ namespace Dapplo.Config {
 	}
 
 	/// <summary>
-	///     The property proxy is implemented with this interface.
+	/// The property proxy is implemented with this interface.
 	/// </summary>
 	/// <typeparam name="T">The type of the interface with the properties</typeparam>
 	public interface IPropertyProxy<T> : IPropertyProxy {
@@ -107,10 +100,5 @@ namespace Dapplo.Config {
 		T PropertyObject {
 			get;
 		}
-
-		/// <summary>
-		///     Add the extension of type TE
-		/// </summary>
-		void AddExtension<TE>() where TE : IPropertyProxyExtension<T>;
 	}
 }

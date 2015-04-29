@@ -31,15 +31,13 @@ namespace Dapplo.Config.Extension.Implementation {
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	[Extension(typeof(IWriteProtectProperties))]
-	internal class WriteProtectExtension<T> : IPropertyProxyExtension<T> {
+	internal class WriteProtectExtension<T> : AbstractPropertyProxyExtension<T> {
 		// A store for the values that are write protected
 		private readonly ISet<string> _writeProtectedProperties = new HashSet<string>();
 		private bool _isProtecting;
 
-		public WriteProtectExtension(IPropertyProxy<T> proxy) {
-			if (!typeof(T).GetInterfaces().Contains(typeof(IWriteProtectProperties))) {
-				throw new NotSupportedException("Type needs to implement IWriteProtectProperties");
-			}
+		public WriteProtectExtension(IPropertyProxy<T> proxy) : base(proxy) {
+			CheckType(typeof(IWriteProtectProperties));
 			proxy.RegisterSetter((int)CallOrder.First, WriteProtectSetter);
 
 			// Use Lambdas to make refactoring possible
@@ -48,13 +46,6 @@ namespace Dapplo.Config.Extension.Implementation {
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties>(x => x.WriteProtect("")), WriteProtect);
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties>(x => x.DisableWriteProtect("")), DisableWriteProtect);
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties>(x => x.IsWriteProtected("")), IsWriteProtected);
-		}
-
-		/// <summary>
-		/// Process the property, in our case we do nothing
-		/// </summary>
-		/// <param name="propertyInfo"></param>
-		public void InitProperty(PropertyInfo propertyInfo) {
 		}
 
 		/// <summary>

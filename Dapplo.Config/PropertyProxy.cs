@@ -34,7 +34,7 @@ namespace Dapplo.Config {
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	internal sealed class PropertyProxy<T> : RealProxy, IPropertyProxy<T> {
-		private readonly List<IPropertyProxyExtension<T>> _extensions = new List<IPropertyProxyExtension<T>>();
+		private readonly List<IPropertyProxyExtension> _extensions = new List<IPropertyProxyExtension>();
 		private readonly List<Getter> _getters = new List<Getter>();
 		private readonly IDictionary<string, List<Action<MethodCallInfo>>> _methodMap = new Dictionary<string, List<Action<MethodCallInfo>>>();
 		private readonly IDictionary<string, object> _properties = new Dictionary<string, object>();
@@ -120,18 +120,9 @@ namespace Dapplo.Config {
 		/// <summary>
 		/// Add an extension to the proxy, these extensions contain logic which enhances the proxy
 		/// </summary>
-		/// <typeparam name="TE">Type of Extension</typeparam>
-		public void AddExtension<TE>() where TE : IPropertyProxyExtension<T> {
-			var extension = (TE) Activator.CreateInstance(typeof (TE), this);
-			_extensions.Add(extension);
-		}
-
-		/// <summary>
-		/// Add an extension to the proxy, these extensions contain logic which enhances the proxy
-		/// </summary>
 		/// <param name="extensionType">Type for the extension</param>
-		public void AddExtension(Type extensionType) {
-			var extension = (IPropertyProxyExtension<T>) Activator.CreateInstance(extensionType.MakeGenericType(typeof (T)), this);
+		internal void AddExtension(Type extensionType) {
+			var extension = (IPropertyProxyExtension) Activator.CreateInstance(extensionType.MakeGenericType(typeof (T)), this);
 			_extensions.Add(extension);
 		}
 

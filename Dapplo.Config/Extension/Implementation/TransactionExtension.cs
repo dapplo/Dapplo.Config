@@ -32,18 +32,14 @@ namespace Dapplo.Config.Extension.Implementation {
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	[Extension(typeof (ITransactionalProperties))]
-	internal class TransactionExtension<T> : IPropertyProxyExtension<T> {
-		private readonly IPropertyProxy<T> _proxy;
+	internal class TransactionExtension<T> : AbstractPropertyProxyExtension<T> {
 		// A store for the values that are set during the transaction
 		private readonly IDictionary<string, object> _transactionProperties = new Dictionary<string, object>();
 		// This boolean has the value true if we are currently in a transaction
 		private bool _inTransaction;
 
-		public TransactionExtension(IPropertyProxy<T> proxy) {
-			_proxy = proxy;
-			if (!typeof (T).GetInterfaces().Contains(typeof (ITransactionalProperties))) {
-				throw new NotSupportedException("Type needs to implement ITransactionalProperties");
-			}
+		public TransactionExtension(IPropertyProxy<T> proxy) : base(proxy) {
+			CheckType(typeof (ITransactionalProperties));
 			proxy.RegisterSetter((int)CallOrder.First, TransactionalSetter);
 			proxy.RegisterGetter((int)CallOrder.First, TransactionalGetter);
 
@@ -52,13 +48,6 @@ namespace Dapplo.Config.Extension.Implementation {
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<ITransactionalProperties>(x => x.CommitTransaction()), CommitTransaction);
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<ITransactionalProperties>(x => x.RollbackTransaction()), RollbackTransaction);
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<ITransactionalProperties>(x => x.IsTransactionDirty()), IsTransactionDirty);
-		}
-
-		/// <summary>
-		/// Process the property, in our case we do nothing
-		/// </summary>
-		/// <param name="propertyInfo"></param>
-		public void InitProperty(PropertyInfo propertyInfo) {
 		}
 
 		/// <summary>

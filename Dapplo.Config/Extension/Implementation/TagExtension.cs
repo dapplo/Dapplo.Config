@@ -27,17 +27,12 @@ using System.Reflection;
 
 namespace Dapplo.Config.Extension.Implementation {
 	[Extension(typeof (ITagging))]
-	internal class TagExtension<T> : IPropertyProxyExtension<T> {
-		private readonly IPropertyProxy<T> _proxy;
-
+	internal class TagExtension<T> : AbstractPropertyProxyExtension<T> {
 		// The set of found expert properties
 		private readonly IDictionary<string, ISet<object>> _taggedProperties = new Dictionary<string, ISet<object>>();
 		
-		public TagExtension(IPropertyProxy<T> proxy) {
-			if (!typeof (T).GetInterfaces().Contains(typeof (ITagging))) {
-				throw new NotSupportedException("Type needs to implement ITagging");
-			}
-			_proxy = proxy;
+		public TagExtension(IPropertyProxy<T> proxy) : base(proxy) {
+			CheckType(typeof (ITagging));
 
 			// Use Lambda to make refactoring possible, this registers one method and the overloading is handled in the IsTaggedWith
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<ITagging>(x => x.IsTaggedWith("", null)), IsTaggedWith);
@@ -47,7 +42,7 @@ namespace Dapplo.Config.Extension.Implementation {
 		/// Process the property, in our case get the tags
 		/// </summary>
 		/// <param name="propertyInfo"></param>
-		public void InitProperty(PropertyInfo propertyInfo) {
+		public override void InitProperty(PropertyInfo propertyInfo) {
 			Attribute[] customAttributes = Attribute.GetCustomAttributes(propertyInfo);
 			foreach (Attribute customAttribute in customAttributes) {
 				TagAttribute tagAttribute = customAttribute as TagAttribute;

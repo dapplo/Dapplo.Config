@@ -32,29 +32,20 @@ namespace Dapplo.Config.Extension.Implementation {
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	[Extension(typeof (INotifyPropertyChanged))]
-	public class NotifyPropertyChangedExtension<T> : IPropertyProxyExtension<T> {
+	internal class NotifyPropertyChangedExtension<T> : AbstractPropertyProxyExtension<T> {
 		// Reference to the property object, which is supplied in the PropertyChanged event
 		private readonly T _propertyObject;
 
 		// The "backing" event
 		private event PropertyChangedEventHandler PropertyChanged;
 
-		public NotifyPropertyChangedExtension(IPropertyProxy<T> proxy) {
-			if (!typeof (T).GetInterfaces().Contains(typeof (INotifyPropertyChanged))) {
-				throw new NotSupportedException("Type needs to implement INotifyPropertyChanged");
-			}
+		public NotifyPropertyChangedExtension(IPropertyProxy<T> proxy) : base(proxy) {
+			CheckType(typeof(INotifyPropertyChanged));
 			_propertyObject = proxy.PropertyObject;
 			proxy.RegisterMethod("add_PropertyChanged", AddPropertyChanged);
 			proxy.RegisterMethod("remove_PropertyChanged", RemovePropertyChanged);
 			// Register the NotifyPropertyChangedSetter as a last setter, it will call the NPC event
 			proxy.RegisterSetter((int)CallOrder.Last, NotifyPropertyChangedSetter);
-		}
-
-		/// <summary>
-		/// Process the property, in our case we do nothing
-		/// </summary>
-		/// <param name="propertyInfo"></param>
-		public void InitProperty(PropertyInfo propertyInfo) {
 		}
 
 		/// <summary>

@@ -38,6 +38,7 @@
     <Compile Include="ExtensionAttribute.cs" />
     <Compile Include="Extension\IDescription.cs" />
     <Compile Include="Extension\IDefaultValue.cs" />
+    <Compile Include="Extension\Implementation\AbstractPropertyProxyExtension.cs" />
     <Compile Include="Extension\Implementation\DescriptionExtension.cs" />
     <Compile Include="Extension\ITagging.cs" />
     <Compile Include="Extension\Implementation\NotifyPropertyChangingExtension.cs" />
@@ -53,7 +54,7 @@
     <Compile Include="Ini\IniSectionAttribute.cs" />
     <Compile Include="Ini\IniValue.cs" />
     <Compile Include="Ini\IniConfig.cs" />
-    <Compile Include="Ini\IniExtension.cs" />
+    <Compile Include="Ini\Implementation\IniExtension.cs" />
     <Compile Include="IPropertyProxy.cs" />
     <Compile Include="IPropertyProxyExtension.cs" />
     <Compile Include="Extension\Implementation\NotifyPropertyChangedExtension.cs" />
