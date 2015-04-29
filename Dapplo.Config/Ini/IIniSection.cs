@@ -32,23 +32,20 @@ namespace Dapplo.Config.Ini {
 	/// By making your property proxy interface extend this, you will be able to write the property to an ini file
 	/// </summary>
 	public interface IIniSection : IDefaultValue {
-		//IniValue IniValueFor<TProp>(Expression<Func<T, TProp>> propertyExpression);
-		IEnumerable<IniValue> IniValues {
-			get;
-		}
+		/// <summary>
+		/// Retrieve all the ini values
+		/// </summary>
+		/// <returns></returns>
+		IEnumerable<IniValue> GetIniValues();
 
 		/// <summary>
 		/// Name of the Ini-Section, should be set on your property interface with
 		/// </summary>
-		string SectionName {
-			get;
-		}
+		string GetSectionName();
 
 		/// <summary>
-		/// Description of the Ini-Section
+		/// Get the Description of the Ini-Section
 		/// </summary>
-		string Description {
-			get;
-		}
+		string GetSectionDescription();
 	}
 }

@@ -38,9 +38,9 @@ namespace Dapplo.Config.Ini.Implementation {
 			CheckType(typeof(IIniSection));
 
 			//_proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection>(x => x.IniValueFor<T>(y => default(T))), IniValueFor);
-			_proxy.RegisterMethod("get_" + ConfigUtils.GetMemberName<IIniSection, object>(x => x.IniValues), GetIniValues);
-			_proxy.RegisterMethod("get_" + ConfigUtils.GetMemberName<IIniSection, object>(x => x.SectionName), GetSectionName);
-			_proxy.RegisterMethod("get_" + ConfigUtils.GetMemberName<IIniSection, object>(x => x.Description), GetDescription);
+			_proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.GetIniValues()), GetIniValues);
+			_proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.GetSectionName()), GetSectionName);
+			_proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.GetSectionDescription()), GetDescription);
 		}
 
 		/// <summary>
@@ -56,7 +56,7 @@ namespace Dapplo.Config.Ini.Implementation {
 		}
 
 		/// <summary>
-		/// Supply the Description
+		/// Supply the GetSectionDescription
 		/// </summary>
 		private void GetDescription(MethodCallInfo methodCallInfo) {
 			var descriptionAttribute = typeof(T).GetCustomAttribute<DescriptionAttribute>();
@@ -69,7 +69,7 @@ namespace Dapplo.Config.Ini.Implementation {
 		/// Get all the ini values, these are generated and not cached!
 		/// </summary>
 		private void GetIniValues(MethodCallInfo methodCallInfo) {
-			// return a linq which loops over all the properties and generates IniValues
+			// return a linq which loops over all the properties and generates GetIniValues
 			methodCallInfo.ReturnValue = from propertyInfo in typeof(T).GetProperties()
 										 select GenerateIniValue(propertyInfo);
 		}

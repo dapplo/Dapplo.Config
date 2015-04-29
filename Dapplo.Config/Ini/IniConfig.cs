@@ -48,8 +48,9 @@ namespace Dapplo.Config.Ini {
 		/// </summary>
 		/// <param name="section"></param>
 		public void AddSection(IIniSection section) {
-			if (!_sections.ContainsKey(section.SectionName)) {
-				_sections.Add(section.SectionName, section);
+			var sectionName = section.GetSectionName();
+			if (!_sections.ContainsKey(sectionName)) {
+				_sections.Add(sectionName, section);
 			}
 		}
 
@@ -76,12 +77,12 @@ namespace Dapplo.Config.Ini {
 			var writer = new StreamWriter(stream, Encoding.UTF8);
 			foreach(var section in _sections.Values) {
 				await writer.WriteLineAsync();
-				string description = section.Description;
+				string description = section.GetSectionDescription();
 				if (!string.IsNullOrEmpty(description)) {
 					await writer.WriteLineAsync(string.Format(";{0}", description));
 				}
-				await writer.WriteLineAsync(string.Format("[{0}]", section.SectionName));
-				foreach (var iniValue in section.IniValues) {
+				await writer.WriteLineAsync(string.Format("[{0}]", section.GetSectionName()));
+				foreach (var iniValue in section.GetIniValues()) {
 					if (!iniValue.IsWriteNeeded) {
 						continue;
 					}
@@ -144,7 +145,7 @@ namespace Dapplo.Config.Ini {
 		/// <param name="iniProperties"></param>
 		/// <param name="iniSection"></param>
 		private void FillSection(IDictionary<string, string> iniProperties, IIniSection iniSection) {
-			IDictionary<string, IniValue> iniValues = (from iniValue in iniSection.IniValues
+			IDictionary<string, IniValue> iniValues = (from iniValue in iniSection.GetIniValues()
 													   select iniValue).ToDictionary(x => x.IniPropertyName, x => x);
 			foreach (var iniPropertyName in iniProperties.Keys) {
 				IniValue iniValue;
