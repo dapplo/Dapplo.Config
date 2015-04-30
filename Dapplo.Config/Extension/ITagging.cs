@@ -41,7 +41,6 @@ namespace Dapplo.Config.Extension {
 	/// <summary>
 	/// Interface which your interface needs to implement to be able to see if a property is tagged
 	/// </summary>
-	/// <typeparam name="T"></typeparam>
 	public interface ITagging {
 		/// <summary>
 		///     Checks if the supplied expression resolves to a property which has the expert attribute

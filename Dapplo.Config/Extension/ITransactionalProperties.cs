@@ -24,9 +24,25 @@ namespace Dapplo.Config.Extension {
 	///     Extending the to be property interface with this, adds transactional support
 	/// </summary>
 	public interface ITransactionalProperties {
+		/// <summary>
+		/// This method will start the transaction, all changes will be stored in a separate cache.
+		/// </summary>
 		void StartTransaction();
+
+		/// <summary>
+		/// Apply the stored changes from the cache to the property object
+		/// </summary>
 		void CommitTransaction();
+
+		/// <summary>
+		/// Cancel the transaction, this will clear the stored changes
+		/// </summary>
 		void RollbackTransaction();
+
+		/// <summary>
+		/// Check if there are changes pending
+		/// </summary>
+		/// <returns>true wenn es stored changes gibt</returns>
 		bool IsTransactionDirty();
 	}
 }

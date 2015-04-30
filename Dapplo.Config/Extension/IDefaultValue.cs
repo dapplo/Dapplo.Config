@@ -33,6 +33,12 @@ namespace Dapplo.Config.Extension {
 		/// <param name="propertyName"></param>
 		/// <returns>the default value, null if none</returns>
 		object DefaultValueFor(string propertyName);
+
+		/// <summary>
+		/// Restore the property value back to its default
+		/// </summary>
+		/// <param name="propertyName"></param>
+		void RestoreToDefault(string propertyName);
 	}
 
 	/// <summary>
@@ -46,5 +52,12 @@ namespace Dapplo.Config.Extension {
 		/// <param name="propertyExpression"></param>
 		/// <returns>the default value, null if none</returns>
 		object DefaultValueFor<TProp>(Expression<Func<T, TProp>> propertyExpression);
+
+		/// <summary>
+		/// Restore the property value back to its default
+		/// </summary>
+		/// <typeparam name="TProp"></typeparam>
+		/// <param name="propertyExpression"></param>
+		void RestoreToDefault<TProp>(Expression<Func<T, TProp>> propertyExpression);
 	}
 }

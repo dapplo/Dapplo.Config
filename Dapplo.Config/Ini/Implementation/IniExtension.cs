@@ -19,10 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization;
 using Dapplo.Config.Support;
 using System.ComponentModel;
 using Dapplo.Config.Extension.Implementation;
@@ -38,9 +36,9 @@ namespace Dapplo.Config.Ini.Implementation {
 			CheckType(typeof(IIniSection));
 
 			//_proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection>(x => x.IniValueFor<T>(y => default(T))), IniValueFor);
-			_proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.GetIniValues()), GetIniValues);
-			_proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.GetSectionName()), GetSectionName);
-			_proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.GetSectionDescription()), GetDescription);
+			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.GetIniValues()), GetIniValues);
+			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.GetSectionName()), GetSectionName);
+			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.GetSectionDescription()), GetDescription);
 		}
 
 		/// <summary>
@@ -80,7 +78,7 @@ namespace Dapplo.Config.Ini.Implementation {
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>IniValue</returns>
 		private IniValue GenerateIniValue(PropertyInfo propertyInfo) {
-			var newIniValue = new IniValue(_proxy.Properties);
+			var newIniValue = new IniValue(Proxy.Properties);
 			newIniValue.PropertyName = propertyInfo.Name;
 			newIniValue.ValueType = propertyInfo.PropertyType;
 

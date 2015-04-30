@@ -29,9 +29,9 @@ namespace Dapplo.Config.Extension.Implementation {
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	public abstract class AbstractPropertyProxyExtension<T> : IPropertyProxyExtension {
-		protected readonly IPropertyProxy<T> _proxy;
+		protected readonly IPropertyProxy<T> Proxy;
 		public AbstractPropertyProxyExtension(IPropertyProxy<T> proxy) {
-			_proxy = proxy;
+			Proxy = proxy;
 		}
 
 		/// <summary>

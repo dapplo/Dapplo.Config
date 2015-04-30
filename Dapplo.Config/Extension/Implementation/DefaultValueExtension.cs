@@ -20,8 +20,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Dapplo.Config.Support;
 using System.Reflection;
 using System.ComponentModel;
@@ -37,7 +35,8 @@ namespace Dapplo.Config.Extension.Implementation {
 			CheckType(typeof(IDefaultValue));
 
 			// this registers one method and the overloading is handled in the GetDefaultValue
-			_proxy.RegisterMethod(ConfigUtils.GetMemberName<IDefaultValue>(x => x.DefaultValueFor("")), GetDefaultValue);
+			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IDefaultValue>(x => x.DefaultValueFor("")), GetDefaultValue);
+			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IDefaultValue>(x => x.RestoreToDefault("")), RestoreToDefault);
 		}
 
 		/// <summary>
@@ -47,7 +46,7 @@ namespace Dapplo.Config.Extension.Implementation {
 		public override void InitProperty(PropertyInfo propertyInfo) {
 			var defaultValueAttribute = propertyInfo.GetCustomAttribute<DefaultValueAttribute>();
 			if (defaultValueAttribute != null) {
-				_proxy.Properties[propertyInfo.Name] = defaultValueAttribute.Value;
+				Proxy.Properties[propertyInfo.Name] = defaultValueAttribute.Value;
 			}
 		}
 
@@ -58,6 +57,16 @@ namespace Dapplo.Config.Extension.Implementation {
 			Type proxiedType = typeof(T);
 			PropertyInfo propertyInfo = proxiedType.GetProperty(methodCallInfo.PropertyNameOf(0));
 			methodCallInfo.ReturnValue = propertyInfo.GetDefaultValue();
+		}
+
+		/// <summary>
+		/// Return the default value for a property
+		/// </summary>
+		private void RestoreToDefault(MethodCallInfo methodCallInfo) {
+			Type proxiedType = typeof(T);
+			PropertyInfo propertyInfo = proxiedType.GetProperty(methodCallInfo.PropertyNameOf(0));
+			object defaultValue = propertyInfo.GetDefaultValue();
+			propertyInfo.SetValue(Proxy.PropertyObject, defaultValue);
 		}
 	}
 }

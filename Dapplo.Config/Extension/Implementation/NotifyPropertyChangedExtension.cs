@@ -19,11 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
 using System.ComponentModel;
-using System.Linq;
 using Dapplo.Config.Support;
-using System.Reflection;
 
 namespace Dapplo.Config.Extension.Implementation {
 	/// <summary>

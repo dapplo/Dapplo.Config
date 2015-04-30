@@ -22,7 +22,6 @@
 using System;
 using System.Collections.Generic;
 using Dapplo.Config.Support;
-using System.Linq.Expressions;
 
 namespace Dapplo.Config {
 	/// <summary>

@@ -20,11 +20,8 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Dapplo.Config.Support;
 using System.Reflection;
-using System.ComponentModel;
 
 namespace Dapplo.Config.Extension.Implementation {
 	/// <summary>
@@ -37,7 +34,7 @@ namespace Dapplo.Config.Extension.Implementation {
 			CheckType(typeof(IDescription));
 
 			// this registers one method and the overloading is handled in the GetDescription
-			_proxy.RegisterMethod(ConfigUtils.GetMemberName<IDescription>(x => x.DescriptionFor("")), GetDescription);
+			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IDescription>(x => x.DescriptionFor("")), GetDescription);
 		}
 
 		/// <summary>

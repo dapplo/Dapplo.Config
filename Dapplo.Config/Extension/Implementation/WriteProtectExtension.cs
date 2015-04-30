@@ -21,9 +21,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Dapplo.Config.Support;
-using System.Reflection;
 
 namespace Dapplo.Config.Extension.Implementation {
 	/// <summary>

@@ -20,10 +20,7 @@
  */
 
 using Dapplo.Config.Support;
-using System;
 using System.ComponentModel;
-using System.Linq;
-using System.Reflection;
 
 namespace Dapplo.Config.Extension.Implementation {
 	/// <summary>

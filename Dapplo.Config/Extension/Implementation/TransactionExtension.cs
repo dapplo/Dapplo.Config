@@ -19,12 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using Dapplo.Config.Extension;
 using Dapplo.Config.Support;
-using System.Reflection;
 
 namespace Dapplo.Config.Extension.Implementation {
 	/// <summary>
@@ -121,7 +117,7 @@ namespace Dapplo.Config.Extension.Implementation {
 		/// <param name="methodCallInfo">MethodCallInfo</param>
 		private void CommitTransaction(MethodCallInfo methodCallInfo) {
 			if (_inTransaction) {
-				_proxy.Properties = _transactionProperties;
+				Proxy.Properties = _transactionProperties;
 				_transactionProperties.Clear();
 				_inTransaction = false;
 			}
