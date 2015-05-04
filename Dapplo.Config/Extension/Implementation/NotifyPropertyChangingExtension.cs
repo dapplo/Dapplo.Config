@@ -22,22 +22,25 @@
 using Dapplo.Config.Support;
 using System.ComponentModel;
 
-namespace Dapplo.Config.Extension.Implementation {
+namespace Dapplo.Config.Extension.Implementation
+{
 	/// <summary>
 	///     This class implements the NotifyPropertyChanging extension logic,
 	///     which automatically generates NotifyPropertyChanging events when set is called.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	[Extension(typeof (INotifyPropertyChanging))]
-	internal class NotifyPropertyChangingExtension<T> : AbstractPropertyProxyExtension<T> {
+	[Extension(typeof(INotifyPropertyChanging))]
+	internal class NotifyPropertyChangingExtension<T> : AbstractPropertyProxyExtension<T>
+	{
 		// Reference to the property object, which is supplied in the PropertyChanging event
 		private readonly T _propertyObject;
 
 		// The "backing" event
 		private event PropertyChangingEventHandler PropertyChanging;
 
-		public NotifyPropertyChangingExtension(IPropertyProxy<T> proxy) : base(proxy) {
-			CheckType(typeof (INotifyPropertyChanging));
+		public NotifyPropertyChangingExtension(IPropertyProxy<T> proxy) : base(proxy)
+		{
+			CheckType(typeof(INotifyPropertyChanging));
 
 			_propertyObject = proxy.PropertyObject;
 			proxy.RegisterMethod("add_PropertyChanging", AddPropertyChanging);
@@ -50,12 +53,15 @@ namespace Dapplo.Config.Extension.Implementation {
 		///     This creates a NPC event if the values are changing
 		/// </summary>
 		/// <param name="setInfo">SetInfo with all the set call information</param>
-		private void NotifyPropertyChangingSetter(SetInfo setInfo) {
-			if (PropertyChanging == null) {
+		private void NotifyPropertyChangingSetter(SetInfo setInfo)
+		{
+			if (PropertyChanging == null)
+			{
 				return;
 			}
 			// Create the event if the property is changing
-			if (!setInfo.HasOldValue || !Equals(setInfo.NewValue, setInfo.OldValue)) {
+			if (!setInfo.HasOldValue || !Equals(setInfo.NewValue, setInfo.OldValue))
+			{
 				PropertyChanging(_propertyObject, new PropertyChangingEventArgs(setInfo.PropertyName));
 			}
 		}
@@ -64,16 +70,18 @@ namespace Dapplo.Config.Extension.Implementation {
 		///     This is the logic which is called when the PropertyChanging event is registered.
 		/// </summary>
 		/// <param name="methodCallInfo">MethodCallInfo</param>
-		private void AddPropertyChanging(MethodCallInfo methodCallInfo) {
+		private void AddPropertyChanging(MethodCallInfo methodCallInfo)
+		{
 			// Add the parameters which should contain the event handler
-			PropertyChanging += (PropertyChangingEventHandler) methodCallInfo.Arguments[0];
+			PropertyChanging += (PropertyChangingEventHandler)methodCallInfo.Arguments[0];
 		}
 
 		/// <summary>
 		///     This is the logic which is called when the PropertyChanging event is unregistered.
 		/// </summary>
 		/// <param name="methodCallInfo">MethodCallInfo</param>
-		private void RemovePropertyChanging(MethodCallInfo methodCallInfo) {
+		private void RemovePropertyChanging(MethodCallInfo methodCallInfo)
+		{
 			// Remove the handler via the parameter which should contain the event handler
 			PropertyChanging -= (PropertyChangingEventHandler)methodCallInfo.Arguments[0];
 		}

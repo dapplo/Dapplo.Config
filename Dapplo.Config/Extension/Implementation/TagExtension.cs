@@ -24,14 +24,17 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Dapplo.Config.Extension.Implementation {
-	[Extension(typeof (ITagging))]
-	internal class TagExtension<T> : AbstractPropertyProxyExtension<T> {
+namespace Dapplo.Config.Extension.Implementation
+{
+	[Extension(typeof(ITagging))]
+	internal class TagExtension<T> : AbstractPropertyProxyExtension<T>
+	{
 		// The set of found expert properties
 		private readonly IDictionary<string, ISet<object>> _taggedProperties = new Dictionary<string, ISet<object>>();
-		
-		public TagExtension(IPropertyProxy<T> proxy) : base(proxy) {
-			CheckType(typeof (ITagging));
+
+		public TagExtension(IPropertyProxy<T> proxy) : base(proxy)
+		{
+			CheckType(typeof(ITagging));
 
 			// Use Lambda to make refactoring possible, this registers one method and the overloading is handled in the IsTaggedWith
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<ITagging>(x => x.IsTaggedWith("", null)), IsTaggedWith);
@@ -41,13 +44,17 @@ namespace Dapplo.Config.Extension.Implementation {
 		/// Process the property, in our case get the tags
 		/// </summary>
 		/// <param name="propertyInfo"></param>
-		public override void InitProperty(PropertyInfo propertyInfo) {
+		public override void InitProperty(PropertyInfo propertyInfo)
+		{
 			Attribute[] customAttributes = Attribute.GetCustomAttributes(propertyInfo);
-			foreach (Attribute customAttribute in customAttributes) {
+			foreach (Attribute customAttribute in customAttributes)
+			{
 				TagAttribute tagAttribute = customAttribute as TagAttribute;
-				if (tagAttribute != null) {
+				if (tagAttribute != null)
+				{
 					ISet<object> tags;
-					if (!_taggedProperties.TryGetValue(propertyInfo.Name, out tags)) {
+					if (!_taggedProperties.TryGetValue(propertyInfo.Name, out tags))
+					{
 						tags = new HashSet<object>();
 						_taggedProperties.Add(propertyInfo.Name, tags);
 					}
@@ -60,10 +67,12 @@ namespace Dapplo.Config.Extension.Implementation {
 		/// Check if a property is tagged with a certain tag
 		/// </summary>
 		/// <param name="methodCallInfo">IMethodCallMessage</param>
-		private void IsTaggedWith(MethodCallInfo methodCallInfo) {
+		private void IsTaggedWith(MethodCallInfo methodCallInfo)
+		{
 			methodCallInfo.ReturnValue = false;
 			ISet<object> tags;
-			if (_taggedProperties.TryGetValue(methodCallInfo.PropertyNameOf(0), out tags)) {
+			if (_taggedProperties.TryGetValue(methodCallInfo.PropertyNameOf(0), out tags))
+			{
 				methodCallInfo.ReturnValue = tags.Contains(methodCallInfo.Arguments[1]);
 			}
 		}

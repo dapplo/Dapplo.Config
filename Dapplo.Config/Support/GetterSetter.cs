@@ -21,19 +21,24 @@
 
 using System;
 
-namespace Dapplo.Config.Support {
+namespace Dapplo.Config.Support
+{
 	/// <summary>
 	///     Container class to store the setters, this allows them to be ordered.
 	/// </summary>
-	internal class GetterSetter : IComparable {
-		public int Order {
+	internal class GetterSetter : IComparable
+	{
+		public int Order
+		{
 			get;
 			set;
 		}
 
-		public int CompareTo(object obj) {
+		public int CompareTo(object obj)
+		{
 			var otherGetterSetter = obj as GetterSetter;
-			if (otherGetterSetter != null) {
+			if (otherGetterSetter != null)
+			{
 				return Order.CompareTo(otherGetterSetter.Order);
 			}
 			return -1;

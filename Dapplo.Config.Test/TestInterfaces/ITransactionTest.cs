@@ -21,12 +21,15 @@
 
 using Dapplo.Config.Extension;
 
-namespace Dapplo.Config.Test.TestInterfaces {
+namespace Dapplo.Config.Test.TestInterfaces
+{
 	/// <summary>
 	/// This is the interface under test
 	/// </summary>
-	public interface ITransactionTest : ITransactionalProperties {
-		int Age {
+	public interface ITransactionTest : ITransactionalProperties
+	{
+		int Age
+		{
 			get;
 			set;
 		}

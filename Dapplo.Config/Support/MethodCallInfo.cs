@@ -21,33 +21,41 @@
 
 using System;
 
-namespace Dapplo.Config.Support {
+namespace Dapplo.Config.Support
+{
 	/// <summary>
 	///     This container holds all the information that is needed for extending the proxy with a method call
 	/// </summary>
-	public class MethodCallInfo {
-		public string MethodName {
+	public class MethodCallInfo
+	{
+		public string MethodName
+		{
 			get;
 			set;
 		}
 
-		public object[] Arguments {
+		public object[] Arguments
+		{
 			get;
 			set;
 		}
 
-		public object ReturnValue {
+		public object ReturnValue
+		{
 			get;
 			set;
 		}
 
-		public Exception Error {
+		public Exception Error
+		{
 			get;
 			set;
 		}
 
-		public bool HasError {
-			get {
+		public bool HasError
+		{
+			get
+			{
 				return Error != null;
 			}
 		}

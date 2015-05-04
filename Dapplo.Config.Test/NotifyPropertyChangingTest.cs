@@ -23,9 +23,11 @@ using System.ComponentModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Dapplo.Config.Test.TestInterfaces;
 
-namespace Dapplo.Config.Test {
+namespace Dapplo.Config.Test
+{
 	[TestClass]
-	public class NotifyPropertyChangingTest {
+	public class NotifyPropertyChangingTest
+	{
 		private IPropertyProxy<INotifyPropertyChangingTest> _propertyProxy;
 
 		private const string NoChange = "NOCHANGE";
@@ -33,12 +35,14 @@ namespace Dapplo.Config.Test {
 		private const string TestValue2 = "VALUE2";
 
 		[TestInitialize]
-		public void Initialize() {
+		public void Initialize()
+		{
 			_propertyProxy = ProxyBuilder.CreateProxy<INotifyPropertyChangingTest>();
 		}
 
 		[TestMethod]
-		public void TestNotifyPropertyChanging() {
+		public void TestNotifyPropertyChanging()
+		{
 
 			var properties = _propertyProxy.PropertyObject;
 			string changingPropertyName = null;

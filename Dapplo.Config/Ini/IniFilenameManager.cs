@@ -19,30 +19,57 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Dapplo.Config.Extension;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Dapplo.Config.Ini
 {
 	/// <summary>
-	/// By making your property proxy interface extend this, you will be able to write the property to an ini file
+	/// Helps to specify how the ini file is read
 	/// </summary>
-	public interface IIniSection : IDefaultValue
+	public enum IniFilePolicy
 	{
-		/// <summary>
-		/// Retrieve all the ini values
-		/// </summary>
-		/// <returns></returns>
-		IEnumerable<IniValue> GetIniValues();
+		Portable,
+		Basic,
+		Fixed
+	}
+
+	/// <summary>
+	/// This manages the location of the Ini-File for one instance
+	/// </summary>
+	public class IniFilenameManager
+	{
+		private readonly string _filename;
+		private readonly IniFilePolicy _policy;
 
 		/// <summary>
-		/// Name of the Ini-Section, should be set on your property interface with
+		/// Setup the management of an .ini file location
 		/// </summary>
-		string GetSectionName();
+		/// <param name="fileName"></param>
+		/// <param name="policy"></param>
+		public IniFilenameManager(string fileName, IniFilePolicy policy = IniFilePolicy.Basic)
+		{
+			_filename = fileName;
+			_policy = policy;
+		}
 
-		/// <summary>
-		/// Get the Description of the Ini-Section
-		/// </summary>
-		string GetSectionDescription();
+		public string WritableIniLocation
+		{
+			get
+			{
+				return _filename;
+			}
+		}
+
+		public string ConstantLocation
+		{
+			get
+			{
+				return _filename;
+			}
+		}
 	}
 }

@@ -26,11 +26,13 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.Serialization;
 
-namespace Dapplo.Config.Support {
+namespace Dapplo.Config.Support
+{
 	/// <summary>
 	/// Lambda expressions Utils
 	/// </summary>
-	public static class ConfigUtils {
+	public static class ConfigUtils
+	{
 		/// <summary>
 		/// Get the property name from the argument "index" of the MethodCallInfo
 		/// If the argument is a string, it will be returned.
@@ -39,9 +41,11 @@ namespace Dapplo.Config.Support {
 		/// <param name="methodCallInfo">MethodCallInfo</param>
 		/// <param name="index">Index of the argument</param>
 		/// <returns>Property name</returns>
-		public static string PropertyNameOf(this MethodCallInfo methodCallInfo, int index) {
+		public static string PropertyNameOf(this MethodCallInfo methodCallInfo, int index)
+		{
 			string propertyName = methodCallInfo.Arguments[index] as string;
-			if (propertyName == null) {
+			if (propertyName == null)
+			{
 				LambdaExpression propertyExpression = (LambdaExpression)methodCallInfo.Arguments[index];
 				propertyName = propertyExpression.GetMemberName();
 			}
@@ -54,7 +58,8 @@ namespace Dapplo.Config.Support {
 		/// <typeparam name="T"></typeparam>
 		/// <param name="expression"></param>
 		/// <returns>Name of member</returns>
-		public static string GetMemberName<T>(Expression<Action<T>> expression) {
+		public static string GetMemberName<T>(Expression<Action<T>> expression)
+		{
 			return expression.GetMemberName();
 		}
 
@@ -65,7 +70,8 @@ namespace Dapplo.Config.Support {
 		/// <typeparam name="TProp"></typeparam>
 		/// <param name="expression"></param>
 		/// <returns>Name of member</returns>
-		public static string GetMemberName<T, TProp>(Expression<Func<T, TProp>> expression) {
+		public static string GetMemberName<T, TProp>(Expression<Func<T, TProp>> expression)
+		{
 			return expression.GetMemberName();
 		}
 
@@ -74,11 +80,13 @@ namespace Dapplo.Config.Support {
 		/// </summary>
 		/// <param name="memberSelector">LambdaExpression</param>
 		/// <returns>string with the member name</returns>
-		public static string GetMemberName(this LambdaExpression memberSelector) {
+		public static string GetMemberName(this LambdaExpression memberSelector)
+		{
 			Func<Expression, string> nameSelector = null; //recursive func
 			nameSelector = e => {
 				//or move the entire thing to a separate recursive method
-				switch (e.NodeType) {
+				switch (e.NodeType)
+				{
 					case ExpressionType.Parameter:
 						return ((ParameterExpression)e).Name;
 					case ExpressionType.MemberAccess:
@@ -105,9 +113,11 @@ namespace Dapplo.Config.Support {
 		/// </summary>
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>DefaultValueFor</returns>
-		public static object GetDefaultValue(this PropertyInfo propertyInfo) {
+		public static object GetDefaultValue(this PropertyInfo propertyInfo)
+		{
 			var defaultValueAttribute = propertyInfo.GetCustomAttribute<DefaultValueAttribute>();
-			if (defaultValueAttribute != null) {
+			if (defaultValueAttribute != null)
+			{
 				return defaultValueAttribute.Value;
 			}
 			return null;
@@ -118,11 +128,14 @@ namespace Dapplo.Config.Support {
 		/// </summary>
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>TypeConverter</returns>
-		public static TypeConverter GetTypeConverter(this PropertyInfo propertyInfo) {
+		public static TypeConverter GetTypeConverter(this PropertyInfo propertyInfo)
+		{
 			var typeConverterAttribute = propertyInfo.GetCustomAttribute<TypeConverterAttribute>();
-			if (typeConverterAttribute != null && !string.IsNullOrEmpty(typeConverterAttribute.ConverterTypeName)) {
+			if (typeConverterAttribute != null && !string.IsNullOrEmpty(typeConverterAttribute.ConverterTypeName))
+			{
 				Type typeConverterType = Type.GetType(typeConverterAttribute.ConverterTypeName);
-				if (typeConverterType != null) {
+				if (typeConverterType != null)
+				{
 					return (TypeConverter)Activator.CreateInstance(typeConverterType);
 				}
 			}
@@ -134,9 +147,11 @@ namespace Dapplo.Config.Support {
 		/// </summary>
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>Description</returns>
-		public static string GetDescription(this PropertyInfo propertyInfo) {
+		public static string GetDescription(this PropertyInfo propertyInfo)
+		{
 			var descriptionAttribute = propertyInfo.GetCustomAttribute<DescriptionAttribute>();
-			if (descriptionAttribute != null) {
+			if (descriptionAttribute != null)
+			{
 				return descriptionAttribute.Description;
 			}
 			return null;
@@ -147,10 +162,13 @@ namespace Dapplo.Config.Support {
 		/// </summary>
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>Name</returns>
-		public static string GetDataMemberName(this PropertyInfo propertyInfo) {
+		public static string GetDataMemberName(this PropertyInfo propertyInfo)
+		{
 			var dataMemberAttribute = propertyInfo.GetCustomAttribute<DataMemberAttribute>();
-			if (dataMemberAttribute != null) {
-				if (!string.IsNullOrEmpty(dataMemberAttribute.Name)) {
+			if (dataMemberAttribute != null)
+			{
+				if (!string.IsNullOrEmpty(dataMemberAttribute.Name))
+				{
 					return dataMemberAttribute.Name;
 				}
 			}
@@ -162,9 +180,11 @@ namespace Dapplo.Config.Support {
 		/// </summary>
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>EmitDefaultValue</returns>
-		public static bool GetEmitDefaultValue(this PropertyInfo propertyInfo) {
+		public static bool GetEmitDefaultValue(this PropertyInfo propertyInfo)
+		{
 			var dataMemberAttribute = propertyInfo.GetCustomAttribute<DataMemberAttribute>();
-			if (dataMemberAttribute != null) {
+			if (dataMemberAttribute != null)
+			{
 				return dataMemberAttribute.EmitDefaultValue;
 			}
 			return false;
@@ -175,9 +195,11 @@ namespace Dapplo.Config.Support {
 		/// </summary>
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>IsReadOnly</returns>
-		public static bool GetReadOnly(this PropertyInfo propertyInfo) {
+		public static bool GetReadOnly(this PropertyInfo propertyInfo)
+		{
 			var readOnlyAttribute = propertyInfo.GetCustomAttribute<ReadOnlyAttribute>();
-			if (readOnlyAttribute != null) {
+			if (readOnlyAttribute != null)
+			{
 				return readOnlyAttribute.IsReadOnly;
 			}
 			return false;
@@ -188,9 +210,11 @@ namespace Dapplo.Config.Support {
 		/// </summary>
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>Category</returns>
-		public static string GetCategory(this PropertyInfo propertyInfo) {
+		public static string GetCategory(this PropertyInfo propertyInfo)
+		{
 			var categoryAttribute = propertyInfo.GetCustomAttribute<CategoryAttribute>();
-			if (categoryAttribute != null) {
+			if (categoryAttribute != null)
+			{
 				return categoryAttribute.Category;
 			}
 			return null;
@@ -202,9 +226,11 @@ namespace Dapplo.Config.Support {
 		/// <param name="dictionary"></param>
 		/// <param name="key"></param>
 		/// <returns>object</returns>
-		public static object SafeGet(this IDictionary<string, object> dictionary, string key) {
+		public static object SafeGet(this IDictionary<string, object> dictionary, string key)
+		{
 			object value;
-			if (dictionary.TryGetValue(key, out value)) {
+			if (dictionary.TryGetValue(key, out value))
+			{
 				return value;
 			}
 			return null;
@@ -217,10 +243,14 @@ namespace Dapplo.Config.Support {
 		/// <param name="key">string key</param>
 		/// <param name="newValue">object</param>
 		/// <returns>dictionary for fluent API calls</returns>
-		public static IDictionary<string, object> SafelyAddOrOverwrite(this IDictionary<string, object> dictionary, string key, object newValue) {
-			if (dictionary.ContainsKey(key)) {
+		public static IDictionary<string, object> SafelyAddOrOverwrite(this IDictionary<string, object> dictionary, string key, object newValue)
+		{
+			if (dictionary.ContainsKey(key))
+			{
 				dictionary[key] = newValue;
-			} else {
+			}
+			else
+			{
 				dictionary.Add(key, newValue);
 			}
 			return dictionary;

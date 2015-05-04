@@ -21,12 +21,15 @@
 
 using System;
 
-namespace Dapplo.Config.Support {
-	public class GetSetInfo {
+namespace Dapplo.Config.Support
+{
+	public class GetSetInfo
+	{
 		/// <summary>
 		///     Property name of the property that is being set
 		/// </summary>
-		public string PropertyName {
+		public string PropertyName
+		{
 			get;
 			set;
 		}
@@ -34,7 +37,8 @@ namespace Dapplo.Config.Support {
 		/// <summary>
 		///     This can be set to an exception if a getter/setter wants to throw an exception
 		/// </summary>
-		public Exception Error {
+		public Exception Error
+		{
 			get;
 			set;
 		}
@@ -42,8 +46,10 @@ namespace Dapplo.Config.Support {
 		/// <summary>
 		/// Simple property to check for error
 		/// </summary>
-		public bool HasError {
-			get {
+		public bool HasError
+		{
+			get
+			{
 				return Error != null;
 			}
 		}
@@ -53,7 +59,8 @@ namespace Dapplo.Config.Support {
 		///     This should be set to false if a getter/setter implementation wants to throw an exception or thinks there should be
 		///     no more others.
 		/// </summary>
-		public bool CanContinue {
+		public bool CanContinue
+		{
 			get;
 			set;
 		}

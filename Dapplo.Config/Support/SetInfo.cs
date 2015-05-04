@@ -19,15 +19,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Dapplo.Config.Support {
+namespace Dapplo.Config.Support
+{
 	/// <summary>
 	///     This class contains all the information for the setter actions
 	/// </summary>
-	public class SetInfo : GetSetInfo {
+	public class SetInfo : GetSetInfo
+	{
 		/// <summary>
 		///     The new value for the property
 		/// </summary>
-		public object NewValue {
+		public object NewValue
+		{
 			get;
 			set;
 		}
@@ -35,7 +38,8 @@ namespace Dapplo.Config.Support {
 		/// <summary>
 		///     The old value of the property, if any (see HasOldValue)
 		/// </summary>
-		public object OldValue {
+		public object OldValue
+		{
 			get;
 			set;
 		}
@@ -43,7 +47,8 @@ namespace Dapplo.Config.Support {
 		/// <summary>
 		///     Does property have an old value?
 		/// </summary>
-		public bool HasOldValue {
+		public bool HasOldValue
+		{
 			get;
 			set;
 		}

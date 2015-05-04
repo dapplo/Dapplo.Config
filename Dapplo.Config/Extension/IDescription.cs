@@ -22,11 +22,13 @@
 using System;
 using System.Linq.Expressions;
 
-namespace Dapplo.Config.Extension {
+namespace Dapplo.Config.Extension
+{
 	/// <summary>
 	/// Extend your property interface with this, and you can read the DescriptionAttribute
 	/// </summary>
-	public interface IDescription {
+	public interface IDescription
+	{
 		/// <summary>
 		/// Return the description of the property
 		/// </summary>
@@ -38,7 +40,8 @@ namespace Dapplo.Config.Extension {
 	/// <summary>
 	/// Extend your property interface with this, and you can read the DescriptionAttribute
 	/// </summary>
-	public interface IDescription<T> : IDescription {
+	public interface IDescription<T> : IDescription
+	{
 		/// <summary>
 		/// Return the description of the property
 		/// </summary>

@@ -21,16 +21,21 @@
 
 using Dapplo.Config.Extension;
 
-namespace Dapplo.Config.Test.TestInterfaces {
+namespace Dapplo.Config.Test.TestInterfaces
+{
 	/// <summary>
 	/// This is the interface under test
 	/// </summary>
-	public interface IWriteProtectTest : IWriteProtectProperties<IWriteProtectTest> {
-		string Name {
+	public interface IWriteProtectTest : IWriteProtectProperties<IWriteProtectTest>
+	{
+		string Name
+		{
 			get;
 			set;
 		}
-		int Age {
+
+		int Age
+		{
 			get;
 			set;
 		}

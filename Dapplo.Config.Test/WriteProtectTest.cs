@@ -23,22 +23,26 @@ using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Dapplo.Config.Test.TestInterfaces;
 
-namespace Dapplo.Config.Test {
+namespace Dapplo.Config.Test
+{
 	/// <summary>
 	/// This test class shows how the write protect works
 	/// </summary>
 	[TestClass]
-	public class WriteProtectTest {
+	public class WriteProtectTest
+	{
 		private const string TestValue1 = "VALUE1";
 		private IPropertyProxy<IWriteProtectTest> _propertyProxy;
-	
+
 		[TestInitialize]
-		public void Initialize() {
+		public void Initialize()
+		{
 			_propertyProxy = ProxyBuilder.CreateProxy<IWriteProtectTest>();
 		}
 
 		[TestMethod]
-		public void TestWriteProtect() {
+		public void TestWriteProtect()
+		{
 
 			var properties = _propertyProxy.PropertyObject;
 			properties.StartWriteProtecting();
@@ -51,7 +55,8 @@ namespace Dapplo.Config.Test {
 		}
 
 		[TestMethod]
-		public void TestDisableWriteProtect() {
+		public void TestDisableWriteProtect()
+		{
 			var properties = _propertyProxy.PropertyObject;
 			properties.StartWriteProtecting();
 			properties.Age = 30;
@@ -64,7 +69,8 @@ namespace Dapplo.Config.Test {
 
 		[TestMethod]
 		[ExpectedException(typeof(AccessViolationException))]
-		public void TestAccessViolation() {
+		public void TestAccessViolation()
+		{
 			var properties = _propertyProxy.PropertyObject;
 			properties.WriteProtect(x => x.Name);
 			Assert.IsTrue(properties.IsWriteProtected(x => x.Name));

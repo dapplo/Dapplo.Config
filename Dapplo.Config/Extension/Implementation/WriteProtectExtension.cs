@@ -23,18 +23,21 @@ using System;
 using System.Collections.Generic;
 using Dapplo.Config.Support;
 
-namespace Dapplo.Config.Extension.Implementation {
+namespace Dapplo.Config.Extension.Implementation
+{
 	/// <summary>
 	///     This implements logic to add write protect support to your proxied interface.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	[Extension(typeof(IWriteProtectProperties))]
-	internal class WriteProtectExtension<T> : AbstractPropertyProxyExtension<T> {
+	internal class WriteProtectExtension<T> : AbstractPropertyProxyExtension<T>
+	{
 		// A store for the values that are write protected
 		private readonly ISet<string> _writeProtectedProperties = new HashSet<string>();
 		private bool _isProtecting;
 
-		public WriteProtectExtension(IPropertyProxy<T> proxy) : base(proxy) {
+		public WriteProtectExtension(IPropertyProxy<T> proxy) : base(proxy)
+		{
 			CheckType(typeof(IWriteProtectProperties));
 			proxy.RegisterSetter((int)CallOrder.First, WriteProtectSetter);
 
@@ -50,11 +53,15 @@ namespace Dapplo.Config.Extension.Implementation {
 		///     This is the implementation of the set logic
 		/// </summary>
 		/// <param name="setInfo">SetInfo with all the information on the set call</param>
-		private void WriteProtectSetter(SetInfo setInfo) {
-			if (_writeProtectedProperties.Contains(setInfo.PropertyName)) {
+		private void WriteProtectSetter(SetInfo setInfo)
+		{
+			if (_writeProtectedProperties.Contains(setInfo.PropertyName))
+			{
 				setInfo.CanContinue = false;
 				setInfo.Error = new AccessViolationException(string.Format("Property {0} is write protected", setInfo.PropertyName));
-			} else if (_isProtecting) {
+			}
+			else if (_isProtecting)
+			{
 				_writeProtectedProperties.Add(setInfo.PropertyName);
 			}
 		}
@@ -63,7 +70,8 @@ namespace Dapplo.Config.Extension.Implementation {
 		///     After calling this, every set will be write protected
 		/// </summary>
 		/// <param name="methodCallInfo">MethodCallInfo</param>
-		private void StartWriteProtecting(MethodCallInfo methodCallInfo) {
+		private void StartWriteProtecting(MethodCallInfo methodCallInfo)
+		{
 			_isProtecting = true;
 		}
 
@@ -71,7 +79,8 @@ namespace Dapplo.Config.Extension.Implementation {
 		///     Stop write protecting every property
 		/// </summary>
 		/// <param name="methodCallInfo">MethodCallInfo</param>
-		private void StopWriteProtecting(MethodCallInfo methodCallInfo) {
+		private void StopWriteProtecting(MethodCallInfo methodCallInfo)
+		{
 			_isProtecting = false;
 		}
 
@@ -79,7 +88,8 @@ namespace Dapplo.Config.Extension.Implementation {
 		///     IsWriteProtected logic checks if the supplied property Lambda expression is write protected.
 		/// </summary>
 		/// <param name="methodCallInfo">IMethodCallMessage</param>
-		private void IsWriteProtected(MethodCallInfo methodCallInfo) {
+		private void IsWriteProtected(MethodCallInfo methodCallInfo)
+		{
 			methodCallInfo.ReturnValue = _writeProtectedProperties.Contains(methodCallInfo.PropertyNameOf(0));
 		}
 
@@ -87,7 +97,8 @@ namespace Dapplo.Config.Extension.Implementation {
 		///     WriteProtect sets the write protection of the supplied property in the LambdaExpression
 		/// </summary>
 		/// <param name="methodCallInfo">IMethodCallMessage</param>
-		private void WriteProtect(MethodCallInfo methodCallInfo) {
+		private void WriteProtect(MethodCallInfo methodCallInfo)
+		{
 			_writeProtectedProperties.Add(methodCallInfo.PropertyNameOf(0));
 		}
 
@@ -95,7 +106,8 @@ namespace Dapplo.Config.Extension.Implementation {
 		///     DisableWriteProtect removes the write protection of the supplied property in the LambdaExpression
 		/// </summary>
 		/// <param name="methodCallInfo">IMethodCallMessage</param>
-		private void DisableWriteProtect(MethodCallInfo methodCallInfo) {
+		private void DisableWriteProtect(MethodCallInfo methodCallInfo)
+		{
 			_writeProtectedProperties.Remove(methodCallInfo.PropertyNameOf(0));
 		}
 	}

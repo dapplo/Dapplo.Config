@@ -20,11 +20,14 @@
  */
 
 using System.Reflection;
-namespace Dapplo.Config {
+
+namespace Dapplo.Config
+{
 	/// <summary>
 	///     Extensions need to extend this interface.
 	/// </summary>
-	public interface IPropertyProxyExtension {
+	public interface IPropertyProxyExtension
+	{
 		/// <summary>
 		/// This is called for every Property on type T, so we only have 1x reflection
 		/// </summary>

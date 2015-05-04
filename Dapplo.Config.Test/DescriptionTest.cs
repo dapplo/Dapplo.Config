@@ -22,19 +22,23 @@
 using Dapplo.Config.Test.TestInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Dapplo.Config.Test {
+namespace Dapplo.Config.Test
+{
 	[TestClass]
-	public class DescriptionTest {
+	public class DescriptionTest
+	{
 		private IPropertyProxy<IDescriptionTest> _propertyProxy;
 		public const string TestDescription = "Name of the person";
 
 		[TestInitialize]
-		public void Initialize() {
+		public void Initialize()
+		{
 			_propertyProxy = ProxyBuilder.CreateProxy<IDescriptionTest>();
 		}
 
 		[TestMethod]
-		public void TestDescriptionAttribute() {
+		public void TestDescriptionAttribute()
+		{
 			string description = _propertyProxy.PropertyObject.DescriptionFor(x => x.Name);
 			Assert.AreEqual(description, TestDescription);
 			description = _propertyProxy.PropertyObject.DescriptionFor("Name");

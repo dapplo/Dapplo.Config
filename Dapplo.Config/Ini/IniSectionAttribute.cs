@@ -20,16 +20,21 @@
  */
 using System;
 
-namespace Dapplo.Config.Ini {
+namespace Dapplo.Config.Ini
+{
 	[AttributeUsage(AttributeTargets.Interface, AllowMultiple = true)]
-	public class IniSectionAttribute : Attribute {
+	public class IniSectionAttribute : Attribute
+	{
 		private string _name;
-		public IniSectionAttribute(string name) {
+		public IniSectionAttribute(string name)
+		{
 			_name = name;
 		}
 
-		public string Name {
-			get {
+		public string Name
+		{
+			get
+			{
 				return _name;
 			}
 		}

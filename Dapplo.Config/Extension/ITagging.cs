@@ -22,18 +22,22 @@
 using System;
 using System.Linq.Expressions;
 
-namespace Dapplo.Config.Extension {
+namespace Dapplo.Config.Extension
+{
 	/// <summary>
 	///	 Attribute to "Tag" properties as with certain information
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
-	public class TagAttribute : Attribute {
-		public object Tag {
+	public class TagAttribute : Attribute
+	{
+		public object Tag
+		{
 			get;
 			set;
 		}
 
-		public TagAttribute(object tag) {
+		public TagAttribute(object tag)
+		{
 			Tag = tag;
 		}
 	}
@@ -41,7 +45,8 @@ namespace Dapplo.Config.Extension {
 	/// <summary>
 	/// Interface which your interface needs to implement to be able to see if a property is tagged
 	/// </summary>
-	public interface ITagging {
+	public interface ITagging
+	{
 		/// <summary>
 		///     Checks if the supplied expression resolves to a property which has the expert attribute
 		/// </summary>
@@ -55,7 +60,8 @@ namespace Dapplo.Config.Extension {
 	/// Interface which your interface needs to implement to be able to see if a property is tagged
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public interface ITagging<T> : ITagging {
+	public interface ITagging<T> : ITagging
+	{
 		/// <summary>
 		///     Checks if the supplied expression resolves to a property which has the expert attribute
 		/// </summary>

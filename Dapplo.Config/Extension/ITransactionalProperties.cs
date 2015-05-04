@@ -19,11 +19,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Dapplo.Config.Extension {
+namespace Dapplo.Config.Extension
+{
 	/// <summary>
 	///     Extending the to be property interface with this, adds transactional support
 	/// </summary>
-	public interface ITransactionalProperties {
+	public interface ITransactionalProperties
+	{
 		/// <summary>
 		/// This method will start the transaction, all changes will be stored in a separate cache.
 		/// </summary>

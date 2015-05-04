@@ -24,20 +24,24 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace Dapplo.Config.Ini {
+namespace Dapplo.Config.Ini
+{
 	/// <summary>
 	/// Container for supplying the properties to the Ini file
 	/// </summary>
-	public class IniValue {
+	public class IniValue
+	{
 		private IDictionary<string, object> _properties;
-		public IniValue(IDictionary<string, object> properties) {
+		public IniValue(IDictionary<string, object> properties)
+		{
 			_properties = properties;
 		}
 
 		/// <summary>
 		/// Name of the property in the interface
 		/// </summary>
-		public string PropertyName {
+		public string PropertyName
+		{
 			get;
 			set;
 		}
@@ -45,7 +49,8 @@ namespace Dapplo.Config.Ini {
 		/// <summary>
 		/// Name of the property in the file, this could be different
 		/// </summary>
-		public string IniPropertyName {
+		public string IniPropertyName
+		{
 			get;
 			set;
 		}
@@ -53,7 +58,8 @@ namespace Dapplo.Config.Ini {
 		/// <summary>
 		/// Description, which was set via the DescriptionAttribute on the property
 		/// </summary>
-		public string Description {
+		public string Description
+		{
 			get;
 			set;
 		}
@@ -61,7 +67,8 @@ namespace Dapplo.Config.Ini {
 		/// <summary>
 		/// Category, which was set via the CategoryAttribute on the property
 		/// </summary>
-		public string Category {
+		public string Category
+		{
 			get;
 			set;
 		}
@@ -69,19 +76,28 @@ namespace Dapplo.Config.Ini {
 		/// <summary>
 		/// Current value
 		/// </summary>
-		public object Value {
-			get {
+		public object Value
+		{
+			get
+			{
 				return _properties.SafeGet(PropertyName);
 			}
-			set {
+			set
+			{
 				_properties.SafelyAddOrOverwrite(PropertyName, value);
 			}
+		}
+
+		public void ResetToDefault()
+		{
+			_properties.SafelyAddOrOverwrite(PropertyName, DefaultValue);
 		}
 
 		/// <summary>
 		/// Default value, from the DefaultAttribute
 		/// </summary>
-		public object DefaultValue {
+		public object DefaultValue
+		{
 			get;
 			set;
 		}
@@ -89,7 +105,8 @@ namespace Dapplo.Config.Ini {
 		/// <summary>
 		/// If this is set to true, we also should write the default value to the file
 		/// </summary>
-		public bool EmitDefaultValue {
+		public bool EmitDefaultValue
+		{
 			get;
 			set;
 		}
@@ -97,7 +114,8 @@ namespace Dapplo.Config.Ini {
 		/// <summary>
 		/// Type for the value, needed for conversion when reading.
 		/// </summary>
-		public Type ValueType {
+		public Type ValueType
+		{
 			get;
 			set;
 		}
@@ -105,7 +123,8 @@ namespace Dapplo.Config.Ini {
 		/// <summary>
 		/// Return the TypeConverter for this value, when not set defaults are used
 		/// </summary>
-		public TypeConverter Converter {
+		public TypeConverter Converter
+		{
 			get;
 			set;
 		}
@@ -113,7 +132,8 @@ namespace Dapplo.Config.Ini {
 		/// <summary>
 		/// Return true when the value is readonly in the GUI
 		/// </summary>
-		public bool IsReadOnly {
+		public bool IsReadOnly
+		{
 			get;
 			set;
 		}
@@ -121,8 +141,10 @@ namespace Dapplo.Config.Ini {
 		/// <summary>
 		/// Check if this IniValue has a value
 		/// </summary>
-		public bool HasValue {
-			get {
+		public bool HasValue
+		{
+			get
+			{
 				return _properties.ContainsKey(PropertyName);
 			}
 		}
@@ -131,15 +153,19 @@ namespace Dapplo.Config.Ini {
 		/// Check if this IniValue needs to be written.
 		/// This returns false if there is no value, or if the value is the default and if EmitDefaultValue is false (Default)
 		/// </summary>
-		public bool IsWriteNeeded {
-			get {
+		public bool IsWriteNeeded
+		{
+			get
+			{
 				// if EmitDefaultValue is true, we should always write this value (without checking if it is default
-				if (EmitDefaultValue) {
+				if (EmitDefaultValue)
+				{
 					return true;
 				}
 
 				// Don't write if there is no value
-				if (!_properties.ContainsKey(PropertyName)) {
+				if (!_properties.ContainsKey(PropertyName))
+				{
 					return false;
 				}
 

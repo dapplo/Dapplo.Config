@@ -20,13 +20,16 @@
  */
 
 using System.ComponentModel;
-namespace Dapplo.Config.Test.TestInterfaces {
+namespace Dapplo.Config.Test.TestInterfaces
+{
 	/// <summary>
 	/// This is the interface under test
 	/// </summary>
-	interface IBassicAssignTest {
+	interface IBassicAssignTest
+	{
 		[Description("Name of the person")]
-		string Name {
+		string Name
+		{
 			get;
 			set;
 		}

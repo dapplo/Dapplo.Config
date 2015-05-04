@@ -4,11 +4,14 @@ using Dapplo.Config.Ini;
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace Dapplo.Config.Test {
+namespace Dapplo.Config.Test
+{
 	[TestClass]
-	public class TypeConverterTest {
+	public class TypeConverterTest
+	{
 		[TestMethod]
-		public void TestGenericListConverterString() {
+		public void TestGenericListConverterString()
+		{
 			var stringListConverter = (TypeConverter)Activator.CreateInstance(typeof(StringToGenericListConverter<string>));
 			Assert.IsTrue(stringListConverter.CanConvertFrom(typeof(string)));
 			Assert.IsTrue(stringListConverter.CanConvertTo(typeof(List<string>)));
@@ -28,7 +31,8 @@ namespace Dapplo.Config.Test {
 
 			var stringList = (List<string>)stringListConverter.ConvertFrom(myTestStringWithStrings);
 			Assert.AreEqual(myTestStringList.Count, stringList.Count);
-			for (int i = 0; i < myTestStringList.Count; i++) {
+			for (int i = 0; i < myTestStringList.Count; i++)
+			{
 				Assert.AreEqual(myTestStringList[i], stringList[i]);
 			}
 
@@ -41,7 +45,8 @@ namespace Dapplo.Config.Test {
 
 			var intList = (List<int>)intListConverter.ConvertFrom(myTestStringWithInts);
 			Assert.AreEqual(myTestIntList.Count, intList.Count);
-			for (int i = 0; i < myTestIntList.Count; i++) {
+			for (int i = 0; i < myTestIntList.Count; i++)
+			{
 				Assert.AreEqual(myTestIntList[i], intList[i]);
 			}
 		}

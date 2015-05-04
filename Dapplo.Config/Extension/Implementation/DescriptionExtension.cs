@@ -23,14 +23,17 @@ using System;
 using Dapplo.Config.Support;
 using System.Reflection;
 
-namespace Dapplo.Config.Extension.Implementation {
+namespace Dapplo.Config.Extension.Implementation
+{
 	/// <summary>
 	///  This implements logic to set the default values on your property interface.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	[Extension(typeof(IDescription))]
-	internal class DescriptionExtension<T> : AbstractPropertyProxyExtension<T> {
-		public DescriptionExtension(IPropertyProxy<T> proxy) : base(proxy){
+	internal class DescriptionExtension<T> : AbstractPropertyProxyExtension<T>
+	{
+		public DescriptionExtension(IPropertyProxy<T> proxy) : base(proxy)
+		{
 			CheckType(typeof(IDescription));
 
 			// this registers one method and the overloading is handled in the GetDescription
@@ -40,7 +43,8 @@ namespace Dapplo.Config.Extension.Implementation {
 		/// <summary>
 		/// Return the description for a property
 		/// </summary>
-		private void GetDescription(MethodCallInfo methodCallInfo) {
+		private void GetDescription(MethodCallInfo methodCallInfo)
+		{
 			Type proxiedType = typeof(T);
 			PropertyInfo propertyInfo = proxiedType.GetProperty(methodCallInfo.PropertyNameOf(0));
 			methodCallInfo.ReturnValue = propertyInfo.GetDescription();

@@ -22,29 +22,34 @@
 using Dapplo.Config.Test.TestInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Dapplo.Config.Test {
+namespace Dapplo.Config.Test
+{
 	/// <summary>
 	/// Test case to show how the default value works
 	/// </summary>
 	[TestClass]
-	public class DefaultValueTest {
+	public class DefaultValueTest
+	{
 		private IPropertyProxy<IDefaultValueTest> _propertyProxy;
 
 		[TestInitialize]
-		public void Initialize() {
+		public void Initialize()
+		{
 			_propertyProxy = ProxyBuilder.CreateProxy<IDefaultValueTest>();
 		}
 
 
 		[TestMethod]
-		public void TestDefaultValue() {
+		public void TestDefaultValue()
+		{
 			IDefaultValueTest properties = _propertyProxy.PropertyObject;
 			Assert.AreEqual(properties.Age, 21);
 			Assert.AreEqual(3, properties.Ages.Count);
 		}
 
 		[TestMethod]
-		public void TestDefaultValueAtrribute() {
+		public void TestDefaultValueAtrribute()
+		{
 			IDefaultValueTest properties = _propertyProxy.PropertyObject;
 			object defaultValue = properties.DefaultValueFor(x => x.Age);
 			Assert.AreEqual(defaultValue, 21);

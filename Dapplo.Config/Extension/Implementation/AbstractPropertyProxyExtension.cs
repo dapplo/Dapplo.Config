@@ -23,14 +23,17 @@ using System;
 using System.Reflection;
 using System.Linq;
 
-namespace Dapplo.Config.Extension.Implementation {
+namespace Dapplo.Config.Extension.Implementation
+{
 	/// <summary>
 	/// Base class for extensions, this should take away some default handling
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public abstract class AbstractPropertyProxyExtension<T> : IPropertyProxyExtension {
+	public abstract class AbstractPropertyProxyExtension<T> : IPropertyProxyExtension
+	{
 		protected readonly IPropertyProxy<T> Proxy;
-		public AbstractPropertyProxyExtension(IPropertyProxy<T> proxy) {
+		public AbstractPropertyProxyExtension(IPropertyProxy<T> proxy)
+		{
 			Proxy = proxy;
 		}
 
@@ -38,9 +41,11 @@ namespace Dapplo.Config.Extension.Implementation {
 		/// Force that the type extends the type we build an extension for
 		/// </summary>
 		/// <param name="extensionType"></param>
-		protected void CheckType(Type extensionType) {
-			if (!typeof(T).GetInterfaces().Contains(extensionType)) {
-				throw new NotSupportedException(string.Format("Type needs to implement {0}",extensionType.Name));
+		protected void CheckType(Type extensionType)
+		{
+			if (!typeof(T).GetInterfaces().Contains(extensionType))
+			{
+				throw new NotSupportedException(string.Format("Type needs to implement {0}", extensionType.Name));
 			}
 		}
 
@@ -48,7 +53,8 @@ namespace Dapplo.Config.Extension.Implementation {
 		/// Handle every property
 		/// </summary>
 		/// <param name="propertyInfo"></param>
-		public virtual void InitProperty(PropertyInfo propertyInfo) {
+		public virtual void InitProperty(PropertyInfo propertyInfo)
+		{
 		}
 	}
 }

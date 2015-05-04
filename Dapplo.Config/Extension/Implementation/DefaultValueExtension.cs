@@ -24,14 +24,17 @@ using Dapplo.Config.Support;
 using System.Reflection;
 using System.ComponentModel;
 
-namespace Dapplo.Config.Extension.Implementation {
+namespace Dapplo.Config.Extension.Implementation
+{
 	/// <summary>
 	///  This implements logic to set the default values on your property interface.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	[Extension(typeof(IDefaultValue))]
-	internal class DefaultValueExtension<T> : AbstractPropertyProxyExtension<T> {
-		public DefaultValueExtension(IPropertyProxy<T> proxy) : base(proxy) {
+	internal class DefaultValueExtension<T> : AbstractPropertyProxyExtension<T>
+	{
+		public DefaultValueExtension(IPropertyProxy<T> proxy) : base(proxy)
+		{
 			CheckType(typeof(IDefaultValue));
 
 			// this registers one method and the overloading is handled in the GetDefaultValue
@@ -43,38 +46,57 @@ namespace Dapplo.Config.Extension.Implementation {
 		/// Process the property, in our case set the default
 		/// </summary>
 		/// <param name="propertyInfo"></param>
-		public override void InitProperty(PropertyInfo propertyInfo) {
-
-			var defaultValue = propertyInfo.GetDefaultValue();
-			if (defaultValue != null) {
-				TypeConverter typeConverter = propertyInfo.GetTypeConverter();
-				if (typeConverter != null && typeConverter.CanConvertFrom(defaultValue.GetType())) {
-					// Convert
-					Proxy.Properties[propertyInfo.Name] = typeConverter.ConvertFrom(defaultValue);
-				} else {
-					// No conversion
-					Proxy.Properties[propertyInfo.Name] = defaultValue;
-				}
+		public override void InitProperty(PropertyInfo propertyInfo)
+		{
+			var defaultValue = GetConvertedDefaultValue(propertyInfo);
+			if (defaultValue != null)
+			{
+				Proxy.Properties[propertyInfo.Name] = defaultValue;
+			}
+			else if (Proxy.Properties.ContainsKey(propertyInfo.Name))
+			{
+				Proxy.Properties.Remove(propertyInfo.Name);
 			}
 		}
 
 		/// <summary>
-		/// Return the default value for a property
+		/// Retrieve the default value, using the TypeConverter
 		/// </summary>
-		private void GetDefaultValue(MethodCallInfo methodCallInfo) {
-			Type proxiedType = typeof(T);
-			PropertyInfo propertyInfo = proxiedType.GetProperty(methodCallInfo.PropertyNameOf(0));
-			methodCallInfo.ReturnValue = propertyInfo.GetDefaultValue();
+		/// <param name="propertyInfo">Property to get the default value for</param>
+		/// <returns>object with the type converted default value</returns>
+		private object GetConvertedDefaultValue(PropertyInfo propertyInfo)
+		{
+			var defaultValue = propertyInfo.GetDefaultValue();
+			if (defaultValue != null)
+			{
+				TypeConverter typeConverter = propertyInfo.GetTypeConverter();
+				if (typeConverter != null && typeConverter.CanConvertFrom(defaultValue.GetType()))
+				{
+					// Convert
+					return typeConverter.ConvertFrom(defaultValue);
+				}
+			}
+			return defaultValue;
 		}
 
 		/// <summary>
 		/// Return the default value for a property
 		/// </summary>
-		private void RestoreToDefault(MethodCallInfo methodCallInfo) {
+		private void GetDefaultValue(MethodCallInfo methodCallInfo)
+		{
 			Type proxiedType = typeof(T);
 			PropertyInfo propertyInfo = proxiedType.GetProperty(methodCallInfo.PropertyNameOf(0));
-			object defaultValue = propertyInfo.GetDefaultValue();
-			propertyInfo.SetValue(Proxy.PropertyObject, defaultValue);
+			methodCallInfo.ReturnValue = GetConvertedDefaultValue(propertyInfo);
+		}
+
+		/// <summary>
+		/// Return the default value for a property
+		/// </summary>
+		private void RestoreToDefault(MethodCallInfo methodCallInfo)
+		{
+			Type proxiedType = typeof(T);
+			PropertyInfo propertyInfo = proxiedType.GetProperty(methodCallInfo.PropertyNameOf(0));
+			InitProperty(propertyInfo);
 		}
 	}
 }

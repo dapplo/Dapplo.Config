@@ -24,17 +24,20 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Dapplo.Config {
+namespace Dapplo.Config
+{
 	/// <summary>
 	/// This is the proxy builder
 	/// The ProxyBuilder is used to create instances of interfaces with implementations depending on
 	/// the extended interfaces. Especially useful for configurations.
 	/// </summary>
-	public static class ProxyBuilder {
+	public static class ProxyBuilder
+	{
 		private static readonly List<Type> ExtensionTypes = new List<Type>();
 		private static readonly IDictionary<Type, IPropertyProxy> Cache = new ConcurrentDictionary<Type, IPropertyProxy>();
-		static ProxyBuilder() {
-			IEnumerable<Type> types = from someAssembly in AppDomain.CurrentDomain.GetAssemblies() from someType in someAssembly.GetTypes() where someType.GetCustomAttributes(typeof (ExtensionAttribute), true).Length > 0 select someType;
+		static ProxyBuilder()
+		{
+			IEnumerable<Type> types = from someAssembly in AppDomain.CurrentDomain.GetAssemblies() from someType in someAssembly.GetTypes() where someType.GetCustomAttributes(typeof(ExtensionAttribute), true).Length > 0 select someType;
 			ExtensionTypes.AddRange(types);
 		}
 
@@ -43,10 +46,13 @@ namespace Dapplo.Config {
 		/// </summary>
 		/// <typeparam name="T">Should be an interface</typeparam>
 		/// <returns>proxy</returns>
-		public static IPropertyProxy<T> GetOrCreateProxy<T>() {
+		public static IPropertyProxy<T> GetOrCreateProxy<T>()
+		{
 			IPropertyProxy proxy;
-			lock (Cache) {
-				if (!Cache.TryGetValue(typeof(T), out proxy)) {
+			lock (Cache)
+			{
+				if (!Cache.TryGetValue(typeof(T), out proxy))
+				{
 					proxy = CreateProxy<T>();
 					Cache.Add(typeof(T), proxy);
 				}
@@ -60,18 +66,25 @@ namespace Dapplo.Config {
 		/// </summary>
 		/// <typeparam name="T">Should be an interface</typeparam>
 		/// <returns>proxy</returns>
-		public static IPropertyProxy<T> CreateProxy<T>() {
+		public static IPropertyProxy<T> CreateProxy<T>()
+		{
 			var proxy = new PropertyProxy<T>();
-			Type[] interfaces = typeof (T).GetInterfaces();
-			foreach (Type extensionType in ExtensionTypes) {
-				var extensionAttributes = (ExtensionAttribute[]) extensionType.GetCustomAttributes(typeof (ExtensionAttribute), false);
-				foreach (ExtensionAttribute extensionAttribute in extensionAttributes) {
+			Type[] interfaces = typeof(T).GetInterfaces();
+			foreach (Type extensionType in ExtensionTypes)
+			{
+				var extensionAttributes = (ExtensionAttribute[])extensionType.GetCustomAttributes(typeof(ExtensionAttribute), false);
+				foreach (ExtensionAttribute extensionAttribute in extensionAttributes)
+				{
 					Type implementing = extensionAttribute.Implementing;
-					if (interfaces.Contains(implementing)) {
+					if (interfaces.Contains(implementing))
+					{
 						proxy.AddExtension(extensionType);
-					} else if (implementing.IsGenericType && implementing.IsGenericTypeDefinition) {
-						Type genericExtensionType = implementing.MakeGenericType(typeof (T));
-						if (interfaces.Contains(genericExtensionType)) {
+					}
+					else if (implementing.IsGenericType && implementing.IsGenericTypeDefinition)
+					{
+						Type genericExtensionType = implementing.MakeGenericType(typeof(T));
+						if (interfaces.Contains(genericExtensionType))
+						{
 							proxy.AddExtension(extensionType);
 						}
 					}

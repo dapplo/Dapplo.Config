@@ -19,15 +19,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Dapplo.Config.Support {
+namespace Dapplo.Config.Support
+{
 	/// <summary>
 	///     This class contains all the information for the getter actions
 	/// </summary>
-	public class GetInfo : GetSetInfo {
+	public class GetInfo : GetSetInfo
+	{
 		/// <summary>
 		///     The value of the property
 		/// </summary>
-		public object Value {
+		public object Value
+		{
 			get;
 			set;
 		}

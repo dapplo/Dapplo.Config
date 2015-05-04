@@ -26,38 +26,45 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Dapplo.Config.Test {
+namespace Dapplo.Config.Test
+{
 	[TestClass]
-	public class IniTest {
+	public class IniTest
+	{
 		private IPropertyProxy<IIniTest> _propertyProxy;
 		private const string Name = "Dapplo";
 		private const string FirstName = "Robin";
 
 		[ClassInitialize]
-		public static void InitializeClass(TestContext textContext) {
+		public static void InitializeClass(TestContext textContext)
+		{
 			StringEncryptionTypeConverter.RgbIv = "fjr84hF49gp3911fFFg";
 			StringEncryptionTypeConverter.RgbKey = "ljew3lJfrS0rlddlfeelOekfekcvbAwE";
 		}
 
 		[TestInitialize]
-		public void InitializeEveryTest() {
+		public void InitializeEveryTest()
+		{
 			_propertyProxy = ProxyBuilder.CreateProxy<IIniTest>();
 		}
 
 		[TestMethod]
-		public async Task TestIniInit() {
+		public async Task TestIniInit()
+		{
 			var iniConfig = new IniConfig();
 
 			var iniTest = _propertyProxy.PropertyObject;
 			iniConfig.AddSection(iniTest);
-			using (var testMemoryStream = new MemoryStream()) {
-				await iniConfig.InitFromStream(testMemoryStream);
+			using (var testMemoryStream = new MemoryStream())
+			{
+				await iniConfig.ReadFromStream(testMemoryStream);
 				Assert.IsTrue(iniTest.WindowCornerCutShape.Count > 0);
 			}
 		}
 
 		[TestMethod]
-		public async Task TestIniWriteRead() {
+		public async Task TestIniWriteRead()
+		{
 			var iniConfig = new IniConfig();
 
 			var iniTest = _propertyProxy.PropertyObject;
@@ -66,14 +73,16 @@ namespace Dapplo.Config.Test {
 			iniTest.FirstName = FirstName;
 			long ticks = DateTimeOffset.Now.UtcTicks;
 			iniTest.Age = ticks;
-			using (var writeStream = new MemoryStream()) {
-				await iniConfig.Write(writeStream);
+			using (var writeStream = new MemoryStream())
+			{
+				await iniConfig.WriteToStream(writeStream);
 				iniTest.Age = 2;
 
 				// Test reading
 				writeStream.Seek(0, SeekOrigin.Begin);
-				var isFileRead = await iniConfig.InitFromStream(writeStream);
-				if (isFileRead) {
+				var isFileRead = await iniConfig.ReadFromStream(writeStream);
+				if (isFileRead)
+				{
 					Assert.AreEqual(Name, iniTest.Name);
 					Assert.AreEqual(FirstName, iniTest.FirstName);
 					Assert.AreEqual(ticks, iniTest.Age);

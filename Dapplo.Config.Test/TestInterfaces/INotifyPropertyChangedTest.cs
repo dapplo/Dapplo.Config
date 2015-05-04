@@ -21,12 +21,15 @@
 
 using System.ComponentModel;
 
-namespace Dapplo.Config.Test.TestInterfaces {
+namespace Dapplo.Config.Test.TestInterfaces
+{
 	/// <summary>
 	/// This is the interface under test
 	/// </summary>
-	public interface INotifyPropertyChangedTest : INotifyPropertyChanged {
-		string Name {
+	public interface INotifyPropertyChangedTest : INotifyPropertyChanged
+	{
+		string Name
+		{
 			get;
 			set;
 		}

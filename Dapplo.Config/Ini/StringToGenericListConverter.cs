@@ -24,38 +24,48 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 
-namespace Dapplo.Config.Ini {
+namespace Dapplo.Config.Ini
+{
 	/// <summary>
 	/// This TypeConverter should be used to convert a comma separated string to a List of type T.
 	/// Use the TypeConverterAttribute with StringToGenericListConverter where T is your type (not list of type)
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public class StringToGenericListConverter<T> : TypeConverter {
+	public class StringToGenericListConverter<T> : TypeConverter
+	{
 		protected readonly TypeConverter _typeConverter;
 
-		public StringToGenericListConverter() {
+		public StringToGenericListConverter()
+		{
 			_typeConverter = TypeDescriptor.GetConverter(typeof(T));
-			if (_typeConverter == null) {
+			if (_typeConverter == null)
+			{
 				throw new InvalidOperationException("No type converter exists for type " + typeof(T).FullName);
 			}
 		}
 
-		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) {
-			if (sourceType == typeof(string)) {
+		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+		{
+			if (sourceType == typeof(string))
+			{
 				return true;
 			}
 
 			return base.CanConvertFrom(context, sourceType);
 		}
 
-		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType) {
-			if (destinationType == typeof(List<T>)) {
+		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+		{
+			if (destinationType == typeof(List<T>))
+			{
 				return true;
 			}
-			if (destinationType == typeof(IList<T>)) {
+			if (destinationType == typeof(IList<T>))
+			{
 				return true;
 			}
-			if (destinationType == typeof(string)) {
+			if (destinationType == typeof(string))
+			{
 				return true;
 			}
 
@@ -69,12 +79,14 @@ namespace Dapplo.Config.Ini {
 		/// <param name="culture"></param>
 		/// <param name="value"></param>
 		/// <returns>Converted value</returns>
-		public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value) {
-			if (value is string) {
+		public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+		{
+			if (value is string)
+			{
 				// Split, and where all element are not null or empty, convert the item to T and add the items to a list<T>
 				return (from item in ((string)value).Split(',')
 						where !string.IsNullOrWhiteSpace(item)
-						select  (T)_typeConverter.ConvertFromInvariantString(item.Trim())).ToList<T>();
+						select (T)_typeConverter.ConvertFromInvariantString(item.Trim())).ToList<T>();
 			}
 
 			return base.ConvertFrom(context, culture, value);
@@ -88,8 +100,10 @@ namespace Dapplo.Config.Ini {
 		/// <param name="value"></param>
 		/// <param name="destinationType"></param>
 		/// <returns></returns>
-		public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType) {
-			if (destinationType == typeof(string)) {
+		public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+		{
+			if (destinationType == typeof(string))
+			{
 				return string.Join(",", ((IList<T>)value));
 			}
 

@@ -22,18 +22,22 @@
 using Dapplo.Config.Test.TestInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Dapplo.Config.Test {
+namespace Dapplo.Config.Test
+{
 	[TestClass]
-	public class BassicAssignTest {
+	public class BassicAssignTest
+	{
 		private IPropertyProxy<IBassicAssignTest> _propertyProxy;
 
 		[TestInitialize]
-		public void Initialize() {
+		public void Initialize()
+		{
 			_propertyProxy = ProxyBuilder.CreateProxy<IBassicAssignTest>();
 		}
 
 		[TestMethod]
-		public void TestAssign() {
+		public void TestAssign()
+		{
 			var properties = _propertyProxy.PropertyObject;
 			const string testValue = "Robin";
 			properties.Name = testValue;

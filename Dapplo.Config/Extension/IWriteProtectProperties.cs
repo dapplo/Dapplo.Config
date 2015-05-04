@@ -22,11 +22,13 @@
 using System;
 using System.Linq.Expressions;
 
-namespace Dapplo.Config.Extension {
+namespace Dapplo.Config.Extension
+{
 	/// <summary>
 	///     Extending the to be property interface with this, adds write protection
 	/// </summary>
-	public interface IWriteProtectProperties {
+	public interface IWriteProtectProperties
+	{
 		/// <summary>
 		/// After calling this method, every changed property will be write-protected
 		/// </summary>
@@ -60,7 +62,8 @@ namespace Dapplo.Config.Extension {
 	/// <summary>
 	///     Extending the to be property interface with this, adds write protection
 	/// </summary>
-	public interface IWriteProtectProperties<T> : IWriteProtectProperties {
+	public interface IWriteProtectProperties<T> : IWriteProtectProperties
+	{
 
 		/// <summary>
 		/// Test if the supplied property (by lamdba) is write protected

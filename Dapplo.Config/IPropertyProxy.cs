@@ -23,11 +23,13 @@ using System;
 using System.Collections.Generic;
 using Dapplo.Config.Support;
 
-namespace Dapplo.Config {
+namespace Dapplo.Config
+{
 	/// <summary>
 	/// Helper enum for the call order, used when registering the setter
 	/// </summary>
-	public enum CallOrder : int {
+	public enum CallOrder : int
+	{
 		First = int.MinValue,
 		Middle = 0,
 		Last = int.MaxValue
@@ -37,7 +39,8 @@ namespace Dapplo.Config {
 	/// Base interface for the generic IPropertyProxy
 	/// This can be used to store in Lists etc
 	/// </summary>
-	public interface IPropertyProxy {
+	public interface IPropertyProxy
+	{
 		/// <summary>
 		/// Direct access to the raw property values of the property object
 		/// Can be used to modify the directly, or for load/save
@@ -45,7 +48,8 @@ namespace Dapplo.Config {
 		/// It will keep the current values, that are not supplied.
 		/// Call clean iF you want to make sure it only has the supplied values.
 		/// </summary>
-		IDictionary<string, object> Properties {
+		IDictionary<string, object> Properties
+		{
 			get;
 			set;
 		}
@@ -54,14 +58,16 @@ namespace Dapplo.Config {
 		/// This can be used to access the property object
 		/// via the non generic interface.
 		/// </summary>
-		object UntypedPropertyObject {
+		object UntypedPropertyObject
+		{
 			get;
 		}
 
 		/// <summary>
 		/// Return the type of the property object
 		/// </summary>
-		Type PropertyObjectType {
+		Type PropertyObjectType
+		{
 			get;
 		}
 
@@ -91,12 +97,14 @@ namespace Dapplo.Config {
 	/// The property proxy is implemented with this interface.
 	/// </summary>
 	/// <typeparam name="T">The type of the interface with the properties</typeparam>
-	public interface IPropertyProxy<T> : IPropertyProxy {
+	public interface IPropertyProxy<T> : IPropertyProxy
+	{
 		/// <summary>
 		///     Get the proxy object which "implements" the interface.
 		///     Use this to access the values.
 		/// </summary>
-		T PropertyObject {
+		T PropertyObject
+		{
 			get;
 		}
 	}

@@ -26,16 +26,19 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Dapplo.Config.Ini {
+namespace Dapplo.Config.Ini
+{
 	/// <summary>
 	/// This converter makes it possible to store values in an ini file, somewhat secure.
 	/// Please make sure to initialize the RgbKey/RgbIv before it is used.
 	/// </summary>
-	public class StringEncryptionTypeConverter : TypeConverter {
+	public class StringEncryptionTypeConverter : TypeConverter
+	{
 		/// <summary>
 		/// The secret key to use for the symmetric algorithm.
 		/// </summary>
-		public static string RgbKey {
+		public static string RgbKey
+		{
 			get;
 			set;
 		}
@@ -43,7 +46,8 @@ namespace Dapplo.Config.Ini {
 		/// <summary>
 		/// The initialization vector to use for the symmetric algorithm.
 		/// </summary>
-		public static string RgbIv {
+		public static string RgbIv
+		{
 			get;
 			set;
 		}
@@ -52,20 +56,27 @@ namespace Dapplo.Config.Ini {
 		/// <summary>
 		/// The algorithm to use for the encrypt/decrypt, default is Rijndael
 		/// </summary>
-		public static string Algorithm {
-			get {
+		public static string Algorithm
+		{
+			get
+			{
 				return _algorithm;
 			}
-			set {
+			set
+			{
 				_algorithm = value;
 			}
 		}
 
-		private static IList<int> ValidKeySizes() {
+		private static IList<int> ValidKeySizes()
+		{
 			IList<int> validSizes = new List<int>();
-			using (SymmetricAlgorithm symmetricAlgorithm = SymmetricAlgorithm.Create(Algorithm)) {
-				foreach (var keySize in symmetricAlgorithm.LegalKeySizes) {
-					for (int valueSize = keySize.MinSize; valueSize <= keySize.MaxSize; valueSize += keySize.SkipSize) {
+			using (SymmetricAlgorithm symmetricAlgorithm = SymmetricAlgorithm.Create(Algorithm))
+			{
+				foreach (var keySize in symmetricAlgorithm.LegalKeySizes)
+				{
+					for (int valueSize = keySize.MinSize; valueSize <= keySize.MaxSize; valueSize += keySize.SkipSize)
+					{
 						validSizes.Add(valueSize);
 					}
 				}
@@ -76,13 +87,16 @@ namespace Dapplo.Config.Ini {
 		/// <summary>
 		/// The constructor validates all settings
 		/// </summary>
-		public StringEncryptionTypeConverter() {
-			if (RgbKey == null || RgbIv == null) {
+		public StringEncryptionTypeConverter()
+		{
+			if (RgbKey == null || RgbIv == null)
+			{
 				throw new InvalidOperationException("Please make sure the StringEncryptionTypeConverter.RgbKey & RgbIv are set!");
 			}
 			var currentKeySize = RgbKey.Length * 8;
 			var validKeySizes = ValidKeySizes();
-			if (!validKeySizes.Contains(currentKeySize)) {
+			if (!validKeySizes.Contains(currentKeySize))
+			{
 				throw new InvalidOperationException(string.Format("Bit-Length of StringEncryptionTypeConverter.RgbKey {0} is invalid, valid bit sizes are: {1}", currentKeySize, string.Join(",", validKeySizes)));
 			}
 		}
@@ -93,8 +107,10 @@ namespace Dapplo.Config.Ini {
 		/// <param name="context"></param>
 		/// <param name="destinationType"></param>
 		/// <returns></returns>
-		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType) {
-			if (destinationType == typeof(string)) {
+		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+		{
+			if (destinationType == typeof(string))
+			{
 				return true;
 			}
 			return base.CanConvertTo(context, destinationType);
@@ -106,8 +122,10 @@ namespace Dapplo.Config.Ini {
 		/// <param name="context"></param>
 		/// <param name="sourceType"></param>
 		/// <returns></returns>
-		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) {
-			if (sourceType == typeof(string)) {
+		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+		{
+			if (sourceType == typeof(string))
+			{
 				return true;
 			}
 			return base.CanConvertFrom(context, sourceType);
@@ -121,10 +139,13 @@ namespace Dapplo.Config.Ini {
 		/// <param name="value"></param>
 		/// <param name="destinationType"></param>
 		/// <returns></returns>
-		public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType) {
-			if (destinationType == typeof(string)) {
+		public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+		{
+			if (destinationType == typeof(string))
+			{
 				string plaintext = (string)value;
-				if (string.IsNullOrEmpty(plaintext)) {
+				if (string.IsNullOrEmpty(plaintext))
+				{
 					return null;
 				}
 				return Encrypt(plaintext);
@@ -140,12 +161,15 @@ namespace Dapplo.Config.Ini {
 		/// <param name="culture"></param>
 		/// <param name="value"></param>
 		/// <returns></returns>
-		public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value) {
-			if (value == null) {
+		public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+		{
+			if (value == null)
+			{
 				return null;
 			}
 			string valueString = value as string;
-			if (!string.IsNullOrEmpty(valueString)) {
+			if (!string.IsNullOrEmpty(valueString))
+			{
 				return Decrypt(valueString);
 			}
 
@@ -157,11 +181,13 @@ namespace Dapplo.Config.Ini {
 		/// </summary>
 		/// <param name="clearText">the string to call upon</param>
 		/// <returns>an encryped string in base64 form</returns>
-		private static string Encrypt(string clearText) {
+		private static string Encrypt(string clearText)
+		{
 			string returnValue = clearText;
 			byte[] clearTextBytes = Encoding.ASCII.GetBytes(clearText);
 			using (SymmetricAlgorithm symmetricAlgorithm = SymmetricAlgorithm.Create(Algorithm))
-			using (MemoryStream memoryStream = new MemoryStream()) {
+			using (MemoryStream memoryStream = new MemoryStream())
+			{
 				byte[] rgbIV = Encoding.ASCII.GetBytes(RgbIv);
 				byte[] key = Encoding.ASCII.GetBytes(RgbKey);
 				CryptoStream cryptoStream = new CryptoStream(memoryStream, symmetricAlgorithm.CreateEncryptor(key, rgbIV), CryptoStreamMode.Write);
@@ -179,12 +205,14 @@ namespace Dapplo.Config.Ini {
 		/// </summary>
 		/// <param name="encryptedText">a base64 encoded encrypted string</param>
 		/// <returns>Decrypeted text</returns>
-		private static string Decrypt(string encryptedText) {
+		private static string Decrypt(string encryptedText)
+		{
 			string returnValue = encryptedText;
 			byte[] encryptedTextBytes = Convert.FromBase64String(encryptedText);
 
 			using (SymmetricAlgorithm symmetricAlgorithm = SymmetricAlgorithm.Create(Algorithm))
-			using (MemoryStream memoryStream = new MemoryStream()) {
+			using (MemoryStream memoryStream = new MemoryStream())
+			{
 
 				byte[] rgbIV = Encoding.ASCII.GetBytes(RgbIv);
 				byte[] key = Encoding.ASCII.GetBytes(RgbKey);

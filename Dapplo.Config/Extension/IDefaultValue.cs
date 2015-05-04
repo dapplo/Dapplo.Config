@@ -22,11 +22,13 @@
 using System;
 using System.Linq.Expressions;
 
-namespace Dapplo.Config.Extension {
+namespace Dapplo.Config.Extension
+{
 	/// <summary>
 	/// Extend your property interface with this, and all default values specified with the DefaultValueAttribute will be applied
 	/// </summary>
-	public interface IDefaultValue {
+	public interface IDefaultValue
+	{
 		/// <summary>
 		/// Return the default value of the property
 		/// </summary>
@@ -44,7 +46,8 @@ namespace Dapplo.Config.Extension {
 	/// <summary>
 	/// Extend your property interface with this, and all default values specified with the DefaultValueAttribute will be applied
 	/// </summary>
-	public interface IDefaultValue<T> : IDefaultValue {
+	public interface IDefaultValue<T> : IDefaultValue
+	{
 		/// <summary>
 		/// Return the default value of the property
 		/// </summary>

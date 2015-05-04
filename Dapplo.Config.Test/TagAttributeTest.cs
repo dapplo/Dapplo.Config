@@ -22,8 +22,10 @@
 using Dapplo.Config.Test.TestInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Dapplo.Config.Test {
-	public enum TestTags {
+namespace Dapplo.Config.Test
+{
+	public enum TestTags
+	{
 		Tag1,
 		Expert,
 		Tag2
@@ -33,16 +35,19 @@ namespace Dapplo.Config.Test {
 	/// This test class shows how the expert attribute can be used
 	/// </summary>
 	[TestClass]
-	public class TagAttributeTest {
+	public class TagAttributeTest
+	{
 		private IPropertyProxy<ITagAttributeTest> _propertyProxy;
 
 		[TestInitialize]
-		public void Initialize() {
+		public void Initialize()
+		{
 			_propertyProxy = ProxyBuilder.CreateProxy<ITagAttributeTest>();
 		}
 
 		[TestMethod]
-		public void TestTagging() {
+		public void TestTagging()
+		{
 			var properties = _propertyProxy.PropertyObject;
 			Assert.IsFalse(properties.IsTaggedWith(x => x.Name, "Expert"));
 			Assert.IsFalse(properties.IsTaggedWith("Name", "Expert"));

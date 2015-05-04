@@ -24,32 +24,38 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.Serialization;
 
-namespace Dapplo.Config.Test.TestInterfaces {
+namespace Dapplo.Config.Test.TestInterfaces
+{
 	/// <summary>
 	/// This is the interface under test
 	/// </summary>
 	[IniSection("Test")]
 	[Description("Test Configuration")]
-	public interface IIniTest : IIniSection {
+	public interface IIniTest : IIniSection
+	{
 		[Description("Name of the person")]
-		string Name {
+		string Name
+		{
 			get;
 			set;
 		}
-		[DefaultValue(21), DataMember(EmitDefaultValue=true)]
-		long Age {
+		[DefaultValue(21), DataMember(EmitDefaultValue = true)]
+		long Age
+		{
 			get;
 			set;
 		}
 
 		[TypeConverter(typeof(StringEncryptionTypeConverter))]
-		string FirstName {
+		string FirstName
+		{
 			get;
 			set;
 		}
 
 		[DefaultValue("5,3,2,1,1"), TypeConverter(typeof(StringToGenericListConverter<int>))]
-		IList<int> WindowCornerCutShape {
+		IList<int> WindowCornerCutShape
+		{
 			get;
 			set;
 		}

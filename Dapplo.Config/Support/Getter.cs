@@ -21,12 +21,15 @@
 
 using System;
 
-namespace Dapplo.Config.Support {
+namespace Dapplo.Config.Support
+{
 	/// <summary>
 	///     Container class to store the getters, this allows them to be ordered.
 	/// </summary>
-	internal class Getter : GetterSetter {
-		public Action<GetInfo> GetterAction {
+	internal class Getter : GetterSetter
+	{
+		public Action<GetInfo> GetterAction
+		{
 			get;
 			set;
 		}

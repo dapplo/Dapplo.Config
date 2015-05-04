@@ -21,18 +21,22 @@
 
 using System;
 
-namespace Dapplo.Config {
+namespace Dapplo.Config
+{
 	/// <summary>
 	///     Use this attribute to mark the extension with the interface that is supports.
 	///     If the proxied interface extends such an interface, the extension is automatically loaded.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-	public class ExtensionAttribute : Attribute {
-		public ExtensionAttribute(Type implementing) {
+	public class ExtensionAttribute : Attribute
+	{
+		public ExtensionAttribute(Type implementing)
+		{
 			Implementing = implementing;
 		}
 
-		public Type Implementing {
+		public Type Implementing
+		{
 			get;
 			set;
 		}

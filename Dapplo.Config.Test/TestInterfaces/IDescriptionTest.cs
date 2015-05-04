@@ -22,13 +22,16 @@
 using Dapplo.Config.Extension;
 using System.ComponentModel;
 
-namespace Dapplo.Config.Test.TestInterfaces {
+namespace Dapplo.Config.Test.TestInterfaces
+{
 	/// <summary>
 	/// This is the interface under test
 	/// </summary>
-	interface IDescriptionTest : IDescription<IDescriptionTest> {
+	interface IDescriptionTest : IDescription<IDescriptionTest>
+	{
 		[Description(DescriptionTest.TestDescription)]
-		string Name {
+		string Name
+		{
 			get;
 			set;
 		}

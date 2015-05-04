@@ -25,11 +25,13 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Dapplo.Config.Ini {
+namespace Dapplo.Config.Ini
+{
 	/// <summary>
 	/// Functionality to read a .ini file
 	/// </summary>
-	internal static class IniReader {
+	internal static class IniReader
+	{
 		private const string SectionStart = "[";
 		private const string SectionEnd = "]";
 		private const string Comment = ";";
@@ -42,8 +44,10 @@ namespace Dapplo.Config.Ini {
 		/// <param name="encoding">Encoding</param>
 		/// <param name="token">CancellationToken</param>
 		/// <returns>dictionary of sections - dictionaries with the properties</returns>
-		public static async Task<Dictionary<string, Dictionary<string, string>>> ReadAsync(string path, Encoding encoding, CancellationToken token = default(CancellationToken)) {
-			using (FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 1024)) {
+		public static async Task<Dictionary<string, Dictionary<string, string>>> ReadAsync(string path, Encoding encoding, CancellationToken token = default(CancellationToken))
+		{
+			using (FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 1024))
+			{
 				return await ReadAsync(fileStream, encoding, token);
 			}
 		}
@@ -55,31 +59,41 @@ namespace Dapplo.Config.Ini {
 		/// <param name="encoding">Encoding</param>
 		/// <param name="token">CancellationToken</param>
 		/// <returns>dictionary of sections - dictionaries with the properties</returns>
-		public static async Task<Dictionary<string, Dictionary<string, string>>> ReadAsync(Stream stream, Encoding encoding, CancellationToken token = default(CancellationToken)) {
+		public static async Task<Dictionary<string, Dictionary<string, string>>> ReadAsync(Stream stream, Encoding encoding, CancellationToken token = default(CancellationToken))
+		{
 			Dictionary<string, Dictionary<string, string>> ini = new Dictionary<string, Dictionary<string, string>>();
 
 			// Do not dispose the reader, this will close the supplied stream and that is not our job!
 			var reader = new StreamReader(stream, encoding);
 			Dictionary<string, string> nameValues = new Dictionary<string, string>();
-			while (!reader.EndOfStream && !token.IsCancellationRequested) {
+			while (!reader.EndOfStream && !token.IsCancellationRequested)
+			{
 				string line = await reader.ReadLineAsync();
-				if (line != null) {
+				if (line != null)
+				{
 					string cleanLine = line.Trim();
-					if (cleanLine.Length == 0 || cleanLine.StartsWith(Comment)) {
+					if (cleanLine.Length == 0 || cleanLine.StartsWith(Comment))
+					{
 						continue;
 					}
-					if (cleanLine.StartsWith(SectionStart)) {
+					if (cleanLine.StartsWith(SectionStart))
+					{
 						string section = line.Replace(SectionStart, "").Replace(SectionEnd, "").Trim();
 						nameValues = new Dictionary<string, string>();
 						ini.Add(section, nameValues);
-					} else {
+					}
+					else
+					{
 						string[] keyvalueSplitter = line.Split(Assignment, 2);
 						string name = keyvalueSplitter[0];
 						string inivalue = keyvalueSplitter.Length > 1 ? keyvalueSplitter[1] : null;
 						inivalue = ConvertSpecialCharacters(inivalue);
-						if (nameValues.ContainsKey(name)) {
+						if (nameValues.ContainsKey(name))
+						{
 							nameValues[name] = inivalue;
-						} else {
+						}
+						else
+						{
 							nameValues.Add(name, inivalue);
 						}
 					}
@@ -93,8 +107,10 @@ namespace Dapplo.Config.Ini {
 		/// </summary>
 		/// <param name="iniValue">string</param>
 		/// <returns>string</returns>
-		private static string ConvertSpecialCharacters(string iniValue) {
-			if (!string.IsNullOrEmpty(iniValue)) {
+		private static string ConvertSpecialCharacters(string iniValue)
+		{
+			if (!string.IsNullOrEmpty(iniValue))
+			{
 				iniValue = iniValue.Replace("\\n", "\n");
 			}
 			return iniValue;

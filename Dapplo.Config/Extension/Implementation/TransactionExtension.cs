@@ -22,20 +22,23 @@
 using System.Collections.Generic;
 using Dapplo.Config.Support;
 
-namespace Dapplo.Config.Extension.Implementation {
+namespace Dapplo.Config.Extension.Implementation
+{
 	/// <summary>
 	///     This implements logic to add transactional support to your proxied interface.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	[Extension(typeof (ITransactionalProperties))]
-	internal class TransactionExtension<T> : AbstractPropertyProxyExtension<T> {
+	[Extension(typeof(ITransactionalProperties))]
+	internal class TransactionExtension<T> : AbstractPropertyProxyExtension<T>
+	{
 		// A store for the values that are set during the transaction
 		private readonly IDictionary<string, object> _transactionProperties = new Dictionary<string, object>();
 		// This boolean has the value true if we are currently in a transaction
 		private bool _inTransaction;
 
-		public TransactionExtension(IPropertyProxy<T> proxy) : base(proxy) {
-			CheckType(typeof (ITransactionalProperties));
+		public TransactionExtension(IPropertyProxy<T> proxy) : base(proxy)
+		{
+			CheckType(typeof(ITransactionalProperties));
 			proxy.RegisterSetter((int)CallOrder.First, TransactionalSetter);
 			proxy.RegisterGetter((int)CallOrder.First, TransactionalGetter);
 
@@ -50,14 +53,19 @@ namespace Dapplo.Config.Extension.Implementation {
 		///     This is the implementation of the set logic
 		/// </summary>
 		/// <param name="setInfo">SetInfo with all the information on the set call</param>
-		private void TransactionalSetter(SetInfo setInfo) {
-			if (_inTransaction) {
+		private void TransactionalSetter(SetInfo setInfo)
+		{
+			if (_inTransaction)
+			{
 				object oldValue;
-				if (_transactionProperties.TryGetValue(setInfo.PropertyName, out oldValue)) {
+				if (_transactionProperties.TryGetValue(setInfo.PropertyName, out oldValue))
+				{
 					_transactionProperties[setInfo.PropertyName] = setInfo.NewValue;
 					setInfo.OldValue = oldValue;
 					setInfo.HasOldValue = true;
-				} else {
+				}
+				else
+				{
 					_transactionProperties.Add(setInfo.PropertyName, setInfo.NewValue);
 					setInfo.OldValue = null;
 					setInfo.HasOldValue = false;
@@ -71,11 +79,14 @@ namespace Dapplo.Config.Extension.Implementation {
 		///     This is the implementation of the getter logic for a transactional proxy
 		/// </summary>
 		/// <param name="getInfo">GetInfo with all the information on the get call</param>
-		private void TransactionalGetter(GetInfo getInfo) {
-			if (_inTransaction) {
+		private void TransactionalGetter(GetInfo getInfo)
+		{
+			if (_inTransaction)
+			{
 				// Get the value from the dictionary
 				object value;
-				if (_transactionProperties.TryGetValue(getInfo.PropertyName, out value)) {
+				if (_transactionProperties.TryGetValue(getInfo.PropertyName, out value))
+				{
 					getInfo.Value = value;
 					getInfo.CanContinue = false;
 				}
@@ -86,7 +97,8 @@ namespace Dapplo.Config.Extension.Implementation {
 		///     This returns true if we have set (changed) values during a transaction
 		/// </summary>
 		/// <param name="methodCallInfo">MethodCallInfo</param>
-		private void IsTransactionDirty(MethodCallInfo methodCallInfo) {
+		private void IsTransactionDirty(MethodCallInfo methodCallInfo)
+		{
 			methodCallInfo.ReturnValue = _inTransaction && _transactionProperties.Count > 0;
 		}
 
@@ -94,7 +106,8 @@ namespace Dapplo.Config.Extension.Implementation {
 		///     Logic to start the transaction, any setter used after this will be in the transaction
 		/// </summary>
 		/// <param name="methodCallInfo">MethodCallInfo</param>
-		private void StartTransaction(MethodCallInfo methodCallInfo) {
+		private void StartTransaction(MethodCallInfo methodCallInfo)
+		{
 			_inTransaction = true;
 		}
 
@@ -102,8 +115,10 @@ namespace Dapplo.Config.Extension.Implementation {
 		///     Logic to rollback the transaction, all values set (changed) after starting the transaction will be cleared
 		/// </summary>
 		/// <param name="methodCallInfo">MethodCallInfo</param>
-		private void RollbackTransaction(MethodCallInfo methodCallInfo) {
-			if (_inTransaction) {
+		private void RollbackTransaction(MethodCallInfo methodCallInfo)
+		{
+			if (_inTransaction)
+			{
 				_transactionProperties.Clear();
 				_inTransaction = false;
 			}
@@ -115,8 +130,10 @@ namespace Dapplo.Config.Extension.Implementation {
 		///     property store
 		/// </summary>
 		/// <param name="methodCallInfo">MethodCallInfo</param>
-		private void CommitTransaction(MethodCallInfo methodCallInfo) {
-			if (_inTransaction) {
+		private void CommitTransaction(MethodCallInfo methodCallInfo)
+		{
+			if (_inTransaction)
+			{
 				Proxy.Properties = _transactionProperties;
 				_transactionProperties.Clear();
 				_inTransaction = false;

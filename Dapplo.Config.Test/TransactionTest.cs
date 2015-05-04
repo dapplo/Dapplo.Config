@@ -22,21 +22,25 @@
 using Dapplo.Config.Test.TestInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Dapplo.Config.Test {
+namespace Dapplo.Config.Test
+{
 	/// <summary>
 	/// This test class tests the transactional capabilities of the proxy
 	/// </summary>
 	[TestClass]
-	public class TransactionTest {
+	public class TransactionTest
+	{
 		private IPropertyProxy<ITransactionTest> _propertyProxy;
 
 		[TestInitialize]
-		public void Initialize() {
+		public void Initialize()
+		{
 			_propertyProxy = ProxyBuilder.CreateProxy<ITransactionTest>();
 		}
 
 		[TestMethod]
-		public void TestTransactionCommit() {
+		public void TestTransactionCommit()
+		{
 			var properties = _propertyProxy.PropertyObject;
 			properties.Age = 30;
 			properties.StartTransaction();
@@ -50,7 +54,8 @@ namespace Dapplo.Config.Test {
 		}
 
 		[TestMethod]
-		public void TestTransactionRollback() {
+		public void TestTransactionRollback()
+		{
 			var properties = _propertyProxy.PropertyObject;
 			properties.Age = 30;
 			properties.StartTransaction();

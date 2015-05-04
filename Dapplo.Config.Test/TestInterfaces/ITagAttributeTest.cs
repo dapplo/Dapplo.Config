@@ -21,23 +21,29 @@
 
 using Dapplo.Config.Extension;
 
-namespace Dapplo.Config.Test.TestInterfaces {
+namespace Dapplo.Config.Test.TestInterfaces
+{
 	/// <summary>
 	/// This is the interface under test
 	/// </summary>
-	public interface ITagAttributeTest : ITagging<ITagAttributeTest> {
-		string Name {
+	public interface ITagAttributeTest : ITagging<ITagAttributeTest>
+	{
+		string Name
+		{
 			get;
 			set;
 		}
+
 		[Tag("Expert")]
-		int Age {
+		int Age
+		{
 			get;
 			set;
 		}
 
 		[Tag(TestTags.Tag2), Tag(TestTags.Tag1)]
-		string FirstName {
+		string FirstName
+		{
 			get;
 			set;
 		}

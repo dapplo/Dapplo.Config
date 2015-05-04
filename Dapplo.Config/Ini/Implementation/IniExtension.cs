@@ -25,14 +25,17 @@ using Dapplo.Config.Support;
 using System.ComponentModel;
 using Dapplo.Config.Extension.Implementation;
 
-namespace Dapplo.Config.Ini.Implementation {
+namespace Dapplo.Config.Ini.Implementation
+{
 	/// <summary>
 	/// Extend the PropertyProxy with Ini functionality
 	/// </summary>
 	[Extension(typeof(IIniSection))]
-	internal class IniExtension<T> : AbstractPropertyProxyExtension<T> {
+	internal class IniExtension<T> : AbstractPropertyProxyExtension<T>
+	{
 
-		public IniExtension(IPropertyProxy<T> proxy) : base(proxy) {
+		public IniExtension(IPropertyProxy<T> proxy) : base(proxy)
+		{
 			CheckType(typeof(IIniSection));
 
 			//_proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection>(x => x.IniValueFor<T>(y => default(T))), IniValueFor);
@@ -44,11 +47,15 @@ namespace Dapplo.Config.Ini.Implementation {
 		/// <summary>
 		/// Supply the iniSection name
 		/// </summary>
-		private void GetSectionName(MethodCallInfo methodCallInfo) {
+		private void GetSectionName(MethodCallInfo methodCallInfo)
+		{
 			var iniSectionAttribute = typeof(T).GetCustomAttribute<IniSectionAttribute>();
-			if (iniSectionAttribute != null && !string.IsNullOrEmpty(iniSectionAttribute.Name)) {
+			if (iniSectionAttribute != null && !string.IsNullOrEmpty(iniSectionAttribute.Name))
+			{
 				methodCallInfo.ReturnValue = iniSectionAttribute.Name;
-			} else {
+			}
+			else
+			{
 				methodCallInfo.ReturnValue = typeof(T).Name;
 			}
 		}
@@ -56,9 +63,11 @@ namespace Dapplo.Config.Ini.Implementation {
 		/// <summary>
 		/// Supply the GetSectionDescription
 		/// </summary>
-		private void GetDescription(MethodCallInfo methodCallInfo) {
+		private void GetDescription(MethodCallInfo methodCallInfo)
+		{
 			var descriptionAttribute = typeof(T).GetCustomAttribute<DescriptionAttribute>();
-			if (descriptionAttribute != null && !string.IsNullOrEmpty(descriptionAttribute.Description)) {
+			if (descriptionAttribute != null && !string.IsNullOrEmpty(descriptionAttribute.Description))
+			{
 				methodCallInfo.ReturnValue = descriptionAttribute.Description;
 			}
 		}
@@ -66,7 +75,8 @@ namespace Dapplo.Config.Ini.Implementation {
 		/// <summary>
 		/// Get all the ini values, these are generated and not cached!
 		/// </summary>
-		private void GetIniValues(MethodCallInfo methodCallInfo) {
+		private void GetIniValues(MethodCallInfo methodCallInfo)
+		{
 			// return a linq which loops over all the properties and generates GetIniValues
 			methodCallInfo.ReturnValue = from propertyInfo in typeof(T).GetProperties()
 										 select GenerateIniValue(propertyInfo);
@@ -77,22 +87,24 @@ namespace Dapplo.Config.Ini.Implementation {
 		/// </summary>
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>IniValue</returns>
-		private IniValue GenerateIniValue(PropertyInfo propertyInfo) {
+		private IniValue GenerateIniValue(PropertyInfo propertyInfo)
+		{
 			var newIniValue = new IniValue(Proxy.Properties);
 			newIniValue.PropertyName = propertyInfo.Name;
 			newIniValue.ValueType = propertyInfo.PropertyType;
 
 			newIniValue.IniPropertyName = propertyInfo.GetDataMemberName();
-			if (string.IsNullOrEmpty(newIniValue.IniPropertyName)) {
+			if (string.IsNullOrEmpty(newIniValue.IniPropertyName))
+			{
 				newIniValue.IniPropertyName = newIniValue.PropertyName;
 			}
 			newIniValue.EmitDefaultValue = propertyInfo.GetEmitDefaultValue();
 			newIniValue.Description = propertyInfo.GetDescription();
 			newIniValue.Converter = propertyInfo.GetTypeConverter();
-			newIniValue.DefaultValue = propertyInfo.GetDefaultValue();
 			newIniValue.IsReadOnly = propertyInfo.GetReadOnly();
 			newIniValue.Category = propertyInfo.GetCategory();
 
+			newIniValue.DefaultValue = propertyInfo.GetDefaultValue();
 			return newIniValue;
 		}
 	}
