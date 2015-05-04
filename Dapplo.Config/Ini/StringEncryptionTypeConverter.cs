@@ -20,6 +20,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Security.Cryptography;
@@ -60,17 +61,29 @@ namespace Dapplo.Config.Ini {
 			}
 		}
 
+		private static IList<int> ValidKeySizes() {
+			IList<int> validSizes = new List<int>();
+			using (SymmetricAlgorithm symmetricAlgorithm = SymmetricAlgorithm.Create(Algorithm)) {
+				foreach (var keySize in symmetricAlgorithm.LegalKeySizes) {
+					for (int valueSize = keySize.MinSize; valueSize <= keySize.MaxSize; valueSize += keySize.SkipSize) {
+						validSizes.Add(valueSize);
+					}
+				}
+			}
+			return validSizes;
+		}
+
+		/// <summary>
+		/// The constructor validates all settings
+		/// </summary>
 		public StringEncryptionTypeConverter() {
 			if (RgbKey == null || RgbIv == null) {
 				throw new InvalidOperationException("Please make sure the StringEncryptionTypeConverter.RgbKey & RgbIv are set!");
 			}
-			using (SymmetricAlgorithm symmetricAlgorithm = SymmetricAlgorithm.Create(Algorithm)) {
-				foreach (var keySize in symmetricAlgorithm.LegalKeySizes) {
-					var currentKeySize = RgbKey.Length * 8;
-					if (currentKeySize > keySize.MaxSize || currentKeySize < keySize.MinSize) {
-						throw new InvalidOperationException(string.Format("StringEncryptionTypeConverter.RgbKey is invalid, min size (in bits): {0}, max size (in bits): {1}!", keySize.MinSize, keySize.MaxSize));
-					}
-				}
+			var currentKeySize = RgbKey.Length * 8;
+			var validKeySizes = ValidKeySizes();
+			if (!validKeySizes.Contains(currentKeySize)) {
+				throw new InvalidOperationException(string.Format("Bit-Length of StringEncryptionTypeConverter.RgbKey {0} is invalid, valid bit sizes are: {1}", currentKeySize, string.Join(",", validKeySizes)));
 			}
 		}
 
