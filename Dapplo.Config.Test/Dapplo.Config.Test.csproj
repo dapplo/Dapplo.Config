@@ -72,6 +72,7 @@
     <Compile Include="DefaultValueTest.cs" />
     <Compile Include="TransactionTest.cs" />
     <Compile Include="IniTest.cs" />
+    <Compile Include="TypeConverterTest.cs" />
     <Compile Include="WriteProtectTest.cs" />
   </ItemGroup>
   <ItemGroup>

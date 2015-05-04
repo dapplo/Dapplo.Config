@@ -44,9 +44,17 @@ namespace Dapplo.Config.Extension.Implementation {
 		/// </summary>
 		/// <param name="propertyInfo"></param>
 		public override void InitProperty(PropertyInfo propertyInfo) {
-			var defaultValueAttribute = propertyInfo.GetCustomAttribute<DefaultValueAttribute>();
-			if (defaultValueAttribute != null) {
-				Proxy.Properties[propertyInfo.Name] = defaultValueAttribute.Value;
+
+			var defaultValue = propertyInfo.GetDefaultValue();
+			if (defaultValue != null) {
+				TypeConverter typeConverter = propertyInfo.GetTypeConverter();
+				if (typeConverter != null && typeConverter.CanConvertFrom(defaultValue.GetType())) {
+					// Convert
+					Proxy.Properties[propertyInfo.Name] = typeConverter.ConvertFrom(defaultValue);
+				} else {
+					// No conversion
+					Proxy.Properties[propertyInfo.Name] = defaultValue;
+				}
 			}
 		}
 

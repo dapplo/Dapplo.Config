@@ -21,6 +21,8 @@
 
 using System.ComponentModel;
 using Dapplo.Config.Extension;
+using System.Collections.Generic;
+using Dapplo.Config.Ini;
 
 namespace Dapplo.Config.Test.TestInterfaces {
 	/// <summary>
@@ -29,6 +31,12 @@ namespace Dapplo.Config.Test.TestInterfaces {
 	public interface IDefaultValueTest : IDefaultValue<IDefaultValueTest> {
 		[DefaultValue(21)]
 		int Age {
+			get;
+			set;
+		}
+
+		[DefaultValue("10,20,30"), TypeConverter(typeof(StringToGenericListConverter<int>))]
+		IList<int> Ages {
 			get;
 			set;
 		}

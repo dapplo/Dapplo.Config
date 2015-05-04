@@ -47,11 +47,10 @@ namespace Dapplo.Config.Test.TestInterfaces {
 			set;
 		}
 
-		[DefaultValue("5,3,2,1,1"), TypeConverter(typeof(GenericListTypeConverter<int>))]
-		List<int> WindowCornerCutShape {
+		[DefaultValue("5,3,2,1,1"), TypeConverter(typeof(StringToGenericListConverter<int>))]
+		IList<int> WindowCornerCutShape {
 			get;
 			set;
 		}
-
 	}
 }

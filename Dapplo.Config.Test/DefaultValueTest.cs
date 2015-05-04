@@ -40,6 +40,7 @@ namespace Dapplo.Config.Test {
 		public void TestDefaultValue() {
 			IDefaultValueTest properties = _propertyProxy.PropertyObject;
 			Assert.AreEqual(properties.Age, 21);
+			Assert.AreEqual(3, properties.Ages.Count);
 		}
 
 		[TestMethod]

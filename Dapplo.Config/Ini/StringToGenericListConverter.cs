@@ -27,52 +27,67 @@ using System.Linq;
 namespace Dapplo.Config.Ini {
 	/// <summary>
 	/// This TypeConverter should be used to convert a comma separated string to a List of type T.
-	/// Use the TypeConverterAttribute with GenericListTypeConverter where T is your type (not list of type)
+	/// Use the TypeConverterAttribute with StringToGenericListConverter where T is your type (not list of type)
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public class GenericListTypeConverter<T> : TypeConverter {
+	public class StringToGenericListConverter<T> : TypeConverter {
 		protected readonly TypeConverter _typeConverter;
 
-		public GenericListTypeConverter() {
+		public StringToGenericListConverter() {
 			_typeConverter = TypeDescriptor.GetConverter(typeof(T));
 			if (_typeConverter == null) {
 				throw new InvalidOperationException("No type converter exists for type " + typeof(T).FullName);
 			}
 		}
 
-		protected string[] GetStringArray(string input) {
-			string[] result = input.Split(',');
-			Array.ForEach(result, s => s.Trim());
-			return result;
-		}
-
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) {
 			if (sourceType == typeof(string)) {
-				string[] items = GetStringArray(sourceType.ToString());
-				return (items.Count() > 0);
+				return true;
 			}
 
 			return base.CanConvertFrom(context, sourceType);
 		}
 
+		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType) {
+			if (destinationType == typeof(List<T>)) {
+				return true;
+			}
+			if (destinationType == typeof(IList<T>)) {
+				return true;
+			}
+			if (destinationType == typeof(string)) {
+				return true;
+			}
+
+			return base.CanConvertFrom(context, destinationType);
+		}
+
+		/// <summary>
+		/// This type converter can convert from a string to a list "T"
+		/// </summary>
+		/// <param name="context"></param>
+		/// <param name="culture"></param>
+		/// <param name="value"></param>
+		/// <returns>Converted value</returns>
 		public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value) {
 			if (value is string) {
-				string[] items = GetStringArray((string)value);
-
-				List<T> result = new List<T>();
-				Array.ForEach(items, s => {
-					object item = _typeConverter.ConvertFromInvariantString(s);
-					if (item != null) {
-						result.Add((T)item);
-					}
-				});
-
-				return result;
+				// Split, and where all element are not null or empty, convert the item to T and add the items to a list<T>
+				return (from item in ((string)value).Split(',')
+						where !string.IsNullOrWhiteSpace(item)
+						select  (T)_typeConverter.ConvertFromInvariantString(item.Trim())).ToList<T>();
 			}
 
 			return base.ConvertFrom(context, culture, value);
 		}
 
+		/// <summary>
+		/// Normally the convert to is only called if the value needs to be converted to a specific type.
+		/// </summary>
+		/// <param name="context"></param>
+		/// <param name="culture"></param>
+		/// <param name="value"></param>
+		/// <param name="destinationType"></param>
+		/// <returns></returns>
 		public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType) {
 			if (destinationType == typeof(string)) {
 				return string.Join(",", ((IList<T>)value));

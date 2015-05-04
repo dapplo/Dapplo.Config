@@ -103,7 +103,7 @@ namespace Dapplo.Config.Ini {
 		/// Initialize the IniConfig by reading all the properties from the file and setting them on the IniSections
 		/// </summary>
 		/// <returns>Task with bool indicating if the ini file was read</returns>
-		public async Task<bool> Init() {
+		public async Task<bool> InitFromFile() {
 			if (string.IsNullOrEmpty(_filename)) {
 				throw new ArgumentNullException("_filename");
 			}
@@ -118,7 +118,7 @@ namespace Dapplo.Config.Ini {
 		/// Initialize the IniConfig by reading all the properties from the file and setting them on the IniSections
 		/// </summary>
 		/// <returns>Task with bool indicating if the ini file was read</returns>
-		public async Task<bool> Init(Stream stream) {
+		public async Task<bool> InitFromStream(Stream stream) {
 			var properties = await IniReader.ReadAsync(stream, Encoding.UTF8);
 			return FillSections(properties);
 		}

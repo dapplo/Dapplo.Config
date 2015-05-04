@@ -44,7 +44,8 @@ namespace Dapplo.Config.Test {
 			var iniTest = _propertyProxy.PropertyObject;
 			iniConfig.AddSection(iniTest);
 			using (var testMemoryStream = new MemoryStream()) {
-				await iniConfig.Init(testMemoryStream);
+				await iniConfig.InitFromStream(testMemoryStream);
+				Assert.IsTrue(iniTest.WindowCornerCutShape.Count > 0);
 			}
 		}
 
@@ -63,7 +64,7 @@ namespace Dapplo.Config.Test {
 
 				// Test reading
 				writeStream.Seek(0, SeekOrigin.Begin);
-				var isFileRead = await iniConfig.Init(writeStream);
+				var isFileRead = await iniConfig.InitFromStream(writeStream);
 				if (isFileRead) {
 					Assert.AreEqual(Name, iniTest.Name);
 					Assert.AreEqual(ticks, iniTest.Age);
