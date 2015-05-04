@@ -30,10 +30,17 @@ namespace Dapplo.Config.Test {
 	[TestClass]
 	public class IniTest {
 		private IPropertyProxy<IIniTest> _propertyProxy;
-		private const string Name = "Robin";
+		private const string Name = "Dapplo";
+		private const string FirstName = "Robin";
+
+		[ClassInitialize]
+		public static void InitializeClass(TestContext textContext) {
+			StringEncryptionTypeConverter.RgbIv = "fjr84hF49gp3911fFFg";
+			StringEncryptionTypeConverter.RgbKey = "ljew3lJfrS0rlddlfeelOekfekcvbAwE";
+		}
 
 		[TestInitialize]
-		public void Initialize() {
+		public void InitializeEveryTest() {
 			_propertyProxy = ProxyBuilder.CreateProxy<IIniTest>();
 		}
 
@@ -56,6 +63,7 @@ namespace Dapplo.Config.Test {
 			var iniTest = _propertyProxy.PropertyObject;
 			iniConfig.AddSection(iniTest);
 			iniTest.Name = Name;
+			iniTest.FirstName = FirstName;
 			long ticks = DateTimeOffset.Now.UtcTicks;
 			iniTest.Age = ticks;
 			using (var writeStream = new MemoryStream()) {
@@ -67,6 +75,7 @@ namespace Dapplo.Config.Test {
 				var isFileRead = await iniConfig.InitFromStream(writeStream);
 				if (isFileRead) {
 					Assert.AreEqual(Name, iniTest.Name);
+					Assert.AreEqual(FirstName, iniTest.FirstName);
 					Assert.AreEqual(ticks, iniTest.Age);
 				}
 			}

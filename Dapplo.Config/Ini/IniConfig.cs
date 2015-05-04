@@ -93,7 +93,8 @@ namespace Dapplo.Config.Ini {
 					if (converter == null) {
 						converter = TypeDescriptor.GetConverter(iniValue.ValueType);
 					}
-					await writer.WriteLineAsync(string.Format("{0}={1}", iniValue.IniPropertyName, converter.ConvertToInvariantString(iniValue.Value)));
+					var writingValue = converter.ConvertToInvariantString(iniValue.Value);
+					await writer.WriteLineAsync(string.Format("{0}={1}", iniValue.IniPropertyName, writingValue));
 				}
 			}
 			writer.Flush();
@@ -155,15 +156,17 @@ namespace Dapplo.Config.Ini {
 
 					Type sourceType = typeof(string);
 					Type destinationType = iniValue.ValueType;
-					if (destinationType != sourceType) {
-						var converter = TypeDescriptor.GetConverter(destinationType);
-						if (converter.CanConvertFrom(typeof(string))) {
-							iniValue.Value = converter.ConvertFrom(stringValue);
-						} else if (iniValue.Converter != null && iniValue.Converter.CanConvertFrom(sourceType)) {
+					if (destinationType != sourceType || iniValue.Converter != null) {
+						if (iniValue.Converter != null && iniValue.Converter.CanConvertFrom(sourceType)) {
 							iniValue.Value = iniValue.Converter.ConvertFrom(stringValue);
 						} else {
-							// No converter, just set it and hope it can be cast
-							iniValue.Value = stringValue;
+							var converter = TypeDescriptor.GetConverter(destinationType);
+							if (converter.CanConvertFrom(typeof(string))) {
+								iniValue.Value = converter.ConvertFrom(stringValue);
+							} else {
+								// No converter, just set it and hope it can be cast
+								iniValue.Value = stringValue;
+							}
 						}
 					} else {
 						iniValue.Value = stringValue;

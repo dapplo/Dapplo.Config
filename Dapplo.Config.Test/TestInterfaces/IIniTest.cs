@@ -42,6 +42,7 @@ namespace Dapplo.Config.Test.TestInterfaces {
 			set;
 		}
 
+		[TypeConverter(typeof(StringEncryptionTypeConverter))]
 		string FirstName {
 			get;
 			set;
