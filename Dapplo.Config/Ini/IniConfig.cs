@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -34,27 +35,139 @@ namespace Dapplo.Config.Ini
 	/// </summary>
 	public class IniConfig
 	{
+		private readonly string _fileName;
+		private readonly string _applicationName;
+		private const string Defaults = "-defaults";
+		private const string Constants = "-constants";
+		private const string IniExtension = "ini";
 		private readonly IDictionary<string, IIniSection> _sections = new Dictionary<string, IIniSection>();
 
 		/// <summary>
-		/// Add an ini section to this IniConfig
+		/// Setup the management of an .ini file location
 		/// </summary>
-		/// <param name="section"></param>
-		public void AddSection(IIniSection section)
+		/// <param name="applicationName"></param>
+		/// <param name="fileName"></param>
+		public IniConfig(string applicationName, string fileName)
 		{
+			_applicationName = applicationName;
+			_fileName = fileName;
+		}
+
+		/// <summary>
+		/// Register a Property Interface to this ini config, this method will return the property object 
+		/// </summary>
+		/// <typeparam name="T">Your property interface, which extends IIniSection</typeparam>
+		/// <returns>instance of type T</returns>
+		public T RegisterAndGet<T>() where T : IIniSection
+		{
+			var _propertyProxy = ProxyBuilder.GetOrCreateProxy<T>();
+			var section = _propertyProxy.PropertyObject;
 			var sectionName = section.GetSectionName();
 			if (!_sections.ContainsKey(sectionName))
 			{
 				_sections.Add(sectionName, section);
 			}
+			return section;
 		}
 
 		/// <summary>
-		/// Add an ini section to this IniConfig by specifying the proxy
+		/// Return the location of the ini file
 		/// </summary>
-		/// <param name="section"></param>
-		public void AddSection<T>(IPropertyProxy<T> sectionProxy) where T: IIniSection {
-			AddSection(sectionProxy.PropertyObject);
+		/// <param name="fixedDirectory"></param>
+		/// <returns>string with full path to the ini file</returns>
+		public string IniFileLocation(string fixedDirectory = null)
+		{
+			string iniFile;
+			if (fixedDirectory != null)
+			{
+				iniFile = Path.Combine(fixedDirectory, string.Format("{0}.{1}", _fileName, IniExtension));
+			}
+			else
+			{
+				iniFile = Path.Combine(AppDataDirectory, string.Format("{0}.{1}", _fileName, IniExtension));
+			}
+			return iniFile;
+		}
+
+		/// <summary>
+		/// Create the reading list for the files
+		/// </summary>
+		/// <param name="fixedDirectory">If you want to read the file(s) from a certain directory specify it here</param>
+		/// <returns>reading list</returns>
+		public string[] FileReadOrder(string fixedDirectory = null)
+		{
+			string defaultsFile;
+			string constantsFile;
+			string iniFile = IniFileLocation(fixedDirectory);
+
+			if (fixedDirectory != null)
+			{
+				defaultsFile = Path.Combine(fixedDirectory, string.Format("{0}{1}.{2}", _fileName, Defaults, IniExtension));
+				constantsFile = Path.Combine(fixedDirectory, string.Format("{0}{1}.{2}", _fileName, Constants, IniExtension));
+			}
+			else
+			{
+				defaultsFile = Path.Combine(StartupDirectory, string.Format("{0}{1}.{2}", _fileName, Defaults, IniExtension));
+				if (!File.Exists(defaultsFile))
+				{
+					defaultsFile = Path.Combine(AppDataDirectory, string.Format("{0}{1}.{2}", _fileName, Defaults, IniExtension));
+				}
+				constantsFile = Path.Combine(StartupDirectory, string.Format("{0}{1}.{2}", _fileName, Constants, IniExtension));
+				if (!File.Exists(constantsFile))
+				{
+					constantsFile = Path.Combine(AppDataDirectory, string.Format("{0}{1}.{2}", _fileName, Constants, IniExtension));
+				}
+			}
+			return new string[] { defaultsFile, iniFile, constantsFile };
+		}
+
+		/// <summary>
+		/// Load the ini files "default", "normal" and fixed
+		/// </summary>
+		/// <param name="config">IniConfig to load</param>
+		/// <param name="fixedDirectory">If you want to read the file(s) from a certain directory specify it here</param>
+		public async Task LoadAsync(string fixedDirectory = null)
+		{
+			foreach (string filename in FileReadOrder(fixedDirectory))
+			{
+				if (filename == null || !File.Exists(filename))
+				{
+					continue;
+				}
+				await ReadFromFileAsync(filename);
+			}
+		}
+
+		/// <summary>
+		/// Write the ini file
+		/// </summary>
+		/// <param name="config">IniConfig to load</param>
+		/// <param name="fixedDirectory">If you want to read the file(s) from a certain directory specify it here</param>
+		public async Task WriteAsync(string fixedDirectory = null)
+		{
+			await WriteToFileAsync(IniFileLocation(fixedDirectory));
+		}
+
+		/// <summary>
+		/// Retrieve the startup directory
+		/// </summary>
+		private string StartupDirectory
+		{
+			get
+			{
+				return Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+			}
+		}
+
+		/// <summary>
+		/// Retrieve the ApplicationData directory
+		/// </summary>
+		private string AppDataDirectory
+		{
+			get
+			{
+				return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), _applicationName);
+			}
 		}
 
 		/// <summary>

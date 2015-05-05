@@ -48,7 +48,6 @@
     <Compile Include="Extension\Implementation\DefaultValueExtension.cs" />
     <Compile Include="Extension\Implementation\WriteProtectExtension.cs" />
     <Compile Include="Extension\Implementation\TransactionExtension.cs" />
-    <Compile Include="Ini\ConfigFilenameManager.cs" />
     <Compile Include="Ini\IniPropertyBehaviorAttribute.cs" />
     <Compile Include="Ini\StringEncryptionTypeConverter.cs" />
     <Compile Include="Ini\StringToGenericListConverter.cs" />

@@ -31,7 +31,6 @@ namespace Dapplo.Config.Test
 	[TestClass]
 	public class IniTest
 	{
-		private IPropertyProxy<IIniTest> _propertyProxy;
 		private const string Name = "Dapplo";
 		private const string FirstName = "Robin";
 		private const string TestValueForNonSerialized = "Hello!";
@@ -43,19 +42,13 @@ namespace Dapplo.Config.Test
 			StringEncryptionTypeConverter.RgbKey = "ljew3lJfrS0rlddlfeelOekfekcvbAwE";
 		}
 
-		[TestInitialize]
-		public void InitializeEveryTest()
-		{
-			_propertyProxy = ProxyBuilder.CreateProxy<IIniTest>();
-		}
-
 		[TestMethod]
 		public async Task TestIniInit()
 		{
-			var iniConfig = new IniConfig();
+			var iniConfig = new IniConfig("Dapplo", "dapplo");
 
-			var iniTest = _propertyProxy.PropertyObject;
-			iniConfig.AddSection(iniTest);
+			var iniTest = iniConfig.RegisterAndGet<IIniTest>();
+
 			using (var testMemoryStream = new MemoryStream())
 			{
 				await iniConfig.ReadFromStreamAsync(testMemoryStream);
@@ -66,11 +59,10 @@ namespace Dapplo.Config.Test
 		[TestMethod]
 		public async Task TestIniWriteRead()
 		{
-			var iniConfig = new IniConfig();
+			var iniConfig = new IniConfig("Dapplo", "dapplo");
 
-			iniConfig.AddSection(_propertyProxy);
+			var iniTest = iniConfig.RegisterAndGet<IIniTest>();
 
-			var iniTest = _propertyProxy.PropertyObject;
 			// Change some values
 			iniTest.Name = Name;
 			iniTest.FirstName = FirstName;
