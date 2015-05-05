@@ -30,7 +30,7 @@ namespace Dapplo.Config.Ini
 	/// <summary>
 	/// Functionality to read a .ini file
 	/// </summary>
-	internal static class IniReader
+	public static class IniReader
 	{
 		private const string SectionStart = "[";
 		private const string SectionEnd = "]";
