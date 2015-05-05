@@ -101,9 +101,8 @@ namespace Dapplo.Config.Ini.Implementation
 			newIniValue.EmitDefaultValue = propertyInfo.GetEmitDefaultValue();
 			newIniValue.Description = propertyInfo.GetDescription();
 			newIniValue.Converter = propertyInfo.GetTypeConverter();
-			newIniValue.IsReadOnly = propertyInfo.GetReadOnly();
 			newIniValue.Category = propertyInfo.GetCategory();
-
+			newIniValue.Behavior = propertyInfo.GetIniPropertyBehavior();
 			newIniValue.DefaultValue = propertyInfo.GetDefaultValue();
 			return newIniValue;
 		}

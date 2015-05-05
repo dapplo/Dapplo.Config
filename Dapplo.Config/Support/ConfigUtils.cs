@@ -19,6 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Dapplo.Config.Ini;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -188,6 +189,19 @@ namespace Dapplo.Config.Support
 				return dataMemberAttribute.EmitDefaultValue;
 			}
 			return false;
+		}
+
+		/// <summary>
+		/// Check if the property is non serialized (annotated with the NonSerializedAttribute)
+		/// </summary>
+		/// <param name="propertyInfo">PropertyInfo</param>
+		/// <returns>true if the NonSerialized attribute is set on the property</returns>
+		public static IniPropertyBehaviorAttribute GetIniPropertyBehavior(this PropertyInfo propertyInfo) {
+			var iniPropertyBehaviorAttribute = propertyInfo.GetCustomAttribute<IniPropertyBehaviorAttribute>();
+			if (iniPropertyBehaviorAttribute == null) {
+				iniPropertyBehaviorAttribute = new IniPropertyBehaviorAttribute();
+			}
+			return iniPropertyBehaviorAttribute;
 		}
 
 		/// <summary>

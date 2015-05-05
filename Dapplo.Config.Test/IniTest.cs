@@ -34,6 +34,7 @@ namespace Dapplo.Config.Test
 		private IPropertyProxy<IIniTest> _propertyProxy;
 		private const string Name = "Dapplo";
 		private const string FirstName = "Robin";
+		private const string TestValueForNonSerialized = "Hello!";
 
 		[ClassInitialize]
 		public static void InitializeClass(TestContext textContext)
@@ -69,13 +70,25 @@ namespace Dapplo.Config.Test
 
 			var iniTest = _propertyProxy.PropertyObject;
 			iniConfig.AddSection(iniTest);
+
+			// Change some values
 			iniTest.Name = Name;
 			iniTest.FirstName = FirstName;
+
+			// This value should not be written to the file
+			iniTest.NotWritten = "Whatever";
+
+			// Some "random" value that needs to be there again after reading.
 			long ticks = DateTimeOffset.Now.UtcTicks;
 			iniTest.Age = ticks;
 			using (var writeStream = new MemoryStream())
 			{
 				await iniConfig.WriteToStream(writeStream);
+
+				// Set the not written value to a testable value, this should not be read (and overwritten) by reading the ini file.
+				iniTest.NotWritten = TestValueForNonSerialized;
+
+				// Make sure Age is set to some value, so we can see that it is re-read
 				iniTest.Age = 2;
 
 				// Test reading
@@ -86,6 +99,7 @@ namespace Dapplo.Config.Test
 					Assert.AreEqual(Name, iniTest.Name);
 					Assert.AreEqual(FirstName, iniTest.FirstName);
 					Assert.AreEqual(ticks, iniTest.Age);
+					Assert.AreEqual(TestValueForNonSerialized, iniTest.NotWritten);
 				}
 			}
 		}

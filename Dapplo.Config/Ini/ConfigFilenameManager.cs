@@ -30,7 +30,7 @@ namespace Dapplo.Config.Ini
 	/// <summary>
 	/// Helps to specify how the ini file is read
 	/// </summary>
-	public enum IniFilePolicy
+	public enum ConfigFilePolicy
 	{
 		Portable,
 		Basic,
@@ -40,17 +40,17 @@ namespace Dapplo.Config.Ini
 	/// <summary>
 	/// This manages the location of the Ini-File for one instance
 	/// </summary>
-	public class IniFilenameManager
+	public class ConfigFilenameManager
 	{
 		private readonly string _filename;
-		private readonly IniFilePolicy _policy;
+		private readonly ConfigFilePolicy _policy;
 
 		/// <summary>
 		/// Setup the management of an .ini file location
 		/// </summary>
 		/// <param name="fileName"></param>
 		/// <param name="policy"></param>
-		public IniFilenameManager(string fileName, IniFilePolicy policy = IniFilePolicy.Basic)
+		public ConfigFilenameManager(string fileName, ConfigFilePolicy policy = ConfigFilePolicy.Basic)
 		{
 			_filename = fileName;
 			_policy = policy;

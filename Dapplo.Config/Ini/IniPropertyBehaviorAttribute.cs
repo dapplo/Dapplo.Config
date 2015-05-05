@@ -18,52 +18,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-using Dapplo.Config.Ini;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.Serialization;
 
-namespace Dapplo.Config.Test.TestInterfaces
+namespace Dapplo.Config.Ini
 {
 	/// <summary>
-	/// This is the interface under test
+	/// Use this attribute on Properties where you want to influence the ini config behavior.
 	/// </summary>
-	[IniSection("Test")]
-	[Description("Test Configuration")]
-	public interface IIniTest : IIniSection
+	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+	public class IniPropertyBehaviorAttribute : Attribute
 	{
-		[Description("Name of the person")]
-		string Name
-		{
+		public IniPropertyBehaviorAttribute() {
+			Read = true;
+			Write = true;
+		}
+		/// <summary>
+		/// Default is true, set read to false to skip reading.
+		/// Although this might be unlikely, examples are:
+		/// 1 A property with the last changed date, which might not be the date of the file
+		/// 2 A property with the application or component version which "processed" the configuration
+		/// </summary>
+		public bool Read {
 			get;
 			set;
 		}
 
-		[DefaultValue(21), DataMember(EmitDefaultValue = true)]
-		long Age
-		{
-			get;
-			set;
-		}
-
-		[TypeConverter(typeof(StringEncryptionTypeConverter))]
-		string FirstName
-		{
-			get;
-			set;
-		}
-
-		[DefaultValue("5,3,2,1,1"), TypeConverter(typeof(StringToGenericListConverter<int>))]
-		IList<int> WindowCornerCutShape
-		{
-			get;
-			set;
-		}
-
-		[IniPropertyBehavior(Read = false, Write = false)]
-		string NotWritten {
+		/// <summary>
+		/// Default is true, set write to false to skip serializing.
+		/// </summary>
+		public bool Write {
 			get;
 			set;
 		}

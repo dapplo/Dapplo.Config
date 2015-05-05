@@ -50,7 +50,7 @@ namespace Dapplo.Config.Ini
 		}
 
 		/// <summary>
-		/// Reset all the values to their default
+		/// Reset all the values, in all the registered ini sections, to their default
 		/// </summary>
 		public void Reset()
 		{
@@ -58,6 +58,7 @@ namespace Dapplo.Config.Ini
 			{
 				foreach (var iniValue in section.GetIniValues())
 				{
+					// TODO: Do we need to skip read/write protected values here?
 					section.RestoreToDefault(iniValue.PropertyName);
 				}
 			}
@@ -74,8 +75,11 @@ namespace Dapplo.Config.Ini
 			{
 				throw new ArgumentNullException("filename");
 			}
+
+			// Create the file as a stream
 			using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write))
 			{
+				// Write the registered ini sections to the stream
 				await WriteToStream(stream);
 			}
 
@@ -90,34 +94,55 @@ namespace Dapplo.Config.Ini
 		{
 			// Do not dispose the writer, this will close the supplied stream and that is not our job!
 			var writer = new StreamWriter(stream, Encoding.UTF8);
+
+			// Loop over the "registered" sections
 			foreach (var section in _sections.Values)
 			{
-				await writer.WriteLineAsync();
-				string description = section.GetSectionDescription();
-				if (!string.IsNullOrEmpty(description))
-				{
-					await writer.WriteLineAsync(string.Format(";{0}", description));
-				}
-				await writer.WriteLineAsync(string.Format("[{0}]", section.GetSectionName()));
+				// This flag tells us if the header for the section is already written
+				bool isSectionHeaderWritten = false;
+
+				// Loop over the ini values, this automatically skips all NonSerialized properties
 				foreach (var iniValue in section.GetIniValues())
 				{
+					// Check if we need to write the value, this is not needed when it has the default or if write is disabled
 					if (!iniValue.IsWriteNeeded)
 					{
 						continue;
 					}
+
+					// Before we are going to write, we need to check if the section header "[Sectionname]" is already written.
+					// If not, do so now before writing the properties of the section itself
+					if (!isSectionHeaderWritten) {
+						await writer.WriteLineAsync();
+						string description = section.GetSectionDescription();
+						if (!string.IsNullOrEmpty(description)) {
+							await writer.WriteLineAsync(string.Format(";{0}", description));
+						}
+						await writer.WriteLineAsync(string.Format("[{0}]", section.GetSectionName()));
+						// Mark section header as written!
+						isSectionHeaderWritten = true;
+					}
+
+					// Check if the property has a description, if so write it in the ini comment before the property
 					if (!string.IsNullOrEmpty(iniValue.Description))
 					{
 						await writer.WriteLineAsync(string.Format(";{0}", iniValue.Description));
 					}
+
+					// Check if a converter is specified
 					TypeConverter converter = iniValue.Converter;
+					// If not, use the default converter for the property type
 					if (converter == null)
 					{
 						converter = TypeDescriptor.GetConverter(iniValue.ValueType);
 					}
+					// Convert the value to a string
 					var writingValue = converter.ConvertToInvariantString(iniValue.Value);
+					// And write the value with the IniPropertyName (which does NOT have to be the property name) to the file
 					await writer.WriteLineAsync(string.Format("{0}={1}", iniValue.IniPropertyName, writingValue));
 				}
 			}
+			// Make sure the values are flushed, otherwise the information is not in the stream
 			writer.Flush();
 		}
 
@@ -176,6 +201,7 @@ namespace Dapplo.Config.Ini
 		private void FillSection(IDictionary<string, string> iniProperties, IIniSection iniSection)
 		{
 			IDictionary<string, IniValue> iniValues = (from iniValue in iniSection.GetIniValues()
+													   where iniValue.Behavior.Read
 													   select iniValue).ToDictionary(x => x.IniPropertyName, x => x);
 			foreach (var iniPropertyName in iniProperties.Keys)
 			{

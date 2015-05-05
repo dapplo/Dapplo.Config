@@ -129,11 +129,7 @@ namespace Dapplo.Config.Ini
 			set;
 		}
 
-		/// <summary>
-		/// Return true when the value is readonly in the GUI
-		/// </summary>
-		public bool IsReadOnly
-		{
+		public IniPropertyBehaviorAttribute Behavior {
 			get;
 			set;
 		}
@@ -157,6 +153,10 @@ namespace Dapplo.Config.Ini
 		{
 			get
 			{
+				// Never write!!
+				if (!Behavior.Write) {
+					return false;
+				}
 				// if EmitDefaultValue is true, we should always write this value (without checking if it is default
 				if (EmitDefaultValue)
 				{
