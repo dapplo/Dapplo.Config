@@ -50,6 +50,14 @@ namespace Dapplo.Config.Ini
 		}
 
 		/// <summary>
+		/// Add an ini section to this IniConfig by specifying the proxy
+		/// </summary>
+		/// <param name="section"></param>
+		public void AddSection<T>(IPropertyProxy<T> sectionProxy) where T: IIniSection {
+			AddSection(sectionProxy.PropertyObject);
+		}
+
+		/// <summary>
 		/// Reset all the values, in all the registered ini sections, to their default
 		/// </summary>
 		public void Reset()
@@ -69,7 +77,7 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		/// <param name="filename">File to write to</param>
 		/// <returns>Task</returns>
-		public async Task WriteToFile(string filename)
+		public async Task WriteToFileAsync(string filename)
 		{
 			if (string.IsNullOrEmpty(filename))
 			{
@@ -80,7 +88,7 @@ namespace Dapplo.Config.Ini
 			using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write))
 			{
 				// Write the registered ini sections to the stream
-				await WriteToStream(stream);
+				await WriteToStreamAsync(stream);
 			}
 
 		}
@@ -90,7 +98,7 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		/// <param name="stream">Stream to write to</param>
 		/// <returns>Task</returns>
-		public async Task WriteToStream(Stream stream)
+		public async Task WriteToStreamAsync(Stream stream)
 		{
 			// Do not dispose the writer, this will close the supplied stream and that is not our job!
 			var writer = new StreamWriter(stream, Encoding.UTF8);
@@ -112,10 +120,12 @@ namespace Dapplo.Config.Ini
 
 					// Before we are going to write, we need to check if the section header "[Sectionname]" is already written.
 					// If not, do so now before writing the properties of the section itself
-					if (!isSectionHeaderWritten) {
+					if (!isSectionHeaderWritten)
+					{
 						await writer.WriteLineAsync();
 						string description = section.GetSectionDescription();
-						if (!string.IsNullOrEmpty(description)) {
+						if (!string.IsNullOrEmpty(description))
+						{
 							await writer.WriteLineAsync(string.Format(";{0}", description));
 						}
 						await writer.WriteLineAsync(string.Format("[{0}]", section.GetSectionName()));
@@ -150,12 +160,13 @@ namespace Dapplo.Config.Ini
 		/// Initialize the IniConfig by reading all the properties from the file and setting them on the IniSections
 		/// </summary>
 		/// <returns>Task with bool indicating if the ini file was read</returns>
-		public async Task<bool> ReadFromFile(string filename)
+		public async Task<bool> ReadFromFileAsync(string filename)
 		{
 			if (string.IsNullOrEmpty(filename))
 			{
 				throw new ArgumentNullException("filename");
 			}
+
 			if (File.Exists(filename))
 			{
 				var properties = await IniReader.ReadAsync(filename, Encoding.UTF8);
@@ -168,7 +179,7 @@ namespace Dapplo.Config.Ini
 		/// Initialize the IniConfig by reading all the properties from the file and setting them on the IniSections
 		/// </summary>
 		/// <returns>Task with bool indicating if the ini file was read</returns>
-		public async Task<bool> ReadFromStream(Stream stream)
+		public async Task<bool> ReadFromStreamAsync(Stream stream)
 		{
 			var properties = await IniReader.ReadAsync(stream, Encoding.UTF8);
 			return FillSections(properties);

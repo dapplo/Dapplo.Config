@@ -58,7 +58,7 @@ namespace Dapplo.Config.Test
 			iniConfig.AddSection(iniTest);
 			using (var testMemoryStream = new MemoryStream())
 			{
-				await iniConfig.ReadFromStream(testMemoryStream);
+				await iniConfig.ReadFromStreamAsync(testMemoryStream);
 				Assert.IsTrue(iniTest.WindowCornerCutShape.Count > 0);
 			}
 		}
@@ -68,9 +68,9 @@ namespace Dapplo.Config.Test
 		{
 			var iniConfig = new IniConfig();
 
-			var iniTest = _propertyProxy.PropertyObject;
-			iniConfig.AddSection(iniTest);
+			iniConfig.AddSection(_propertyProxy);
 
+			var iniTest = _propertyProxy.PropertyObject;
 			// Change some values
 			iniTest.Name = Name;
 			iniTest.FirstName = FirstName;
@@ -83,7 +83,7 @@ namespace Dapplo.Config.Test
 			iniTest.Age = ticks;
 			using (var writeStream = new MemoryStream())
 			{
-				await iniConfig.WriteToStream(writeStream);
+				await iniConfig.WriteToStreamAsync(writeStream);
 
 				// Set the not written value to a testable value, this should not be read (and overwritten) by reading the ini file.
 				iniTest.NotWritten = TestValueForNonSerialized;
@@ -93,7 +93,7 @@ namespace Dapplo.Config.Test
 
 				// Test reading
 				writeStream.Seek(0, SeekOrigin.Begin);
-				var isFileRead = await iniConfig.ReadFromStream(writeStream);
+				var isFileRead = await iniConfig.ReadFromStreamAsync(writeStream);
 				if (isFileRead)
 				{
 					Assert.AreEqual(Name, iniTest.Name);
