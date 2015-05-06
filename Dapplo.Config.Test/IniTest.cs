@@ -47,11 +47,10 @@ namespace Dapplo.Config.Test
 		{
 			var iniConfig = new IniConfig("Dapplo", "dapplo");
 
-			var iniTest = iniConfig.RegisterAndGet<IIniTest>();
-
 			using (var testMemoryStream = new MemoryStream())
 			{
 				await iniConfig.ReadFromStreamAsync(testMemoryStream);
+				var iniTest = await iniConfig.RegisterAndGet<IIniTest>();
 				Assert.IsTrue(iniTest.WindowCornerCutShape.Count > 0);
 			}
 		}
@@ -61,7 +60,7 @@ namespace Dapplo.Config.Test
 		{
 			var iniConfig = new IniConfig("Dapplo", "dapplo");
 
-			var iniTest = iniConfig.RegisterAndGet<IIniTest>();
+			var iniTest = await iniConfig.RegisterAndGet<IIniTest>();
 
 			// Change some values
 			iniTest.Name = Name;
@@ -85,14 +84,11 @@ namespace Dapplo.Config.Test
 
 				// Test reading
 				writeStream.Seek(0, SeekOrigin.Begin);
-				var isFileRead = await iniConfig.ReadFromStreamAsync(writeStream);
-				if (isFileRead)
-				{
-					Assert.AreEqual(Name, iniTest.Name);
-					Assert.AreEqual(FirstName, iniTest.FirstName);
-					Assert.AreEqual(ticks, iniTest.Age);
-					Assert.AreEqual(TestValueForNonSerialized, iniTest.NotWritten);
-				}
+				await iniConfig.ReadFromStreamAsync(writeStream);
+				Assert.AreEqual(Name, iniTest.Name);
+				Assert.AreEqual(FirstName, iniTest.FirstName);
+				Assert.AreEqual(ticks, iniTest.Age);
+				Assert.AreEqual(TestValueForNonSerialized, iniTest.NotWritten);
 			}
 		}
 	}

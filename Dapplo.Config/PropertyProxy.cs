@@ -281,19 +281,7 @@ namespace Dapplo.Config
 			if (methodName.StartsWith("get_"))
 			{
 				propertyName = methodName.Substring(4);
-				var getInfo = new GetInfo
-				{
-					PropertyName = propertyName,
-					CanContinue = true
-				};
-				foreach (Getter getter in _getters)
-				{
-					getter.GetterAction(getInfo);
-					if (!getInfo.CanContinue || getInfo.Error != null)
-					{
-						break;
-					}
-				}
+				var getInfo = Get(propertyName);
 				if (getInfo.HasError)
 				{
 					return new ReturnMessage(getInfo.Error, methodCallMessage);
@@ -303,25 +291,7 @@ namespace Dapplo.Config
 			if (methodName.StartsWith("set_"))
 			{
 				propertyName = methodName.Substring(4);
-
-				object oldValue;
-				bool hasOldValue = _properties.TryGetValue(propertyName, out oldValue);
-				var setInfo = new SetInfo
-				{
-					NewValue = parameters[0],
-					PropertyName = propertyName,
-					HasOldValue = hasOldValue,
-					CanContinue = true,
-					OldValue = oldValue
-				};
-				foreach (Setter setter in _setters)
-				{
-					setter.SetterAction(setInfo);
-					if (!setInfo.CanContinue || setInfo.Error != null)
-					{
-						break;
-					}
-				}
+				var setInfo = Set(propertyName, parameters[0]);
 				if (setInfo.HasError)
 				{
 					return new ReturnMessage(setInfo.Error, methodCallMessage);
@@ -330,6 +300,55 @@ namespace Dapplo.Config
 			}
 
 			return new ReturnMessage(new NotImplementedException("No implementation for " + methodName), methodCallMessage);
+		}
+
+		/// <summary>
+		/// Pretend the get on the property object was called
+		/// This will invoke the normal get, going through all the registered getters
+		/// </summary>
+		/// <param name="propertyName">propertyName</param>
+		/// <returns>GetInfo</returns>
+		public GetInfo Get(string propertyName) {
+			var getInfo = new GetInfo {
+				PropertyName = propertyName,
+				CanContinue = true
+			};
+			foreach (Getter getter in _getters) {
+				getter.GetterAction(getInfo);
+				if (!getInfo.CanContinue || getInfo.Error != null) {
+					break;
+				}
+			}
+			return getInfo;
+		}
+
+		/// <summary>
+		/// Pretend the set on the property object was called
+		/// This will invoke the normal set, going through all the registered setters
+		/// </summary>
+		/// <param name="propertyName">propertyName</param>
+		/// <param name="value">object</param>
+		/// <returns>SetInfo</returns>
+		public SetInfo Set(string propertyName, object newValue) {
+			object oldValue;
+			bool hasOldValue = _properties.TryGetValue(propertyName, out oldValue);
+			var setInfo = new SetInfo
+			{
+				NewValue = newValue,
+				PropertyName = propertyName,
+				HasOldValue = hasOldValue,
+				CanContinue = true,
+				OldValue = oldValue
+			};
+			foreach (Setter setter in _setters)
+			{
+				setter.SetterAction(setInfo);
+				if (!setInfo.CanContinue || setInfo.Error != null)
+				{
+					break;
+				}
+			}
+			return setInfo;
 		}
 
 		/// <summary>

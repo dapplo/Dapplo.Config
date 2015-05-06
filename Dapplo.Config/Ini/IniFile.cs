@@ -28,9 +28,9 @@ using System.Threading.Tasks;
 namespace Dapplo.Config.Ini
 {
 	/// <summary>
-	/// Functionality to read a .ini file
+	/// Functionality to read/write a .ini file
 	/// </summary>
-	public static class IniReader
+	public static class IniFile
 	{
 		private const string SectionStart = "[";
 		private const string SectionEnd = "]";
@@ -46,10 +46,12 @@ namespace Dapplo.Config.Ini
 		/// <returns>dictionary of sections - dictionaries with the properties</returns>
 		public static async Task<Dictionary<string, Dictionary<string, string>>> ReadAsync(string path, Encoding encoding, CancellationToken token = default(CancellationToken))
 		{
-			using (FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 1024))
-			{
-				return await ReadAsync(fileStream, encoding, token);
+			if (File.Exists(path)) {
+				using (FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 1024)) {
+					return await ReadAsync(fileStream, encoding, token);
+				}
 			}
+			return null;
 		}
 
 		/// <summary>
@@ -87,7 +89,7 @@ namespace Dapplo.Config.Ini
 						string[] keyvalueSplitter = line.Split(Assignment, 2);
 						string name = keyvalueSplitter[0];
 						string inivalue = keyvalueSplitter.Length > 1 ? keyvalueSplitter[1] : null;
-						inivalue = ConvertSpecialCharacters(inivalue);
+						inivalue = ReadEscape(inivalue);
 						if (nameValues.ContainsKey(name))
 						{
 							nameValues[name] = inivalue;
@@ -103,15 +105,27 @@ namespace Dapplo.Config.Ini
 		}
 
 		/// <summary>
-		/// change escaped newlines to newlines, an any other conversions that might be needed
+		/// change escaped newlines to newlines, and any other conversions that might be needed
 		/// </summary>
-		/// <param name="iniValue">string</param>
+		/// <param name="iniValue">encoded string value</param>
 		/// <returns>string</returns>
-		private static string ConvertSpecialCharacters(string iniValue)
+		private static string ReadEscape(string iniValue)
 		{
 			if (!string.IsNullOrEmpty(iniValue))
 			{
 				iniValue = iniValue.Replace("\\n", "\n");
+			}
+			return iniValue;
+		}
+
+		/// <summary>
+		/// change newlines to escaped newlines, and any other conversions that might be needed
+		/// </summary>
+		/// <param name="iniValue">string</param>
+		/// <returns>encoded string value</returns>
+		private static string WriteEscape(string iniValue) {
+			if (!string.IsNullOrEmpty(iniValue)) {
+				iniValue = iniValue.Replace("\n", "\\n");
 			}
 			return iniValue;
 		}

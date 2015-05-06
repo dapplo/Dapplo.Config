@@ -19,30 +19,31 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Dapplo.Config.Extension;
-using System.Collections.Generic;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace Dapplo.Config.Ini
-{
+namespace Dapplo.Config.Support {
 	/// <summary>
-	/// By making your property proxy interface extend this, you will be able to write the property to an ini file
+	/// A simple helper to synchronize async code
+	/// Usage:
+	/// private readonly SemaphoreSlim _sync = new SemaphoreSlim(1);
+	/// using (await Sync.Wait(_sync)) {
+	///		// Do your stuff
+	///	}
 	/// </summary>
-	public interface IIniSection : IDefaultValue, IWriteProtectProperties
-	{
-		/// <summary>
-		/// Retrieve all the ini values
-		/// </summary>
-		/// <returns></returns>
-		IEnumerable<IniValue> GetIniValues();
+	public class Sync : IDisposable {
+		private readonly SemaphoreSlim _syncSemaphore;
+		public static async Task<Sync> Wait(SemaphoreSlim syncSemaphore) {
+			await syncSemaphore.WaitAsync();
+			return new Sync(syncSemaphore);
+		}
+		private Sync(SemaphoreSlim syncSemaphore) {
+			_syncSemaphore = syncSemaphore;
+		}
 
-		/// <summary>
-		/// Name of the Ini-Section, should be set on your property interface with
-		/// </summary>
-		string GetSectionName();
-
-		/// <summary>
-		/// Get the Description of the Ini-Section
-		/// </summary>
-		string GetSectionDescription();
+		public void Dispose() {
+			_syncSemaphore.Release();
+		}
 	}
 }

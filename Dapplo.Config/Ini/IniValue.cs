@@ -31,10 +31,10 @@ namespace Dapplo.Config.Ini
 	/// </summary>
 	public class IniValue
 	{
-		private IDictionary<string, object> _properties;
-		public IniValue(IDictionary<string, object> properties)
+		private IPropertyProxy _proxy;
+		public IniValue(IPropertyProxy proxy)
 		{
-			_properties = properties;
+			_proxy = proxy;
 		}
 
 		/// <summary>
@@ -80,17 +80,17 @@ namespace Dapplo.Config.Ini
 		{
 			get
 			{
-				return _properties.SafeGet(PropertyName);
+				return _proxy.Get(PropertyName).Value;
 			}
 			set
 			{
-				_properties.SafelyAddOrOverwrite(PropertyName, value);
+				_proxy.Set(PropertyName, value);
 			}
 		}
 
 		public void ResetToDefault()
 		{
-			_properties.SafelyAddOrOverwrite(PropertyName, DefaultValue);
+			_proxy.Set(PropertyName, DefaultValue);
 		}
 
 		/// <summary>
@@ -141,7 +141,7 @@ namespace Dapplo.Config.Ini
 		{
 			get
 			{
-				return _properties.ContainsKey(PropertyName);
+				return _proxy.Properties.ContainsKey(PropertyName);
 			}
 		}
 
@@ -164,12 +164,12 @@ namespace Dapplo.Config.Ini
 				}
 
 				// Don't write if there is no value
-				if (!_properties.ContainsKey(PropertyName))
+				if (!_proxy.Properties.ContainsKey(PropertyName))
 				{
 					return false;
 				}
 
-				object value = _properties.SafeGet(PropertyName);
+				object value = _proxy.Get(PropertyName);
 
 				// Check if our value is default
 				bool isDefault = object.Equals(value, DefaultValue);

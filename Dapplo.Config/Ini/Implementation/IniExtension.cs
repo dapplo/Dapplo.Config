@@ -89,7 +89,7 @@ namespace Dapplo.Config.Ini.Implementation
 		/// <returns>IniValue</returns>
 		private IniValue GenerateIniValue(PropertyInfo propertyInfo)
 		{
-			var newIniValue = new IniValue(Proxy.Properties);
+			var newIniValue = new IniValue(Proxy);
 			newIniValue.PropertyName = propertyInfo.Name;
 			newIniValue.ValueType = propertyInfo.PropertyType;
 

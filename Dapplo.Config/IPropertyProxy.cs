@@ -91,6 +91,23 @@ namespace Dapplo.Config
 		/// <param name="order">int used for sorting, lower is before higher is after</param>
 		/// <param name="getterAction">Function to be called</param>
 		void RegisterGetter(int order, Action<GetInfo> getterAction);
+
+		/// <summary>
+		/// Pretend the set on the property object was called
+		/// This will invoke the normal set, going through all the registered setters
+		/// </summary>
+		/// <param name="propertyName">propertyName</param>
+		/// <param name="value">object</param>
+		/// <returns>SetInfo</returns>
+		SetInfo Set(string propertyName, object newValue);
+
+		/// <summary>
+		/// Pretend the get on the property object was called
+		/// This will invoke the normal get, going through all the registered getters
+		/// </summary>
+		/// <param name="propertyName">propertyName</param>
+		/// <returns>GetInfo</returns>
+		GetInfo Get(string propertyName);
 	}
 
 	/// <summary>

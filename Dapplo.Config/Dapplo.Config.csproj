@@ -52,7 +52,7 @@
     <Compile Include="Ini\StringEncryptionTypeConverter.cs" />
     <Compile Include="Ini\StringToGenericListConverter.cs" />
     <Compile Include="Ini\IIniSection.cs" />
-    <Compile Include="Ini\IniReader.cs" />
+    <Compile Include="Ini\IniFile.cs" />
     <Compile Include="Ini\IniSectionAttribute.cs" />
     <Compile Include="Ini\IniValue.cs" />
     <Compile Include="Ini\IniConfig.cs" />
@@ -71,6 +71,7 @@
     <Compile Include="Support\ConfigUtils.cs" />
     <Compile Include="Support\SetInfo.cs" />
     <Compile Include="Support\Setter.cs" />
+    <Compile Include="Support\Sync.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

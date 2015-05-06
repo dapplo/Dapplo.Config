@@ -19,6 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Dapplo.Config.Support;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -26,6 +27,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Dapplo.Config.Ini
@@ -40,17 +42,32 @@ namespace Dapplo.Config.Ini
 		private const string Defaults = "-defaults";
 		private const string Constants = "-constants";
 		private const string IniExtension = "ini";
+		private readonly SemaphoreSlim _sync = new SemaphoreSlim(1);
+
+		private readonly string _iniFile;
+		private readonly string _constantsFile;
+		private readonly string _defaultsFile;
 		private readonly IDictionary<string, IIniSection> _sections = new Dictionary<string, IIniSection>();
+		private bool _initialReadDone;
+		private Dictionary<string, Dictionary<string, string>> _defaults;
+		private Dictionary<string, Dictionary<string, string>> _constants;
+		private Dictionary<string, Dictionary<string, string>> _ini;
 
 		/// <summary>
 		/// Setup the management of an .ini file location
 		/// </summary>
 		/// <param name="applicationName"></param>
 		/// <param name="fileName"></param>
-		public IniConfig(string applicationName, string fileName)
+		/// <param name="fixedDirectory">Specify a path if you don't want to use the default loading</param>
+		public IniConfig(string applicationName, string fileName, string fixedDirectory = null)
 		{
 			_applicationName = applicationName;
 			_fileName = fileName;
+
+			// Create the filenames
+			_iniFile = CreateFileLocation(false, "", fixedDirectory);
+			_defaultsFile = CreateFileLocation(true, Defaults, fixedDirectory);
+			_constantsFile = CreateFileLocation(true, Constants, fixedDirectory);
 		}
 
 		/// <summary>
@@ -58,156 +75,82 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		/// <typeparam name="T">Your property interface, which extends IIniSection</typeparam>
 		/// <returns>instance of type T</returns>
-		public T RegisterAndGet<T>() where T : IIniSection
+		public async Task<T> RegisterAndGet<T>() where T : IIniSection
 		{
 			var _propertyProxy = ProxyBuilder.GetOrCreateProxy<T>();
 			var section = _propertyProxy.PropertyObject;
 			var sectionName = section.GetSectionName();
-			if (!_sections.ContainsKey(sectionName))
-			{
-				_sections.Add(sectionName, section);
+
+			using (await Sync.Wait(_sync)) {
+				if (!_sections.ContainsKey(sectionName)) {
+					if (!_initialReadDone) {
+						await ReadAllIniFilesAsync();
+					}
+					FillSection(section);
+					_sections.Add(sectionName, section);
+				}
 			}
+			
 			return section;
 		}
 
 		/// <summary>
-		/// Return the location of the ini file
+		/// Helper to create the location of a file
 		/// </summary>
-		/// <param name="fixedDirectory"></param>
-		/// <returns>string with full path to the ini file</returns>
-		public string IniFileLocation(string fixedDirectory = null)
-		{
-			string iniFile;
-			if (fixedDirectory != null)
-			{
-				iniFile = Path.Combine(fixedDirectory, string.Format("{0}.{1}", _fileName, IniExtension));
+		/// <param name="specifiedDirectory"></param>
+		/// <returns></returns>
+		private string CreateFileLocation(bool checkStartupDirectory, string postfix = "", string specifiedDirectory = null) {
+			string file = null;
+			if (specifiedDirectory != null) {
+				file = Path.Combine(specifiedDirectory, string.Format("{0}{1}.{2}", _fileName, postfix, IniExtension));
+			} else {
+				if (checkStartupDirectory) {
+					var entryAssembly = Assembly.GetEntryAssembly();
+					if (entryAssembly != null) {
+						string startupDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+						file = Path.Combine(startupDirectory, string.Format("{0}{1}.{2}", _fileName, postfix, IniExtension));
+					}
+				}
+				if (file == null || !File.Exists(file)) {
+					string appDataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), _applicationName);
+					file = Path.Combine(appDataDirectory, string.Format("{0}{1}.{2}", _fileName, postfix, IniExtension));
+				}
 			}
-			else
-			{
-				iniFile = Path.Combine(AppDataDirectory, string.Format("{0}.{1}", _fileName, IniExtension));
-			}
-			return iniFile;
+			return file;
 		}
 
 		/// <summary>
-		/// Create the reading list for the files
+		/// Reset all the values, in all the registered ini sections, to their default
 		/// </summary>
-		/// <param name="fixedDirectory">If you want to read the file(s) from a certain directory specify it here</param>
-		/// <returns>reading list</returns>
-		public string[] FileReadOrder(string fixedDirectory = null)
-		{
-			string defaultsFile;
-			string constantsFile;
-			string iniFile = IniFileLocation(fixedDirectory);
-
-			if (fixedDirectory != null)
-			{
-				defaultsFile = Path.Combine(fixedDirectory, string.Format("{0}{1}.{2}", _fileName, Defaults, IniExtension));
-				constantsFile = Path.Combine(fixedDirectory, string.Format("{0}{1}.{2}", _fileName, Constants, IniExtension));
-			}
-			else
-			{
-				defaultsFile = Path.Combine(StartupDirectory, string.Format("{0}{1}.{2}", _fileName, Defaults, IniExtension));
-				if (!File.Exists(defaultsFile))
-				{
-					defaultsFile = Path.Combine(AppDataDirectory, string.Format("{0}{1}.{2}", _fileName, Defaults, IniExtension));
+		public async void ResetAsync() {
+			using (await Sync.Wait(_sync)) {
+				foreach (var section in _sections.Values) {
+					foreach (var iniValue in section.GetIniValues()) {
+						// TODO: Do we need to skip read/write protected values here?
+						section.RestoreToDefault(iniValue.PropertyName);
+					}
 				}
-				constantsFile = Path.Combine(StartupDirectory, string.Format("{0}{1}.{2}", _fileName, Constants, IniExtension));
-				if (!File.Exists(constantsFile))
-				{
-					constantsFile = Path.Combine(AppDataDirectory, string.Format("{0}{1}.{2}", _fileName, Constants, IniExtension));
-				}
-			}
-			return new string[] { defaultsFile, iniFile, constantsFile };
-		}
-
-		/// <summary>
-		/// Load the ini files "default", "normal" and fixed
-		/// </summary>
-		/// <param name="config">IniConfig to load</param>
-		/// <param name="fixedDirectory">If you want to read the file(s) from a certain directory specify it here</param>
-		public async Task LoadAsync(string fixedDirectory = null)
-		{
-			foreach (string filename in FileReadOrder(fixedDirectory))
-			{
-				if (filename == null || !File.Exists(filename))
-				{
-					continue;
-				}
-				await ReadFromFileAsync(filename);
 			}
 		}
 
 		/// <summary>
 		/// Write the ini file
 		/// </summary>
-		/// <param name="config">IniConfig to load</param>
-		/// <param name="fixedDirectory">If you want to read the file(s) from a certain directory specify it here</param>
-		public async Task WriteAsync(string fixedDirectory = null)
+		public async Task WriteAsync()
 		{
-			await WriteToFileAsync(IniFileLocation(fixedDirectory));
-		}
-
-		/// <summary>
-		/// Retrieve the startup directory
-		/// </summary>
-		private string StartupDirectory
-		{
-			get
-			{
-				return Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-			}
-		}
-
-		/// <summary>
-		/// Retrieve the ApplicationData directory
-		/// </summary>
-		private string AppDataDirectory
-		{
-			get
-			{
-				return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), _applicationName);
-			}
-		}
-
-		/// <summary>
-		/// Reset all the values, in all the registered ini sections, to their default
-		/// </summary>
-		public void Reset()
-		{
-			foreach (var section in _sections.Values)
-			{
-				foreach (var iniValue in section.GetIniValues())
-				{
-					// TODO: Do we need to skip read/write protected values here?
-					section.RestoreToDefault(iniValue.PropertyName);
+			// Make sure only one write to file is running, other request will have to wait
+			using (await Sync.Wait(_sync)) {
+				// Create the file as a stream
+				using (var stream = new FileStream(_iniFile, FileMode.Create, FileAccess.Write)) {
+					// Write the registered ini sections to the stream
+					await WriteToStreamAsync(stream);
 				}
 			}
 		}
 
-		/// <summary>
-		/// Write all the IIniSections to the ini file
-		/// </summary>
-		/// <param name="filename">File to write to</param>
-		/// <returns>Task</returns>
-		public async Task WriteToFileAsync(string filename)
-		{
-			if (string.IsNullOrEmpty(filename))
-			{
-				throw new ArgumentNullException("filename");
-			}
-
-			// Create the file as a stream
-			using (var stream = new FileStream(filename, FileMode.Create, FileAccess.Write))
-			{
-				// Write the registered ini sections to the stream
-				await WriteToStreamAsync(stream);
-			}
-
-		}
 
 		/// <summary>
-		/// Write all the IIniSections to the stream
+		/// Write all the IIniSections to the stream, this is also used for testing
 		/// </summary>
 		/// <param name="stream">Stream to write to</param>
 		/// <returns>Task</returns>
@@ -269,33 +212,60 @@ namespace Dapplo.Config.Ini
 			writer.Flush();
 		}
 
-		/// <summary>
-		/// Initialize the IniConfig by reading all the properties from the file and setting them on the IniSections
-		/// </summary>
-		/// <returns>Task with bool indicating if the ini file was read</returns>
-		public async Task<bool> ReadFromFileAsync(string filename)
-		{
-			if (string.IsNullOrEmpty(filename))
-			{
-				throw new ArgumentNullException("filename");
-			}
 
-			if (File.Exists(filename))
-			{
-				var properties = await IniReader.ReadAsync(filename, Encoding.UTF8);
-				return FillSections(properties);
-			}
-			return false;
+		/// <summary>
+		/// Helper method to read all the .ini files
+		/// </summary>
+		private async Task ReadAllIniFilesAsync() {
+			_defaults = await IniFile.ReadAsync(_defaultsFile, Encoding.UTF8);
+			_constants = await IniFile.ReadAsync(_constantsFile, Encoding.UTF8);
+			_ini = await IniFile.ReadAsync(_iniFile, Encoding.UTF8);
+			_initialReadDone = true;
+
+			// Reset the sections that have already been registered
+			FillSections();
 		}
 
 		/// <summary>
-		/// Initialize the IniConfig by reading all the properties from the file and setting them on the IniSections
+		/// Helper method to fill the values of one section
 		/// </summary>
-		/// <returns>Task with bool indicating if the ini file was read</returns>
-		public async Task<bool> ReadFromStreamAsync(Stream stream)
+		/// <param name="section"></param>
+		private void FillSection(IIniSection section) {
+			string sectionName = section.GetSectionName();
+			Dictionary<string, string> properties;
+
+			// Make sure there is no write protection
+			section.RemoveWriteProtection();
+			// Defaults:
+			if (_defaults != null && _defaults.TryGetValue(sectionName, out properties)) {
+				FillSection(properties, section);
+			}
+			// Ini:
+			if (_ini != null && _ini.TryGetValue(sectionName, out properties)) {
+				FillSection(properties, section);
+			}
+			section.StartWriteProtecting();
+			// Constants:
+			if (_constants != null && _constants.TryGetValue(sectionName, out properties)) {
+				FillSection(properties, section);
+			}
+			section.StopWriteProtecting();
+		}
+
+		/// <summary>
+		/// Initialize the IniConfig by reading all the properties from the stream
+		/// If this is called directly after construction, no files will be read which is useful for testing!
+		/// </summary>
+		public async Task ReadFromStreamAsync(Stream stream)
 		{
-			var properties = await IniReader.ReadAsync(stream, Encoding.UTF8);
-			return FillSections(properties);
+			_initialReadDone = true;
+			// This is for testing, clear all defaults & constants as the 
+			_defaults = null;
+			_constants = null;
+			_ini = await IniFile.ReadAsync(stream, Encoding.UTF8);
+
+			// Reset the current sections
+			FillSections();
 		}
 
 		/// <summary>
@@ -303,16 +273,11 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		/// <param name="properties"></param>
 		/// <returns></returns>
-		private bool FillSections(Dictionary<string, Dictionary<string, string>> properties)
+		private bool FillSections()
 		{
-			foreach (var sectionName in properties.Keys)
+			foreach (var section in _sections.Values)
 			{
-				IIniSection section;
-				if (_sections.TryGetValue(sectionName, out section))
-				{
-					var iniProperties = properties[sectionName];
-					FillSection(iniProperties, section);
-				}
+				FillSection(section);
 			}
 			return true;
 		}

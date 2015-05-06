@@ -43,6 +43,7 @@ namespace Dapplo.Config.Extension.Implementation
 
 			// Use Lambdas to make refactoring possible
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties>(x => x.StartWriteProtecting()), StartWriteProtecting);
+			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties>(x => x.RemoveWriteProtection()), RemoveWriteProtection);
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties>(x => x.StopWriteProtecting()), StopWriteProtecting);
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties>(x => x.WriteProtect("")), WriteProtect);
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties>(x => x.DisableWriteProtect("")), DisableWriteProtect);
@@ -73,6 +74,15 @@ namespace Dapplo.Config.Extension.Implementation
 		private void StartWriteProtecting(MethodCallInfo methodCallInfo)
 		{
 			_isProtecting = true;
+		}
+
+		/// <summary>
+		///     After calling this, nothing is write protected
+		/// </summary>
+		/// <param name="methodCallInfo">MethodCallInfo</param>
+		private void RemoveWriteProtection(MethodCallInfo methodCallInfo) {
+			_isProtecting = true;
+			_writeProtectedProperties.Clear();
 		}
 
 		/// <summary>

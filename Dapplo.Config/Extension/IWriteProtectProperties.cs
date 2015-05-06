@@ -40,6 +40,11 @@ namespace Dapplo.Config.Extension
 		void StopWriteProtecting();
 
 		/// <summary>
+		/// Remove the write protection
+		/// </summary>
+		void RemoveWriteProtection();
+
+		/// <summary>
 		/// Test if the supplied property is write protected
 		/// </summary>
 		/// <param name="propertyName">Name of the property</param>
