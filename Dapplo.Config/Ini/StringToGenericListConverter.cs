@@ -56,14 +56,6 @@ namespace Dapplo.Config.Ini
 
 		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
 		{
-			if (destinationType == typeof(List<T>))
-			{
-				return true;
-			}
-			if (destinationType == typeof(IList<T>))
-			{
-				return true;
-			}
 			if (destinationType == typeof(string))
 			{
 				return true;

@@ -14,13 +14,12 @@ namespace Dapplo.Config.Test
 		{
 			var stringListConverter = (TypeConverter)Activator.CreateInstance(typeof(StringToGenericListConverter<string>));
 			Assert.IsTrue(stringListConverter.CanConvertFrom(typeof(string)));
-			Assert.IsTrue(stringListConverter.CanConvertTo(typeof(List<string>)));
-			Assert.IsFalse(stringListConverter.CanConvertTo(typeof(List<int>)));
+			Assert.IsTrue(stringListConverter.CanConvertTo(typeof(string)));
+			Assert.IsFalse(stringListConverter.CanConvertTo(typeof(List<string>)));
 
 			var intListConverter = (TypeConverter)Activator.CreateInstance(typeof(StringToGenericListConverter<int>));
 			Assert.IsTrue(intListConverter.CanConvertFrom(typeof(string)));
-			Assert.IsFalse(intListConverter.CanConvertTo(typeof(List<string>)));
-			Assert.IsTrue(intListConverter.CanConvertTo(typeof(List<int>)));
+			Assert.IsTrue(intListConverter.CanConvertTo(typeof(string)));
 
 			IList<string> myTestStringList = new List<string>();
 			myTestStringList.Add("hello");
