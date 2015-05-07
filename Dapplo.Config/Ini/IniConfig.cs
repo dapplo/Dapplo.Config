@@ -140,6 +140,13 @@ namespace Dapplo.Config.Ini
 		{
 			// Make sure only one write to file is running, other request will have to wait
 			using (await Sync.Wait(_sync)) {
+				string path = Path.GetDirectoryName(_iniFile);
+
+				// Create the directory to write to, if it doesn't exist yet
+				if (!Directory.Exists(path)) {
+					Directory.CreateDirectory(path);
+				}
+
 				// Create the file as a stream
 				using (var stream = new FileStream(_iniFile, FileMode.Create, FileAccess.Write)) {
 					// Write the registered ini sections to the stream
