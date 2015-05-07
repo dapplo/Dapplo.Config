@@ -209,8 +209,15 @@ namespace Dapplo.Config.Ini
 					{
 						converter = TypeDescriptor.GetConverter(iniValue.ValueType);
 					}
+					ITypeDescriptorContext context = null;
+					try {
+						var propertyDescription = TypeDescriptor.GetProperties(section.GetType()).Find(iniValue.PropertyName, false);
+						context = new TypeDescriptorContext(section, propertyDescription);
+					} catch {
+						// Ignore any exceptions
+					}
 					// Convert the value to a string
-					var writingValue = converter.ConvertToInvariantString(iniValue.Value);
+					var writingValue = converter.ConvertToInvariantString(context, iniValue.Value);
 					// And write the value with the IniPropertyName (which does NOT have to be the property name) to the file
 					await writer.WriteLineAsync(string.Format("{0}={1}", iniValue.IniPropertyName, writingValue));
 				}
