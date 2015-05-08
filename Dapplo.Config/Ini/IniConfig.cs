@@ -140,6 +140,13 @@ namespace Dapplo.Config.Ini
 		{
 			// Make sure only one write to file is running, other request will have to wait
 			using (await Sync.Wait(_sync)) {
+				string path = Path.GetDirectoryName(_iniFile);
+
+				// Create the directory to write to, if it doesn't exist yet
+				if (!Directory.Exists(path)) {
+					Directory.CreateDirectory(path);
+				}
+
 				// Create the file as a stream
 				using (var stream = new FileStream(_iniFile, FileMode.Create, FileAccess.Write)) {
 					// Write the registered ini sections to the stream
@@ -202,8 +209,15 @@ namespace Dapplo.Config.Ini
 					{
 						converter = TypeDescriptor.GetConverter(iniValue.ValueType);
 					}
+					ITypeDescriptorContext context = null;
+					try {
+						var propertyDescription = TypeDescriptor.GetProperties(section.GetType()).Find(iniValue.PropertyName, false);
+						context = new TypeDescriptorContext(section, propertyDescription);
+					} catch {
+						// Ignore any exceptions
+					}
 					// Convert the value to a string
-					var writingValue = converter.ConvertToInvariantString(iniValue.Value);
+					var writingValue = converter.ConvertToInvariantString(context, iniValue.Value);
 					// And write the value with the IniPropertyName (which does NOT have to be the property name) to the file
 					await writer.WriteLineAsync(string.Format("{0}={1}", iniValue.IniPropertyName, writingValue));
 				}
