@@ -119,6 +119,65 @@ namespace Dapplo.Config.Ini
 		}
 
 		/// <summary>
+		/// Read an ini file to a Dictionary, each key is a iniSection and the value is a Dictionary with name and values.
+		/// </summary>
+		/// <param name="path">Path to file</param>
+		/// <param name="encoding">Encoding</param>
+		/// <param name="sections"></param>
+		/// <param name="sectionsComments">Optional</param>
+		/// <param name="token">CancellationToken</param>
+		public static async Task WriteAsync(string path, Encoding encoding, Dictionary<string, Dictionary<string, string>> sections, Dictionary<string, Dictionary<string, string>> sectionComments = null, CancellationToken token = default(CancellationToken)) {
+			using (FileStream fileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write, 1024)) {
+				await WriteAsync(fileStream, encoding, sections, sectionComments, token);
+			}
+		}
+
+		/// <summary>
+		/// Write the supplied properties to the stream
+		/// </summary>
+		/// <param name="stream"></param>
+		/// <param name="encoding"></param>
+		/// <param name="sections"></param>
+		/// <param name="sectionsComments">Optional</param>
+		/// <param name="token"></param>
+		public static async Task WriteAsync(Stream stream, Encoding encoding, Dictionary<string, Dictionary<string, string>> sections, Dictionary<string, Dictionary<string, string>> sectionsComments = null, CancellationToken token = default(CancellationToken)) {
+			var writer = new StreamWriter(stream, Encoding.UTF8);
+			try {
+				foreach (var sectionKey in sections.Keys) {
+					await writer.WriteLineAsync();
+					Dictionary<string, string> properties = sections[sectionKey];
+					if (properties.Count == 0) {
+						continue;
+					}
+					Dictionary<string, string> comments = null;
+					if (sectionsComments != null) {
+						sectionsComments.TryGetValue(sectionKey, out comments);
+						string sectionDescription;
+						// Section comment is stored with the sectionKey
+						if (comments != null && comments.TryGetValue(sectionKey, out sectionDescription)) {
+							if (!string.IsNullOrEmpty(sectionDescription)) {
+								await writer.WriteLineAsync(string.Format(";{0}", sectionDescription));
+							}
+						}
+					}
+					await writer.WriteLineAsync(string.Format("[{0}]", sectionKey));
+					foreach (var propertyName in properties.Keys) {
+						string propertyComment;
+						if (comments != null && comments.TryGetValue(propertyName, out propertyComment)) {
+							if (!string.IsNullOrEmpty(propertyComment)) {
+								await writer.WriteLineAsync(string.Format(";{0}", propertyComment));
+							}
+						}
+						await writer.WriteLineAsync(string.Format("{0}={1}", propertyName, WriteEscape(properties[propertyName])));
+					}
+				}
+			} finally {
+				// Make sure the values are flushed, otherwise the information is not in the stream
+				writer.Flush();
+			}
+		}
+
+		/// <summary>
 		/// change newlines to escaped newlines, and any other conversions that might be needed
 		/// </summary>
 		/// <param name="iniValue">string</param>

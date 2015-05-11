@@ -81,7 +81,7 @@ namespace Dapplo.Config.Extension.Implementation
 		/// </summary>
 		/// <param name="methodCallInfo">MethodCallInfo</param>
 		private void RemoveWriteProtection(MethodCallInfo methodCallInfo) {
-			_isProtecting = true;
+			_isProtecting = false;
 			_writeProtectedProperties.Clear();
 		}
 
