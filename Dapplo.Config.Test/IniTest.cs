@@ -69,6 +69,9 @@ namespace Dapplo.Config.Test
 			// This value should not be written to the file
 			iniTest.NotWritten = "Whatever";
 
+			// Dictionary test
+			iniTest.SomeValues.Add("One", 1);
+
 			// Some "random" value that needs to be there again after reading.
 			long ticks = DateTimeOffset.Now.UtcTicks;
 			iniTest.Age = ticks;
@@ -87,6 +90,8 @@ namespace Dapplo.Config.Test
 				writeStream.Seek(0, SeekOrigin.Begin);
 				await iniConfig.ReadFromStreamAsync(writeStream);
 				//await iniConfig.ReloadAsync(false);
+
+				Assert.IsTrue(iniTest.SomeValues.ContainsKey("One"));
 				Assert.AreEqual(Name, iniTest.Name);
 				Assert.AreEqual(FirstName, iniTest.FirstName);
 				Assert.AreEqual(ticks, iniTest.Age);

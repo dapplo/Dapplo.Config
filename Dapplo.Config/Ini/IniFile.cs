@@ -44,7 +44,7 @@ namespace Dapplo.Config.Ini
 		/// <param name="encoding">Encoding</param>
 		/// <param name="token">CancellationToken</param>
 		/// <returns>dictionary of sections - dictionaries with the properties</returns>
-		public static async Task<Dictionary<string, Dictionary<string, string>>> ReadAsync(string path, Encoding encoding, CancellationToken token = default(CancellationToken))
+		public static async Task<IDictionary<string, IDictionary<string, string>>> ReadAsync(string path, Encoding encoding, CancellationToken token = default(CancellationToken))
 		{
 			if (File.Exists(path)) {
 				using (FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 1024)) {
@@ -61,9 +61,9 @@ namespace Dapplo.Config.Ini
 		/// <param name="encoding">Encoding</param>
 		/// <param name="token">CancellationToken</param>
 		/// <returns>dictionary of sections - dictionaries with the properties</returns>
-		public static async Task<Dictionary<string, Dictionary<string, string>>> ReadAsync(Stream stream, Encoding encoding, CancellationToken token = default(CancellationToken))
+		public static async Task<IDictionary<string, IDictionary<string, string>>> ReadAsync(Stream stream, Encoding encoding, CancellationToken token = default(CancellationToken))
 		{
-			Dictionary<string, Dictionary<string, string>> ini = new Dictionary<string, Dictionary<string, string>>();
+			IDictionary<string, IDictionary<string, string>> ini = new Dictionary<string, IDictionary<string, string>>();
 
 			// Do not dispose the reader, this will close the supplied stream and that is not our job!
 			var reader = new StreamReader(stream, encoding);
@@ -126,7 +126,7 @@ namespace Dapplo.Config.Ini
 		/// <param name="sections"></param>
 		/// <param name="sectionsComments">Optional</param>
 		/// <param name="token">CancellationToken</param>
-		public static async Task WriteAsync(string path, Encoding encoding, Dictionary<string, Dictionary<string, string>> sections, Dictionary<string, Dictionary<string, string>> sectionComments = null, CancellationToken token = default(CancellationToken)) {
+		public static async Task WriteAsync(string path, Encoding encoding, IDictionary<string, IDictionary<string, string>> sections, IDictionary<string, IDictionary<string, string>> sectionComments = null, CancellationToken token = default(CancellationToken)) {
 			using (FileStream fileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write, 1024)) {
 				await WriteAsync(fileStream, encoding, sections, sectionComments, token);
 			}
@@ -140,16 +140,16 @@ namespace Dapplo.Config.Ini
 		/// <param name="sections"></param>
 		/// <param name="sectionsComments">Optional</param>
 		/// <param name="token"></param>
-		public static async Task WriteAsync(Stream stream, Encoding encoding, Dictionary<string, Dictionary<string, string>> sections, Dictionary<string, Dictionary<string, string>> sectionsComments = null, CancellationToken token = default(CancellationToken)) {
+		public static async Task WriteAsync(Stream stream, Encoding encoding, IDictionary<string, IDictionary<string, string>> sections, IDictionary<string, IDictionary<string, string>> sectionsComments = null, CancellationToken token = default(CancellationToken)) {
 			var writer = new StreamWriter(stream, Encoding.UTF8);
 			try {
 				foreach (var sectionKey in sections.Keys) {
 					await writer.WriteLineAsync();
-					Dictionary<string, string> properties = sections[sectionKey];
+					IDictionary<string, string> properties = sections[sectionKey];
 					if (properties.Count == 0) {
 						continue;
 					}
-					Dictionary<string, string> comments = null;
+					IDictionary<string, string> comments = null;
 					if (sectionsComments != null) {
 						sectionsComments.TryGetValue(sectionKey, out comments);
 						string sectionDescription;

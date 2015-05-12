@@ -52,9 +52,18 @@ namespace Dapplo.Config.Extension.Implementation
 			if (defaultValue != null)
 			{
 				Proxy.Properties[propertyInfo.Name] = defaultValue;
+				return;
 			}
-			else if (Proxy.Properties.ContainsKey(propertyInfo.Name))
+			if (!propertyInfo.PropertyType.IsInterface && !propertyInfo.PropertyType.IsByRef && propertyInfo.PropertyType != typeof(string))
 			{
+				try {
+					defaultValue = Activator.CreateInstance(propertyInfo.PropertyType);
+					Proxy.Properties[propertyInfo.Name] = defaultValue;
+					return;
+				} catch {
+				}
+			}
+			if (Proxy.Properties.ContainsKey(propertyInfo.Name)) {
 				Proxy.Properties.Remove(propertyInfo.Name);
 			}
 		}

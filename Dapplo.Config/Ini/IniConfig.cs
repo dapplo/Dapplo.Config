@@ -23,6 +23,7 @@ using Dapplo.Config.Support;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -46,11 +47,11 @@ namespace Dapplo.Config.Ini
 
 		private readonly string _iniFile;
 		private readonly string _fixedDirectory;
-		private readonly IDictionary<string, IIniSection> _sections = new Dictionary<string, IIniSection>();
+		private readonly IDictionary<string, IIniSection> _sections = new SortedDictionary<string, IIniSection>();
 		private bool _initialReadDone;
-		private Dictionary<string, Dictionary<string, string>> _defaults;
-		private Dictionary<string, Dictionary<string, string>> _constants;
-		private Dictionary<string, Dictionary<string, string>> _ini;
+		private IDictionary<string, IDictionary<string, string>> _defaults;
+		private IDictionary<string, IDictionary<string, string>> _constants;
+		private IDictionary<string, IDictionary<string, string>> _ini;
 
 		/// <summary>
 		/// Setup the management of an .ini file location
@@ -159,16 +160,16 @@ namespace Dapplo.Config.Ini
 		/// <returns>Task</returns>
 		public async Task WriteToStreamAsync(Stream stream, CancellationToken token = default(CancellationToken))
 		{
-			Dictionary<string, Dictionary<string, string>> sections = new Dictionary<string, Dictionary<string, string>>();
-			Dictionary<string, Dictionary<string, string>> sectionsComments = new Dictionary<string, Dictionary<string, string>>();
+			IDictionary<string, IDictionary<string, string>> sections = new SortedDictionary<string, IDictionary<string, string>>();
+			IDictionary<string, IDictionary<string, string>> sectionsComments = new SortedDictionary<string, IDictionary<string, string>>();
 
 			// Loop over the "registered" sections
 			foreach (var section in _sections.Values) {
 				// This flag tells us if the header for the section is already written
 				bool isSectionCreated = false;
 
-				Dictionary<string, string> sectionProperties = new Dictionary<string,string>();
-				Dictionary<string, string> sectionComments = new Dictionary<string,string>();
+				IDictionary<string, string> sectionProperties = new SortedDictionary<string, string>();
+				IDictionary<string, string> sectionComments = new SortedDictionary<string, string>();
 				// Loop over the ini values, this automatically skips all NonSerialized properties
 				foreach (var iniValue in section.GetIniValues()) {
 					// Check if we need to write the value, this is not needed when it has the default or if write is disabled
@@ -196,12 +197,6 @@ namespace Dapplo.Config.Ini
 						sectionComments.Add(iniValue.IniPropertyName, iniValue.Description);
 					}
 
-					// Check if a converter is specified
-					TypeConverter converter = iniValue.Converter;
-					// If not, use the default converter for the property type
-					if (converter == null) {
-						converter = TypeDescriptor.GetConverter(iniValue.ValueType);
-					}
 					ITypeDescriptorContext context = null;
 					try {
 						var propertyDescription = TypeDescriptor.GetProperties(section.GetType()).Find(iniValue.PropertyName, false);
@@ -209,6 +204,26 @@ namespace Dapplo.Config.Ini
 					} catch {
 						// Ignore any exceptions
 					}
+
+					// Check if a converter is specified
+					TypeConverter converter = iniValue.Converter;
+					// If not, use the default converter for the property type
+					if (converter == null) {
+						converter = TypeDescriptor.GetConverter(iniValue.ValueType);
+					} else if (converter.CanConvertTo(typeof(IDictionary<string, string>))) {
+						// Convert the dictionary to a string,string variant.
+						IDictionary<string, string> dictionaryProperties = (IDictionary<string, string>)converter.ConvertTo(context, CultureInfo.CurrentCulture, iniValue.Value, typeof(IDictionary<string, string>));
+						// Use this to build a separate "section" which is called "[section-propertyname]"
+						string dictionaryIdentifier = string.Format("{0}-{1}", section.GetSectionName(), iniValue.IniPropertyName);
+						sections.Add(dictionaryIdentifier, dictionaryProperties);
+						if (!string.IsNullOrWhiteSpace(iniValue.Description)) {
+							IDictionary<string, string> dictionaryComments = new SortedDictionary<string, string>();
+							dictionaryComments.Add(dictionaryIdentifier, iniValue.Description);
+							sectionsComments.Add(dictionaryIdentifier, dictionaryComments);
+						}
+						continue;
+					}
+
 					// Convert the value to a string
 					var writingValue = converter.ConvertToInvariantString(context, iniValue.Value);
 					// And write the value with the IniPropertyName (which does NOT have to be the property name) to the file
@@ -244,22 +259,20 @@ namespace Dapplo.Config.Ini
 		/// <param name="section"></param>
 		private void FillSection(IIniSection section) {
 			string sectionName = section.GetSectionName();
-			Dictionary<string, string> properties;
-
 			// Make sure there is no write protection
 			section.RemoveWriteProtection();
 			// Defaults:
-			if (_defaults != null && _defaults.TryGetValue(sectionName, out properties)) {
-				FillSection(properties, section);
+			if (_defaults != null) {
+				FillSection(_defaults, section);
 			}
 			// Ini:
-			if (_ini != null && _ini.TryGetValue(sectionName, out properties)) {
-				FillSection(properties, section);
+			if (_ini != null) {
+				FillSection(_ini, section);
 			}
 			// Constants:
-			if (_constants != null && _constants.TryGetValue(sectionName, out properties)) {
+			if (_constants != null) {
 				section.StartWriteProtecting();
-				FillSection(properties, section);
+				FillSection(_constants, section);
 				section.StopWriteProtecting();
 			}
 		}
@@ -299,45 +312,47 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		/// <param name="iniProperties"></param>
 		/// <param name="iniSection"></param>
-		private void FillSection(IDictionary<string, string> iniProperties, IIniSection iniSection)
+		private void FillSection(IDictionary<string, IDictionary<string, string>> iniSections, IIniSection iniSection)
 		{
-			IDictionary<string, IniValue> iniValues = (from iniValue in iniSection.GetIniValues()
-													   where iniValue.Behavior.Read
-													   select iniValue).ToDictionary(x => x.IniPropertyName, x => x);
-			foreach (var iniPropertyName in iniProperties.Keys)
-			{
-				IniValue iniValue;
-				// Skip values that don't have a property
-				if (iniValues.TryGetValue(iniPropertyName, out iniValue))
-				{
-					object stringValue = iniProperties[iniPropertyName];
 
-					Type sourceType = typeof(string);
+			IDictionary<string, string> iniProperties;
+			iniSections.TryGetValue(iniSection.GetSectionName(), out iniProperties);
+
+			IEnumerable<IniValue> iniValues = (from iniValue in iniSection.GetIniValues()
+													   where iniValue.Behavior.Read
+													   select iniValue);
+
+			foreach (var iniValue in iniValues)
+			{
+				string dictionaryIdentifier = string.Format("{0}-{1}", iniSection.GetSectionName(), iniValue.IniPropertyName);
+				// If there are no properties, there might still be a separate section for a dictionary
+				if (iniValue.Converter != null && iniSections.ContainsKey(dictionaryIdentifier)) {
+					iniValue.Value = iniValue.Converter.ConvertFrom(iniSections[dictionaryIdentifier]);
+					continue;
+				}
+				if (iniProperties == null) {
+					continue;
+				}
+				string stringValue;
+				// Skip values that don't have a property
+				if (iniProperties.TryGetValue(iniValue.IniPropertyName, out stringValue))
+				{
+					Type stringType = typeof(string);
 					Type destinationType = iniValue.ValueType;
-					if (destinationType != sourceType || iniValue.Converter != null)
+					if (iniValue.Converter != null && iniValue.Converter.CanConvertFrom(stringType))
 					{
-						if (iniValue.Converter != null && iniValue.Converter.CanConvertFrom(sourceType))
-						{
-							iniValue.Value = iniValue.Converter.ConvertFrom(stringValue);
-						}
-						else
-						{
-							var converter = TypeDescriptor.GetConverter(destinationType);
-							if (converter.CanConvertFrom(typeof(string)))
-							{
-								iniValue.Value = converter.ConvertFrom(stringValue);
-							}
-							else
-							{
-								// No converter, just set it and hope it can be cast
-								iniValue.Value = stringValue;
-							}
+						iniValue.Value = iniValue.Converter.ConvertFrom(stringValue);
+						continue;
+					}
+					if (destinationType != stringType) {
+						var converter = TypeDescriptor.GetConverter(destinationType);
+						if (converter != null && converter.CanConvertFrom(stringType)) {
+							iniValue.Value = converter.ConvertFrom(stringValue);
+							continue;
 						}
 					}
-					else
-					{
-						iniValue.Value = stringValue;
-					}
+					// just set it and hope it can be cast
+					iniValue.Value = stringValue;
 				}
 			}
 		}
