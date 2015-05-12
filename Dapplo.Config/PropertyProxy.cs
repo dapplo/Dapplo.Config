@@ -63,7 +63,7 @@ namespace Dapplo.Config
 		/// <summary>
 		/// Initialize, make sure every property is processed by the extensions
 		/// </summary>
-		public void Init()
+		internal void Init()
 		{
 			Type proxiedType = typeof(T);
 			foreach (PropertyInfo propertyInfo in proxiedType.GetProperties())
@@ -167,10 +167,19 @@ namespace Dapplo.Config
 		/// <summary>
 		/// Get the property object which this Proxy maintains
 		/// </summary>
-		public T PropertyObject
+		object IPropertyProxy.PropertyObject
 		{
 			get
 			{
+				return _transparentProxy;
+			}
+		}
+
+		/// <summary>
+		/// Get the property object which this Proxy maintains
+		/// </summary>
+		T IPropertyProxy<T>.PropertyObject {
+			get {
 				return _transparentProxy;
 			}
 		}

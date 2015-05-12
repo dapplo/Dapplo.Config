@@ -75,8 +75,33 @@ namespace Dapplo.Config.Ini
 		/// <returns>instance of type T</returns>
 		public async Task<T> RegisterAndGetAsync<T>(CancellationToken token = default(CancellationToken)) where T : IIniSection
 		{
-			var _propertyProxy = ProxyBuilder.GetOrCreateProxy<T>();
-			var section = _propertyProxy.PropertyObject;
+			return (T) await RegisterAndGetAsync(typeof(T), token);
+		}
+
+		/// <summary>
+		/// Register the supplied types
+		/// </summary>
+		/// <param name="types">Types to register, these must extend IIniSection</param>
+		/// <returns>List with instances for the supplied types</returns>
+		public async Task<IList<IIniSection>> RegisterAndGetAsync(IEnumerable<Type> types, CancellationToken token = default(CancellationToken)) {
+			IList<IIniSection> sections = new List<IIniSection>();
+			foreach(var type in types) {
+				sections.Add(await RegisterAndGetAsync(type, token));
+			}
+			return sections;
+		}
+
+		/// <summary>
+		/// Register a Property Interface to this ini config, this method will return the property object 
+		/// </summary>
+		/// <param name="type">Type to register, this must extend IIniSection</param>
+		/// <returns>instance of type</returns>
+		public async Task<IIniSection> RegisterAndGetAsync(Type type, CancellationToken token = default(CancellationToken)) {
+			if (!typeof(IIniSection).IsAssignableFrom(type)) {
+				throw new ArgumentException("type is not a IIniSection");
+			}
+			var _propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
+			var section = (IIniSection)_propertyProxy.PropertyObject;
 			var sectionName = section.GetSectionName();
 
 			using (await Sync.Wait(_sync)) {
@@ -88,7 +113,7 @@ namespace Dapplo.Config.Ini
 					_sections.Add(sectionName, section);
 				}
 			}
-			
+
 			return section;
 		}
 
