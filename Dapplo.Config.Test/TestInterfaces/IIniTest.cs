@@ -67,5 +67,11 @@ namespace Dapplo.Config.Test.TestInterfaces
 			get;
 			set;
 		}
+
+		[Description("Here are some values"), TypeConverter(typeof(GenericDictionaryConverter<string, int>))]
+		Dictionary<string, int> SomeValues {
+			get;
+			set;
+		}
 	}
 }

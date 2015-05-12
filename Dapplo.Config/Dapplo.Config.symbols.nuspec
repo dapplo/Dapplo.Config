@@ -5,7 +5,7 @@
         <version>$version$</version>
         <title>Dapplo.Config</title>
         <authors>Robin Krom</authors>
-        <owners>dapplo</owners>
+        <owners>Dapplo</owners>
         <licenseUrl>https://en.wikipedia.org/wiki/GNU_General_Public_License</licenseUrl>
         <projectUrl>http://www.dapplo.net/blocks/Dapplo.Config.html</projectUrl>
         <iconUrl>http://www.dapplo.net/favicon.ico</iconUrl>
@@ -16,4 +16,10 @@
 		<copyright>Dapplo</copyright>
 		<tags>config ini</tags>
     </metadata>
+	<files>
+		<file src="bin\release\Dapplo.Config.pdb" target="lib\net451" />
+		<file src="bin\release\Dapplo.Config.dll" target="lib\net451" />
+		<file src="**\*.cs" exclude="**\obj\**\*.cs;**\release\**\*.cs" target="src" />
+	</files>
+		
 </package>

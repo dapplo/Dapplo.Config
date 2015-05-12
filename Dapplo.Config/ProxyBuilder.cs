@@ -23,6 +23,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace Dapplo.Config
 {
@@ -48,16 +49,23 @@ namespace Dapplo.Config
 		/// <returns>proxy</returns>
 		public static IPropertyProxy<T> GetOrCreateProxy<T>()
 		{
+			return (IPropertyProxy<T>)GetOrCreateProxy(typeof(T));
+		}
+
+		/// <summary>
+		/// This can be used for Caching the Proxy generation, if there is only one proxy instance needed you want to call this!
+		/// </summary>
+		/// <param name="type">Type to create </param>
+		/// <returns>proxy</returns>
+		public static IPropertyProxy GetOrCreateProxy(Type type) {
 			IPropertyProxy proxy;
-			lock (Cache)
-			{
-				if (!Cache.TryGetValue(typeof(T), out proxy))
-				{
-					proxy = CreateProxy<T>();
-					Cache.Add(typeof(T), proxy);
+			lock (Cache) {
+				if (!Cache.TryGetValue(type, out proxy)) {
+					proxy = CreateProxy(type);
+					Cache.Add(type, proxy);
 				}
 			}
-			return (IPropertyProxy<T>)proxy;
+			return proxy;
 		}
 
 		/// <summary>
@@ -66,10 +74,22 @@ namespace Dapplo.Config
 		/// </summary>
 		/// <typeparam name="T">Should be an interface</typeparam>
 		/// <returns>proxy</returns>
-		public static IPropertyProxy<T> CreateProxy<T>()
+		public static IPropertyProxy<T> CreateProxy<T>() {
+			return (IPropertyProxy<T>) CreateProxy(typeof(T));
+		}
+
+		/// <summary>
+		///     This method creates a proxy for the given type.
+		///     If the type implements certain interfaces, that are known, the matching proxy extensions are automatically added.
+		/// </summary>
+		/// <param name="type">Type to create </param>
+		/// <returns>proxy</returns>
+		public static IPropertyProxy CreateProxy(Type type)
 		{
-			var proxy = new PropertyProxy<T>();
-			Type[] interfaces = typeof(T).GetInterfaces();
+			var genericType = typeof(PropertyProxy<>).MakeGenericType(type);
+			var proxy = (IPropertyProxy)Activator.CreateInstance(genericType, null);
+			Type[] interfaces = type.GetInterfaces();
+			var addExtensionMethodInfo = genericType.GetMethod("AddExtension", BindingFlags.NonPublic | BindingFlags.Instance);
 			foreach (Type extensionType in ExtensionTypes)
 			{
 				var extensionAttributes = (ExtensionAttribute[])extensionType.GetCustomAttributes(typeof(ExtensionAttribute), false);
@@ -78,20 +98,20 @@ namespace Dapplo.Config
 					Type implementing = extensionAttribute.Implementing;
 					if (interfaces.Contains(implementing))
 					{
-						proxy.AddExtension(extensionType);
+						addExtensionMethodInfo.Invoke(proxy, new object[] { extensionType });
 					}
 					else if (implementing.IsGenericType && implementing.IsGenericTypeDefinition)
 					{
-						Type genericExtensionType = implementing.MakeGenericType(typeof(T));
+						Type genericExtensionType = implementing.MakeGenericType(type);
 						if (interfaces.Contains(genericExtensionType))
 						{
-							proxy.AddExtension(extensionType);
+							addExtensionMethodInfo.Invoke(proxy, new object[] { extensionType });
 						}
 					}
 				}
 			}
-			// Call the init, this will also proceyy any extensions
-			proxy.Init();
+			// Call the init, this will also process any extensions
+			genericType.GetMethod("Init", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(proxy, null);
 			return proxy;
 		}
 	}

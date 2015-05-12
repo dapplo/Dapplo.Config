@@ -44,7 +44,7 @@ namespace Dapplo.Config.Ini
 		/// <param name="encoding">Encoding</param>
 		/// <param name="token">CancellationToken</param>
 		/// <returns>dictionary of sections - dictionaries with the properties</returns>
-		public static async Task<Dictionary<string, Dictionary<string, string>>> ReadAsync(string path, Encoding encoding, CancellationToken token = default(CancellationToken))
+		public static async Task<IDictionary<string, IDictionary<string, string>>> ReadAsync(string path, Encoding encoding, CancellationToken token = default(CancellationToken))
 		{
 			if (File.Exists(path)) {
 				using (FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 1024)) {
@@ -61,9 +61,9 @@ namespace Dapplo.Config.Ini
 		/// <param name="encoding">Encoding</param>
 		/// <param name="token">CancellationToken</param>
 		/// <returns>dictionary of sections - dictionaries with the properties</returns>
-		public static async Task<Dictionary<string, Dictionary<string, string>>> ReadAsync(Stream stream, Encoding encoding, CancellationToken token = default(CancellationToken))
+		public static async Task<IDictionary<string, IDictionary<string, string>>> ReadAsync(Stream stream, Encoding encoding, CancellationToken token = default(CancellationToken))
 		{
-			Dictionary<string, Dictionary<string, string>> ini = new Dictionary<string, Dictionary<string, string>>();
+			IDictionary<string, IDictionary<string, string>> ini = new Dictionary<string, IDictionary<string, string>>();
 
 			// Do not dispose the reader, this will close the supplied stream and that is not our job!
 			var reader = new StreamReader(stream, encoding);
@@ -116,6 +116,65 @@ namespace Dapplo.Config.Ini
 				iniValue = iniValue.Replace("\\n", "\n");
 			}
 			return iniValue;
+		}
+
+		/// <summary>
+		/// Read an ini file to a Dictionary, each key is a iniSection and the value is a Dictionary with name and values.
+		/// </summary>
+		/// <param name="path">Path to file</param>
+		/// <param name="encoding">Encoding</param>
+		/// <param name="sections"></param>
+		/// <param name="sectionsComments">Optional</param>
+		/// <param name="token">CancellationToken</param>
+		public static async Task WriteAsync(string path, Encoding encoding, IDictionary<string, IDictionary<string, string>> sections, IDictionary<string, IDictionary<string, string>> sectionComments = null, CancellationToken token = default(CancellationToken)) {
+			using (FileStream fileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write, 1024)) {
+				await WriteAsync(fileStream, encoding, sections, sectionComments, token);
+			}
+		}
+
+		/// <summary>
+		/// Write the supplied properties to the stream
+		/// </summary>
+		/// <param name="stream"></param>
+		/// <param name="encoding"></param>
+		/// <param name="sections"></param>
+		/// <param name="sectionsComments">Optional</param>
+		/// <param name="token"></param>
+		public static async Task WriteAsync(Stream stream, Encoding encoding, IDictionary<string, IDictionary<string, string>> sections, IDictionary<string, IDictionary<string, string>> sectionsComments = null, CancellationToken token = default(CancellationToken)) {
+			var writer = new StreamWriter(stream, Encoding.UTF8);
+			try {
+				foreach (var sectionKey in sections.Keys) {
+					await writer.WriteLineAsync();
+					IDictionary<string, string> properties = sections[sectionKey];
+					if (properties.Count == 0) {
+						continue;
+					}
+					IDictionary<string, string> comments = null;
+					if (sectionsComments != null) {
+						sectionsComments.TryGetValue(sectionKey, out comments);
+						string sectionDescription;
+						// Section comment is stored with the sectionKey
+						if (comments != null && comments.TryGetValue(sectionKey, out sectionDescription)) {
+							if (!string.IsNullOrEmpty(sectionDescription)) {
+								await writer.WriteLineAsync(string.Format(";{0}", sectionDescription));
+							}
+						}
+					}
+					await writer.WriteLineAsync(string.Format("[{0}]", sectionKey));
+					foreach (var propertyName in properties.Keys) {
+						string propertyComment;
+						if (comments != null && comments.TryGetValue(propertyName, out propertyComment)) {
+							if (!string.IsNullOrEmpty(propertyComment)) {
+								await writer.WriteLineAsync(string.Format(";{0}", propertyComment));
+							}
+						}
+						await writer.WriteLineAsync(string.Format("{0}={1}", propertyName, WriteEscape(properties[propertyName])));
+					}
+				}
+			} finally {
+				// Make sure the values are flushed, otherwise the information is not in the stream
+				writer.Flush();
+			}
 		}
 
 		/// <summary>

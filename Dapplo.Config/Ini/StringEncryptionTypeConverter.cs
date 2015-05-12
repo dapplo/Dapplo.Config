@@ -168,9 +168,11 @@ namespace Dapplo.Config.Ini
 				return null;
 			}
 			string valueString = value as string;
-			if (!string.IsNullOrEmpty(valueString))
+			if (!string.IsNullOrWhiteSpace(valueString))
 			{
 				return Decrypt(valueString);
+			} else if (valueString != null) {
+				return valueString;
 			}
 
 			return base.ConvertFrom(context, culture, value);

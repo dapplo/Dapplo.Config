@@ -50,7 +50,7 @@ namespace Dapplo.Config.Test
 			using (var testMemoryStream = new MemoryStream())
 			{
 				await iniConfig.ReadFromStreamAsync(testMemoryStream);
-				var iniTest = await iniConfig.RegisterAndGet<IIniTest>();
+				var iniTest = await iniConfig.RegisterAndGetAsync<IIniTest>();
 				Assert.IsTrue(iniTest.WindowCornerCutShape.Count > 0);
 			}
 		}
@@ -60,7 +60,7 @@ namespace Dapplo.Config.Test
 		{
 			var iniConfig = new IniConfig("Dapplo", "dapplo");
 
-			var iniTest = await iniConfig.RegisterAndGet<IIniTest>();
+			var iniTest = await iniConfig.RegisterAndGetAsync<IIniTest>();
 
 			// Change some values
 			iniTest.Name = Name;
@@ -69,12 +69,16 @@ namespace Dapplo.Config.Test
 			// This value should not be written to the file
 			iniTest.NotWritten = "Whatever";
 
+			// Dictionary test
+			iniTest.SomeValues.Add("One", 1);
+
 			// Some "random" value that needs to be there again after reading.
 			long ticks = DateTimeOffset.Now.UtcTicks;
 			iniTest.Age = ticks;
 			using (var writeStream = new MemoryStream())
 			{
 				await iniConfig.WriteToStreamAsync(writeStream);
+				//await iniConfig.WriteAsync();
 
 				// Set the not written value to a testable value, this should not be read (and overwritten) by reading the ini file.
 				iniTest.NotWritten = TestValueForNonSerialized;
@@ -85,6 +89,9 @@ namespace Dapplo.Config.Test
 				// Test reading
 				writeStream.Seek(0, SeekOrigin.Begin);
 				await iniConfig.ReadFromStreamAsync(writeStream);
+				//await iniConfig.ReloadAsync(false);
+
+				Assert.IsTrue(iniTest.SomeValues.ContainsKey("One"));
 				Assert.AreEqual(Name, iniTest.Name);
 				Assert.AreEqual(FirstName, iniTest.FirstName);
 				Assert.AreEqual(ticks, iniTest.Age);

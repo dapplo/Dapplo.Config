@@ -50,6 +50,7 @@
     <Compile Include="Extension\Implementation\TransactionExtension.cs" />
     <Compile Include="Ini\IniPropertyBehaviorAttribute.cs" />
     <Compile Include="Ini\StringEncryptionTypeConverter.cs" />
+    <Compile Include="Ini\GenericDictionaryConverter.cs" />
     <Compile Include="Ini\StringToGenericListConverter.cs" />
     <Compile Include="Ini\IIniSection.cs" />
     <Compile Include="Ini\IniFile.cs" />

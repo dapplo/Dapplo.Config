@@ -108,6 +108,10 @@ namespace Dapplo.Config
 		/// <param name="propertyName">propertyName</param>
 		/// <returns>GetInfo</returns>
 		GetInfo Get(string propertyName);
+
+		object PropertyObject {
+			get;
+		}
 	}
 
 	/// <summary>
@@ -120,7 +124,7 @@ namespace Dapplo.Config
 		///     Get the proxy object which "implements" the interface.
 		///     Use this to access the values.
 		/// </summary>
-		T PropertyObject
+		new T PropertyObject
 		{
 			get;
 		}
