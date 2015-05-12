@@ -51,7 +51,7 @@ namespace Dapplo.Config.Ini
 		private bool _initialReadDone;
 		private IDictionary<string, IDictionary<string, string>> _defaults;
 		private IDictionary<string, IDictionary<string, string>> _constants;
-		private IDictionary<string, IDictionary<string, string>> _ini;
+		private IDictionary<string, IDictionary<string, string>> _ini = new SortedDictionary<string, IDictionary<string, string>>();
 
 		/// <summary>
 		/// Setup the management of an .ini file location
@@ -250,7 +250,10 @@ namespace Dapplo.Config.Ini
 
 			_defaults = await IniFile.ReadAsync( CreateFileLocation(true, Defaults, _fixedDirectory), Encoding.UTF8, token);
 			_constants = await IniFile.ReadAsync(CreateFileLocation(true, Constants, _fixedDirectory), Encoding.UTF8, token);
-			_ini = await IniFile.ReadAsync(_iniFile, Encoding.UTF8, token);
+			var newIni = await IniFile.ReadAsync(_iniFile, Encoding.UTF8, token);
+			if (newIni != null) {
+				_ini = newIni;
+			}
 			_initialReadDone = true;
 
 			// Reset the sections that have already been registered
