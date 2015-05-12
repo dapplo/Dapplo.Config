@@ -160,7 +160,6 @@ namespace Dapplo.Config.Ini
 		/// <returns>Task</returns>
 		public async Task WriteToStreamAsync(Stream stream, CancellationToken token = default(CancellationToken))
 		{
-			IDictionary<string, IDictionary<string, string>> sections = new SortedDictionary<string, IDictionary<string, string>>();
 			IDictionary<string, IDictionary<string, string>> sectionsComments = new SortedDictionary<string, IDictionary<string, string>>();
 
 			// Loop over the "registered" sections
@@ -180,8 +179,10 @@ namespace Dapplo.Config.Ini
 					// Before we are going to write, we need to check if the section header "[Sectionname]" is already written.
 					// If not, do so now before writing the properties of the section itself
 					if (!isSectionCreated) {
-
-						sections.Add(section.GetSectionName(), sectionProperties);
+						if (_ini.ContainsKey(section.GetSectionName())) {
+							_ini.Remove(section.GetSectionName());
+						}
+						_ini.Add(section.GetSectionName(), sectionProperties);
 						sectionsComments.Add(section.GetSectionName(), sectionComments);
 
 						string description = section.GetSectionDescription();
@@ -215,7 +216,10 @@ namespace Dapplo.Config.Ini
 						IDictionary<string, string> dictionaryProperties = (IDictionary<string, string>)converter.ConvertTo(context, CultureInfo.CurrentCulture, iniValue.Value, typeof(IDictionary<string, string>));
 						// Use this to build a separate "section" which is called "[section-propertyname]"
 						string dictionaryIdentifier = string.Format("{0}-{1}", section.GetSectionName(), iniValue.IniPropertyName);
-						sections.Add(dictionaryIdentifier, dictionaryProperties);
+						if (_ini.ContainsKey(dictionaryIdentifier)) {
+							_ini.Remove(dictionaryIdentifier);
+						}
+						_ini.Add(dictionaryIdentifier, dictionaryProperties);
 						if (!string.IsNullOrWhiteSpace(iniValue.Description)) {
 							IDictionary<string, string> dictionaryComments = new SortedDictionary<string, string>();
 							dictionaryComments.Add(dictionaryIdentifier, iniValue.Description);
@@ -230,7 +234,7 @@ namespace Dapplo.Config.Ini
 					sectionProperties.Add(iniValue.IniPropertyName, writingValue);
 				}
 			}
-			await IniFile.WriteAsync(stream, Encoding.UTF8, sections, sectionsComments, token);
+			await IniFile.WriteAsync(stream, Encoding.UTF8, _ini, sectionsComments, token);
 		}
 
 		/// <summary>
