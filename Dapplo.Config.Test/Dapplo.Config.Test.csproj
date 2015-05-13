@@ -39,7 +39,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Windows" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -56,6 +59,7 @@
   <ItemGroup>
     <Compile Include="DescriptionTest.cs" />
     <Compile Include="NotifyPropertyChangingTest.cs" />
+    <Compile Include="TestInterfaces\CoreConfiguration.cs" />
     <Compile Include="TestInterfaces\IDescriptionTest.cs" />
     <Compile Include="TestInterfaces\IBassicAssignTest.cs" />
     <Compile Include="TestInterfaces\IDefaultValueTest.cs" />
@@ -64,12 +68,14 @@
     <Compile Include="TagAttributeTest.cs" />
     <Compile Include="TestInterfaces\INotifyPropertyChangingTest.cs" />
     <Compile Include="TestInterfaces\ITagAttributeTest.cs" />
+    <Compile Include="TestInterfaces\IRegistryTest.cs" />
     <Compile Include="TestInterfaces\ITransactionTest.cs" />
     <Compile Include="TestInterfaces\IWriteProtectTest.cs" />
     <Compile Include="BasicAssignTest.cs" />
     <Compile Include="NotifyPropertyChangedTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DefaultValueTest.cs" />
+    <Compile Include="RegistryTest .cs" />
     <Compile Include="TransactionTest.cs" />
     <Compile Include="IniTest.cs" />
     <Compile Include="TypeConverterTest.cs" />

@@ -18,25 +18,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-using System;
 
-namespace Dapplo.Config.Ini
+using Dapplo.Config.WindowsRegistry;
+using Microsoft.Win32;
+using System.Collections.Generic;
+
+namespace Dapplo.Config.Test.TestInterfaces
 {
-	[AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
-	public class IniSectionAttribute : Attribute
+	/// <summary>
+	/// This is the interface under test
+	/// </summary>
+	[Registry(@"Software\Microsoft\Windows\CurrentVersion", Hive = RegistryHive.CurrentUser, View = RegistryView.Registry32)]
+	public interface IRegistryTest : IRegistry
 	{
-		private string _name;
-		public IniSectionAttribute(string name)
+		[RegistryProperty(@"Run", Hive = RegistryHive.LocalMachine)]
+		Dictionary<string, object> LMRun32
 		{
-			_name = name;
+			get;
+			set;
 		}
-
-		public string Name
-		{
-			get
-			{
-				return _name;
-			}
+		[RegistryProperty(@"Run", Hive = RegistryHive.LocalMachine, View = RegistryView.Registry64)]
+		Dictionary<string, object> LMRun64 {
+			get;
+			set;
+		}
+		[RegistryProperty(@"Run")]
+		Dictionary<string, object> CURun32 {
+			get;
+			set;
+		}
+		[RegistryProperty(@"Run", View = RegistryView.Registry64)]
+		Dictionary<string, object> CURun64 {
+			get;
+			set;
 		}
 	}
 }

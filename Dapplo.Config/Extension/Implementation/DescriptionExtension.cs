@@ -45,8 +45,7 @@ namespace Dapplo.Config.Extension.Implementation
 		/// </summary>
 		private void GetDescription(MethodCallInfo methodCallInfo)
 		{
-			Type proxiedType = typeof(T);
-			PropertyInfo propertyInfo = proxiedType.GetProperty(methodCallInfo.PropertyNameOf(0));
+			PropertyInfo propertyInfo = typeof(T).GetProperty(methodCallInfo.PropertyNameOf(0));
 			methodCallInfo.ReturnValue = propertyInfo.GetDescription();
 		}
 	}

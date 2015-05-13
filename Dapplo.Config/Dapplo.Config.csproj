@@ -64,6 +64,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyProxy.cs" />
     <Compile Include="ProxyBuilder.cs" />
+    <Compile Include="WindowsRegistry\Implementation\RegistryExtension.cs" />
+    <Compile Include="WindowsRegistry\RegistryAttribute.cs" />
+    <Compile Include="WindowsRegistry\RegistryPropertyAttribute.cs" />
+    <Compile Include="WindowsRegistry\IRegistryConfig.cs" />
+    <Compile Include="WindowsRegistry\RegistryConfig.cs" />
     <Compile Include="Support\GetInfo.cs" />
     <Compile Include="Support\GetSetInfo.cs" />
     <Compile Include="Support\Getter.cs" />
