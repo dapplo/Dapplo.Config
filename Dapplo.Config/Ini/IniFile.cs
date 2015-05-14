@@ -19,6 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -147,6 +148,8 @@ namespace Dapplo.Config.Ini
 		public static async Task WriteAsync(Stream stream, Encoding encoding, IDictionary<string, IDictionary<string, string>> sections, IDictionary<string, IDictionary<string, string>> sectionsComments = null, CancellationToken token = default(CancellationToken))
 		{
 			var writer = new StreamWriter(stream, Encoding.UTF8);
+
+			Exception exception = null;
 			try
 			{
 				foreach (var sectionKey in sections.Keys)
@@ -194,10 +197,17 @@ namespace Dapplo.Config.Ini
 					}
 				}
 			}
-			finally
+			catch (Exception ex) {
+				// Store Exception so it can be thrown later
+				exception = ex;
+			}
+			// Make sure the values are flushed, otherwise the information is not in the stream
+			await writer.FlushAsync();
+
+			// Throw the exception, if we caught one
+			if (exception != null)
 			{
-				// Make sure the values are flushed, otherwise the information is not in the stream
-				await writer.FlushAsync();
+				throw exception;
 			}
 		}
 
