@@ -151,6 +151,10 @@ namespace Dapplo.Config.Ini
 			{
 				foreach (var sectionKey in sections.Keys)
 				{
+					if (token.IsCancellationRequested)
+					{
+						break;
+					}
 					await writer.WriteLineAsync();
 					IDictionary<string, string> properties = sections[sectionKey];
 					if (properties.Count == 0)
@@ -174,6 +178,10 @@ namespace Dapplo.Config.Ini
 					await writer.WriteLineAsync(string.Format("[{0}]", sectionKey));
 					foreach (var propertyName in properties.Keys)
 					{
+						if (token.IsCancellationRequested)
+						{
+							break;
+						}
 						string propertyComment;
 						if (comments != null && comments.TryGetValue(propertyName, out propertyComment))
 						{
@@ -189,7 +197,7 @@ namespace Dapplo.Config.Ini
 			finally
 			{
 				// Make sure the values are flushed, otherwise the information is not in the stream
-				writer.Flush();
+				await writer.FlushAsync();
 			}
 		}
 

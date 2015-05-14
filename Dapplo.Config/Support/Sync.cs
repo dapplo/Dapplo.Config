@@ -36,9 +36,9 @@ namespace Dapplo.Config.Support
 	public class Sync : IDisposable
 	{
 		private readonly SemaphoreSlim _syncSemaphore;
-		public static async Task<Sync> Wait(SemaphoreSlim syncSemaphore)
+		public static async Task<Sync> Wait(SemaphoreSlim syncSemaphore, CancellationToken token = default(CancellationToken))
 		{
-			await syncSemaphore.WaitAsync();
+			await syncSemaphore.WaitAsync(token);
 			return new Sync(syncSemaphore);
 		}
 		private Sync(SemaphoreSlim syncSemaphore)
