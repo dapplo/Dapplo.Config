@@ -58,5 +58,13 @@ namespace Dapplo.Config.Test.TestInterfaces
 			get;
 			set;
 		}
+
+		[RegistryProperty(@"\Software\Microsoft\Windows NT\CurrentVersion", "ProductName", Hive = RegistryHive.LocalMachine, View = RegistryView.Default)]
+		string ProductName
+		{
+			get;
+			set;
+		}
+
 	}
 }

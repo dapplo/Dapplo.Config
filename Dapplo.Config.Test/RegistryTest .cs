@@ -34,13 +34,9 @@ namespace Dapplo.Config.Test
 		public void TestRegistryRead()
 		{
 			var registryTest = ProxyBuilder.GetOrCreateProxy<IRegistryTest>().PropertyObject;
-			var keys1 = registryTest.LMRun32;
-			var keys2 = registryTest.LMRun64;
-			var keys3 = registryTest.CURun32;
-			var keys4 = registryTest.CURun64;
 
-			// assume that SOME Run key in 32/64 LocalMachine/CurrentUser is set
-			Assert.IsTrue(keys1.Count >= 1 || keys2.Count >= 1 || keys3.Count >= 1 || keys4.Count >= 1);
+			// assume that the product name is set
+			Assert.IsNotNull(registryTest.ProductName);
 		}
 	}
 }

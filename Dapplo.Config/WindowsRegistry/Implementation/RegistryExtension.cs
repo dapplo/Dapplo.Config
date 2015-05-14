@@ -75,6 +75,10 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 			{
 				throw new ArgumentException(string.Format("{0} doesn't have a path mapping", propertyInfo.Name));
 			}
+			if (path.StartsWith(@"\"))
+			{
+				path = path.Remove(0,1);
+			}
 			RegistryHive hive = _registryAttribute.Hive;
 			if (registryPropertyAttribute.HasHive)
 			{
