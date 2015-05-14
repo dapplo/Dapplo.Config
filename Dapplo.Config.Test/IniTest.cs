@@ -60,6 +60,7 @@ namespace Dapplo.Config.Test
 		{
 			var iniConfig = new IniConfig("Dapplo", "dapplo");
 
+			var coreConfig = await iniConfig.RegisterAndGetAsync<CoreConfiguration>();
 			var iniTest = await iniConfig.RegisterAndGetAsync<IIniTest>();
 
 			// Change some values

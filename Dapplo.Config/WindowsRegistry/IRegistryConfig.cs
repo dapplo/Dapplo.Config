@@ -18,25 +18,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+using Dapplo.Config.Extension;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Dapplo.Config.Ini
-{
-	[AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
-	public class IniSectionAttribute : Attribute
-	{
-		private string _name;
-		public IniSectionAttribute(string name)
-		{
-			_name = name;
-		}
+namespace Dapplo.Config.WindowsRegistry {
+	public interface IRegistry : IDefaultValue, IWriteProtectProperties {
+		string PathFor(string propertyName);
+	}
 
-		public string Name
-		{
-			get
-			{
-				return _name;
-			}
-		}
+	public interface IRegistry<T> : IRegistry, IDefaultValue<T>, IWriteProtectProperties<T> {
+		/// <summary>
+		/// Return the registry path for a property
+		/// </summary>
+		/// <typeparam name="TProp"></typeparam>
+		/// <param name="propertyExpression"></param>
+		/// <returns>the path to a property</returns>
+		string PathFor<TProp>(Expression<Func<T, TProp>> propertyExpression);
 	}
 }

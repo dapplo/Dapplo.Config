@@ -1,4 +1,4 @@
-﻿/*
+/*
  * dapplo - building blocks for desktop applications
  * Copyright (C) 2015 Robin Krom
  * 
@@ -18,25 +18,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-using System;
 
-namespace Dapplo.Config.Ini
+using Dapplo.Config.Test.TestInterfaces;
+using Dapplo.Config.WindowsRegistry;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
+
+namespace Dapplo.Config.Test
 {
-	[AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
-	public class IniSectionAttribute : Attribute
+	/// <summary>
+	/// This test class tests the registry capabilities of the proxy
+	/// </summary>
+	[TestClass]
+	public class RegistryTest 
 	{
-		private string _name;
-		public IniSectionAttribute(string name)
+		[TestMethod]
+		public async Task TestRegistryRead()
 		{
-			_name = name;
+			var registryConfig = new RegistryConfig();
+			var registryTest = await registryConfig.RegisterAndGetAsync<IRegistryTest>();
+			// assume that SOME Run key in 32/64 LocalMachine/CurrentUser is set
+			Assert.IsTrue(registryTest.LMRun32.Count > 1 || registryTest.LMRun64.Count > 1 || registryTest.CURun32.Count > 1 || registryTest.CURun64.Count > 1);
 		}
 
-		public string Name
-		{
-			get
-			{
-				return _name;
-			}
-		}
 	}
 }

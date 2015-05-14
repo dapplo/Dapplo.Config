@@ -18,25 +18,50 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+using Microsoft.Win32;
 using System;
 
-namespace Dapplo.Config.Ini
+namespace Dapplo.Config.WindowsRegistry
 {
+	/// <summary>
+	/// Specify the base settings for the registry property proxy interface
+	/// </summary>
 	[AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
-	public class IniSectionAttribute : Attribute
+	public class RegistryAttribute : Attribute
 	{
-		private string _name;
-		public IniSectionAttribute(string name)
-		{
-			_name = name;
+		public RegistryAttribute() {
+			View = RegistryView.Default;
+			Hive = RegistryHive.CurrentUser;
 		}
 
-		public string Name
+		public RegistryAttribute(string path) : this()
 		{
-			get
-			{
-				return _name;
-			}
+			Path = path;
+		}
+
+		/// <summary>
+		/// What hive to use, see RegistryHive
+		/// </summary>
+		public RegistryHive Hive {
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// What view to use, default is Default
+		/// </summary>
+		public RegistryView View {
+			get;
+			set;
+		}
+		
+		/// <summary>
+		/// Path to key
+		/// </summary>
+		public string Path {
+			get;
+			set;
 		}
 	}
 }

@@ -93,8 +93,7 @@ namespace Dapplo.Config.Extension.Implementation
 		/// </summary>
 		private void GetDefaultValue(MethodCallInfo methodCallInfo)
 		{
-			Type proxiedType = typeof(T);
-			PropertyInfo propertyInfo = proxiedType.GetProperty(methodCallInfo.PropertyNameOf(0));
+			PropertyInfo propertyInfo = typeof(T).GetProperty(methodCallInfo.PropertyNameOf(0));
 			methodCallInfo.ReturnValue = GetConvertedDefaultValue(propertyInfo);
 		}
 
@@ -103,8 +102,7 @@ namespace Dapplo.Config.Extension.Implementation
 		/// </summary>
 		private void RestoreToDefault(MethodCallInfo methodCallInfo)
 		{
-			Type proxiedType = typeof(T);
-			PropertyInfo propertyInfo = proxiedType.GetProperty(methodCallInfo.PropertyNameOf(0));
+			PropertyInfo propertyInfo = typeof(T).GetProperty(methodCallInfo.PropertyNameOf(0));
 			InitProperty(propertyInfo);
 		}
 	}
