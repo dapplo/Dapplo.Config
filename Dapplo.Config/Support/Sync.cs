@@ -23,7 +23,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Dapplo.Config.Support {
+namespace Dapplo.Config.Support
+{
 	/// <summary>
 	/// A simple helper to synchronize async code
 	/// Usage:
@@ -32,17 +33,21 @@ namespace Dapplo.Config.Support {
 	///		// Do your stuff
 	///	}
 	/// </summary>
-	public class Sync : IDisposable {
+	public class Sync : IDisposable
+	{
 		private readonly SemaphoreSlim _syncSemaphore;
-		public static async Task<Sync> Wait(SemaphoreSlim syncSemaphore) {
+		public static async Task<Sync> Wait(SemaphoreSlim syncSemaphore)
+		{
 			await syncSemaphore.WaitAsync();
 			return new Sync(syncSemaphore);
 		}
-		private Sync(SemaphoreSlim syncSemaphore) {
+		private Sync(SemaphoreSlim syncSemaphore)
+		{
 			_syncSemaphore = syncSemaphore;
 		}
 
-		public void Dispose() {
+		public void Dispose()
+		{
 			_syncSemaphore.Release();
 		}
 	}

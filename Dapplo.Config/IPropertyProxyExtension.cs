@@ -33,5 +33,13 @@ namespace Dapplo.Config
 		/// </summary>
 		/// <param name="propertyInfo"></param>
 		void InitProperty(PropertyInfo propertyInfo);
+
+		/// <summary>
+		/// Specify the Init-Order, low first and high later 
+		/// </summary>
+		int InitOrder
+		{
+			get;
+		}
 	}
 }

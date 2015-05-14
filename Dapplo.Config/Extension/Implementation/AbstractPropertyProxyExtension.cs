@@ -38,6 +38,18 @@ namespace Dapplo.Config.Extension.Implementation
 		}
 
 		/// <summary>
+		/// This returns 0, which means somewhere in the middle
+		/// If an extension needs to be called last, it should override this and return int.MaxValue
+		/// </summary>
+		public virtual int InitOrder
+		{
+			get
+			{
+				return 0;
+			}
+		}
+
+		/// <summary>
 		/// Force that the type extends the type we build an extension for
 		/// </summary>
 		/// <param name="extensionType"></param>

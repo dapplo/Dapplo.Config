@@ -26,6 +26,7 @@ using System.Runtime.Remoting.Messaging;
 using System.Runtime.Remoting.Proxies;
 using Dapplo.Config.Support;
 using System.Linq.Expressions;
+using System.Linq;
 
 namespace Dapplo.Config
 {
@@ -66,10 +67,16 @@ namespace Dapplo.Config
 		internal void Init()
 		{
 			Type proxiedType = typeof(T);
+			//Init in the right order
+			var extensions = from sortedExtension in _extensions
+							 orderby sortedExtension.InitOrder ascending
+							 select sortedExtension;
+
 			foreach (PropertyInfo propertyInfo in proxiedType.GetProperties())
 			{
 				_propertyTypes[propertyInfo.Name] = propertyInfo.PropertyType;
-				foreach (var extension in _extensions)
+
+				foreach (var extension in extensions)
 				{
 					extension.InitProperty(propertyInfo);
 				}
@@ -178,8 +185,10 @@ namespace Dapplo.Config
 		/// <summary>
 		/// Get the property object which this Proxy maintains
 		/// </summary>
-		T IPropertyProxy<T>.PropertyObject {
-			get {
+		T IPropertyProxy<T>.PropertyObject
+		{
+			get
+			{
 				return _transparentProxy;
 			}
 		}
@@ -235,6 +244,7 @@ namespace Dapplo.Config
 			if (getInfo.PropertyName != null && _properties.TryGetValue(getInfo.PropertyName, out value))
 			{
 				getInfo.Value = value;
+				getInfo.HasValue = true;
 			}
 			else
 			{
@@ -244,6 +254,7 @@ namespace Dapplo.Config
 				{
 					getInfo.Value = Activator.CreateInstance(propType);
 				}
+				getInfo.HasValue = false;
 			}
 		}
 
@@ -317,14 +328,18 @@ namespace Dapplo.Config
 		/// </summary>
 		/// <param name="propertyName">propertyName</param>
 		/// <returns>GetInfo</returns>
-		public GetInfo Get(string propertyName) {
-			var getInfo = new GetInfo {
+		public GetInfo Get(string propertyName)
+		{
+			var getInfo = new GetInfo
+			{
 				PropertyName = propertyName,
 				CanContinue = true
 			};
-			foreach (Getter getter in _getters) {
+			foreach (Getter getter in _getters)
+			{
 				getter.GetterAction(getInfo);
-				if (!getInfo.CanContinue || getInfo.Error != null) {
+				if (!getInfo.CanContinue || getInfo.Error != null)
+				{
 					break;
 				}
 			}
@@ -338,7 +353,8 @@ namespace Dapplo.Config
 		/// <param name="propertyName">propertyName</param>
 		/// <param name="value">object</param>
 		/// <returns>SetInfo</returns>
-		public SetInfo Set(string propertyName, object newValue) {
+		public SetInfo Set(string propertyName, object newValue)
+		{
 			object oldValue;
 			bool hasOldValue = _properties.TryGetValue(propertyName, out oldValue);
 			var setInfo = new SetInfo

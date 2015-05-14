@@ -3,13 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Dapplo.Config.Test.TestInterfaces {
-	public enum WindowCaptureMode {
+namespace Dapplo.Config.Test.TestInterfaces
+{
+	public enum WindowCaptureMode
+	{
 		Screen,
 		GDI,
 		Aero,
@@ -17,13 +16,15 @@ namespace Dapplo.Config.Test.TestInterfaces {
 		Auto
 	}
 
-	public enum BuildStates {
+	public enum BuildStates
+	{
 		UNSTABLE,
 		RELEASE_CANDIDATE,
 		RELEASE
 	}
 
-	public enum ClickActions {
+	public enum ClickActions
+	{
 		DO_NOTHING,
 		OPEN_LAST_IN_EXPLORER,
 		OPEN_LAST_IN_EDITOR,
@@ -34,7 +35,8 @@ namespace Dapplo.Config.Test.TestInterfaces {
 	/// <summary>
 	///     The capture mode for Greenshot
 	/// </summary>
-	public enum CaptureMode {
+	public enum CaptureMode
+	{
 		None,
 		Region,
 		FullScreen,
@@ -47,13 +49,15 @@ namespace Dapplo.Config.Test.TestInterfaces {
 		Import
 	}; //, Video };
 
-	public enum ScreenCaptureMode {
+	public enum ScreenCaptureMode
+	{
 		Auto,
 		FullScreen,
 		Fixed
 	};
 
-	public enum OutputFormat {
+	public enum OutputFormat
+	{
 		bmp,
 		gif,
 		jpg,
@@ -65,24 +69,30 @@ namespace Dapplo.Config.Test.TestInterfaces {
 	/// <summary>
 	/// A container for the ImageOutputSettings
 	/// </summary>
-	public class ImageOutputSettings {
-		public string Name {
+	public class ImageOutputSettings
+	{
+		public string Name
+		{
 			get;
 			set;
 		}
-		public OutputFormat Format {
+		public OutputFormat Format
+		{
 			get;
 			set;
 		}
-		public int JPGQuality {
+		public int JPGQuality
+		{
 			get;
 			set;
 		}
-		public bool AutoQuantize {
+		public bool AutoQuantize
+		{
 			get;
 			set;
 		}
-		public bool ForceQuantize {
+		public bool ForceQuantize
+		{
 			get;
 			set;
 		}
@@ -90,7 +100,8 @@ namespace Dapplo.Config.Test.TestInterfaces {
 		/// <summary>
 		/// A list of effects that need to be applied, the string is a key to the effect information
 		/// </summary>
-		public List<string> Effects {
+		public List<string> Effects
+		{
 			get;
 			set;
 		}
@@ -101,22 +112,26 @@ namespace Dapplo.Config.Test.TestInterfaces {
 	/// </summary>
 	[Description("Greenshot Core configuration")]
 	[IniSection("Core")]
-	public interface CoreConfiguration : IIniSection {
+	public interface CoreConfiguration : IIniSection
+	{
 		#region General
 		[Description("The language in IETF format (e.g. en-US)"), DefaultValue("en-US")]
-		string Language {
+		string Language
+		{
 			get;
 			set;
 		}
 
 		[Description("Is this the first time launch?"), DefaultValue(true)]
-		bool IsFirstLaunch {
+		bool IsFirstLaunch
+		{
 			get;
 			set;
 		}
 
 		[Description("The wav-file to play when a capture is taken, loaded only once at the Greenshot startup"), DefaultValue("default")]
-		string NotificationSound {
+		string NotificationSound
+		{
 			get;
 			set;
 		}
@@ -124,172 +139,200 @@ namespace Dapplo.Config.Test.TestInterfaces {
 
 		#region Hotkeys
 		[Description("Hotkey for starting the region capture"), DefaultValue("PrintScreen")]
-		string RegionHotkey {
+		string RegionHotkey
+		{
 			get;
 			set;
 		}
 
 		[Description("Hotkey for starting the window capture"), DefaultValue("Alt + PrintScreen")]
-		string WindowHotkey {
+		string WindowHotkey
+		{
 			get;
 			set;
 		}
 
 		[Description("Hotkey for starting the fullscreen capture"), DefaultValue("Ctrl + PrintScreen")]
-		string FullscreenHotkey {
+		string FullscreenHotkey
+		{
 			get;
 			set;
 		}
 
 		[Description("Hotkey for starting the last region capture"), DefaultValue("Shift + PrintScreen")]
-		string LastregionHotkey {
+		string LastregionHotkey
+		{
 			get;
 			set;
 		}
 
 		[Description("Hotkey for starting the IE capture"), DefaultValue("Shift + Ctrl + PrintScreen")]
-		string IEHotkey {
+		string IEHotkey
+		{
 			get;
 			set;
 		}
 		#endregion
 
 		[Description("Which destinations? Possible options (more might be added by plugins) are: Editor, FileDefault, FileWithDialog, Clipboard, Printer, EMail, Picker"), DefaultValue("Picker"), TypeConverter(typeof(StringToGenericListConverter<string>))]
-		List<string> OutputDestinations {
+		List<string> OutputDestinations
+		{
 			get;
 			set;
 		}
 
 		#region Clipboard
 		[Description("Exports to clipboard contain PNG"), DefaultValue(true)]
-		bool ClipboardWritePNG {
+		bool ClipboardWritePNG
+		{
 			get;
 			set;
 		}
 
 		[Description("Exports to clipboard contain HTML"), DefaultValue(false)]
-		bool ClipboardWriteHTML {
+		bool ClipboardWriteHTML
+		{
 			get;
 			set;
 		}
 		[Description("If HTML is exported to the clipboard, use a Data URL (Inline image)"), DefaultValue(false)]
-		bool ClipboardWriteHTMLDataUrl {
+		bool ClipboardWriteHTMLDataUrl
+		{
 			get;
 			set;
 		}
 		[Description("Exports to clipboard contain DIB"), DefaultValue(true)]
-		bool ClipboardWriteDIB {
+		bool ClipboardWriteDIB
+		{
 			get;
 			set;
 		}
 
 		[Description("Exports to clipboard contain a Bitmap"), DefaultValue(true)]
-		bool ClipboardWriteBITMAP {
+		bool ClipboardWriteBITMAP
+		{
 			get;
 			set;
 		}
 
 		[Description("Enable a special DIB clipboard reader"), DefaultValue(true), Category("Expert")]
-		bool EnableSpecialDIBClipboardReader {
+		bool EnableSpecialDIBClipboardReader
+		{
 			get;
 			set;
 		}
 		#endregion
 
 		[Description("Specify which destinations, and in what order, are shown in the destination picker. Empty (default) means all.")]
-		List<string> PickerDestinations {
+		List<string> PickerDestinations
+		{
 			get;
 			set;
 		}
 
 		#region Capture
 		[Description("Should the mouse be captured?"), DefaultValue(true)]
-		bool CaptureMousepointer {
+		bool CaptureMousepointer
+		{
 			get;
 			set;
 		}
 
 		[Description("Use interactive window selection to capture? (false=Capture active window)"), DefaultValue(false)]
-		bool CaptureWindowsInteractive {
+		bool CaptureWindowsInteractive
+		{
 			get;
 			set;
 		}
 
 		[Description("Capture delay in millseconds."), DefaultValue(100), Category("Expert")]
-		int CaptureDelay {
+		int CaptureDelay
+		{
 			get;
 			set;
 		}
 
 		[Description("The capture mode used to capture a screen. (Auto, FullScreen, Fixed)"), DefaultValue(ScreenCaptureMode.Auto)]
-		ScreenCaptureMode ScreenCaptureMode {
+		ScreenCaptureMode ScreenCaptureMode
+		{
 			get;
 			set;
 		}
 
 		[Description("The screen number to capture when using ScreenCaptureMode Fixed."), DefaultValue(1)]
-		int ScreenToCapture {
+		int ScreenToCapture
+		{
 			get;
 			set;
 		}
 
 		[Description("The capture mode used to capture a Window (Screen, GDI, Aero, AeroTransparent, Auto)."), DefaultValue(WindowCaptureMode.Auto)]
-		WindowCaptureMode WindowCaptureMode {
+		WindowCaptureMode WindowCaptureMode
+		{
 			get;
 			set;
 		}
 
 		[Description("Enable/disable capture all children, very slow but will make it possible to use this information in the editor."), DefaultValue(false), Category("Expert")]
-		bool WindowCaptureAllChildLocations {
+		bool WindowCaptureAllChildLocations
+		{
 			get;
 			set;
 		}
 
 		[Description("The background color for a DWM window capture.")]
-		Color DWMBackgroundColor {
+		Color DWMBackgroundColor
+		{
 			get;
 			set;
 		}
 
 		//[IniProperty("PlayCameraSound", LanguageKey = "settings_playsound", Description = "Play a camera sound after taking a capture.", DefaultValue = "false")]
 		[Description("Play a camera sound after taking a capture."), DefaultValue(false)]
-		bool PlayCameraSound {
+		bool PlayCameraSound
+		{
 			get;
 			set;
 		}
 
 		[Description("Flash the screen after taking a capture."), DefaultValue(true)]
-		bool ShowFlashlight {
+		bool ShowFlashlight
+		{
 			get;
 			set;
 		}
 
 		[Description("Remove the corners from a window capture"), DefaultValue(true), Category("Expert")]
-		bool WindowCaptureRemoveCorners {
+		bool WindowCaptureRemoveCorners
+		{
 			get;
 			set;
 		}
 
 		[Description("Sets if the zoomer is enabled"), DefaultValue(true)]
-		bool ZoomerEnabled {
+		bool ZoomerEnabled
+		{
 			get;
 			set;
 		}
 
 		[Description("The cutshape which is used to remove the window corners, is mirrorred for all corners)"), DefaultValue("5,3,2,1,1"), Category("Expert"), TypeConverter(typeof(StringToGenericListConverter<int>))]
-		List<int> WindowCornerCutShape {
+		List<int> WindowCornerCutShape
+		{
 			get;
 			set;
 		}
 
 		[Description("List of products for which GDI capturing is skipped (using fallback)."), DefaultValue("IntelliJ IDEA"), Category("Expert"), TypeConverter(typeof(StringToGenericListConverter<string>))]
-		List<string> NoGDICaptureForProduct {
+		List<string> NoGDICaptureForProduct
+		{
 			get;
 			set;
 		}
 
 		[Description("List of productnames for which DWM capturing is skipped (using fallback)."), DefaultValue("Citrix ICA Client"), Category("Expert"), TypeConverter(typeof(StringToGenericListConverter<string>))]
-		List<string> NoDWMCaptureForProduct {
+		List<string> NoDWMCaptureForProduct
+		{
 			get;
 			set;
 		}
@@ -297,67 +340,78 @@ namespace Dapplo.Config.Test.TestInterfaces {
 
 		#region Output
 		[Description("Output file path.")]
-		string OutputFilePath {
+		string OutputFilePath
+		{
 			get;
 			set;
 		}
 
 		[Description("If the target file already exists True will make Greenshot always overwrite and False will display a 'Save-As' dialog."), DefaultValue(true)]
-		bool OutputFileAllowOverwrite {
+		bool OutputFileAllowOverwrite
+		{
 			get;
 			set;
 		}
 
 		[Description("Filename pattern for screenshot."), DefaultValue("${capturetime:d\"yyyy-MM-dd HH_mm_ss\"}-${title}")]
-		string OutputFileFilenamePattern {
+		string OutputFileFilenamePattern
+		{
 			get;
 			set;
 		}
 
 		[Description("Default file type for writing screenshots. (bmp, gif, jpg, png, tiff)"), DefaultValue(OutputFormat.png)]
-		OutputFormat OutputFileFormat {
+		OutputFormat OutputFileFormat
+		{
 			get;
 			set;
 		}
 
 		[Description("If set to true, than the colors of the output file are reduced to 256 (8-bit) colors"), DefaultValue(false)]
-		bool OutputFileReduceColors {
+		bool OutputFileReduceColors
+		{
 			get;
 			set;
 		}
 
 		[Description("If set to true the amount of colors is counted and if smaller than 256 the color reduction is automatically used."), DefaultValue(false)]
-		bool OutputFileAutoReduceColors {
+		bool OutputFileAutoReduceColors
+		{
 			get;
 			set;
 		}
 
 		[Description("When saving a screenshot, copy the path to the clipboard?"), DefaultValue(true)]
-		bool OutputFileCopyPathToClipboard {
+		bool OutputFileCopyPathToClipboard
+		{
 			get;
 			set;
 		}
 
 		[Description("SaveAs Full path")]
-		string OutputFileAsFullpath {
+		string OutputFileAsFullpath
+		{
 			get;
 			set;
 		}
 
 		[Description("JPEG file save quality in %."), DefaultValue(80)]
-		int OutputFileJpegQuality {
+		int OutputFileJpegQuality
+		{
 			get;
 			set;
 		}
 
 		[Description("Ask for the quality before saving?"), DefaultValue(false)]
-		bool OutputFilePromptQuality {
+		bool OutputFilePromptQuality
+		{
 			get;
 			set;
 		}
 
 		[Description("The number for the ${NUM} in the filename pattern, is increased automatically after each save."), DefaultValue(1)]
-		uint OutputFileIncrementingNumber {
+		uint OutputFileIncrementingNumber
+		{
 			get;
 			set;
 		}
@@ -366,75 +420,86 @@ namespace Dapplo.Config.Test.TestInterfaces {
 		#region Print
 		//[IniProperty("OutputPrintPromptOptions", LanguageKey = "settings_alwaysshowprintoptionsdialog", Description = "Ask for print options when printing?", DefaultValue = "true")]
 		[Description("Ask for print options when printing?"), DefaultValue(true)]
-		bool OutputPrintPromptOptions {
+		bool OutputPrintPromptOptions
+		{
 			get;
 			set;
 		}
 
 		//[IniProperty("OutputPrintAllowRotate", LanguageKey = "printoptions_allowrotate", Description = "Allow rotating the picture for fitting on paper?", DefaultValue = "false")]
 		[Description("Allow rotating the picture for fitting on paper?"), DefaultValue(false)]
-		bool OutputPrintAllowRotate {
+		bool OutputPrintAllowRotate
+		{
 			get;
 			set;
 		}
 
 		//[IniProperty("OutputPrintAllowEnlarge", LanguageKey = "printoptions_allowenlarge", Description = "Allow growing the picture for fitting on paper?", DefaultValue = "false")]
 		[Description("Allow growing the picture for fitting on paper?"), DefaultValue(false)]
-		bool OutputPrintAllowEnlarge {
+		bool OutputPrintAllowEnlarge
+		{
 			get;
 			set;
 		}
 
 		//[IniProperty("OutputPrintAllowShrink", LanguageKey = "printoptions_allowshrink", Description = "Allow shrinking the picture for fitting on paper?", DefaultValue = "true")]
 		[Description("Allow shrinking the picture for fitting on paper?"), DefaultValue(true)]
-		bool OutputPrintAllowShrink {
+		bool OutputPrintAllowShrink
+		{
 			get;
 			set;
 		}
 
 		//[IniProperty("OutputPrintCenter", LanguageKey = "printoptions_allowcenter", Description = "Center image when printing?", DefaultValue = "true")]
 		[Description("Center image when printing?"), DefaultValue(true)]
-		bool OutputPrintCenter {
+		bool OutputPrintCenter
+		{
 			get;
 			set;
 		}
 
 		//[IniProperty("OutputPrintInverted", LanguageKey = "printoptions_inverted", Description = "Print image inverted (use e.g. for console captures)", DefaultValue = "false")]
 		[Description("Print image inverted (use e.g. for console captures)"), DefaultValue(false)]
-		bool OutputPrintInverted {
+		bool OutputPrintInverted
+		{
 			get;
 			set;
 		}
 
 		//[IniProperty("OutputPrintGrayscale", LanguageKey = "printoptions_printgrayscale", Description = "Force grayscale printing", DefaultValue = "false")]
 		[Description("Force grayscale printing"), DefaultValue(false)]
-		bool OutputPrintGrayscale {
+		bool OutputPrintGrayscale
+		{
 			get;
 			set;
 		}
 
 		//[IniProperty("OutputPrintMonochrome", LanguageKey = "printoptions_printmonochrome", Description = "Force monorchrome printing", DefaultValue = "false")]
 		[Description("Force monorchrome printing"), DefaultValue(false)]
-		bool OutputPrintMonochrome {
+		bool OutputPrintMonochrome
+		{
 			get;
 			set;
 		}
 
 		[Description("Threshold for monochrome filter (0 - 255), lower value means less black"), DefaultValue(127)]
-		byte OutputPrintMonochromeThreshold {
+		byte OutputPrintMonochromeThreshold
+		{
 			get;
 			set;
 		}
 
 		//[IniProperty("OutputPrintFooter", LanguageKey = "printoptions_timestamp", Description = "Print footer on print?", DefaultValue = "true")]
 		[Description("Print footer on print?"), DefaultValue(true)]
-		bool OutputPrintFooter {
+		bool OutputPrintFooter
+		{
 			get;
 			set;
 		}
 
 		[Description("Footer pattern"), DefaultValue("${capturetime:d\"D\"} ${capturetime:d\"T\"} - ${title}"), Category("Expert")]
-		string OutputPrintFooterPattern {
+		string OutputPrintFooterPattern
+		{
 			get;
 			set;
 		}
@@ -442,19 +507,22 @@ namespace Dapplo.Config.Test.TestInterfaces {
 
 		#region IE
 		[Description("Enable/disable IE capture"), DefaultValue(true)]
-		bool IECapture {
+		bool IECapture
+		{
 			get;
 			set;
 		}
 
 		[Description("Enable/disable IE field capture, very slow but will make it possible to annotate the fields of a capture in the editor."), DefaultValue(false)]
-		bool IEFieldCapture {
+		bool IEFieldCapture
+		{
 			get;
 			set;
 		}
 
 		[Description("Comma separated list of Window-Classes which need to be checked for a IE instance!"), DefaultValue("AfxFrameOrView70,IMWindowClass"), TypeConverter(typeof(StringToGenericListConverter<string>))]
-		List<string> WindowClassesToCheckForIE {
+		List<string> WindowClassesToCheckForIE
+		{
 			get;
 			set;
 		}
@@ -462,25 +530,29 @@ namespace Dapplo.Config.Test.TestInterfaces {
 
 		#region Network & updates
 		[Description("Use your global proxy?"), DefaultValue(true)]
-		bool UseProxy {
+		bool UseProxy
+		{
 			get;
 			set;
 		}
 
 		[Description("How many days between every update check? (0=no checks)"), DefaultValue(1)]
-		int UpdateCheckInterval {
+		int UpdateCheckInterval
+		{
 			get;
 			set;
 		}
 
 		[Description("Last update check"), DataMember(EmitDefaultValue = true)]
-		DateTimeOffset LastUpdateCheck {
+		DateTimeOffset LastUpdateCheck
+		{
 			get;
 			set;
 		}
 
 		[Description("Also check for unstable version updates"), DefaultValue(false), Category("Expert")]
-		bool CheckForUnstable {
+		bool CheckForUnstable
+		{
 			get;
 			set;
 		}
@@ -488,49 +560,57 @@ namespace Dapplo.Config.Test.TestInterfaces {
 
 		#region Admin
 		[Description("Enable/disable the access to the settings, can only be changed manually in this .ini"), DefaultValue(false)]
-		bool DisableSettings {
+		bool DisableSettings
+		{
 			get;
 			set;
 		}
 
 		[Description("Enable/disable the access to the quick settings, can only be changed manually in this .ini"), DefaultValue(false)]
-		bool DisableQuickSettings {
+		bool DisableQuickSettings
+		{
 			get;
 			set;
 		}
 
 		[DataMember(Name = "DisableTrayicon"), Description("Disable the trayicon, can only be changed manually in this .ini"), DefaultValue(false)]
-		bool HideTrayicon {
+		bool HideTrayicon
+		{
 			get;
 			set;
 		}
 
 		[Description("If set to true, show expert settings"), DefaultValue(false)]
-		bool ShowExpertSettings {
+		bool ShowExpertSettings
+		{
 			get;
 			set;
 		}
 
 		[Description("Show expert checkbox in the settings, can only be changed manually in this .ini"), DefaultValue(true)]
-		bool ShowExpertCheckbox {
+		bool ShowExpertCheckbox
+		{
 			get;
 			set;
 		}
 
 		[Description("Comma separated list of Plugins which are allowed. If something in the list, than every plugin not in the list will not be loaded!"), TypeConverter(typeof(StringToGenericListConverter<string>))]
-		List<string> IncludePlugins {
+		List<string> IncludePlugins
+		{
 			get;
 			set;
 		}
 
 		[Description("Comma separated list of Plugins which are NOT allowed."), TypeConverter(typeof(StringToGenericListConverter<string>))]
-		List<string> ExcludePlugins {
+		List<string> ExcludePlugins
+		{
 			get;
 			set;
 		}
 
 		[Description("Comma separated list of destinations which should be disabled."), TypeConverter(typeof(StringToGenericListConverter<string>))]
-		List<string> ExcludeDestinations {
+		List<string> ExcludeDestinations
+		{
 			get;
 			set;
 		}
@@ -539,13 +619,15 @@ namespace Dapplo.Config.Test.TestInterfaces {
 		#region Advanced
 
 		[Description("Make some optimizations for usage with remote desktop 'like' applications"), DefaultValue(false), Category("Expert")]
-		bool OptimizeForRDP {
+		bool OptimizeForRDP
+		{
 			get;
 			set;
 		}
 
 		[Description("Optimize memory footprint, but with a performance penalty!"), DefaultValue(false), Category("Expert")]
-		bool MinimizeWorkingSetSize {
+		bool MinimizeWorkingSetSize
+		{
 			get;
 			set;
 		}
@@ -554,26 +636,30 @@ namespace Dapplo.Config.Test.TestInterfaces {
 
 		#region Title-fix processor
 		[Description("The title-fixes that are active."), TypeConverter(typeof(StringToGenericListConverter<string>))]
-		List<string> ActiveTitleFixes {
+		List<string> ActiveTitleFixes
+		{
 			get;
 			set;
 		}
 
 		[Description("The regular expressions to match the title with.")]
-		Dictionary<string, string> TitleFixMatcher {
+		Dictionary<string, string> TitleFixMatcher
+		{
 			get;
 			set;
 		}
 
 		[Description("The replacements for the matchers.")]
-		Dictionary<string, string> TitleFixReplacer {
+		Dictionary<string, string> TitleFixReplacer
+		{
 			get;
 			set;
 		}
 		#endregion
 
 		[DataMember(EmitDefaultValue = true), Description("A list of experimental features, this allows us to test certain features before releasing them."), TypeConverter(typeof(StringToGenericListConverter<string>))]
-		List<string> ExperimentalFeatures {
+		List<string> ExperimentalFeatures
+		{
 			get;
 			set;
 		}
@@ -581,32 +667,37 @@ namespace Dapplo.Config.Test.TestInterfaces {
 		#region TrayIcon
 		//[IniProperty("ShowTrayNotification", LanguageKey = "settings_shownotify", Description = "Show a notification from the systray when a capture is taken.", DefaultValue = "true")]
 		[Description("Show a notification from the systray when a capture is taken."), DefaultValue(true)]
-		bool ShowTrayNotification {
+		bool ShowTrayNotification
+		{
 			get;
 			set;
 		}
 
 		[Description("Specify what action is made if the tray icon is left clicked, if a double-click action is specified this action is initiated after a delay (configurable via the windows double-click speed)"), DefaultValue(ClickActions.SHOW_CONTEXT_MENU)]
-		ClickActions LeftClickAction {
+		ClickActions LeftClickAction
+		{
 			get;
 			set;
 		}
 
 		[Description("Specify what action is made if the tray icon is double clicked"), DefaultValue(ClickActions.OPEN_LAST_IN_EXPLORER)]
-		ClickActions DoubleClickAction {
+		ClickActions DoubleClickAction
+		{
 			get;
 			set;
 		}
 
 		[Description("Maximum length of submenu items in the context menu, making this longer might cause context menu issues on dual screen systems."), DefaultValue(25)]
-		int MaxMenuItemLength {
+		int MaxMenuItemLength
+		{
 			get;
 			set;
 		}
 
 
 		[Description("Enable/disable thumbnail previews"), DefaultValue(true), Category("Expert")]
-		bool ThumnailPreview {
+		bool ThumnailPreview
+		{
 			get;
 			set;
 		}
@@ -614,68 +705,79 @@ namespace Dapplo.Config.Test.TestInterfaces {
 
 		#region MAPI
 		[Description("The subject pattern for the email destination (settings for Outlook can be found under the Office section)"), DefaultValue("${title}")]
-		string MailApiSubjectPattern {
+		string MailApiSubjectPattern
+		{
 			get;
 			set;
 		}
 
 		[Description("The 'to' field for the email destination (settings for Outlook can be found under the Office section)")]
-		string MailApiTo {
+		string MailApiTo
+		{
 			get;
 			set;
 		}
 
 		[Description("The 'CC' field for the email destination (settings for Outlook can be found under the Office section)")]
-		string MailApiCC {
+		string MailApiCC
+		{
 			get;
 			set;
 		}
 
 		[Description("The 'BCC' field for the email destination (settings for Outlook can be found under the Office section)")]
-		string MailApiBCC {
+		string MailApiBCC
+		{
 			get;
 			set;
 		}
 		#endregion
 
 		[Description("Optional command to execute on a temporary PNG file, the command should overwrite the file and Greenshot will read it back. Note: this command is also executed when uploading PNG's!"), Category("Expert")]
-		string OptimizePNGCommand {
+		string OptimizePNGCommand
+		{
 			get;
 			set;
 		}
 
 		[Description("Arguments for the optional command to execute on a PNG, {0} is replaced by the temp-filename from Greenshot. Note: Temp-file is deleted afterwards by Greenshot."), DefaultValue("\"{0}\""), Category("Expert")]
-		string OptimizePNGCommandArguments {
+		string OptimizePNGCommandArguments
+		{
 			get;
 			set;
 		}
 
 		[Description("Version of Greenshot which created this .ini")]
-		string LastSaveWithVersion {
+		string LastSaveWithVersion
+		{
 			get;
 			set;
 		}
 
 		[Description("When reading images from files or clipboard, use the EXIF information to correct the orientation"), DefaultValue(true), Category("Expert")]
-		bool ProcessEXIFOrientation {
+		bool ProcessEXIFOrientation
+		{
 			get;
 			set;
 		}
 
 		[IniPropertyBehavior(Write = false, Read = false), Description("Location of the last captured region")]
-		System.Windows.Rect LastCapturedRegion {
+		System.Windows.Rect LastCapturedRegion
+		{
 			get;
 			set;
 		}
 
 		[Description("Last used colors"), TypeConverter(typeof(StringToGenericListConverter<Color>))]
-		List<Color> RecentColors {
+		List<Color> RecentColors
+		{
 			get;
 			set;
 		}
 
 		[DataMember(EmitDefaultValue = true), DefaultValue(""), Description("Token."), TypeConverter(typeof(StringEncryptionTypeConverter))]
-		string BoxToken {
+		string BoxToken
+		{
 			get;
 			set;
 		}

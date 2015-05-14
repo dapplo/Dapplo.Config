@@ -21,18 +21,17 @@
 
 using Dapplo.Config.Extension;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Dapplo.Config.WindowsRegistry {
-	public interface IRegistry : IDefaultValue, IWriteProtectProperties {
+namespace Dapplo.Config.WindowsRegistry
+{
+	public interface IRegistry : IDefaultValue, IWriteProtectProperties
+	{
 		string PathFor(string propertyName);
 	}
 
-	public interface IRegistry<T> : IRegistry, IDefaultValue<T>, IWriteProtectProperties<T> {
+	public interface IRegistry<T> : IRegistry, IDefaultValue<T>, IWriteProtectProperties<T>
+	{
 		/// <summary>
 		/// Return the registry path for a property
 		/// </summary>

@@ -171,7 +171,9 @@ namespace Dapplo.Config.Ini
 			if (!string.IsNullOrWhiteSpace(valueString))
 			{
 				return Decrypt(valueString);
-			} else if (valueString != null) {
+			}
+			else if (valueString != null)
+			{
 				return valueString;
 			}
 

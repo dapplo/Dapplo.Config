@@ -196,9 +196,11 @@ namespace Dapplo.Config.Support
 		/// </summary>
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>true if the NonSerialized attribute is set on the property</returns>
-		public static IniPropertyBehaviorAttribute GetIniPropertyBehavior(this PropertyInfo propertyInfo) {
+		public static IniPropertyBehaviorAttribute GetIniPropertyBehavior(this PropertyInfo propertyInfo)
+		{
 			var iniPropertyBehaviorAttribute = propertyInfo.GetCustomAttribute<IniPropertyBehaviorAttribute>();
-			if (iniPropertyBehaviorAttribute == null) {
+			if (iniPropertyBehaviorAttribute == null)
+			{
 				iniPropertyBehaviorAttribute = new IniPropertyBehaviorAttribute();
 			}
 			return iniPropertyBehaviorAttribute;

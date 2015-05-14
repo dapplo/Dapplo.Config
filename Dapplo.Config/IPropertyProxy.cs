@@ -109,7 +109,8 @@ namespace Dapplo.Config
 		/// <returns>GetInfo</returns>
 		GetInfo Get(string propertyName);
 
-		object PropertyObject {
+		object PropertyObject
+		{
 			get;
 		}
 	}

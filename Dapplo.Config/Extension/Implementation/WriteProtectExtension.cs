@@ -80,7 +80,8 @@ namespace Dapplo.Config.Extension.Implementation
 		///     After calling this, nothing is write protected
 		/// </summary>
 		/// <param name="methodCallInfo">MethodCallInfo</param>
-		private void RemoveWriteProtection(MethodCallInfo methodCallInfo) {
+		private void RemoveWriteProtection(MethodCallInfo methodCallInfo)
+		{
 			_isProtecting = false;
 			_writeProtectedProperties.Clear();
 		}

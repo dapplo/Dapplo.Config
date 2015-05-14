@@ -18,6 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
 using System;
 
 namespace Dapplo.Config.Ini
@@ -25,18 +26,15 @@ namespace Dapplo.Config.Ini
 	[AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
 	public class IniSectionAttribute : Attribute
 	{
-		private string _name;
 		public IniSectionAttribute(string name)
 		{
-			_name = name;
+			Name = name;
 		}
 
 		public string Name
 		{
-			get
-			{
-				return _name;
-			}
+			get;
+			private set;
 		}
 	}
 }

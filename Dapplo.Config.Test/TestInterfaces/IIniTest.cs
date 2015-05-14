@@ -63,13 +63,15 @@ namespace Dapplo.Config.Test.TestInterfaces
 		}
 
 		[IniPropertyBehavior(Read = false, Write = false)]
-		string NotWritten {
+		string NotWritten
+		{
 			get;
 			set;
 		}
 
 		[Description("Here are some values"), TypeConverter(typeof(GenericDictionaryConverter<string, int>))]
-		Dictionary<string, int> SomeValues {
+		Dictionary<string, int> SomeValues
+		{
 			get;
 			set;
 		}

@@ -34,5 +34,14 @@ namespace Dapplo.Config.Support
 			get;
 			set;
 		}
+
+		/// <summary>
+		///     The value of the property
+		/// </summary>
+		public bool HasValue
+		{
+			get;
+			set;
+		}
 	}
 }

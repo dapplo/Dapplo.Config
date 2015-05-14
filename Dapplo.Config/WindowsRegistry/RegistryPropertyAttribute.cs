@@ -30,8 +30,10 @@ namespace Dapplo.Config.WindowsRegistry
 		private RegistryHive _hive = RegistryHive.CurrentUser;
 		private RegistryView _view = RegistryView.Default;
 
-		public RegistryPropertyAttribute() {
+		public RegistryPropertyAttribute()
+		{
 			Kind = RegistryValueKind.Unknown;
+			IgnoreErrors = true;
 		}
 
 		public RegistryPropertyAttribute(string path, string value = null) : this()
@@ -43,7 +45,8 @@ namespace Dapplo.Config.WindowsRegistry
 		/// <summary>
 		/// Specify what kind of value
 		/// </summary>
-		public RegistryValueKind Kind {
+		public RegistryValueKind Kind
+		{
 			get;
 			set;
 		}
@@ -51,11 +54,14 @@ namespace Dapplo.Config.WindowsRegistry
 		/// <summary>
 		/// What hive to use, see RegistryHive
 		/// </summary>
-		public RegistryHive Hive {
-			get {
+		public RegistryHive Hive
+		{
+			get
+			{
 				return _hive;
 			}
-			set {
+			set
+			{
 				_hive = value;
 				HasHive = true;
 			}
@@ -63,7 +69,8 @@ namespace Dapplo.Config.WindowsRegistry
 		/// <summary>
 		/// What hive to use, see RegistryHive
 		/// </summary>
-		public bool HasHive {
+		public bool HasHive
+		{
 			get;
 			private set;
 		}
@@ -71,27 +78,33 @@ namespace Dapplo.Config.WindowsRegistry
 		/// <summary>
 		/// What View to use, see RegistryView
 		/// </summary>
-		public RegistryView View {
-			get {
+		public RegistryView View
+		{
+			get
+			{
 				return _view;
 			}
-			set {
+			set
+			{
 				_view = value;
 				HasView = true;
 			}
 		}
+
 		/// <summary>
 		/// Is there a view?
 		/// </summary>
-		public bool HasView {
+		public bool HasView
+		{
 			get;
 			private set;
 		}
-		
+
 		/// <summary>
 		/// Path to key
 		/// </summary>
-		public string Path {
+		public string Path
+		{
 			get;
 			set;
 		}
@@ -99,7 +112,18 @@ namespace Dapplo.Config.WindowsRegistry
 		/// <summary>
 		/// Value in key, can be null to select all values or "" to select the default value
 		/// </summary>
-		public string Value {
+		public string Value
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Set ignore errors to false, if you want an exception when a parse error occurs.
+		/// Default this is set to true, which will cause the property to have the "default" value.
+		/// </summary>
+		public bool IgnoreErrors
+		{
 			get;
 			set;
 		}

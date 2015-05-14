@@ -1,39 +1,66 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿/*
+ * dapplo - building blocks for desktop applications
+ * Copyright (C) 2015 Robin Krom
+ * 
+ * For more information see: http://dapplo.net/
+ * dapplo repositories are hosted on GitHub: https://github.com/dapplo
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 1 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
-namespace Dapplo.Config.Support {
+using System;
+using System.ComponentModel;
+
+namespace Dapplo.Config.Support
+{
 	[ImmutableObject(true)]
-	public sealed class TypeDescriptorContext : ITypeDescriptorContext {
+	public sealed class TypeDescriptorContext : ITypeDescriptorContext
+	{
 		private readonly object component;
 		private readonly PropertyDescriptor property;
-		public TypeDescriptorContext(object component, PropertyDescriptor property) {
+		public TypeDescriptorContext(object component, PropertyDescriptor property)
+		{
 			this.component = component;
 			this.property = property;
 		}
-		IContainer ITypeDescriptorContext.Container {
+
+		IContainer ITypeDescriptorContext.Container
+		{
 			get { return null; }
 		}
 
-		object ITypeDescriptorContext.Instance {
+		object ITypeDescriptorContext.Instance
+		{
 			get { return component; }
 		}
 
-		void ITypeDescriptorContext.OnComponentChanged() {
+		void ITypeDescriptorContext.OnComponentChanged()
+		{
 		}
 
-		bool ITypeDescriptorContext.OnComponentChanging() {
+		bool ITypeDescriptorContext.OnComponentChanging()
+		{
 			return true;
 		}
 
-		PropertyDescriptor ITypeDescriptorContext.PropertyDescriptor {
+		PropertyDescriptor ITypeDescriptorContext.PropertyDescriptor
+		{
 			get { return property; }
 		}
 
-		object IServiceProvider.GetService(Type serviceType) {
+		object IServiceProvider.GetService(Type serviceType)
+		{
 			return null;
 		}
 	}

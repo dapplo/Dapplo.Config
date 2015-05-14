@@ -75,7 +75,7 @@ namespace Dapplo.Config.Ini
 		/// <returns>instance of type T</returns>
 		public async Task<T> RegisterAndGetAsync<T>(CancellationToken token = default(CancellationToken)) where T : IIniSection
 		{
-			return (T) await RegisterAndGetAsync(typeof(T), token);
+			return (T)await RegisterAndGetAsync(typeof(T), token);
 		}
 
 		/// <summary>
@@ -83,9 +83,11 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		/// <param name="types">Types to register, these must extend IIniSection</param>
 		/// <returns>List with instances for the supplied types</returns>
-		public async Task<IList<IIniSection>> RegisterAndGetAsync(IEnumerable<Type> types, CancellationToken token = default(CancellationToken)) {
+		public async Task<IList<IIniSection>> RegisterAndGetAsync(IEnumerable<Type> types, CancellationToken token = default(CancellationToken))
+		{
 			IList<IIniSection> sections = new List<IIniSection>();
-			foreach(var type in types) {
+			foreach (var type in types)
+			{
 				sections.Add(await RegisterAndGetAsync(type, token));
 			}
 			return sections;
@@ -96,17 +98,22 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		/// <param name="type">Type to register, this must extend IIniSection</param>
 		/// <returns>instance of type</returns>
-		public async Task<IIniSection> RegisterAndGetAsync(Type type, CancellationToken token = default(CancellationToken)) {
-			if (!typeof(IIniSection).IsAssignableFrom(type)) {
+		public async Task<IIniSection> RegisterAndGetAsync(Type type, CancellationToken token = default(CancellationToken))
+		{
+			if (!typeof(IIniSection).IsAssignableFrom(type))
+			{
 				throw new ArgumentException("type is not a IIniSection");
 			}
 			var _propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
 			var section = (IIniSection)_propertyProxy.PropertyObject;
 			var sectionName = section.GetSectionName();
 
-			using (await Sync.Wait(_sync)) {
-				if (!_sections.ContainsKey(sectionName)) {
-					if (!_initialReadDone) {
+			using (await Sync.Wait(_sync))
+			{
+				if (!_sections.ContainsKey(sectionName))
+				{
+					if (!_initialReadDone)
+					{
 						await ReloadAsync(false, token);
 					}
 					FillSection(section);
@@ -122,19 +129,26 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		/// <param name="specifiedDirectory"></param>
 		/// <returns></returns>
-		private string CreateFileLocation(bool checkStartupDirectory, string postfix = "", string specifiedDirectory = null) {
+		private string CreateFileLocation(bool checkStartupDirectory, string postfix = "", string specifiedDirectory = null)
+		{
 			string file = null;
-			if (specifiedDirectory != null) {
+			if (specifiedDirectory != null)
+			{
 				file = Path.Combine(specifiedDirectory, string.Format("{0}{1}.{2}", _fileName, postfix, IniExtension));
-			} else {
-				if (checkStartupDirectory) {
+			}
+			else
+			{
+				if (checkStartupDirectory)
+				{
 					var entryAssembly = Assembly.GetEntryAssembly();
-					if (entryAssembly != null) {
+					if (entryAssembly != null)
+					{
 						string startupDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 						file = Path.Combine(startupDirectory, string.Format("{0}{1}.{2}", _fileName, postfix, IniExtension));
 					}
 				}
-				if (file == null || !File.Exists(file)) {
+				if (file == null || !File.Exists(file))
+				{
 					string appDataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), _applicationName);
 					file = Path.Combine(appDataDirectory, string.Format("{0}{1}.{2}", _fileName, postfix, IniExtension));
 				}
@@ -145,10 +159,14 @@ namespace Dapplo.Config.Ini
 		/// <summary>
 		/// Reset all the values, in all the registered ini sections, to their default
 		/// </summary>
-		public async Task ResetAsync(CancellationToken token = default(CancellationToken)) {
-			using (await Sync.Wait(_sync)) {
-				foreach (var section in _sections.Values) {
-					foreach (var iniValue in section.GetIniValues()) {
+		public async Task ResetAsync(CancellationToken token = default(CancellationToken))
+		{
+			using (await Sync.Wait(_sync))
+			{
+				foreach (var section in _sections.Values)
+				{
+					foreach (var iniValue in section.GetIniValues())
+					{
 						// TODO: Do we need to skip read/write protected values here?
 						section.RestoreToDefault(iniValue.PropertyName);
 					}
@@ -162,16 +180,19 @@ namespace Dapplo.Config.Ini
 		public async Task WriteAsync(CancellationToken token = default(CancellationToken))
 		{
 			// Make sure only one write to file is running, other request will have to wait
-			using (await Sync.Wait(_sync)) {
+			using (await Sync.Wait(_sync))
+			{
 				string path = Path.GetDirectoryName(_iniFile);
 
 				// Create the directory to write to, if it doesn't exist yet
-				if (!Directory.Exists(path)) {
+				if (!Directory.Exists(path))
+				{
 					Directory.CreateDirectory(path);
 				}
 
 				// Create the file as a stream
-				using (var stream = new FileStream(_iniFile, FileMode.Create, FileAccess.Write)) {
+				using (var stream = new FileStream(_iniFile, FileMode.Create, FileAccess.Write))
+				{
 					// Write the registered ini sections to the stream
 					await WriteToStreamAsync(stream);
 				}
@@ -188,30 +209,36 @@ namespace Dapplo.Config.Ini
 			IDictionary<string, IDictionary<string, string>> sectionsComments = new SortedDictionary<string, IDictionary<string, string>>();
 
 			// Loop over the "registered" sections
-			foreach (var section in _sections.Values) {
+			foreach (var section in _sections.Values)
+			{
 				// This flag tells us if the header for the section is already written
 				bool isSectionCreated = false;
 
 				IDictionary<string, string> sectionProperties = new SortedDictionary<string, string>();
 				IDictionary<string, string> sectionComments = new SortedDictionary<string, string>();
 				// Loop over the ini values, this automatically skips all NonSerialized properties
-				foreach (var iniValue in section.GetIniValues()) {
+				foreach (var iniValue in section.GetIniValues())
+				{
 					// Check if we need to write the value, this is not needed when it has the default or if write is disabled
-					if (!iniValue.IsWriteNeeded) {
+					if (!iniValue.IsWriteNeeded)
+					{
 						continue;
 					}
 
 					// Before we are going to write, we need to check if the section header "[Sectionname]" is already written.
 					// If not, do so now before writing the properties of the section itself
-					if (!isSectionCreated) {
-						if (_ini.ContainsKey(section.GetSectionName())) {
+					if (!isSectionCreated)
+					{
+						if (_ini.ContainsKey(section.GetSectionName()))
+						{
 							_ini.Remove(section.GetSectionName());
 						}
 						_ini.Add(section.GetSectionName(), sectionProperties);
 						sectionsComments.Add(section.GetSectionName(), sectionComments);
 
 						string description = section.GetSectionDescription();
-						if (!string.IsNullOrEmpty(description)) {
+						if (!string.IsNullOrEmpty(description))
+						{
 							sectionComments.Add(section.GetSectionName(), description);
 						}
 						// Mark section as created!
@@ -219,44 +246,74 @@ namespace Dapplo.Config.Ini
 					}
 
 					// Check if the property has a description, if so write it in the ini comment before the property
-					if (!string.IsNullOrEmpty(iniValue.Description)) {
+					if (!string.IsNullOrEmpty(iniValue.Description))
+					{
 						sectionComments.Add(iniValue.IniPropertyName, iniValue.Description);
 					}
 
 					ITypeDescriptorContext context = null;
-					try {
+					try
+					{
 						var propertyDescription = TypeDescriptor.GetProperties(section.GetType()).Find(iniValue.PropertyName, false);
 						context = new TypeDescriptorContext(section, propertyDescription);
-					} catch {
+					}
+					catch
+					{
 						// Ignore any exceptions
 					}
 
 					// Check if a converter is specified
 					TypeConverter converter = iniValue.Converter;
 					// If not, use the default converter for the property type
-					if (converter == null) {
+					if (converter == null)
+					{
 						converter = TypeDescriptor.GetConverter(iniValue.ValueType);
-					} else if (converter.CanConvertTo(typeof(IDictionary<string, string>))) {
-						// Convert the dictionary to a string,string variant.
-						IDictionary<string, string> dictionaryProperties = (IDictionary<string, string>)converter.ConvertTo(context, CultureInfo.CurrentCulture, iniValue.Value, typeof(IDictionary<string, string>));
-						// Use this to build a separate "section" which is called "[section-propertyname]"
-						string dictionaryIdentifier = string.Format("{0}-{1}", section.GetSectionName(), iniValue.IniPropertyName);
-						if (_ini.ContainsKey(dictionaryIdentifier)) {
-							_ini.Remove(dictionaryIdentifier);
+					}
+					else if (converter.CanConvertTo(typeof(IDictionary<string, string>)))
+					{
+						try
+						{
+							// Convert the dictionary to a string,string variant.
+							IDictionary<string, string> dictionaryProperties = (IDictionary<string, string>)converter.ConvertTo(context, CultureInfo.CurrentCulture, iniValue.Value, typeof(IDictionary<string, string>));
+							// Use this to build a separate "section" which is called "[section-propertyname]"
+							string dictionaryIdentifier = string.Format("{0}-{1}", section.GetSectionName(), iniValue.IniPropertyName);
+							if (_ini.ContainsKey(dictionaryIdentifier))
+							{
+								_ini.Remove(dictionaryIdentifier);
+							}
+							_ini.Add(dictionaryIdentifier, dictionaryProperties);
+							if (!string.IsNullOrWhiteSpace(iniValue.Description))
+							{
+								IDictionary<string, string> dictionaryComments = new SortedDictionary<string, string>();
+								dictionaryComments.Add(dictionaryIdentifier, iniValue.Description);
+								sectionsComments.Add(dictionaryIdentifier, dictionaryComments);
+							}
 						}
-						_ini.Add(dictionaryIdentifier, dictionaryProperties);
-						if (!string.IsNullOrWhiteSpace(iniValue.Description)) {
-							IDictionary<string, string> dictionaryComments = new SortedDictionary<string, string>();
-							dictionaryComments.Add(dictionaryIdentifier, iniValue.Description);
-							sectionsComments.Add(dictionaryIdentifier, dictionaryComments);
+						catch
+						{
+							if (!iniValue.Behavior.IgnoreErrors)
+							{
+								throw;
+							}
 						}
 						continue;
 					}
 
-					// Convert the value to a string
-					var writingValue = converter.ConvertToInvariantString(context, iniValue.Value);
-					// And write the value with the IniPropertyName (which does NOT have to be the property name) to the file
-					sectionProperties.Add(iniValue.IniPropertyName, writingValue);
+					try
+					{
+						// Convert the value to a string
+						var writingValue = converter.ConvertToInvariantString(context, iniValue.Value);
+						// And write the value with the IniPropertyName (which does NOT have to be the property name) to the file
+						sectionProperties.Add(iniValue.IniPropertyName, writingValue);
+					}
+					catch
+					{
+						if (!iniValue.Behavior.IgnoreErrors)
+						{
+							throw;
+						}
+					}
+
 				}
 			}
 			await IniFile.WriteAsync(stream, Encoding.UTF8, _ini, sectionsComments, token);
@@ -268,15 +325,18 @@ namespace Dapplo.Config.Ini
 		/// Otherwise only the properties in the files will overwrite your settings.
 		/// Usually this should not directly be called, unless you know that the file was changed by an external process.
 		/// </summary>
-		public async Task ReloadAsync(bool reset = true, CancellationToken token = default(CancellationToken)) {
-			if (reset) {
+		public async Task ReloadAsync(bool reset = true, CancellationToken token = default(CancellationToken))
+		{
+			if (reset)
+			{
 				await ResetAsync(token);
 			}
 
-			_defaults = await IniFile.ReadAsync( CreateFileLocation(true, Defaults, _fixedDirectory), Encoding.UTF8, token);
+			_defaults = await IniFile.ReadAsync(CreateFileLocation(true, Defaults, _fixedDirectory), Encoding.UTF8, token);
 			_constants = await IniFile.ReadAsync(CreateFileLocation(true, Constants, _fixedDirectory), Encoding.UTF8, token);
 			var newIni = await IniFile.ReadAsync(_iniFile, Encoding.UTF8, token);
-			if (newIni != null) {
+			if (newIni != null)
+			{
 				_ini = newIni;
 			}
 			_initialReadDone = true;
@@ -289,20 +349,24 @@ namespace Dapplo.Config.Ini
 		/// Helper method to fill the values of one section
 		/// </summary>
 		/// <param name="section"></param>
-		private void FillSection(IIniSection section) {
+		private void FillSection(IIniSection section)
+		{
 			string sectionName = section.GetSectionName();
 			// Make sure there is no write protection
 			section.RemoveWriteProtection();
 			// Defaults:
-			if (_defaults != null) {
+			if (_defaults != null)
+			{
 				FillSection(_defaults, section);
 			}
 			// Ini:
-			if (_ini != null) {
+			if (_ini != null)
+			{
 				FillSection(_ini, section);
 			}
 			// Constants:
-			if (_constants != null) {
+			if (_constants != null)
+			{
 				section.StartWriteProtecting();
 				FillSection(_constants, section);
 				section.StopWriteProtecting();
@@ -351,18 +415,31 @@ namespace Dapplo.Config.Ini
 			iniSections.TryGetValue(iniSection.GetSectionName(), out iniProperties);
 
 			IEnumerable<IniValue> iniValues = (from iniValue in iniSection.GetIniValues()
-													   where iniValue.Behavior.Read
-													   select iniValue);
+											   where iniValue.Behavior.Read
+											   select iniValue);
 
 			foreach (var iniValue in iniValues)
 			{
 				string dictionaryIdentifier = string.Format("{0}-{1}", iniSection.GetSectionName(), iniValue.IniPropertyName);
 				// If there are no properties, there might still be a separate section for a dictionary
-				if (iniValue.Converter != null && iniSections.ContainsKey(dictionaryIdentifier)) {
-					iniValue.Value = iniValue.Converter.ConvertFrom(iniSections[dictionaryIdentifier]);
+				if (iniValue.Converter != null && iniSections.ContainsKey(dictionaryIdentifier))
+				{
+					try
+					{
+						iniValue.Value = iniValue.Converter.ConvertFrom(iniSections[dictionaryIdentifier]);
+					}
+					catch
+					{
+						if (!iniValue.Behavior.IgnoreErrors)
+						{
+							throw;
+						}
+					}
+
 					continue;
 				}
-				if (iniProperties == null) {
+				if (iniProperties == null)
+				{
 					continue;
 				}
 				string stringValue;
@@ -373,13 +450,35 @@ namespace Dapplo.Config.Ini
 					Type destinationType = iniValue.ValueType;
 					if (iniValue.Converter != null && iniValue.Converter.CanConvertFrom(stringType))
 					{
-						iniValue.Value = iniValue.Converter.ConvertFrom(stringValue);
+						try
+						{
+							iniValue.Value = iniValue.Converter.ConvertFrom(stringValue);
+						}
+						catch
+						{
+							if (!iniValue.Behavior.IgnoreErrors)
+							{
+								throw;
+							}
+						}
 						continue;
 					}
-					if (destinationType != stringType) {
+					if (destinationType != stringType)
+					{
 						var converter = TypeDescriptor.GetConverter(destinationType);
-						if (converter != null && converter.CanConvertFrom(stringType)) {
-							iniValue.Value = converter.ConvertFrom(stringValue);
+						if (converter != null && converter.CanConvertFrom(stringType))
+						{
+							try
+							{
+								iniValue.Value = converter.ConvertFrom(stringValue);
+							}
+							catch
+							{
+								if (!iniValue.Behavior.IgnoreErrors)
+								{
+									throw;
+								}
+							}
 							continue;
 						}
 					}

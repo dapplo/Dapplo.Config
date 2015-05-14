@@ -19,10 +19,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
 using Dapplo.Config.Support;
-using System.Reflection;
+using System;
 using System.ComponentModel;
+using System.Reflection;
 
 namespace Dapplo.Config.Extension.Implementation
 {
@@ -43,6 +43,17 @@ namespace Dapplo.Config.Extension.Implementation
 		}
 
 		/// <summary>
+		/// Make sure this extension is initialized first
+		/// </summary>
+		public override int InitOrder
+		{
+			get
+			{
+				return int.MinValue;
+			}
+		}
+
+		/// <summary>
 		/// Process the property, in our case set the default
 		/// </summary>
 		/// <param name="propertyInfo"></param>
@@ -56,14 +67,18 @@ namespace Dapplo.Config.Extension.Implementation
 			}
 			if (!propertyInfo.PropertyType.IsInterface && !propertyInfo.PropertyType.IsByRef && propertyInfo.PropertyType != typeof(string))
 			{
-				try {
+				try
+				{
 					defaultValue = Activator.CreateInstance(propertyInfo.PropertyType);
 					Proxy.Properties[propertyInfo.Name] = defaultValue;
 					return;
-				} catch {
+				}
+				catch
+				{
 				}
 			}
-			if (Proxy.Properties.ContainsKey(propertyInfo.Name)) {
+			if (Proxy.Properties.ContainsKey(propertyInfo.Name))
+			{
 				Proxy.Properties.Remove(propertyInfo.Name);
 			}
 		}

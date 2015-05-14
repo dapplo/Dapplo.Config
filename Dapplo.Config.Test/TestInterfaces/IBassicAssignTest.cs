@@ -20,6 +20,7 @@
  */
 
 using System.ComponentModel;
+
 namespace Dapplo.Config.Test.TestInterfaces
 {
 	/// <summary>

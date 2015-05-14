@@ -45,14 +45,16 @@ namespace Dapplo.Config.Ini
 				throw new InvalidOperationException("No type converter exists for type " + typeof(T1).FullName);
 			}
 			_typeConverter2 = TypeDescriptor.GetConverter(typeof(T2));
-			if (_typeConverter2 == null) {
+			if (_typeConverter2 == null)
+			{
 				throw new InvalidOperationException("No type converter exists for type " + typeof(T2).FullName);
 			}
 		}
 
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
-			if (sourceType == typeof(IDictionary<string, string>)) {
+			if (sourceType == typeof(IDictionary<string, string>))
+			{
 				return true;
 			}
 
@@ -89,7 +91,7 @@ namespace Dapplo.Config.Ini
 
 				// Split, and where all element are not null or empty, convert the item to T and add the items to a list<T>
 				return (from key in values.Keys
-						select key).ToDictionary(x => (T1)_typeConverter1.ConvertFromInvariantString(x), x => (T2)_typeConverter2.ConvertFromInvariantString(values[x]));
+						select key).Distinct().ToDictionary(x => (T1)_typeConverter1.ConvertFromInvariantString(x), x => (T2)_typeConverter2.ConvertFromInvariantString(values[x]));
 			}
 
 			return base.ConvertFrom(context, culture, value);

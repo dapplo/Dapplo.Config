@@ -49,6 +49,7 @@ namespace Dapplo.Config.Ini
 	/// <summary>
 	/// Generic version of IIniSection
 	/// </summary>
-	public interface IIniSection<T> : IIniSection, IDefaultValue<T>, IWriteProtectProperties<T> {
+	public interface IIniSection<T> : IIniSection, IDefaultValue<T>, IWriteProtectProperties<T>
+	{
 	}
 }

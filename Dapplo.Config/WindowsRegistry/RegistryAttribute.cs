@@ -30,7 +30,8 @@ namespace Dapplo.Config.WindowsRegistry
 	[AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
 	public class RegistryAttribute : Attribute
 	{
-		public RegistryAttribute() {
+		public RegistryAttribute()
+		{
 			View = RegistryView.Default;
 			Hive = RegistryHive.CurrentUser;
 		}
@@ -43,7 +44,8 @@ namespace Dapplo.Config.WindowsRegistry
 		/// <summary>
 		/// What hive to use, see RegistryHive
 		/// </summary>
-		public RegistryHive Hive {
+		public RegistryHive Hive
+		{
 			get;
 			set;
 		}
@@ -51,15 +53,17 @@ namespace Dapplo.Config.WindowsRegistry
 		/// <summary>
 		/// What view to use, default is Default
 		/// </summary>
-		public RegistryView View {
+		public RegistryView View
+		{
 			get;
 			set;
 		}
-		
+
 		/// <summary>
 		/// Path to key
 		/// </summary>
-		public string Path {
+		public string Path
+		{
 			get;
 			set;
 		}

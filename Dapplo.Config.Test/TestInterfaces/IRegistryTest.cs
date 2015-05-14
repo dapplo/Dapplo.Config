@@ -37,18 +37,24 @@ namespace Dapplo.Config.Test.TestInterfaces
 			get;
 			set;
 		}
+
 		[RegistryProperty(@"Run", Hive = RegistryHive.LocalMachine, View = RegistryView.Registry64)]
-		Dictionary<string, object> LMRun64 {
+		Dictionary<string, object> LMRun64
+		{
 			get;
 			set;
 		}
+
 		[RegistryProperty(@"Run")]
-		Dictionary<string, object> CURun32 {
+		Dictionary<string, object> CURun32
+		{
 			get;
 			set;
 		}
+
 		[RegistryProperty(@"Run", View = RegistryView.Registry64)]
-		Dictionary<string, object> CURun64 {
+		Dictionary<string, object> CURun64
+		{
 			get;
 			set;
 		}

@@ -46,8 +46,10 @@ namespace Dapplo.Config.Ini
 		/// <returns>dictionary of sections - dictionaries with the properties</returns>
 		public static async Task<IDictionary<string, IDictionary<string, string>>> ReadAsync(string path, Encoding encoding, CancellationToken token = default(CancellationToken))
 		{
-			if (File.Exists(path)) {
-				using (FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 1024)) {
+			if (File.Exists(path))
+			{
+				using (FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 1024))
+				{
 					return await ReadAsync(fileStream, encoding, token);
 				}
 			}
@@ -126,8 +128,10 @@ namespace Dapplo.Config.Ini
 		/// <param name="sections"></param>
 		/// <param name="sectionsComments">Optional</param>
 		/// <param name="token">CancellationToken</param>
-		public static async Task WriteAsync(string path, Encoding encoding, IDictionary<string, IDictionary<string, string>> sections, IDictionary<string, IDictionary<string, string>> sectionComments = null, CancellationToken token = default(CancellationToken)) {
-			using (FileStream fileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write, 1024)) {
+		public static async Task WriteAsync(string path, Encoding encoding, IDictionary<string, IDictionary<string, string>> sections, IDictionary<string, IDictionary<string, string>> sectionComments = null, CancellationToken token = default(CancellationToken))
+		{
+			using (FileStream fileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write, 1024))
+			{
 				await WriteAsync(fileStream, encoding, sections, sectionComments, token);
 			}
 		}
@@ -140,38 +144,50 @@ namespace Dapplo.Config.Ini
 		/// <param name="sections"></param>
 		/// <param name="sectionsComments">Optional</param>
 		/// <param name="token"></param>
-		public static async Task WriteAsync(Stream stream, Encoding encoding, IDictionary<string, IDictionary<string, string>> sections, IDictionary<string, IDictionary<string, string>> sectionsComments = null, CancellationToken token = default(CancellationToken)) {
+		public static async Task WriteAsync(Stream stream, Encoding encoding, IDictionary<string, IDictionary<string, string>> sections, IDictionary<string, IDictionary<string, string>> sectionsComments = null, CancellationToken token = default(CancellationToken))
+		{
 			var writer = new StreamWriter(stream, Encoding.UTF8);
-			try {
-				foreach (var sectionKey in sections.Keys) {
+			try
+			{
+				foreach (var sectionKey in sections.Keys)
+				{
 					await writer.WriteLineAsync();
 					IDictionary<string, string> properties = sections[sectionKey];
-					if (properties.Count == 0) {
+					if (properties.Count == 0)
+					{
 						continue;
 					}
 					IDictionary<string, string> comments = null;
-					if (sectionsComments != null) {
+					if (sectionsComments != null)
+					{
 						sectionsComments.TryGetValue(sectionKey, out comments);
 						string sectionDescription;
 						// Section comment is stored with the sectionKey
-						if (comments != null && comments.TryGetValue(sectionKey, out sectionDescription)) {
-							if (!string.IsNullOrEmpty(sectionDescription)) {
+						if (comments != null && comments.TryGetValue(sectionKey, out sectionDescription))
+						{
+							if (!string.IsNullOrEmpty(sectionDescription))
+							{
 								await writer.WriteLineAsync(string.Format(";{0}", sectionDescription));
 							}
 						}
 					}
 					await writer.WriteLineAsync(string.Format("[{0}]", sectionKey));
-					foreach (var propertyName in properties.Keys) {
+					foreach (var propertyName in properties.Keys)
+					{
 						string propertyComment;
-						if (comments != null && comments.TryGetValue(propertyName, out propertyComment)) {
-							if (!string.IsNullOrEmpty(propertyComment)) {
+						if (comments != null && comments.TryGetValue(propertyName, out propertyComment))
+						{
+							if (!string.IsNullOrEmpty(propertyComment))
+							{
 								await writer.WriteLineAsync(string.Format(";{0}", propertyComment));
 							}
 						}
 						await writer.WriteLineAsync(string.Format("{0}={1}", propertyName, WriteEscape(properties[propertyName])));
 					}
 				}
-			} finally {
+			}
+			finally
+			{
 				// Make sure the values are flushed, otherwise the information is not in the stream
 				writer.Flush();
 			}
@@ -182,8 +198,10 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		/// <param name="iniValue">string</param>
 		/// <returns>encoded string value</returns>
-		private static string WriteEscape(string iniValue) {
-			if (!string.IsNullOrEmpty(iniValue)) {
+		private static string WriteEscape(string iniValue)
+		{
+			if (!string.IsNullOrEmpty(iniValue))
+			{
 				iniValue = iniValue.Replace("\n", "\\n");
 			}
 			return iniValue;

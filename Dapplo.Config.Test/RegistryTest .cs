@@ -20,9 +20,7 @@
  */
 
 using Dapplo.Config.Test.TestInterfaces;
-using Dapplo.Config.WindowsRegistry;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading.Tasks;
 
 namespace Dapplo.Config.Test
 {
@@ -30,16 +28,19 @@ namespace Dapplo.Config.Test
 	/// This test class tests the registry capabilities of the proxy
 	/// </summary>
 	[TestClass]
-	public class RegistryTest 
+	public class RegistryTest
 	{
 		[TestMethod]
-		public async Task TestRegistryRead()
+		public void TestRegistryRead()
 		{
-			var registryConfig = new RegistryConfig();
-			var registryTest = await registryConfig.RegisterAndGetAsync<IRegistryTest>();
-			// assume that SOME Run key in 32/64 LocalMachine/CurrentUser is set
-			Assert.IsTrue(registryTest.LMRun32.Count > 1 || registryTest.LMRun64.Count > 1 || registryTest.CURun32.Count > 1 || registryTest.CURun64.Count > 1);
-		}
+			var registryTest = ProxyBuilder.GetOrCreateProxy<IRegistryTest>().PropertyObject;
+			var keys1 = registryTest.LMRun32;
+			var keys2 = registryTest.LMRun64;
+			var keys3 = registryTest.CURun32;
+			var keys4 = registryTest.CURun64;
 
+			// assume that SOME Run key in 32/64 LocalMachine/CurrentUser is set
+			Assert.IsTrue(keys1.Count >= 1 || keys2.Count >= 1 || keys3.Count >= 1 || keys4.Count >= 1);
+		}
 	}
 }

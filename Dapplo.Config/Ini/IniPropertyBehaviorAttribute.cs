@@ -31,7 +31,9 @@ namespace Dapplo.Config.Ini
 		public IniPropertyBehaviorAttribute() {
 			Read = true;
 			Write = true;
+			IgnoreErrors = true;
 		}
+
 		/// <summary>
 		/// Default is true, set read to false to skip reading.
 		/// Although this might be unlikely, examples are:
@@ -47,6 +49,16 @@ namespace Dapplo.Config.Ini
 		/// Default is true, set write to false to skip serializing.
 		/// </summary>
 		public bool Write {
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Set ignore errors to false, if you want an exception when a parse error occurs.
+		/// Default this is set to true, which will cause the property to have the "default" value.
+		/// </summary>
+		public bool IgnoreErrors
+		{
 			get;
 			set;
 		}

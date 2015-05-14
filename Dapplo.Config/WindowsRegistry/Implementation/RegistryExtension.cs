@@ -40,55 +40,102 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 		{
 			CheckType(typeof(IRegistry));
 			_registryAttribute = typeof(T).GetCustomAttribute<RegistryAttribute>();
-			if (_registryAttribute == null) {
+			if (_registryAttribute == null)
+			{
 				_registryAttribute = new RegistryAttribute();
 			}
 			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IRegistry, object>(x => x.PathFor("")), PathFor);
 		}
 
 		/// <summary>
+		/// Make sure this extension is initialized last
+		/// </summary>
+		public override int InitOrder
+		{
+			get
+			{
+				return int.MaxValue;
+			}
+		}
+
+		/// <summary>
 		/// Process the property, in our case read the registry
 		/// </summary>
 		/// <param name="propertyInfo"></param>
-		public override void InitProperty(PropertyInfo propertyInfo) {
+		public override void InitProperty(PropertyInfo propertyInfo)
+		{
 			var registryPropertyAttribute = propertyInfo.GetCustomAttribute<RegistryPropertyAttribute>();
 
 			string path = registryPropertyAttribute.Path;
-			if (_registryAttribute.Path != null) {
+			if (_registryAttribute.Path != null)
+			{
 				path = Path.Combine(_registryAttribute.Path, path);
 			}
-			if (string.IsNullOrEmpty(path)) {
+			if (string.IsNullOrEmpty(path))
+			{
 				throw new ArgumentException(string.Format("{0} doesn't have a path mapping", propertyInfo.Name));
 			}
 			RegistryHive hive = _registryAttribute.Hive;
-			if (registryPropertyAttribute.HasHive) {
+			if (registryPropertyAttribute.HasHive)
+			{
 				hive = registryPropertyAttribute.Hive;
 			}
 
 			RegistryView view = _registryAttribute.View;
-			if (registryPropertyAttribute.HasView) {
+			if (registryPropertyAttribute.HasView)
+			{
 				view = registryPropertyAttribute.View;
 			}
 
 			using (RegistryKey baseKey = RegistryKey.OpenBaseKey(hive, view))
-			using (RegistryKey key = baseKey.OpenSubKey(path)) {
-				if (key == null) {
-					throw new ArgumentException(string.Format("No registry entry in {0}/{1} for {2}", hive, path, view));
-				}
-				if (registryPropertyAttribute.Value == null) {
-					// Read all values, assume IDictionary<string, object>
-					IDictionary<string, object> values = (IDictionary<string, object>)Proxy.Properties[propertyInfo.Name];
-					foreach (string valueName in key.GetValueNames()) {
-						object value = key.GetValue(valueName);
-						if (!values.ContainsKey(valueName)) {
-							values.Add(valueName, value);
-						} else {
-							values[valueName] = value;
+			using (RegistryKey key = baseKey.OpenSubKey(path))
+			{
+				try
+				{
+					if (key == null)
+					{
+						throw new ArgumentException(string.Format("No registry entry in {0}/{1} for {2}", hive, path, view));
+					}
+					if (registryPropertyAttribute.Value == null)
+					{
+						// Read all values, assume IDictionary<string, object>
+						IDictionary<string, object> values;
+						var getInfo = Proxy.Get(propertyInfo.Name);
+						if (!getInfo.HasValue)
+						{
+							// No value yet, create a new default
+							values = new SortedDictionary<string, object>();
+							Proxy.Set(propertyInfo.Name, values);
+						}
+						else
+						{
+							values = (IDictionary<string, object>)getInfo.Value;
+						}
+						foreach (string valueName in key.GetValueNames())
+						{
+							object value = key.GetValue(valueName);
+							if (!values.ContainsKey(valueName))
+							{
+								values.Add(valueName, value);
+							}
+							else
+							{
+								values[valueName] = value;
+							}
 						}
 					}
-				} else {
-					// Read a specifiy value
-					Proxy.Properties[propertyInfo.Name] = key.GetValue(registryPropertyAttribute.Value);
+					else
+					{
+						// Read a specific value
+						Proxy.Set(propertyInfo.Name, key.GetValue(registryPropertyAttribute.Value));
+					}
+				}
+				catch
+				{
+					if (!registryPropertyAttribute.IgnoreErrors)
+					{
+						throw;
+					}
 				}
 			}
 		}
@@ -107,11 +154,13 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 		/// </summary>
 		/// <param name="propertyInfo"></param>
 		/// <returns></returns>
-		private string PathFor(PropertyInfo propertyInfo) {
+		private string PathFor(PropertyInfo propertyInfo)
+		{
 			var registryPropertyAttribute = propertyInfo.GetCustomAttribute<RegistryPropertyAttribute>();
 
 			string path = registryPropertyAttribute.Path;
-			if (_registryAttribute.Path != null) {
+			if (_registryAttribute.Path != null)
+			{
 				path = Path.Combine(_registryAttribute.Path, path);
 			}
 			return path;

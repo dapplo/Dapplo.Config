@@ -57,10 +57,13 @@ namespace Dapplo.Config
 		/// </summary>
 		/// <param name="type">Type to create </param>
 		/// <returns>proxy</returns>
-		public static IPropertyProxy GetOrCreateProxy(Type type) {
+		public static IPropertyProxy GetOrCreateProxy(Type type)
+		{
 			IPropertyProxy proxy;
-			lock (Cache) {
-				if (!Cache.TryGetValue(type, out proxy)) {
+			lock (Cache)
+			{
+				if (!Cache.TryGetValue(type, out proxy))
+				{
 					proxy = CreateProxy(type);
 					Cache.Add(type, proxy);
 				}
@@ -74,8 +77,9 @@ namespace Dapplo.Config
 		/// </summary>
 		/// <typeparam name="T">Should be an interface</typeparam>
 		/// <returns>proxy</returns>
-		public static IPropertyProxy<T> CreateProxy<T>() {
-			return (IPropertyProxy<T>) CreateProxy(typeof(T));
+		public static IPropertyProxy<T> CreateProxy<T>()
+		{
+			return (IPropertyProxy<T>)CreateProxy(typeof(T));
 		}
 
 		/// <summary>
