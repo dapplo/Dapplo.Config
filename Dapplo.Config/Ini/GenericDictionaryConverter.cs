@@ -110,8 +110,12 @@ namespace Dapplo.Config.Ini
 			if (destinationType == typeof(IDictionary<string, string>))
 			{
 				IDictionary<T1, T2> values = value as IDictionary<T1, T2>;
-				return (from key in values.Keys
-						select key).ToDictionary(x => _typeConverter1.ConvertToInvariantString(x), x => _typeConverter2.ConvertToInvariantString(values[x]));
+				if (values != null) {
+					return (from key in values.Keys
+							select key).ToDictionary(x => _typeConverter1.ConvertToInvariantString(x), x => _typeConverter2.ConvertToInvariantString(values[x]));
+				} else {
+					return null;
+				}
 			}
 
 			return base.ConvertTo(context, culture, value, destinationType);

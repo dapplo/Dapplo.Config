@@ -53,6 +53,36 @@ namespace Dapplo.Config.Ini
 		private IDictionary<string, IDictionary<string, string>> _constants;
 		private IDictionary<string, IDictionary<string, string>> _ini = new SortedDictionary<string, IDictionary<string, string>>();
 
+		private IDictionary<Type, Type> _converters = new Dictionary<Type, Type>();
+
+		/// <summary>
+		/// Set the default converter for the specified type
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="typeConverter"></param>
+		public void SetDefaultConverter(Type type, Type typeConverter) {
+			if (_converters.ContainsKey(type)) {
+				_converters[type] = typeConverter;
+			} else {
+				_converters.Add(type, typeConverter);
+			}
+		}
+
+		/// <summary>
+		/// Set the default converters
+		/// </summary>
+		public void SetDefaultConverters() {
+			SetDefaultConverter(typeof(IDictionary<string, string>), typeof(GenericDictionaryConverter<string, string>));
+			SetDefaultConverter(typeof(Dictionary<string, string>), typeof(GenericDictionaryConverter<string, string>));
+			SetDefaultConverter(typeof(IDictionary<string, int>), typeof(GenericDictionaryConverter<string, int>));
+			SetDefaultConverter(typeof(Dictionary<string, int>), typeof(GenericDictionaryConverter<string, int>));
+
+			SetDefaultConverter(typeof(IList<string>), typeof(StringToGenericListConverter<string>));
+			SetDefaultConverter(typeof(List<string>), typeof(StringToGenericListConverter<string>));
+			SetDefaultConverter(typeof(IList<int>), typeof(StringToGenericListConverter<int>));
+			SetDefaultConverter(typeof(List<string>), typeof(StringToGenericListConverter<int>));
+		}
+
 		/// <summary>
 		/// Assign your own error handler to get all the write errors
 		/// </summary>
@@ -300,7 +330,11 @@ namespace Dapplo.Config.Ini
 					// If not, use the default converter for the property type
 					if (converter == null)
 					{
-						converter = TypeDescriptor.GetConverter(iniValue.ValueType);
+						if (_converters.ContainsKey(iniValue.ValueType)) {
+							converter = (TypeConverter)Activator.CreateInstance(_converters[iniValue.ValueType]);
+						} else {
+							converter = TypeDescriptor.GetConverter(iniValue.ValueType);
+						}
 					}
 					else if (converter.CanConvertTo(typeof(IDictionary<string, string>)))
 					{
@@ -468,15 +502,48 @@ namespace Dapplo.Config.Ini
 				}
 				string stringValue;
 				// Skip values that don't have a property
-				if (iniProperties.TryGetValue(iniValue.IniPropertyName, out stringValue))
+				if (!iniProperties.TryGetValue(iniValue.IniPropertyName, out stringValue))
 				{
-					Type stringType = typeof(string);
-					Type destinationType = iniValue.ValueType;
-					if (iniValue.Converter != null && iniValue.Converter.CanConvertFrom(stringType))
+					continue;
+				}
+				Type stringType = typeof(string);
+				Type destinationType = iniValue.ValueType;
+				if (iniValue.Converter != null && iniValue.Converter.CanConvertFrom(stringType))
+				{
+					try
+					{
+						iniValue.Value = iniValue.Converter.ConvertFrom(stringValue);
+					}
+					catch (Exception ex)
+					{
+						ReadErrorHandler(iniSection, iniValue, ex);
+					}
+					continue;
+				}
+
+				// use default converter
+				if (_converters.ContainsKey(iniValue.ValueType))
+				{
+					var converter = (TypeConverter)Activator.CreateInstance(_converters[iniValue.ValueType]);
+					try
+					{
+						iniValue.Value = converter.ConvertFrom(stringValue);
+					}
+					catch (Exception ex)
+					{
+						ReadErrorHandler(iniSection, iniValue, ex);
+					}
+					continue;
+				}
+
+				if (destinationType != stringType)
+				{
+					var converter = TypeDescriptor.GetConverter(destinationType);
+					if (converter != null && converter.CanConvertFrom(stringType))
 					{
 						try
 						{
-							iniValue.Value = iniValue.Converter.ConvertFrom(stringValue);
+							iniValue.Value = converter.ConvertFrom(stringValue);
 						}
 						catch (Exception ex)
 						{
@@ -484,25 +551,9 @@ namespace Dapplo.Config.Ini
 						}
 						continue;
 					}
-					if (destinationType != stringType)
-					{
-						var converter = TypeDescriptor.GetConverter(destinationType);
-						if (converter != null && converter.CanConvertFrom(stringType))
-						{
-							try
-							{
-								iniValue.Value = converter.ConvertFrom(stringValue);
-							}
-							catch (Exception ex)
-							{
-								ReadErrorHandler(iniSection, iniValue, ex);
-							}
-							continue;
-						}
-					}
-					// just set it and hope it can be cast
-					iniValue.Value = stringValue;
 				}
+				// just set it and hope it can be cast
+				iniValue.Value = stringValue;
 			}
 		}
 	}
