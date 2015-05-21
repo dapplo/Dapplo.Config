@@ -138,7 +138,7 @@ namespace Dapplo.Config.Ini
 		/// <returns>instance of type T</returns>
 		public async Task<T> RegisterAndGetAsync<T>(CancellationToken token = default(CancellationToken)) where T : IIniSection
 		{
-			return (T)await RegisterAndGetAsync(typeof(T), token);
+			return (T)await RegisterAndGetAsync(typeof(T), token).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -151,7 +151,7 @@ namespace Dapplo.Config.Ini
 			IList<IIniSection> sections = new List<IIniSection>();
 			foreach (var type in types)
 			{
-				sections.Add(await RegisterAndGetAsync(type, token));
+				sections.Add(await RegisterAndGetAsync(type, token).ConfigureAwait(false));
 			}
 			return sections;
 		}
@@ -171,13 +171,13 @@ namespace Dapplo.Config.Ini
 			var iniSection = (IIniSection)_propertyProxy.PropertyObject;
 			var iniSectionName = iniSection.GetSectionName();
 
-			using (await Sync.Wait(_sync))
+			using (await Sync.WaitAsync(_sync).ConfigureAwait(false))
 			{
 				if (!_iniSections.ContainsKey(iniSectionName))
 				{
 					if (!_initialReadDone)
 					{
-						await ReloadAsync(false, token);
+						await ReloadAsync(false, token).ConfigureAwait(false);
 					}
 					FillSection(iniSection);
 					_iniSections.Add(iniSectionName, iniSection);
@@ -224,7 +224,7 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		public async Task ResetAsync(CancellationToken token = default(CancellationToken))
 		{
-			using (await Sync.Wait(_sync, token))
+			using (await Sync.WaitAsync(_sync, token).ConfigureAwait(false))
 			{
 				foreach (var iniSection in _iniSections.Values)
 				{
@@ -243,7 +243,7 @@ namespace Dapplo.Config.Ini
 		public async Task WriteAsync(CancellationToken token = default(CancellationToken))
 		{
 			// Make sure only one write to file is running, other request will have to wait
-			using (await Sync.Wait(_sync))
+			using (await Sync.WaitAsync(_sync).ConfigureAwait(false))
 			{
 				string path = Path.GetDirectoryName(_iniFile);
 
@@ -257,7 +257,7 @@ namespace Dapplo.Config.Ini
 				using (var stream = new FileStream(_iniFile, FileMode.Create, FileAccess.Write))
 				{
 					// Write the registered ini sections to the stream
-					await WriteToStreamAsync(stream, token);
+					await WriteToStreamAsync(stream, token).ConfigureAwait(false);
 				}
 			}
 		}
@@ -376,8 +376,8 @@ namespace Dapplo.Config.Ini
 					}
 				}
 			}
-			await IniFile.WriteAsync(stream, Encoding.UTF8, _ini, iniSectionsComments, token);
-			await stream.FlushAsync(token);
+			await IniFile.WriteAsync(stream, Encoding.UTF8, _ini, iniSectionsComments, token).ConfigureAwait(false);
+			await stream.FlushAsync(token).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -390,12 +390,12 @@ namespace Dapplo.Config.Ini
 		{
 			if (reset)
 			{
-				await ResetAsync(token);
+				await ResetAsync(token).ConfigureAwait(false);
 			}
 
-			_defaults = await IniFile.ReadAsync(CreateFileLocation(true, Defaults, _fixedDirectory), Encoding.UTF8, token);
-			_constants = await IniFile.ReadAsync(CreateFileLocation(true, Constants, _fixedDirectory), Encoding.UTF8, token);
-			var newIni = await IniFile.ReadAsync(_iniFile, Encoding.UTF8, token);
+			_defaults = await IniFile.ReadAsync(CreateFileLocation(true, Defaults, _fixedDirectory), Encoding.UTF8, token).ConfigureAwait(false);
+			_constants = await IniFile.ReadAsync(CreateFileLocation(true, Constants, _fixedDirectory), Encoding.UTF8, token).ConfigureAwait(false);
+			var newIni = await IniFile.ReadAsync(_iniFile, Encoding.UTF8, token).ConfigureAwait(false);
 			if (newIni != null)
 			{
 				_ini = newIni;
@@ -444,7 +444,7 @@ namespace Dapplo.Config.Ini
 			// This is for testing, clear all defaults & constants as the 
 			_defaults = null;
 			_constants = null;
-			_ini = await IniFile.ReadAsync(stream, Encoding.UTF8, token);
+			_ini = await IniFile.ReadAsync(stream, Encoding.UTF8, token).ConfigureAwait(false);
 
 			// Reset the current sections
 			FillSections();

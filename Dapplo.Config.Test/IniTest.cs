@@ -49,8 +49,8 @@ namespace Dapplo.Config.Test
 
 			using (var testMemoryStream = new MemoryStream())
 			{
-				await iniConfig.ReadFromStreamAsync(testMemoryStream);
-				var iniTest = await iniConfig.RegisterAndGetAsync<IIniTest>();
+				await iniConfig.ReadFromStreamAsync(testMemoryStream).ConfigureAwait(false);
+				var iniTest = await iniConfig.RegisterAndGetAsync<IIniTest>().ConfigureAwait(false);
 				Assert.IsTrue(iniTest.WindowCornerCutShape.Count > 0);
 			}
 		}
@@ -60,8 +60,8 @@ namespace Dapplo.Config.Test
 		{
 			var iniConfig = new IniConfig("Dapplo", "dapplo");
 
-			var coreConfig = await iniConfig.RegisterAndGetAsync<CoreConfiguration>();
-			var iniTest = await iniConfig.RegisterAndGetAsync<IIniTest>();
+			var coreConfig = await iniConfig.RegisterAndGetAsync<CoreConfiguration>().ConfigureAwait(false);
+			var iniTest = await iniConfig.RegisterAndGetAsync<IIniTest>().ConfigureAwait(false);
 
 			// Change some values
 			iniTest.Name = Name;
@@ -78,8 +78,8 @@ namespace Dapplo.Config.Test
 			iniTest.Age = ticks;
 			using (var writeStream = new MemoryStream())
 			{
-				await iniConfig.WriteToStreamAsync(writeStream);
-				//await iniConfig.WriteAsync();
+				await iniConfig.WriteToStreamAsync(writeStream).ConfigureAwait(false);
+				//await iniConfig.WriteAsync().ConfigureAwait(false);
 
 				// Set the not written value to a testable value, this should not be read (and overwritten) by reading the ini file.
 				iniTest.NotWritten = TestValueForNonSerialized;
@@ -89,8 +89,8 @@ namespace Dapplo.Config.Test
 
 				// Test reading
 				writeStream.Seek(0, SeekOrigin.Begin);
-				await iniConfig.ReadFromStreamAsync(writeStream);
-				//await iniConfig.ReloadAsync(false);
+				await iniConfig.ReadFromStreamAsync(writeStream).ConfigureAwait(false);
+				//await iniConfig.ReloadAsync(false).ConfigureAwait(false);
 
 				Assert.IsTrue(iniTest.SomeValues.ContainsKey("One"));
 				Assert.AreEqual(Name, iniTest.Name);

@@ -29,16 +29,16 @@ namespace Dapplo.Config.Support
 	/// A simple helper to synchronize async code
 	/// Usage:
 	/// private readonly SemaphoreSlim _sync = new SemaphoreSlim(1);
-	/// using (await Sync.Wait(_sync)) {
+	/// using (await Sync.WaitAsync(_sync).ConfigureAwait(false)) {
 	///		// Do your stuff
 	///	}
 	/// </summary>
 	public class Sync : IDisposable
 	{
 		private readonly SemaphoreSlim _syncSemaphore;
-		public static async Task<Sync> Wait(SemaphoreSlim syncSemaphore, CancellationToken token = default(CancellationToken))
+		public static async Task<Sync> WaitAsync(SemaphoreSlim syncSemaphore, CancellationToken token = default(CancellationToken))
 		{
-			await syncSemaphore.WaitAsync(token);
+			await syncSemaphore.WaitAsync(token).ConfigureAwait(false);
 			return new Sync(syncSemaphore);
 		}
 		private Sync(SemaphoreSlim syncSemaphore)

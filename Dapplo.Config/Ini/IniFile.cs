@@ -51,7 +51,7 @@ namespace Dapplo.Config.Ini
 			{
 				using (FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 1024))
 				{
-					return await ReadAsync(fileStream, encoding, token);
+					return await ReadAsync(fileStream, encoding, token).ConfigureAwait(false);
 				}
 			}
 			return null;
@@ -73,7 +73,7 @@ namespace Dapplo.Config.Ini
 			Dictionary<string, string> nameValues = new Dictionary<string, string>();
 			while (!reader.EndOfStream && !token.IsCancellationRequested)
 			{
-				string line = await reader.ReadLineAsync();
+				string line = await reader.ReadLineAsync().ConfigureAwait(false);
 				if (line != null)
 				{
 					string cleanLine = line.Trim();
@@ -133,7 +133,7 @@ namespace Dapplo.Config.Ini
 		{
 			using (FileStream fileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write, 1024))
 			{
-				await WriteAsync(fileStream, encoding, sections, sectionComments, token);
+				await WriteAsync(fileStream, encoding, sections, sectionComments, token).ConfigureAwait(false);
 			}
 		}
 
@@ -158,7 +158,7 @@ namespace Dapplo.Config.Ini
 					{
 						break;
 					}
-					await writer.WriteLineAsync();
+					await writer.WriteLineAsync().ConfigureAwait(false);
 					IDictionary<string, string> properties = sections[sectionKey];
 					if (properties.Count == 0)
 					{
@@ -174,11 +174,11 @@ namespace Dapplo.Config.Ini
 						{
 							if (!string.IsNullOrEmpty(sectionDescription))
 							{
-								await writer.WriteLineAsync(string.Format(";{0}", sectionDescription));
+								await writer.WriteLineAsync(string.Format(";{0}", sectionDescription)).ConfigureAwait(false);
 							}
 						}
 					}
-					await writer.WriteLineAsync(string.Format("[{0}]", sectionKey));
+					await writer.WriteLineAsync(string.Format("[{0}]", sectionKey)).ConfigureAwait(false);
 					foreach (var propertyName in properties.Keys)
 					{
 						if (token.IsCancellationRequested)
@@ -190,10 +190,10 @@ namespace Dapplo.Config.Ini
 						{
 							if (!string.IsNullOrEmpty(propertyComment))
 							{
-								await writer.WriteLineAsync(string.Format(";{0}", propertyComment));
+								await writer.WriteLineAsync(string.Format(";{0}", propertyComment)).ConfigureAwait(false);
 							}
 						}
-						await writer.WriteLineAsync(string.Format("{0}={1}", propertyName, WriteEscape(properties[propertyName])));
+						await writer.WriteLineAsync(string.Format("{0}={1}", propertyName, WriteEscape(properties[propertyName]))).ConfigureAwait(false);
 					}
 				}
 			}
@@ -202,7 +202,7 @@ namespace Dapplo.Config.Ini
 				exception = ex;
 			}
 			// Make sure the values are flushed, otherwise the information is not in the stream
-			await writer.FlushAsync();
+			await writer.FlushAsync().ConfigureAwait(false);
 
 			// Throw the exception, if we caught one
 			if (exception != null)
