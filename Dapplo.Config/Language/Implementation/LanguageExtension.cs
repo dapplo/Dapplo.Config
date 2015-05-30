@@ -19,36 +19,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
+using Dapplo.Config.Extension.Implementation;
 
-namespace Dapplo.Config.Ini
+namespace Dapplo.Config.Language.Implementation
 {
-	[AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
-	public class IniSectionAttribute : Attribute
+	/// <summary>
+	/// Extend the PropertyProxy with Ini functionality
+	/// </summary>
+	[Extension(typeof(ILanguage))]
+	internal class LanguageExtension<T> : AbstractPropertyProxyExtension<T>
 	{
-		public IniSectionAttribute(string name)
-		{
-			Name = name;
-			IgnoreErrors = true;
-		}
 
-		/// <summary>
-		/// Name of the section in the ini file
-		/// </summary>
-		public string Name
+		public LanguageExtension(IPropertyProxy<T> proxy) : base(proxy)
 		{
-			get;
-			private set;
-		}
+			CheckType(typeof(ILanguage));
 
-		/// <summary>
-		/// Set ignore errors to false, if you want an exception when a parse error occurs.
-		/// Default this is set to true, which will cause the property to have the "default" value.
-		/// </summary>
-		public bool IgnoreErrors
-		{
-			get;
-			set;
+			//Proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.GetIniValues()), GetIniValues);
 		}
 	}
 }

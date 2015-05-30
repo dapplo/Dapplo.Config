@@ -351,7 +351,7 @@ namespace Dapplo.Config
 		/// This will invoke the normal set, going through all the registered setters
 		/// </summary>
 		/// <param name="propertyName">propertyName</param>
-		/// <param name="value">object</param>
+		/// <param name="newValue">object value to set</param>
 		/// <returns>SetInfo</returns>
 		public SetInfo Set(string propertyName, object newValue)
 		{

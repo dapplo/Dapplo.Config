@@ -19,36 +19,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
+using System.ComponentModel;
+using Dapplo.Config.Extension;
 
-namespace Dapplo.Config.Ini
-{
-	[AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
-	public class IniSectionAttribute : Attribute
-	{
-		public IniSectionAttribute(string name)
-		{
-			Name = name;
-			IgnoreErrors = true;
-		}
-
-		/// <summary>
-		/// Name of the section in the ini file
-		/// </summary>
-		public string Name
-		{
-			get;
-			private set;
-		}
-
-		/// <summary>
-		/// Set ignore errors to false, if you want an exception when a parse error occurs.
-		/// Default this is set to true, which will cause the property to have the "default" value.
-		/// </summary>
-		public bool IgnoreErrors
-		{
-			get;
-			set;
-		}
+namespace Dapplo.Config.Language {
+	/// <summary>
+	/// The base interface for all language objects.
+	/// It is important to have INotifyPropertyChanged, so language changes are directly shown in the UI.
+	/// </summary>
+	public interface ILanguage : IDefaultValue, INotifyPropertyChanged {
 	}
 }

@@ -126,12 +126,12 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		/// <param name="path">Path to file</param>
 		/// <param name="encoding">Encoding</param>
-		/// <param name="sections"></param>
-		/// <param name="sectionsComments">Optional</param>
+		/// <param name="sections">A dictionary with dictionaries with values for every section</param>
+		/// <param name="sectionComments">A dictionary with the optional comments for the file</param>
 		/// <param name="token">CancellationToken</param>
 		public static async Task WriteAsync(string path, Encoding encoding, IDictionary<string, IDictionary<string, string>> sections, IDictionary<string, IDictionary<string, string>> sectionComments = null, CancellationToken token = default(CancellationToken))
 		{
-			using (FileStream fileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write, 1024))
+			using (var fileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write, 1024))
 			{
 				await WriteAsync(fileStream, encoding, sections, sectionComments, token).ConfigureAwait(false);
 			}

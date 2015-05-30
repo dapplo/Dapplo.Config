@@ -73,8 +73,10 @@ namespace Dapplo.Config.Extension.Implementation
 					Proxy.Properties[propertyInfo.Name] = defaultValue;
 					return;
 				}
+// ReSharper disable once EmptyGeneralCatchClause
 				catch
 				{
+					// Ignore creating the default type, this might happen if there is no default constructor.
 				}
 			}
 			if (Proxy.Properties.ContainsKey(propertyInfo.Name))

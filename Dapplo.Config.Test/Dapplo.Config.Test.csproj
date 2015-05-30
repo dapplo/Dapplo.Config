@@ -59,7 +59,6 @@
   <ItemGroup>
     <Compile Include="DescriptionTest.cs" />
     <Compile Include="NotifyPropertyChangingTest.cs" />
-    <Compile Include="TestInterfaces\CoreConfiguration.cs" />
     <Compile Include="TestInterfaces\IDescriptionTest.cs" />
     <Compile Include="TestInterfaces\IBassicAssignTest.cs" />
     <Compile Include="TestInterfaces\IDefaultValueTest.cs" />

@@ -33,7 +33,7 @@ namespace Dapplo.Config.Ini
 	/// <typeparam name="T"></typeparam>
 	public class StringToGenericListConverter<T> : TypeConverter
 	{
-		protected readonly TypeConverter _typeConverter;
+		private readonly TypeConverter _typeConverter;
 
 		public StringToGenericListConverter()
 		{

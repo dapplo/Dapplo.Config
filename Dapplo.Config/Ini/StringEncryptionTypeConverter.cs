@@ -172,7 +172,7 @@ namespace Dapplo.Config.Ini
 			{
 				return Decrypt(valueString);
 			}
-			else if (valueString != null)
+			if (valueString != null)
 			{
 				return valueString;
 			}
@@ -187,7 +187,7 @@ namespace Dapplo.Config.Ini
 		/// <returns>an encryped string in base64 form</returns>
 		private static string Encrypt(string clearText)
 		{
-			string returnValue = clearText;
+			string returnValue;
 			byte[] clearTextBytes = Encoding.ASCII.GetBytes(clearText);
 			using (SymmetricAlgorithm symmetricAlgorithm = SymmetricAlgorithm.Create(Algorithm))
 			using (MemoryStream memoryStream = new MemoryStream())
@@ -211,7 +211,7 @@ namespace Dapplo.Config.Ini
 		/// <returns>Decrypeted text</returns>
 		private static string Decrypt(string encryptedText)
 		{
-			string returnValue = encryptedText;
+			string returnValue;
 			byte[] encryptedTextBytes = Convert.FromBase64String(encryptedText);
 
 			using (SymmetricAlgorithm symmetricAlgorithm = SymmetricAlgorithm.Create(Algorithm))

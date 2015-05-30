@@ -259,7 +259,7 @@ namespace Dapplo.Config.Support
 		/// <param name="key">string key</param>
 		/// <param name="newValue">object</param>
 		/// <returns>dictionary for fluent API calls</returns>
-		public static IDictionary<string, object> SafelyAddOrOverwrite(this IDictionary<string, object> dictionary, string key, object newValue)
+		public static IDictionary<T1, T2> SafelyAddOrOverwrite<T1, T2>(this IDictionary<T1, T2> dictionary, T1 key, T2 newValue)
 		{
 			if (dictionary.ContainsKey(key))
 			{
