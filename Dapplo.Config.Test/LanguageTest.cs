@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Dapplo.Config.Language;
 using Dapplo.Config.Test.TestInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -13,16 +10,16 @@ namespace Dapplo.Config.Test {
 	[TestClass]
 	public class LanguageTest
 	{
-		private IPropertyProxy<ILanguageTest> _propertyProxy;
-
-		[TestInitialize]
-		public void Initialize()
-		{
-			_propertyProxy = ProxyBuilder.CreateProxy<ILanguageTest>();
-		}
+		public const string Ok = "Ok";
 
 		[TestMethod]
-		public void TestTransactionCommit() {
+		public async Task TestTranslations() {
+			var languageLoader = new LanguageLoader("Dapplo");
+			var language = await languageLoader.RegisterAndGetAsync<ILanguageTest>();
+
+			Assert.AreEqual(Ok, language.Ok);
+			Assert.AreEqual("Cancel", language.TestValue);
+			
 		}
 	}
 }

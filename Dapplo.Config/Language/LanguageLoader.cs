@@ -33,15 +33,6 @@ using Dapplo.Config.Ini;
 using Dapplo.Config.Support;
 
 namespace Dapplo.Config.Language {
-
-	/// <summary>
-	/// Specify the type for the loader
-	/// </summary>
-	public enum LanguageFormat {
-		Ini,
-		Json,
-		XML
-	}
 	/// <summary>
 	/// The language loader should be used to fill ILanguage proxy interfaces.
 	/// It is possible to specify the directory locations, in order, where files with certain patterns should be located.
@@ -52,18 +43,18 @@ namespace Dapplo.Config.Language {
 		private readonly SemaphoreSlim _sync = new SemaphoreSlim(1);
 		private readonly IDictionary<string, string> _allProperties = new Dictionary<string, string>();
 		private readonly string _applicationName;
-		private readonly string _filePattern = @"language_\([:alnum:]+\-[:alnum:]+\)\.ini";
+		private readonly string _filePattern;
 		private readonly IList<string> _files;
 		private bool _initialReadDone;
 		private string _currentLanguage;
-		private IDictionary<string, string> _availableLanguages = new Dictionary<string, string>(); 
- 
-		public LanguageLoader(string applicationName, string defaultLanguage, string filePatern = null) {
+		private IDictionary<string, string> _availableLanguages = new Dictionary<string, string>();
+
+		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language_([a-zA-Z]+-[a-zA-Z]+)\.ini") {
 			_currentLanguage = defaultLanguage;
 			_filePattern = filePatern;
 			_applicationName = applicationName;
 			_files = ScanForFiles(true);
-			_availableLanguages = (from filename in _files select Regex.Replace(filename, _filePattern, @"\1")).Distinct().ToDictionary(x => x, x => CultureInfo.GetCultureInfo(x).NativeName);
+			_availableLanguages = (from filename in _files select Regex.Replace(Path.GetFileName(filename), _filePattern, "$1")).Distinct().ToDictionary(x => x, x => CultureInfo.GetCultureInfo(x).NativeName);
 		}
 
 		public IDictionary<string, string> AvailableLanguages {
@@ -73,6 +64,9 @@ namespace Dapplo.Config.Language {
 		}
 
 		public async Task ChangeLanguage(string ietf, CancellationToken token = default(CancellationToken)) {
+			if (ietf == _currentLanguage) {
+				return;
+			}
 			if (_availableLanguages.ContainsKey(ietf)) {
 				_currentLanguage = ietf;
 				await ReloadAsync(token);
@@ -84,7 +78,7 @@ namespace Dapplo.Config.Language {
 		/// </summary>
 		/// <param name="checkStartupDirectory"></param>
 		/// <param name="specifiedDirectory"></param>
-		/// <returns></returns>
+		/// <returns>all language files</returns>
 		private IList<string> ScanForFiles(bool checkStartupDirectory, string specifiedDirectory = null) {
 			IList<string> directories = new List<string>();
 			if (specifiedDirectory != null) {
@@ -92,20 +86,28 @@ namespace Dapplo.Config.Language {
 			} else {
 				if (checkStartupDirectory) {
 					var entryAssembly = Assembly.GetEntryAssembly();
+					string startupDirectory = null;
 					if (entryAssembly != null) {
-						string startupDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-						if (startupDirectory != null) {
-							directories.Add(Path.Combine(startupDirectory, "languages"));
+						startupDirectory = Path.GetDirectoryName(entryAssembly.Location);
+					} else {
+						var executingAssembly = Assembly.GetExecutingAssembly();
+						if (executingAssembly != null) {
+							startupDirectory = Path.GetDirectoryName(executingAssembly.Location);
 						}
+					}
+					if (startupDirectory != null) {
+						directories.Add(Path.Combine(startupDirectory, "languages"));
 					}
 				}
 				string appDataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), _applicationName);
 				directories.Add(Path.Combine(appDataDirectory, "languages"));
 			}
 			var files = (from path in directories
-						select Directory.GetFiles(path, "*.ini", SearchOption.AllDirectories).Where(s => Regex.IsMatch(s, _filePattern))).SelectMany(i => i);
-
-			return files.ToList();
+						 where Directory.Exists(path)
+						 select Directory.GetFiles(path, "*.ini", SearchOption.AllDirectories)
+						 .Where(f => Regex.IsMatch(Path.GetFileName(f), _filePattern)))
+						 .SelectMany(i => i).ToList();
+			return files;
 		}
 
 		/// <summary>
@@ -167,7 +169,8 @@ namespace Dapplo.Config.Language {
 				foreach (var section in newIni.Keys) {
 					var properties = newIni[section];
 					foreach (var key in properties.Keys) {
-						_allProperties.SafelyAddOrOverwrite(string.Format("{0}{1}", section, key), properties[key]);
+						var cleanKey = _cleanup.Replace(string.Format("{0}{1}", section, key), "").ToLowerInvariant();
+						_allProperties.SafelyAddOrOverwrite(cleanKey, properties[key]);
 					}
 				}
 			}

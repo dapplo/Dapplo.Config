@@ -58,10 +58,12 @@
   </Choose>
   <ItemGroup>
     <Compile Include="DescriptionTest.cs" />
+    <Compile Include="LanguageTest.cs" />
     <Compile Include="NotifyPropertyChangingTest.cs" />
     <Compile Include="TestInterfaces\IDescriptionTest.cs" />
     <Compile Include="TestInterfaces\IBassicAssignTest.cs" />
     <Compile Include="TestInterfaces\IDefaultValueTest.cs" />
+    <Compile Include="TestInterfaces\ILanguageTest.cs" />
     <Compile Include="TestInterfaces\INotifyPropertyChangedTest.cs" />
     <Compile Include="TestInterfaces\IIniTest.cs" />
     <Compile Include="TagAttributeTest.cs" />
@@ -85,6 +87,12 @@
       <Project>{f57325b4-9444-4e68-9485-080a5171e8bc}</Project>
       <Name>Dapplo.Config</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="Languages\language_en-US.ini">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
