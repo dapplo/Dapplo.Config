@@ -16,10 +16,14 @@ namespace Dapplo.Config.Test {
 		public async Task TestTranslations() {
 			var languageLoader = new LanguageLoader("Dapplo");
 			var language = await languageLoader.RegisterAndGetAsync<ILanguageTest>();
-
+			Assert.IsTrue(languageLoader.AvailableLanguages.ContainsKey("nl-NL"));
+			Assert.IsTrue(languageLoader.AvailableLanguages.ContainsKey("en-US"));
+			Assert.AreEqual("Nederlands (Nederland)", languageLoader.AvailableLanguages["nl-NL"]);
+			
 			Assert.AreEqual(Ok, language.Ok);
 			Assert.AreEqual("Cancel", language.TestValue);
-			
+			await languageLoader.ChangeLanguage("nl-NL");
+			Assert.AreEqual("Afbreken", language.TestValue);
 		}
 	}
 }

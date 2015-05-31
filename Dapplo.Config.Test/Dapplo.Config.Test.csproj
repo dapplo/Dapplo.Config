@@ -90,6 +90,9 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <None Include="Languages\language_nl-NL.ini">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Languages\language_en-US.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
