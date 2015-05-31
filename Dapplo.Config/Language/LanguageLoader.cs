@@ -29,6 +29,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Dapplo.Config.Extension;
 using Dapplo.Config.Ini;
 using Dapplo.Config.Support;
 
@@ -192,7 +193,9 @@ namespace Dapplo.Config.Language {
 		/// </summary>
 		/// <param name="propertyProxy"></param>
 		private void FillLanguageConfig(IPropertyProxy propertyProxy) {
+			var propertyObject = (IDefaultValue)propertyProxy.PropertyObject;
 			foreach (PropertyInfo propertyInfo in propertyProxy.PropertyObjectType.GetProperties()) {
+				propertyObject.RestoreToDefault(propertyInfo.Name);
 				string key = _cleanup.Replace(propertyInfo.Name, "").ToLowerInvariant();
 				string translation;
 				if (_allProperties.TryGetValue(key, out translation)) {

@@ -22,8 +22,12 @@ namespace Dapplo.Config.Test {
 			
 			Assert.AreEqual(Ok, language.Ok);
 			Assert.AreEqual("Cancel", language.TestValue);
+			Assert.AreEqual("Blub", language.OnlyenUS);
+			Assert.AreNotEqual("Blub", language.OnlynlNL);
 			await languageLoader.ChangeLanguage("nl-NL");
 			Assert.AreEqual("Afbreken", language.TestValue);
+			Assert.AreNotEqual("Blub", language.OnlyenUS);
+			Assert.AreEqual("Blub", language.OnlynlNL);
 		}
 	}
 }

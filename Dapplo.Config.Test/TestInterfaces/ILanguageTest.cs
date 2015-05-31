@@ -31,5 +31,12 @@ namespace Dapplo.Config.Test.TestInterfaces {
 		string TestValue {
 			get;
 		}
+
+		string OnlyenUS {
+			get;
+		}
+		string OnlynlNL {
+			get;
+		}
 	}
 }
