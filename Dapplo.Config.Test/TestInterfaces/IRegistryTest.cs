@@ -65,6 +65,5 @@ namespace Dapplo.Config.Test.TestInterfaces
 			get;
 			set;
 		}
-
 	}
 }

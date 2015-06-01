@@ -69,7 +69,6 @@ namespace Dapplo.Config.Extension
 	/// </summary>
 	public interface IWriteProtectProperties<T> : IWriteProtectProperties
 	{
-
 		/// <summary>
 		/// Test if the supplied property (by lamdba) is write protected
 		/// </summary>

@@ -37,16 +37,16 @@ namespace Dapplo.Config.Ini
 
 		public StringToGenericListConverter()
 		{
-			_typeConverter = TypeDescriptor.GetConverter(typeof(T));
+			_typeConverter = TypeDescriptor.GetConverter(typeof (T));
 			if (_typeConverter == null)
 			{
-				throw new InvalidOperationException("No type converter exists for type " + typeof(T).FullName);
+				throw new InvalidOperationException("No type converter exists for type " + typeof (T).FullName);
 			}
 		}
 
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
-			if (sourceType == typeof(string))
+			if (sourceType == typeof (string))
 			{
 				return true;
 			}
@@ -56,7 +56,7 @@ namespace Dapplo.Config.Ini
 
 		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
 		{
-			if (destinationType == typeof(string))
+			if (destinationType == typeof (string))
 			{
 				return true;
 			}
@@ -76,9 +76,9 @@ namespace Dapplo.Config.Ini
 			if (value is string)
 			{
 				// Split, and where all element are not null or empty, convert the item to T and add the items to a list<T>
-				return (from item in ((string)value).Split(',')
-						where !string.IsNullOrWhiteSpace(item)
-						select (T)_typeConverter.ConvertFromInvariantString(item.Trim())).ToList<T>();
+				return (from item in ((string) value).Split(',')
+					where !string.IsNullOrWhiteSpace(item)
+					select (T) _typeConverter.ConvertFromInvariantString(item.Trim())).ToList<T>();
 			}
 
 			return base.ConvertFrom(context, culture, value);
@@ -94,9 +94,9 @@ namespace Dapplo.Config.Ini
 		/// <returns></returns>
 		public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
 		{
-			if (destinationType == typeof(string))
+			if (destinationType == typeof (string))
 			{
-				return string.Join(",", ((IList<T>)value));
+				return string.Join(",", ((IList<T>) value));
 			}
 
 			return base.ConvertTo(context, culture, value, destinationType);

@@ -18,6 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
 using System;
 
 namespace Dapplo.Config.Ini
@@ -28,7 +29,8 @@ namespace Dapplo.Config.Ini
 	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
 	public class IniPropertyBehaviorAttribute : Attribute
 	{
-		public IniPropertyBehaviorAttribute() {
+		public IniPropertyBehaviorAttribute()
+		{
 			Read = true;
 			Write = true;
 			IgnoreErrors = true;
@@ -40,7 +42,8 @@ namespace Dapplo.Config.Ini
 		/// 1 A property with the last changed date, which might not be the date of the file
 		/// 2 A property with the application or component version which "processed" the configuration
 		/// </summary>
-		public bool Read {
+		public bool Read
+		{
 			get;
 			set;
 		}
@@ -48,7 +51,8 @@ namespace Dapplo.Config.Ini
 		/// <summary>
 		/// Default is true, set write to false to skip serializing.
 		/// </summary>
-		public bool Write {
+		public bool Write
+		{
 			get;
 			set;
 		}

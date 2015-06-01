@@ -49,16 +49,16 @@ namespace Dapplo.Config
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public PropertyProxy() : base(typeof(T))
+		public PropertyProxy() : base(typeof (T))
 		{
 			// Register the GetType handler, use Lambda to make refactoring possible
 			RegisterMethod(ConfigUtils.GetMemberName<object>(x => x.GetType()), HandleGetType);
 
 			// Make sure the default set logic is registered
-			RegisterSetter((int)CallOrder.Middle, DefaultSet);
+			RegisterSetter((int) CallOrder.Middle, DefaultSet);
 			// Make sure the default get logic is registered
-			RegisterGetter((int)CallOrder.Middle, DefaultGet);
-			_transparentProxy = (T)GetTransparentProxy();
+			RegisterGetter((int) CallOrder.Middle, DefaultGet);
+			_transparentProxy = (T) GetTransparentProxy();
 		}
 
 		/// <summary>
@@ -66,11 +66,11 @@ namespace Dapplo.Config
 		/// </summary>
 		internal void Init()
 		{
-			Type proxiedType = typeof(T);
+			Type proxiedType = typeof (T);
 			//Init in the right order
 			var extensions = from sortedExtension in _extensions
-							 orderby sortedExtension.InitOrder ascending
-							 select sortedExtension;
+				orderby sortedExtension.InitOrder ascending
+				select sortedExtension;
 
 			foreach (PropertyInfo propertyInfo in proxiedType.GetProperties())
 			{
@@ -108,8 +108,7 @@ namespace Dapplo.Config
 		{
 			_setters.Add(new Setter
 			{
-				Order = order,
-				SetterAction = setterAction
+				Order = order, SetterAction = setterAction
 			});
 			_setters.Sort();
 		}
@@ -123,8 +122,7 @@ namespace Dapplo.Config
 		{
 			_getters.Add(new Getter
 			{
-				Order = order,
-				GetterAction = getterAction
+				Order = order, GetterAction = getterAction
 			});
 			_getters.Sort();
 		}
@@ -135,7 +133,7 @@ namespace Dapplo.Config
 		/// <param name="methodCallInfo">IMethodCallMessage</param>
 		private void HandleGetType(MethodCallInfo methodCallInfo)
 		{
-			methodCallInfo.ReturnValue = typeof(T);
+			methodCallInfo.ReturnValue = typeof (T);
 		}
 
 		/// <summary>
@@ -144,7 +142,7 @@ namespace Dapplo.Config
 		/// <param name="extensionType">Type for the extension</param>
 		internal void AddExtension(Type extensionType)
 		{
-			var extension = (IPropertyProxyExtension)Activator.CreateInstance(extensionType.MakeGenericType(typeof(T)), this);
+			var extension = (IPropertyProxyExtension) Activator.CreateInstance(extensionType.MakeGenericType(typeof (T)), this);
 			_extensions.Add(extension);
 		}
 
@@ -167,7 +165,7 @@ namespace Dapplo.Config
 		{
 			get
 			{
-				return typeof(T);
+				return typeof (T);
 			}
 		}
 
@@ -282,8 +280,7 @@ namespace Dapplo.Config
 			{
 				var methodCallInfo = new MethodCallInfo
 				{
-					MethodName = methodName,
-					Arguments = parameters
+					MethodName = methodName, Arguments = parameters
 				};
 				foreach (var action in actions)
 				{
@@ -332,8 +329,7 @@ namespace Dapplo.Config
 		{
 			var getInfo = new GetInfo
 			{
-				PropertyName = propertyName,
-				CanContinue = true
+				PropertyName = propertyName, CanContinue = true
 			};
 			foreach (Getter getter in _getters)
 			{
@@ -359,11 +355,7 @@ namespace Dapplo.Config
 			bool hasOldValue = _properties.TryGetValue(propertyName, out oldValue);
 			var setInfo = new SetInfo
 			{
-				NewValue = newValue,
-				PropertyName = propertyName,
-				HasOldValue = hasOldValue,
-				CanContinue = true,
-				OldValue = oldValue
+				NewValue = newValue, PropertyName = propertyName, HasOldValue = hasOldValue, CanContinue = true, OldValue = oldValue
 			};
 			foreach (Setter setter in _setters)
 			{
@@ -386,7 +378,7 @@ namespace Dapplo.Config
 		{
 			string propertyName = propertyExpression.GetMemberName();
 
-			Type proxiedType = typeof(T);
+			Type proxiedType = typeof (T);
 			PropertyInfo propertyInfo = proxiedType.GetProperty(propertyName);
 			return propertyInfo.GetDescription();
 		}

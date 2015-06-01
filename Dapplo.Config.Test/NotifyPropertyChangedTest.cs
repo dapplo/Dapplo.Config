@@ -43,11 +43,11 @@ namespace Dapplo.Config.Test
 		[TestMethod]
 		public void TestNotifyPropertyChanged()
 		{
-
 			var properties = _propertyProxy.PropertyObject;
 			string changedPropertyName = null;
 
-			var propChanged = new PropertyChangedEventHandler((sender, eventArgs) => {
+			var propChanged = new PropertyChangedEventHandler((sender, eventArgs) =>
+			{
 				changedPropertyName = eventArgs.PropertyName;
 			});
 

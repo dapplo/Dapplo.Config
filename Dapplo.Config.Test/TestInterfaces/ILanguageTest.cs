@@ -22,21 +22,29 @@
 using System.ComponentModel;
 using Dapplo.Config.Language;
 
-namespace Dapplo.Config.Test.TestInterfaces {
+namespace Dapplo.Config.Test.TestInterfaces
+{
 	[Language("Test")]
-	public interface ILanguageTest : ILanguage {
+	public interface ILanguageTest : ILanguage
+	{
 		[DefaultValue(LanguageTest.Ok)]
-		string Ok {
-			get;
-		}
-		string TestValue {
+		string Ok
+		{
 			get;
 		}
 
-		string OnlyenUS {
+		string TestValue
+		{
 			get;
 		}
-		string OnlynlNL {
+
+		string OnlyenUS
+		{
+			get;
+		}
+
+		string OnlynlNL
+		{
 			get;
 		}
 	}

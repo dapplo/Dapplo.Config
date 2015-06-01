@@ -36,9 +36,13 @@ namespace Dapplo.Config
 	{
 		private static readonly List<Type> ExtensionTypes = new List<Type>();
 		private static readonly IDictionary<Type, IPropertyProxy> Cache = new ConcurrentDictionary<Type, IPropertyProxy>();
+
 		static ProxyBuilder()
 		{
-			IEnumerable<Type> types = from someAssembly in AppDomain.CurrentDomain.GetAssemblies() from someType in someAssembly.GetTypes() where someType.GetCustomAttributes(typeof(ExtensionAttribute), true).Length > 0 select someType;
+			IEnumerable<Type> types = from someAssembly in AppDomain.CurrentDomain.GetAssemblies()
+				from someType in someAssembly.GetTypes()
+				where someType.GetCustomAttributes(typeof (ExtensionAttribute), true).Length > 0
+				select someType;
 			ExtensionTypes.AddRange(types);
 		}
 
@@ -49,7 +53,7 @@ namespace Dapplo.Config
 		/// <returns>proxy</returns>
 		public static IPropertyProxy<T> GetOrCreateProxy<T>()
 		{
-			return (IPropertyProxy<T>)GetOrCreateProxy(typeof(T));
+			return (IPropertyProxy<T>) GetOrCreateProxy(typeof (T));
 		}
 
 		/// <summary>
@@ -79,7 +83,7 @@ namespace Dapplo.Config
 		/// <returns>proxy</returns>
 		public static IPropertyProxy<T> CreateProxy<T>()
 		{
-			return (IPropertyProxy<T>)CreateProxy(typeof(T));
+			return (IPropertyProxy<T>) CreateProxy(typeof (T));
 		}
 
 		/// <summary>
@@ -90,26 +94,32 @@ namespace Dapplo.Config
 		/// <returns>proxy</returns>
 		public static IPropertyProxy CreateProxy(Type type)
 		{
-			var genericType = typeof(PropertyProxy<>).MakeGenericType(type);
-			var proxy = (IPropertyProxy)Activator.CreateInstance(genericType, null);
+			var genericType = typeof (PropertyProxy<>).MakeGenericType(type);
+			var proxy = (IPropertyProxy) Activator.CreateInstance(genericType, null);
 			Type[] interfaces = type.GetInterfaces();
 			var addExtensionMethodInfo = genericType.GetMethod("AddExtension", BindingFlags.NonPublic | BindingFlags.Instance);
 			foreach (Type extensionType in ExtensionTypes)
 			{
-				var extensionAttributes = (ExtensionAttribute[])extensionType.GetCustomAttributes(typeof(ExtensionAttribute), false);
+				var extensionAttributes = (ExtensionAttribute[]) extensionType.GetCustomAttributes(typeof (ExtensionAttribute), false);
 				foreach (ExtensionAttribute extensionAttribute in extensionAttributes)
 				{
 					Type implementing = extensionAttribute.Implementing;
 					if (interfaces.Contains(implementing))
 					{
-						addExtensionMethodInfo.Invoke(proxy, new object[] { extensionType });
+						addExtensionMethodInfo.Invoke(proxy, new object[]
+						{
+							extensionType
+						});
 					}
 					else if (implementing.IsGenericType && implementing.IsGenericTypeDefinition)
 					{
 						Type genericExtensionType = implementing.MakeGenericType(type);
 						if (interfaces.Contains(genericExtensionType))
 						{
-							addExtensionMethodInfo.Invoke(proxy, new object[] { extensionType });
+							addExtensionMethodInfo.Invoke(proxy, new object[]
+							{
+								extensionType
+							});
 						}
 					}
 				}

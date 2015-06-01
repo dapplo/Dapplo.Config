@@ -30,13 +30,12 @@ namespace Dapplo.Config.Ini.Implementation
 	/// <summary>
 	/// Extend the PropertyProxy with Ini functionality
 	/// </summary>
-	[Extension(typeof(IIniSection))]
+	[Extension(typeof (IIniSection))]
 	internal class IniExtension<T> : AbstractPropertyProxyExtension<T>
 	{
-
 		public IniExtension(IPropertyProxy<T> proxy) : base(proxy)
 		{
-			CheckType(typeof(IIniSection));
+			CheckType(typeof (IIniSection));
 
 			//_proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection>(x => x.IniValueFor<T>(y => default(T))), IniValueFor);
 			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.GetIniValues()), GetIniValues);
@@ -49,14 +48,14 @@ namespace Dapplo.Config.Ini.Implementation
 		/// </summary>
 		private void GetSectionName(MethodCallInfo methodCallInfo)
 		{
-			var iniSectionAttribute = typeof(T).GetCustomAttribute<IniSectionAttribute>();
+			var iniSectionAttribute = typeof (T).GetCustomAttribute<IniSectionAttribute>();
 			if (iniSectionAttribute != null && !string.IsNullOrEmpty(iniSectionAttribute.Name))
 			{
 				methodCallInfo.ReturnValue = iniSectionAttribute.Name;
 			}
 			else
 			{
-				methodCallInfo.ReturnValue = typeof(T).Name;
+				methodCallInfo.ReturnValue = typeof (T).Name;
 			}
 		}
 
@@ -65,7 +64,7 @@ namespace Dapplo.Config.Ini.Implementation
 		/// </summary>
 		private void GetDescription(MethodCallInfo methodCallInfo)
 		{
-			var descriptionAttribute = typeof(T).GetCustomAttribute<DescriptionAttribute>();
+			var descriptionAttribute = typeof (T).GetCustomAttribute<DescriptionAttribute>();
 			if (descriptionAttribute != null && !string.IsNullOrEmpty(descriptionAttribute.Description))
 			{
 				methodCallInfo.ReturnValue = descriptionAttribute.Description;
@@ -78,8 +77,8 @@ namespace Dapplo.Config.Ini.Implementation
 		private void GetIniValues(MethodCallInfo methodCallInfo)
 		{
 			// return a linq which loops over all the properties and generates GetIniValues
-			methodCallInfo.ReturnValue = from propertyInfo in typeof(T).GetProperties()
-										 select GenerateIniValue(propertyInfo);
+			methodCallInfo.ReturnValue = from propertyInfo in typeof (T).GetProperties()
+				select GenerateIniValue(propertyInfo);
 		}
 
 		/// <summary>

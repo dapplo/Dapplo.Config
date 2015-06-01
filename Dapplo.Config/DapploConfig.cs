@@ -21,14 +21,20 @@
 
 using System.Windows.Threading;
 
-namespace Dapplo.Config {
+namespace Dapplo.Config
+{
 	/// <summary>
 	/// Used to configure some of the behavior of Dapplo.Config
 	/// </summary>
-	public static class DapploConfig {
+	public static class DapploConfig
+	{
 		/// <summary>
 		/// If this is set, it will be used to dispatch events (like PropertyChanged)
 		/// </summary>
-		public static Dispatcher EventDispatcher { get; set; }
+		public static Dispatcher EventDispatcher
+		{
+			get;
+			set;
+		}
 	}
 }

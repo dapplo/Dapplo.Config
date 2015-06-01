@@ -29,7 +29,7 @@ namespace Dapplo.Config.Extension.Implementation
 	///     This implements logic to add write protect support to your proxied interface.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	[Extension(typeof(IWriteProtectProperties))]
+	[Extension(typeof (IWriteProtectProperties))]
 	internal class WriteProtectExtension<T> : AbstractPropertyProxyExtension<T>
 	{
 		// A store for the values that are write protected
@@ -38,8 +38,8 @@ namespace Dapplo.Config.Extension.Implementation
 
 		public WriteProtectExtension(IPropertyProxy<T> proxy) : base(proxy)
 		{
-			CheckType(typeof(IWriteProtectProperties));
-			proxy.RegisterSetter((int)CallOrder.First, WriteProtectSetter);
+			CheckType(typeof (IWriteProtectProperties));
+			proxy.RegisterSetter((int) CallOrder.First, WriteProtectSetter);
 
 			// Use Lambdas to make refactoring possible
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties>(x => x.StartWriteProtecting()), StartWriteProtecting);

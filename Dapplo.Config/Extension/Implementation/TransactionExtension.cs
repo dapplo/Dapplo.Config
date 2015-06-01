@@ -28,7 +28,7 @@ namespace Dapplo.Config.Extension.Implementation
 	///     This implements logic to add transactional support to your proxied interface.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	[Extension(typeof(ITransactionalProperties))]
+	[Extension(typeof (ITransactionalProperties))]
 	internal class TransactionExtension<T> : AbstractPropertyProxyExtension<T>
 	{
 		// A store for the values that are set during the transaction
@@ -38,9 +38,9 @@ namespace Dapplo.Config.Extension.Implementation
 
 		public TransactionExtension(IPropertyProxy<T> proxy) : base(proxy)
 		{
-			CheckType(typeof(ITransactionalProperties));
-			proxy.RegisterSetter((int)CallOrder.First, TransactionalSetter);
-			proxy.RegisterGetter((int)CallOrder.First, TransactionalGetter);
+			CheckType(typeof (ITransactionalProperties));
+			proxy.RegisterSetter((int) CallOrder.First, TransactionalSetter);
+			proxy.RegisterGetter((int) CallOrder.First, TransactionalGetter);
 
 			// Use Lambdas to make refactoring possible
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<ITransactionalProperties>(x => x.StartTransaction()), StartTransaction);

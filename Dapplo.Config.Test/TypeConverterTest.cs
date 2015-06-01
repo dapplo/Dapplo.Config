@@ -12,14 +12,14 @@ namespace Dapplo.Config.Test
 		[TestMethod]
 		public void TestGenericListConverterString()
 		{
-			var stringListConverter = (TypeConverter)Activator.CreateInstance(typeof(StringToGenericListConverter<string>));
-			Assert.IsTrue(stringListConverter.CanConvertFrom(typeof(string)));
-			Assert.IsTrue(stringListConverter.CanConvertTo(typeof(string)));
-			Assert.IsFalse(stringListConverter.CanConvertTo(typeof(List<string>)));
+			var stringListConverter = (TypeConverter) Activator.CreateInstance(typeof (StringToGenericListConverter<string>));
+			Assert.IsTrue(stringListConverter.CanConvertFrom(typeof (string)));
+			Assert.IsTrue(stringListConverter.CanConvertTo(typeof (string)));
+			Assert.IsFalse(stringListConverter.CanConvertTo(typeof (List<string>)));
 
-			var intListConverter = (TypeConverter)Activator.CreateInstance(typeof(StringToGenericListConverter<int>));
-			Assert.IsTrue(intListConverter.CanConvertFrom(typeof(string)));
-			Assert.IsTrue(intListConverter.CanConvertTo(typeof(string)));
+			var intListConverter = (TypeConverter) Activator.CreateInstance(typeof (StringToGenericListConverter<int>));
+			Assert.IsTrue(intListConverter.CanConvertFrom(typeof (string)));
+			Assert.IsTrue(intListConverter.CanConvertTo(typeof (string)));
 
 			IList<string> myTestStringList = new List<string>();
 			myTestStringList.Add("hello");
@@ -28,7 +28,7 @@ namespace Dapplo.Config.Test
 
 			var myTestStringWithStrings = string.Join(",", myTestStringList);
 
-			var stringList = (List<string>)stringListConverter.ConvertFrom(myTestStringWithStrings);
+			var stringList = (List<string>) stringListConverter.ConvertFrom(myTestStringWithStrings);
 			Assert.AreEqual(myTestStringList.Count, stringList.Count);
 			for (int i = 0; i < myTestStringList.Count; i++)
 			{
@@ -42,7 +42,7 @@ namespace Dapplo.Config.Test
 
 			var myTestStringWithInts = string.Join(",", myTestIntList);
 
-			var intList = (List<int>)intListConverter.ConvertFrom(myTestStringWithInts);
+			var intList = (List<int>) intListConverter.ConvertFrom(myTestStringWithInts);
 			Assert.AreEqual(myTestIntList.Count, intList.Count);
 			for (int i = 0; i < myTestIntList.Count; i++)
 			{

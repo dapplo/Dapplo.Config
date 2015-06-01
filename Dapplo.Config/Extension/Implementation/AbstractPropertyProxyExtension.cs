@@ -32,7 +32,8 @@ namespace Dapplo.Config.Extension.Implementation
 	public abstract class AbstractPropertyProxyExtension<T> : IPropertyProxyExtension
 	{
 		protected readonly IPropertyProxy<T> Proxy;
-		public AbstractPropertyProxyExtension(IPropertyProxy<T> proxy)
+
+		protected AbstractPropertyProxyExtension(IPropertyProxy<T> proxy)
 		{
 			Proxy = proxy;
 		}
@@ -55,7 +56,7 @@ namespace Dapplo.Config.Extension.Implementation
 		/// <param name="extensionType"></param>
 		protected void CheckType(Type extensionType)
 		{
-			if (!typeof(T).GetInterfaces().Contains(extensionType))
+			if (!typeof (T).GetInterfaces().Contains(extensionType))
 			{
 				throw new NotSupportedException(string.Format("Type needs to implement {0}", extensionType.Name));
 			}

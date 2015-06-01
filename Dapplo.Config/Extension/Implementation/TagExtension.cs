@@ -26,7 +26,7 @@ using System.Reflection;
 
 namespace Dapplo.Config.Extension.Implementation
 {
-	[Extension(typeof(ITagging))]
+	[Extension(typeof (ITagging))]
 	internal class TagExtension<T> : AbstractPropertyProxyExtension<T>
 	{
 		// The set of found expert properties
@@ -34,7 +34,7 @@ namespace Dapplo.Config.Extension.Implementation
 
 		public TagExtension(IPropertyProxy<T> proxy) : base(proxy)
 		{
-			CheckType(typeof(ITagging));
+			CheckType(typeof (ITagging));
 
 			// Use Lambda to make refactoring possible, this registers one method and the overloading is handled in the IsTaggedWith
 			proxy.RegisterMethod(ConfigUtils.GetMemberName<ITagging>(x => x.IsTaggedWith("", null)), IsTaggedWith);

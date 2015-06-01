@@ -32,14 +32,15 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 	/// <summary>
 	/// Extend the PropertyProxy with Registry functionality
 	/// </summary>
-	[Extension(typeof(IRegistry))]
+	[Extension(typeof (IRegistry))]
 	internal class RegistryExtension<T> : AbstractPropertyProxyExtension<T>
 	{
 		private readonly RegistryAttribute _registryAttribute;
+
 		public RegistryExtension(IPropertyProxy<T> proxy) : base(proxy)
 		{
-			CheckType(typeof(IRegistry));
-			_registryAttribute = typeof(T).GetCustomAttribute<RegistryAttribute>();
+			CheckType(typeof (IRegistry));
+			_registryAttribute = typeof (T).GetCustomAttribute<RegistryAttribute>();
 			if (_registryAttribute == null)
 			{
 				_registryAttribute = new RegistryAttribute();
@@ -77,7 +78,7 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 			}
 			if (path.StartsWith(@"\"))
 			{
-				path = path.Remove(0,1);
+				path = path.Remove(0, 1);
 			}
 			RegistryHive hive = _registryAttribute.Hive;
 			if (registryPropertyAttribute.HasHive)
@@ -92,53 +93,55 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 			}
 
 			using (RegistryKey baseKey = RegistryKey.OpenBaseKey(hive, view))
-			using (RegistryKey key = baseKey.OpenSubKey(path))
 			{
-				try
+				using (RegistryKey key = baseKey.OpenSubKey(path))
 				{
-					if (key == null)
+					try
 					{
-						throw new ArgumentException(string.Format("No registry entry in {0}/{1} for {2}", hive, path, view));
-					}
-					if (registryPropertyAttribute.Value == null)
-					{
-						// Read all values, assume IDictionary<string, object>
-						IDictionary<string, object> values;
-						var getInfo = Proxy.Get(propertyInfo.Name);
-						if (!getInfo.HasValue)
+						if (key == null)
 						{
-							// No value yet, create a new default
-							values = new SortedDictionary<string, object>();
-							Proxy.Set(propertyInfo.Name, values);
+							throw new ArgumentException(string.Format("No registry entry in {0}/{1} for {2}", hive, path, view));
 						}
-						else
+						if (registryPropertyAttribute.Value == null)
 						{
-							values = (IDictionary<string, object>)getInfo.Value;
-						}
-						foreach (string valueName in key.GetValueNames())
-						{
-							object value = key.GetValue(valueName);
-							if (!values.ContainsKey(valueName))
+							// Read all values, assume IDictionary<string, object>
+							IDictionary<string, object> values;
+							var getInfo = Proxy.Get(propertyInfo.Name);
+							if (!getInfo.HasValue)
 							{
-								values.Add(valueName, value);
+								// No value yet, create a new default
+								values = new SortedDictionary<string, object>();
+								Proxy.Set(propertyInfo.Name, values);
 							}
 							else
 							{
-								values[valueName] = value;
+								values = (IDictionary<string, object>) getInfo.Value;
+							}
+							foreach (string valueName in key.GetValueNames())
+							{
+								object value = key.GetValue(valueName);
+								if (!values.ContainsKey(valueName))
+								{
+									values.Add(valueName, value);
+								}
+								else
+								{
+									values[valueName] = value;
+								}
 							}
 						}
+						else
+						{
+							// Read a specific value
+							Proxy.Set(propertyInfo.Name, key.GetValue(registryPropertyAttribute.Value));
+						}
 					}
-					else
+					catch
 					{
-						// Read a specific value
-						Proxy.Set(propertyInfo.Name, key.GetValue(registryPropertyAttribute.Value));
-					}
-				}
-				catch
-				{
-					if (!registryPropertyAttribute.IgnoreErrors)
-					{
-						throw;
+						if (!registryPropertyAttribute.IgnoreErrors)
+						{
+							throw;
+						}
 					}
 				}
 			}
@@ -149,7 +152,7 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 		/// </summary>
 		private void PathFor(MethodCallInfo methodCallInfo)
 		{
-			PropertyInfo propertyInfo = typeof(T).GetProperty(methodCallInfo.PropertyNameOf(0));
+			PropertyInfo propertyInfo = typeof (T).GetProperty(methodCallInfo.PropertyNameOf(0));
 			methodCallInfo.ReturnValue = PathFor(propertyInfo);
 		}
 

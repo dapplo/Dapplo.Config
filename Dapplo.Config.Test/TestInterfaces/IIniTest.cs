@@ -47,14 +47,14 @@ namespace Dapplo.Config.Test.TestInterfaces
 			set;
 		}
 
-		[TypeConverter(typeof(StringEncryptionTypeConverter))]
+		[TypeConverter(typeof (StringEncryptionTypeConverter))]
 		string FirstName
 		{
 			get;
 			set;
 		}
 
-		[DefaultValue("5,3,2,1,1"), TypeConverter(typeof(StringToGenericListConverter<int>))]
+		[DefaultValue("5,3,2,1,1"), TypeConverter(typeof (StringToGenericListConverter<int>))]
 		IList<int> WindowCornerCutShape
 		{
 			get;
@@ -68,7 +68,7 @@ namespace Dapplo.Config.Test.TestInterfaces
 			set;
 		}
 
-		[Description("Here are some values"), TypeConverter(typeof(GenericDictionaryConverter<string, int>))]
+		[Description("Here are some values"), TypeConverter(typeof (GenericDictionaryConverter<string, int>))]
 		Dictionary<string, int> SomeValues
 		{
 			get;

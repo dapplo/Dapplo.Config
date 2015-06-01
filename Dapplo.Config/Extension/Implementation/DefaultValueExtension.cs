@@ -30,12 +30,12 @@ namespace Dapplo.Config.Extension.Implementation
 	///  This implements logic to set the default values on your property interface.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	[Extension(typeof(IDefaultValue))]
+	[Extension(typeof (IDefaultValue))]
 	internal class DefaultValueExtension<T> : AbstractPropertyProxyExtension<T>
 	{
 		public DefaultValueExtension(IPropertyProxy<T> proxy) : base(proxy)
 		{
-			CheckType(typeof(IDefaultValue));
+			CheckType(typeof (IDefaultValue));
 
 			// this registers one method and the overloading is handled in the GetDefaultValue
 			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IDefaultValue>(x => x.DefaultValueFor("")), GetDefaultValue);
@@ -59,30 +59,7 @@ namespace Dapplo.Config.Extension.Implementation
 		/// <param name="propertyInfo"></param>
 		public override void InitProperty(PropertyInfo propertyInfo)
 		{
-			var defaultValue = GetConvertedDefaultValue(propertyInfo);
-			if (defaultValue != null)
-			{
-				Proxy.Properties[propertyInfo.Name] = defaultValue;
-				return;
-			}
-			if (!propertyInfo.PropertyType.IsInterface && !propertyInfo.PropertyType.IsByRef && propertyInfo.PropertyType != typeof(string))
-			{
-				try
-				{
-					defaultValue = Activator.CreateInstance(propertyInfo.PropertyType);
-					Proxy.Properties[propertyInfo.Name] = defaultValue;
-					return;
-				}
-// ReSharper disable once EmptyGeneralCatchClause
-				catch
-				{
-					// Ignore creating the default type, this might happen if there is no default constructor.
-				}
-			}
-			if (Proxy.Properties.ContainsKey(propertyInfo.Name))
-			{
-				Proxy.Properties.Remove(propertyInfo.Name);
-			}
+			RestoreToDefault(propertyInfo);
 		}
 
 		/// <summary>
@@ -110,7 +87,7 @@ namespace Dapplo.Config.Extension.Implementation
 		/// </summary>
 		private void GetDefaultValue(MethodCallInfo methodCallInfo)
 		{
-			PropertyInfo propertyInfo = typeof(T).GetProperty(methodCallInfo.PropertyNameOf(0));
+			PropertyInfo propertyInfo = typeof (T).GetProperty(methodCallInfo.PropertyNameOf(0));
 			methodCallInfo.ReturnValue = GetConvertedDefaultValue(propertyInfo);
 		}
 
@@ -119,8 +96,41 @@ namespace Dapplo.Config.Extension.Implementation
 		/// </summary>
 		private void RestoreToDefault(MethodCallInfo methodCallInfo)
 		{
-			PropertyInfo propertyInfo = typeof(T).GetProperty(methodCallInfo.PropertyNameOf(0));
-			InitProperty(propertyInfo);
+			PropertyInfo propertyInfo = typeof (T).GetProperty(methodCallInfo.PropertyNameOf(0));
+			RestoreToDefault(propertyInfo);
+		}
+
+		/// <summary>
+		/// Method to restore a property to its default
+		/// </summary>
+		/// <param name="propertyInfo"></param>
+		private void RestoreToDefault(PropertyInfo propertyInfo)
+		{
+			var defaultValue = GetConvertedDefaultValue(propertyInfo);
+			if (defaultValue != null)
+			{
+				Proxy.Set(propertyInfo.Name, defaultValue);
+				return;
+			}
+			if (!propertyInfo.PropertyType.IsInterface && !propertyInfo.PropertyType.IsByRef && propertyInfo.PropertyType != typeof (string))
+			{
+				try
+				{
+					defaultValue = Activator.CreateInstance(propertyInfo.PropertyType);
+					Proxy.Set(propertyInfo.Name, defaultValue);
+					return;
+				}
+					// ReSharper disable once EmptyGeneralCatchClause
+				catch
+				{
+					// Ignore creating the default type, this might happen if there is no default constructor.
+				}
+			}
+			if (Proxy.Properties.ContainsKey(propertyInfo.Name))
+			{
+				// TODO: This doesn't create a NotifyPropertyChanged/ing event as set isn't called.
+				Proxy.Properties.Remove(propertyInfo.Name);
+			}
 		}
 	}
 }

@@ -36,7 +36,11 @@ namespace Dapplo.Config.Ini
 		private const string SectionStart = "[";
 		private const string SectionEnd = "]";
 		private const string Comment = ";";
-		private static readonly char[] Assignment = { '=' };
+
+		private static readonly char[] Assignment =
+		{
+			'='
+		};
 
 		/// <summary>
 		/// Read an ini file to a Dictionary, each key is a iniSection and the value is a Dictionary with name and values.
@@ -49,7 +53,7 @@ namespace Dapplo.Config.Ini
 		{
 			if (File.Exists(path))
 			{
-				using (FileStream fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 1024))
+				using (var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 1024))
 				{
 					return await ReadAsync(fileStream, encoding, token).ConfigureAwait(false);
 				}
@@ -197,7 +201,8 @@ namespace Dapplo.Config.Ini
 					}
 				}
 			}
-			catch (Exception ex) {
+			catch (Exception ex)
+			{
 				// Store Exception so it can be thrown later
 				exception = ex;
 			}

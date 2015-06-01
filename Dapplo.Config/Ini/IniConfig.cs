@@ -53,34 +53,32 @@ namespace Dapplo.Config.Ini
 		private IDictionary<string, IDictionary<string, string>> _constants;
 		private IDictionary<string, IDictionary<string, string>> _ini = new SortedDictionary<string, IDictionary<string, string>>();
 
-		private IDictionary<Type, Type> _converters = new Dictionary<Type, Type>();
+		private readonly IDictionary<Type, Type> _converters = new Dictionary<Type, Type>();
 
 		/// <summary>
 		/// Set the default converter for the specified type
 		/// </summary>
 		/// <param name="type"></param>
 		/// <param name="typeConverter"></param>
-		public void SetDefaultConverter(Type type, Type typeConverter) {
-			if (_converters.ContainsKey(type)) {
-				_converters[type] = typeConverter;
-			} else {
-				_converters.Add(type, typeConverter);
-			}
+		public void SetDefaultConverter(Type type, Type typeConverter)
+		{
+			_converters.SafelyAddOrOverwrite(type, typeConverter);
 		}
 
 		/// <summary>
 		/// Set the default converters
 		/// </summary>
-		public void SetDefaultConverters() {
-			SetDefaultConverter(typeof(IDictionary<string, string>), typeof(GenericDictionaryConverter<string, string>));
-			SetDefaultConverter(typeof(Dictionary<string, string>), typeof(GenericDictionaryConverter<string, string>));
-			SetDefaultConverter(typeof(IDictionary<string, int>), typeof(GenericDictionaryConverter<string, int>));
-			SetDefaultConverter(typeof(Dictionary<string, int>), typeof(GenericDictionaryConverter<string, int>));
+		public void SetDefaultConverters()
+		{
+			SetDefaultConverter(typeof (IDictionary<string, string>), typeof (GenericDictionaryConverter<string, string>));
+			SetDefaultConverter(typeof (Dictionary<string, string>), typeof (GenericDictionaryConverter<string, string>));
+			SetDefaultConverter(typeof (IDictionary<string, int>), typeof (GenericDictionaryConverter<string, int>));
+			SetDefaultConverter(typeof (Dictionary<string, int>), typeof (GenericDictionaryConverter<string, int>));
 
-			SetDefaultConverter(typeof(IList<string>), typeof(StringToGenericListConverter<string>));
-			SetDefaultConverter(typeof(List<string>), typeof(StringToGenericListConverter<string>));
-			SetDefaultConverter(typeof(IList<int>), typeof(StringToGenericListConverter<int>));
-			SetDefaultConverter(typeof(List<string>), typeof(StringToGenericListConverter<int>));
+			SetDefaultConverter(typeof (IList<string>), typeof (StringToGenericListConverter<string>));
+			SetDefaultConverter(typeof (List<string>), typeof (StringToGenericListConverter<string>));
+			SetDefaultConverter(typeof (IList<int>), typeof (StringToGenericListConverter<int>));
+			SetDefaultConverter(typeof (List<string>), typeof (StringToGenericListConverter<int>));
 		}
 
 		/// <summary>
@@ -107,13 +105,19 @@ namespace Dapplo.Config.Ini
 		/// <param name="applicationName"></param>
 		/// <param name="fileName"></param>
 		/// <param name="fixedDirectory">Specify a path if you don't want to use the default loading</param>
-		public IniConfig(string applicationName, string fileName, string fixedDirectory = null)
+		/// <param name="registerDefaultConverters">false if you don't want to have any default converters</param>
+		public IniConfig(string applicationName, string fileName, string fixedDirectory = null, bool registerDefaultConverters = true)
 		{
 			_applicationName = applicationName;
 			_fileName = fileName;
 			_fixedDirectory = fixedDirectory;
 			// Look for the ini file, this is only done 1 time.
 			_iniFile = CreateFileLocation(false, "", _fixedDirectory);
+
+			if (registerDefaultConverters)
+			{
+				SetDefaultConverters();
+			}
 
 			WriteErrorHandler = (iniSection, iniValue, exception) =>
 			{
@@ -138,7 +142,7 @@ namespace Dapplo.Config.Ini
 		/// <returns>instance of type T</returns>
 		public async Task<T> RegisterAndGetAsync<T>(CancellationToken token = default(CancellationToken)) where T : IIniSection
 		{
-			return (T)await RegisterAndGetAsync(typeof(T), token).ConfigureAwait(false);
+			return (T) await RegisterAndGetAsync(typeof (T), token).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -165,17 +169,18 @@ namespace Dapplo.Config.Ini
 		/// <returns>instance of type</returns>
 		public async Task<IIniSection> RegisterAndGetAsync(Type type, CancellationToken token = default(CancellationToken))
 		{
-			if (!typeof(IIniSection).IsAssignableFrom(type))
+			if (!typeof (IIniSection).IsAssignableFrom(type))
 			{
 				throw new ArgumentException("type is not a IIniSection");
 			}
 			var propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
-			var iniSection = (IIniSection)propertyProxy.PropertyObject;
+			var iniSection = (IIniSection) propertyProxy.PropertyObject;
 			var iniSectionName = iniSection.GetSectionName();
 
 			using (await Sync.WaitAsync(_sync, token).ConfigureAwait(false))
 			{
-				if (_iniSections.ContainsKey(iniSectionName)) {
+				if (_iniSections.ContainsKey(iniSectionName))
+				{
 					return iniSection;
 				}
 				if (!_initialReadDone)
@@ -208,9 +213,11 @@ namespace Dapplo.Config.Ini
 				if (checkStartupDirectory)
 				{
 					var entryAssembly = Assembly.GetEntryAssembly();
-					if (entryAssembly != null) {
+					if (entryAssembly != null)
+					{
 						string startupDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-						if (startupDirectory != null) {
+						if (startupDirectory != null)
+						{
 							file = Path.Combine(startupDirectory, string.Format("{0}{1}.{2}", _fileName, postfix, IniExtension));
 						}
 					}
@@ -326,27 +333,33 @@ namespace Dapplo.Config.Ini
 						var propertyDescription = TypeDescriptor.GetProperties(iniSection.GetType()).Find(iniValue.PropertyName, false);
 						context = new TypeDescriptorContext(iniSection, propertyDescription);
 					}
-// ReSharper disable once EmptyGeneralCatchClause
-					catch {
+						// ReSharper disable once EmptyGeneralCatchClause
+					catch
+					{
 						// Ignore any exceptions
 					}
 
 					// Check if a converter is specified
 					TypeConverter converter = iniValue.Converter;
 					// If not, use the default converter for the property type
-					if (converter == null) {
+					if (converter == null)
+					{
 						Type value;
-						if (_converters.TryGetValue(iniValue.ValueType, out value)) {
-							converter = (TypeConverter)Activator.CreateInstance(value);
-						} else {
+						if (_converters.TryGetValue(iniValue.ValueType, out value))
+						{
+							converter = (TypeConverter) Activator.CreateInstance(value);
+						}
+						else
+						{
 							converter = TypeDescriptor.GetConverter(iniValue.ValueType);
 						}
-					} else if (converter.CanConvertTo(typeof(IDictionary<string, string>)))
+					}
+					else if (converter.CanConvertTo(typeof (IDictionary<string, string>)))
 					{
 						try
 						{
 							// Convert the dictionary to a string,string variant.
-							var dictionaryProperties = (IDictionary<string, string>)converter.ConvertTo(context, CultureInfo.CurrentCulture, iniValue.Value, typeof(IDictionary<string, string>));
+							var dictionaryProperties = (IDictionary<string, string>) converter.ConvertTo(context, CultureInfo.CurrentCulture, iniValue.Value, typeof (IDictionary<string, string>));
 							// Use this to build a separate "section" which is called "[section-propertyname]"
 							string dictionaryIdentifier = string.Format("{0}-{1}", iniSection.GetSectionName(), iniValue.IniPropertyName);
 							if (_ini.ContainsKey(dictionaryIdentifier))
@@ -372,9 +385,12 @@ namespace Dapplo.Config.Ini
 					{
 						// Convert the value to a string
 						string writingValue;
-						if (context != null) {
+						if (context != null)
+						{
 							writingValue = converter.ConvertToInvariantString(context, iniValue.Value);
-						} else {
+						}
+						else
+						{
 							writingValue = converter.ConvertToInvariantString(iniValue.Value);
 						}
 						// And write the value with the IniPropertyName (which does NOT have to be the property name) to the file
@@ -463,7 +479,8 @@ namespace Dapplo.Config.Ini
 		/// Internal method, use the supplied ini-sections & properties to fill the sectoins
 		/// </summary>
 		/// <returns></returns>
-		private void FillSections() {
+		private void FillSections()
+		{
 			foreach (var iniSection in _iniSections.Values)
 			{
 				FillSection(iniSection);
@@ -477,13 +494,12 @@ namespace Dapplo.Config.Ini
 		/// <param name="iniSection"></param>
 		private void FillSection(IDictionary<string, IDictionary<string, string>> iniSections, IIniSection iniSection)
 		{
-
 			IDictionary<string, string> iniProperties;
 			iniSections.TryGetValue(iniSection.GetSectionName(), out iniProperties);
 
 			IEnumerable<IniValue> iniValues = (from iniValue in iniSection.GetIniValues()
-											   where iniValue.Behavior.Read
-											   select iniValue);
+				where iniValue.Behavior.Read
+				select iniValue);
 
 			foreach (var iniValue in iniValues)
 			{
@@ -513,7 +529,7 @@ namespace Dapplo.Config.Ini
 				{
 					continue;
 				}
-				Type stringType = typeof(string);
+				Type stringType = typeof (string);
 				Type destinationType = iniValue.ValueType;
 				if (iniValue.Converter != null && iniValue.Converter.CanConvertFrom(stringType))
 				{
@@ -532,7 +548,7 @@ namespace Dapplo.Config.Ini
 				Type converterType;
 				if (_converters.TryGetValue(iniValue.ValueType, out converterType))
 				{
-					var converter = (TypeConverter)Activator.CreateInstance(converterType);
+					var converter = (TypeConverter) Activator.CreateInstance(converterType);
 					try
 					{
 						iniValue.Value = converter.ConvertFrom(stringValue);

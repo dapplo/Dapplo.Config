@@ -27,7 +27,7 @@ using System.Linq;
 namespace Dapplo.Config.Ini
 {
 	/// <summary>
-	/// This TypeConverter should be used to convert a dictionary<T1,T2> to a dictionary<string,string>
+	/// This TypeConverter should be used to convert a dictionary T1,T2 to a dictionary string,string
 	/// Use the TypeConverterAttribute with GenericDictionaryConverter where T1 is the first and T2 the second type of your Dictionary.
 	/// </summary>
 	/// <typeparam name="T1"></typeparam>
@@ -39,21 +39,21 @@ namespace Dapplo.Config.Ini
 
 		public GenericDictionaryConverter()
 		{
-			_typeConverter1 = TypeDescriptor.GetConverter(typeof(T1));
+			_typeConverter1 = TypeDescriptor.GetConverter(typeof (T1));
 			if (_typeConverter1 == null)
 			{
-				throw new InvalidOperationException("No type converter exists for type " + typeof(T1).FullName);
+				throw new InvalidOperationException("No type converter exists for type " + typeof (T1).FullName);
 			}
-			_typeConverter2 = TypeDescriptor.GetConverter(typeof(T2));
+			_typeConverter2 = TypeDescriptor.GetConverter(typeof (T2));
 			if (_typeConverter2 == null)
 			{
-				throw new InvalidOperationException("No type converter exists for type " + typeof(T2).FullName);
+				throw new InvalidOperationException("No type converter exists for type " + typeof (T2).FullName);
 			}
 		}
 
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
-			if (sourceType == typeof(IDictionary<string, string>))
+			if (sourceType == typeof (IDictionary<string, string>))
 			{
 				return true;
 			}
@@ -63,12 +63,12 @@ namespace Dapplo.Config.Ini
 
 		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
 		{
-			if (destinationType == typeof(IDictionary<string, string>))
+			if (destinationType == typeof (IDictionary<string, string>))
 			{
 				return true;
 			}
 
-			if (destinationType == typeof(string))
+			if (destinationType == typeof (string))
 			{
 				return false;
 			}
@@ -88,10 +88,9 @@ namespace Dapplo.Config.Ini
 			IDictionary<string, string> values = value as IDictionary<string, string>;
 			if (values != null)
 			{
-
 				// Split, and where all element are not null or empty, convert the item to T and add the items to a list<T>
 				return (from key in values.Keys
-						select key).Distinct().ToDictionary(x => (T1)_typeConverter1.ConvertFromInvariantString(x), x => (T2)_typeConverter2.ConvertFromInvariantString(values[x]));
+					select key).Distinct().ToDictionary(x => (T1) _typeConverter1.ConvertFromInvariantString(x), x => (T2) _typeConverter2.ConvertFromInvariantString(values[x]));
 			}
 
 			return base.ConvertFrom(context, culture, value);
@@ -107,15 +106,15 @@ namespace Dapplo.Config.Ini
 		/// <returns></returns>
 		public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
 		{
-			if (destinationType == typeof(IDictionary<string, string>))
+			if (destinationType == typeof (IDictionary<string, string>))
 			{
 				IDictionary<T1, T2> values = value as IDictionary<T1, T2>;
-				if (values != null) {
+				if (values != null)
+				{
 					return (from key in values.Keys
-							select key).ToDictionary(x => _typeConverter1.ConvertToInvariantString(x), x => _typeConverter2.ConvertToInvariantString(values[x]));
-				} else {
-					return null;
+						select key).ToDictionary(x => _typeConverter1.ConvertToInvariantString(x), x => _typeConverter2.ConvertToInvariantString(values[x]));
 				}
+				return null;
 			}
 
 			return base.ConvertTo(context, culture, value, destinationType);

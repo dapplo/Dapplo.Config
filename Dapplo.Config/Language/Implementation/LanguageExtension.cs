@@ -26,13 +26,12 @@ namespace Dapplo.Config.Language.Implementation
 	/// <summary>
 	/// Extend the PropertyProxy with Ini functionality
 	/// </summary>
-	[Extension(typeof(ILanguage))]
+	[Extension(typeof (ILanguage))]
 	internal class LanguageExtension<T> : AbstractPropertyProxyExtension<T>
 	{
-
 		public LanguageExtension(IPropertyProxy<T> proxy) : base(proxy)
 		{
-			CheckType(typeof(ILanguage));
+			CheckType(typeof (ILanguage));
 
 			//Proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.GetIniValues()), GetIniValues);
 		}

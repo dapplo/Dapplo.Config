@@ -28,12 +28,12 @@ namespace Dapplo.Config.Extension.Implementation
 	///  This implements logic to set the default values on your property interface.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	[Extension(typeof(IDescription))]
+	[Extension(typeof (IDescription))]
 	internal class DescriptionExtension<T> : AbstractPropertyProxyExtension<T>
 	{
 		public DescriptionExtension(IPropertyProxy<T> proxy) : base(proxy)
 		{
-			CheckType(typeof(IDescription));
+			CheckType(typeof (IDescription));
 
 			// this registers one method and the overloading is handled in the GetDescription
 			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IDescription>(x => x.DescriptionFor("")), GetDescription);
@@ -44,7 +44,7 @@ namespace Dapplo.Config.Extension.Implementation
 		/// </summary>
 		private void GetDescription(MethodCallInfo methodCallInfo)
 		{
-			PropertyInfo propertyInfo = typeof(T).GetProperty(methodCallInfo.PropertyNameOf(0));
+			PropertyInfo propertyInfo = typeof (T).GetProperty(methodCallInfo.PropertyNameOf(0));
 			methodCallInfo.ReturnValue = propertyInfo.GetDescription();
 		}
 	}

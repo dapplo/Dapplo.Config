@@ -29,7 +29,7 @@ namespace Dapplo.Config.Extension.Implementation
 	///     which automatically generates NotifyPropertyChanged events when set is called.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	[Extension(typeof(INotifyPropertyChanged))]
+	[Extension(typeof (INotifyPropertyChanged))]
 	internal class NotifyPropertyChangedExtension<T> : AbstractPropertyProxyExtension<T>
 	{
 		// Reference to the property object, which is supplied in the PropertyChanged event
@@ -40,12 +40,12 @@ namespace Dapplo.Config.Extension.Implementation
 
 		public NotifyPropertyChangedExtension(IPropertyProxy<T> proxy) : base(proxy)
 		{
-			CheckType(typeof(INotifyPropertyChanged));
+			CheckType(typeof (INotifyPropertyChanged));
 			_propertyObject = proxy.PropertyObject;
 			proxy.RegisterMethod("add_PropertyChanged", AddPropertyChanged);
 			proxy.RegisterMethod("remove_PropertyChanged", RemovePropertyChanged);
 			// Register the NotifyPropertyChangedSetter as a last setter, it will call the NPC event
-			proxy.RegisterSetter((int)CallOrder.Last, NotifyPropertyChangedSetter);
+			proxy.RegisterSetter((int) CallOrder.Last, NotifyPropertyChangedSetter);
 		}
 
 		/// <summary>
@@ -62,9 +62,12 @@ namespace Dapplo.Config.Extension.Implementation
 			if (!setInfo.HasOldValue || !Equals(setInfo.NewValue, setInfo.OldValue))
 			{
 				var propertyChangedEventArgs = new PropertyChangedEventArgs(setInfo.PropertyName);
-				if (DapploConfig.EventDispatcher != null && !DapploConfig.EventDispatcher.CheckAccess()) {
+				if (DapploConfig.EventDispatcher != null && !DapploConfig.EventDispatcher.CheckAccess())
+				{
 					DapploConfig.EventDispatcher.BeginInvoke(PropertyChanged, this, propertyChangedEventArgs);
-				} else {
+				}
+				else
+				{
 					PropertyChanged(_propertyObject, propertyChangedEventArgs);
 				}
 			}
@@ -77,7 +80,7 @@ namespace Dapplo.Config.Extension.Implementation
 		private void AddPropertyChanged(MethodCallInfo methodCallInfo)
 		{
 			// Add the parameters which should contain the event handler
-			PropertyChanged += (PropertyChangedEventHandler)methodCallInfo.Arguments[0];
+			PropertyChanged += (PropertyChangedEventHandler) methodCallInfo.Arguments[0];
 		}
 
 		/// <summary>
@@ -87,7 +90,7 @@ namespace Dapplo.Config.Extension.Implementation
 		private void RemovePropertyChanged(MethodCallInfo methodCallInfo)
 		{
 			// Remove the handler via the parameter which should contain the event handler
-			PropertyChanged -= (PropertyChangedEventHandler)methodCallInfo.Arguments[0];
+			PropertyChanged -= (PropertyChangedEventHandler) methodCallInfo.Arguments[0];
 		}
 	}
 }

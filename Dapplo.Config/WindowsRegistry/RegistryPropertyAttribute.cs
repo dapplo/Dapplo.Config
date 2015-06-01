@@ -66,6 +66,7 @@ namespace Dapplo.Config.WindowsRegistry
 				HasHive = true;
 			}
 		}
+
 		/// <summary>
 		/// What hive to use, see RegistryHive
 		/// </summary>

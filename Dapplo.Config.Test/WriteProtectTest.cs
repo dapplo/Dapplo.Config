@@ -43,7 +43,6 @@ namespace Dapplo.Config.Test
 		[TestMethod]
 		public void TestWriteProtect()
 		{
-
 			var properties = _propertyProxy.PropertyObject;
 			properties.StartWriteProtecting();
 			properties.Age = 30;
@@ -68,7 +67,7 @@ namespace Dapplo.Config.Test
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(AccessViolationException))]
+		[ExpectedException(typeof (AccessViolationException))]
 		public void TestAccessViolation()
 		{
 			var properties = _propertyProxy.PropertyObject;

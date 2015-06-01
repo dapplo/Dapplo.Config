@@ -38,7 +38,7 @@ namespace Dapplo.Config.Test.TestInterfaces
 			set;
 		}
 
-		[DefaultValue("10,20,30"), TypeConverter(typeof(StringToGenericListConverter<int>))]
+		[DefaultValue("10,20,30"), TypeConverter(typeof (StringToGenericListConverter<int>))]
 		IList<int> Ages
 		{
 			get;

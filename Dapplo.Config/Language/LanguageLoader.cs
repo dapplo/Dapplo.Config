@@ -29,16 +29,17 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Dapplo.Config.Extension;
 using Dapplo.Config.Ini;
 using Dapplo.Config.Support;
 
-namespace Dapplo.Config.Language {
+namespace Dapplo.Config.Language
+{
 	/// <summary>
 	/// The language loader should be used to fill ILanguage proxy interfaces.
 	/// It is possible to specify the directory locations, in order, where files with certain patterns should be located.
 	/// </summary>
-	public class LanguageLoader {
+	public class LanguageLoader
+	{
 		private readonly Regex _cleanup = new Regex(@"[^a-zA-Z0-9]+");
 		private readonly IDictionary<Type, IPropertyProxy> _languageConfigs = new Dictionary<Type, IPropertyProxy>();
 		private readonly SemaphoreSlim _sync = new SemaphoreSlim(1);
@@ -47,32 +48,40 @@ namespace Dapplo.Config.Language {
 		private readonly string _filePattern;
 		private readonly IList<string> _files;
 		private bool _initialReadDone;
-		private IDictionary<string, string> _availableLanguages = new Dictionary<string, string>();
+		private readonly IDictionary<string, string> _availableLanguages = new Dictionary<string, string>();
 
-		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language_([a-zA-Z]+-[a-zA-Z]+)\.ini") {
+		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language_([a-zA-Z]+-[a-zA-Z]+)\.ini")
+		{
 			CurrentLanguage = defaultLanguage;
 			_filePattern = filePatern;
 			_applicationName = applicationName;
 			_files = ScanForFiles(true);
-			_availableLanguages = (from filename in _files select Regex.Replace(Path.GetFileName(filename), _filePattern, "$1")).Distinct().ToDictionary(x => x, x => CultureInfo.GetCultureInfo(x).NativeName);
+			_availableLanguages = (from filename in _files
+				select Regex.Replace(Path.GetFileName(filename), _filePattern, "$1")).Distinct().ToDictionary(x => x, x => CultureInfo.GetCultureInfo(x).NativeName);
 		}
 
-		public string CurrentLanguage {
+		public string CurrentLanguage
+		{
 			get;
 			private set;
 		}
 
-		public IDictionary<string, string> AvailableLanguages {
-			get {
+		public IDictionary<string, string> AvailableLanguages
+		{
+			get
+			{
 				return _availableLanguages;
 			}
 		}
 
-		public async Task ChangeLanguage(string ietf, CancellationToken token = default(CancellationToken)) {
-			if (ietf == CurrentLanguage) {
+		public async Task ChangeLanguage(string ietf, CancellationToken token = default(CancellationToken))
+		{
+			if (ietf == CurrentLanguage)
+			{
 				return;
 			}
-			if (_availableLanguages.ContainsKey(ietf)) {
+			if (_availableLanguages.ContainsKey(ietf))
+			{
 				CurrentLanguage = ietf;
 				await ReloadAsync(token).ConfigureAwait(false);
 			}
@@ -84,23 +93,33 @@ namespace Dapplo.Config.Language {
 		/// <param name="checkStartupDirectory"></param>
 		/// <param name="specifiedDirectory"></param>
 		/// <returns>all language files</returns>
-		private IList<string> ScanForFiles(bool checkStartupDirectory, string specifiedDirectory = null) {
+		private IList<string> ScanForFiles(bool checkStartupDirectory, string specifiedDirectory = null)
+		{
 			IList<string> directories = new List<string>();
-			if (specifiedDirectory != null) {
+			if (specifiedDirectory != null)
+			{
 				directories.Add(specifiedDirectory);
-			} else {
-				if (checkStartupDirectory) {
+			}
+			else
+			{
+				if (checkStartupDirectory)
+				{
 					var entryAssembly = Assembly.GetEntryAssembly();
 					string startupDirectory = null;
-					if (entryAssembly != null) {
+					if (entryAssembly != null)
+					{
 						startupDirectory = Path.GetDirectoryName(entryAssembly.Location);
-					} else {
+					}
+					else
+					{
 						var executingAssembly = Assembly.GetExecutingAssembly();
-						if (executingAssembly != null) {
+						if (executingAssembly != null)
+						{
 							startupDirectory = Path.GetDirectoryName(executingAssembly.Location);
 						}
 					}
-					if (startupDirectory != null) {
+					if (startupDirectory != null)
+					{
 						directories.Add(Path.Combine(startupDirectory, "languages"));
 					}
 				}
@@ -108,10 +127,11 @@ namespace Dapplo.Config.Language {
 				directories.Add(Path.Combine(appDataDirectory, "languages"));
 			}
 			var files = (from path in directories
-						 where Directory.Exists(path)
-						 select Directory.GetFiles(path, "*.ini", SearchOption.AllDirectories)
-						 .Where(f => Regex.IsMatch(Path.GetFileName(f), _filePattern)))
-						 .SelectMany(i => i).ToList();
+				where Directory.Exists(path)
+				select Directory.GetFiles(path, "*.ini", SearchOption.AllDirectories).Where(f => Regex.IsMatch(Path.GetFileName(f), _filePattern)))
+// See: https://youtrack.jetbrains.com/issue/RSRP-413613
+// ReSharper disable once PossibleMultipleEnumeration
+				.SelectMany(i => i).ToList();
 			return files;
 		}
 
@@ -120,8 +140,9 @@ namespace Dapplo.Config.Language {
 		/// </summary>
 		/// <typeparam name="T">Your property interface, which extends IIniSection</typeparam>
 		/// <returns>instance of type T</returns>
-		public async Task<T> RegisterAndGetAsync<T>(CancellationToken token = default(CancellationToken)) where T : ILanguage {
-			return (T)await RegisterAndGetAsync(typeof(T), token).ConfigureAwait(false);
+		public async Task<T> RegisterAndGetAsync<T>(CancellationToken token = default(CancellationToken)) where T : ILanguage
+		{
+			return (T) await RegisterAndGetAsync(typeof (T), token).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -130,9 +151,11 @@ namespace Dapplo.Config.Language {
 		/// <param name="types">Types to register, these must extend ILanguage</param>
 		/// <param name="token"></param>
 		/// <returns>List with instances for the supplied types</returns>
-		public async Task<IList<ILanguage>> RegisterAndGetAsync(IEnumerable<Type> types, CancellationToken token = default(CancellationToken)) {
+		public async Task<IList<ILanguage>> RegisterAndGetAsync(IEnumerable<Type> types, CancellationToken token = default(CancellationToken))
+		{
 			IList<ILanguage> languageTypes = new List<ILanguage>();
-			foreach (var type in types) {
+			foreach (var type in types)
+			{
 				languageTypes.Add(await RegisterAndGetAsync(type, token).ConfigureAwait(false));
 			}
 			return languageTypes;
@@ -144,15 +167,20 @@ namespace Dapplo.Config.Language {
 		/// <param name="type">Type to register, this must extend ILanguage</param>
 		/// <param name="token"></param>
 		/// <returns>instance of type</returns>
-		public async Task<ILanguage> RegisterAndGetAsync(Type type, CancellationToken token = default(CancellationToken)) {
-			if (!typeof(ILanguage).IsAssignableFrom(type)) {
+		public async Task<ILanguage> RegisterAndGetAsync(Type type, CancellationToken token = default(CancellationToken))
+		{
+			if (!typeof (ILanguage).IsAssignableFrom(type))
+			{
 				throw new ArgumentException("type is not a ILanguage");
 			}
 			var propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
-			var languageObject = (ILanguage)propertyProxy.PropertyObject;
-			using (await Sync.WaitAsync(_sync, token).ConfigureAwait(false)) {
-				if (!_languageConfigs.ContainsKey(type)) {
-					if (!_initialReadDone) {
+			var languageObject = (ILanguage) propertyProxy.PropertyObject;
+			using (await Sync.WaitAsync(_sync, token).ConfigureAwait(false))
+			{
+				if (!_languageConfigs.ContainsKey(type))
+				{
+					if (!_initialReadDone)
+					{
 						await ReloadAsync(token).ConfigureAwait(false);
 					}
 					FillLanguageConfig(propertyProxy);
@@ -166,14 +194,20 @@ namespace Dapplo.Config.Language {
 		/// <summary>
 		/// This is reloading all the .ini files, and will refill the language objects.
 		/// </summary>
-		public async Task ReloadAsync(CancellationToken token = default(CancellationToken)) {
-			var languageFiles = from file in _files where file.Contains(CurrentLanguage) select file;
+		public async Task ReloadAsync(CancellationToken token = default(CancellationToken))
+		{
+			var languageFiles = from file in _files
+				where file.Contains(CurrentLanguage)
+				select file;
 			_allProperties.Clear();
-			foreach (var languageFile in languageFiles) {
+			foreach (var languageFile in languageFiles)
+			{
 				var newIni = await IniFile.ReadAsync(languageFile, Encoding.UTF8, token).ConfigureAwait(false);
-				foreach (var section in newIni.Keys) {
+				foreach (var section in newIni.Keys)
+				{
 					var properties = newIni[section];
-					foreach (var key in properties.Keys) {
+					foreach (var key in properties.Keys)
+					{
 						var cleanKey = _cleanup.Replace(string.Format("{0}{1}", section, key), "").ToLowerInvariant();
 						_allProperties.SafelyAddOrOverwrite(cleanKey, properties[key]);
 					}
@@ -185,8 +219,10 @@ namespace Dapplo.Config.Language {
 			FillLanguageConfigs();
 		}
 
-		private void FillLanguageConfigs() {
-			foreach (var proxy in _languageConfigs.Values) {
+		private void FillLanguageConfigs()
+		{
+			foreach (var proxy in _languageConfigs.Values)
+			{
 				FillLanguageConfig(proxy);
 			}
 		}
@@ -196,21 +232,27 @@ namespace Dapplo.Config.Language {
 		/// Match the ini-file properties with the name of the property.
 		/// </summary>
 		/// <param name="propertyProxy"></param>
-		private void FillLanguageConfig(IPropertyProxy propertyProxy) {
+		private void FillLanguageConfig(IPropertyProxy propertyProxy)
+		{
 			var languageAttribute = propertyProxy.PropertyObjectType.GetCustomAttribute<LanguageAttribute>();
 			string prefix = "";
-			if (languageAttribute != null) {
+			if (languageAttribute != null)
+			{
 				prefix = languageAttribute.Prefix;
 			}
 
-			var propertyObject = (ILanguage)propertyProxy.PropertyObject;
-			foreach (PropertyInfo propertyInfo in propertyProxy.PropertyObjectType.GetProperties()) {
+			var propertyObject = (ILanguage) propertyProxy.PropertyObject;
+			foreach (PropertyInfo propertyInfo in propertyProxy.PropertyObjectType.GetProperties())
+			{
 				string key = _cleanup.Replace(string.Format("{0}{1}", prefix, propertyInfo.Name), "").ToLowerInvariant();
 				string translation;
-				if (_allProperties.TryGetValue(key, out translation)) {
+				if (_allProperties.TryGetValue(key, out translation))
+				{
 					propertyProxy.Set(propertyInfo.Name, translation);
-				} else {
-					propertyProxy.Set(propertyInfo.Name, propertyObject.DefaultValueFor(propertyInfo.Name));
+				}
+				else
+				{
+					propertyObject.RestoreToDefault(propertyInfo.Name);
 				}
 			}
 		}

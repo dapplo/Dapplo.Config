@@ -19,9 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Dapplo.Config.Support;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace Dapplo.Config.Ini
@@ -31,7 +29,8 @@ namespace Dapplo.Config.Ini
 	/// </summary>
 	public class IniValue
 	{
-		private IPropertyProxy _proxy;
+		private readonly IPropertyProxy _proxy;
+
 		public IniValue(IPropertyProxy proxy)
 		{
 			_proxy = proxy;
@@ -174,7 +173,7 @@ namespace Dapplo.Config.Ini
 				object value = _proxy.Get(PropertyName);
 
 				// Check if our value is default
-				bool isDefault = object.Equals(value, DefaultValue);
+				bool isDefault = Equals(value, DefaultValue);
 				return !isDefault;
 			}
 		}

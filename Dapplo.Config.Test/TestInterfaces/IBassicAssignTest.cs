@@ -26,7 +26,7 @@ namespace Dapplo.Config.Test.TestInterfaces
 	/// <summary>
 	/// This is the interface under test
 	/// </summary>
-	interface IBassicAssignTest
+	internal interface IBassicAssignTest
 	{
 		[Description("Name of the person")]
 		string Name

@@ -22,11 +22,13 @@
 using System.ComponentModel;
 using Dapplo.Config.Extension;
 
-namespace Dapplo.Config.Language {
+namespace Dapplo.Config.Language
+{
 	/// <summary>
 	/// The base interface for all language objects.
 	/// It is important to have INotifyPropertyChanged, so language changes are directly shown in the UI.
 	/// </summary>
-	public interface ILanguage : IDefaultValue, INotifyPropertyChanged {
+	public interface ILanguage : IDefaultValue, INotifyPropertyChanged
+	{
 	}
 }

@@ -28,7 +28,7 @@ namespace Dapplo.Config
 	/// <summary>
 	/// Helper enum for the call order, used when registering the setter
 	/// </summary>
-	public enum CallOrder : int
+	public enum CallOrder
 	{
 		First = int.MinValue,
 		Middle = 0,
@@ -97,7 +97,7 @@ namespace Dapplo.Config
 		/// This will invoke the normal set, going through all the registered setters
 		/// </summary>
 		/// <param name="propertyName">propertyName</param>
-		/// <param name="value">object</param>
+		/// <param name="newValue">object</param>
 		/// <returns>SetInfo</returns>
 		SetInfo Set(string propertyName, object newValue);
 
@@ -119,7 +119,7 @@ namespace Dapplo.Config
 	/// The property proxy is implemented with this interface.
 	/// </summary>
 	/// <typeparam name="T">The type of the interface with the properties</typeparam>
-	public interface IPropertyProxy<T> : IPropertyProxy
+	public interface IPropertyProxy<out T> : IPropertyProxy
 	{
 		/// <summary>
 		///     Get the proxy object which "implements" the interface.

@@ -27,7 +27,7 @@ namespace Dapplo.Config.Test.TestInterfaces
 	/// <summary>
 	/// This is the interface under test
 	/// </summary>
-	interface IDescriptionTest : IDescription<IDescriptionTest>
+	internal interface IDescriptionTest : IDescription<IDescriptionTest>
 	{
 		[Description(DescriptionTest.TestDescription)]
 		string Name

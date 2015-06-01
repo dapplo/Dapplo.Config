@@ -29,6 +29,7 @@ namespace Dapplo.Config.Support
 	{
 		private readonly object component;
 		private readonly PropertyDescriptor property;
+
 		public TypeDescriptorContext(object component, PropertyDescriptor property)
 		{
 			this.component = component;
@@ -37,12 +38,18 @@ namespace Dapplo.Config.Support
 
 		IContainer ITypeDescriptorContext.Container
 		{
-			get { return null; }
+			get
+			{
+				return null;
+			}
 		}
 
 		object ITypeDescriptorContext.Instance
 		{
-			get { return component; }
+			get
+			{
+				return component;
+			}
 		}
 
 		void ITypeDescriptorContext.OnComponentChanged()
@@ -56,7 +63,10 @@ namespace Dapplo.Config.Support
 
 		PropertyDescriptor ITypeDescriptorContext.PropertyDescriptor
 		{
-			get { return property; }
+			get
+			{
+				return property;
+			}
 		}
 
 		object IServiceProvider.GetService(Type serviceType)

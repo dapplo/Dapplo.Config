@@ -53,6 +53,7 @@ namespace Dapplo.Config.Ini
 		}
 
 		private static string _algorithm = "Rijndael";
+
 		/// <summary>
 		/// The algorithm to use for the encrypt/decrypt, default is Rijndael
 		/// </summary>
@@ -93,7 +94,7 @@ namespace Dapplo.Config.Ini
 			{
 				throw new InvalidOperationException("Please make sure the StringEncryptionTypeConverter.RgbKey & RgbIv are set!");
 			}
-			var currentKeySize = RgbKey.Length * 8;
+			var currentKeySize = RgbKey.Length*8;
 			var validKeySizes = ValidKeySizes();
 			if (!validKeySizes.Contains(currentKeySize))
 			{
@@ -109,7 +110,7 @@ namespace Dapplo.Config.Ini
 		/// <returns></returns>
 		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
 		{
-			if (destinationType == typeof(string))
+			if (destinationType == typeof (string))
 			{
 				return true;
 			}
@@ -124,7 +125,7 @@ namespace Dapplo.Config.Ini
 		/// <returns></returns>
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
-			if (sourceType == typeof(string))
+			if (sourceType == typeof (string))
 			{
 				return true;
 			}
@@ -141,9 +142,9 @@ namespace Dapplo.Config.Ini
 		/// <returns></returns>
 		public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
 		{
-			if (destinationType == typeof(string))
+			if (destinationType == typeof (string))
 			{
-				string plaintext = (string)value;
+				string plaintext = (string) value;
 				if (string.IsNullOrEmpty(plaintext))
 				{
 					return null;
@@ -190,16 +191,18 @@ namespace Dapplo.Config.Ini
 			string returnValue;
 			byte[] clearTextBytes = Encoding.ASCII.GetBytes(clearText);
 			using (SymmetricAlgorithm symmetricAlgorithm = SymmetricAlgorithm.Create(Algorithm))
-			using (MemoryStream memoryStream = new MemoryStream())
 			{
-				byte[] rgbIV = Encoding.ASCII.GetBytes(RgbIv);
-				byte[] key = Encoding.ASCII.GetBytes(RgbKey);
-				CryptoStream cryptoStream = new CryptoStream(memoryStream, symmetricAlgorithm.CreateEncryptor(key, rgbIV), CryptoStreamMode.Write);
+				using (MemoryStream memoryStream = new MemoryStream())
+				{
+					byte[] rgbIV = Encoding.ASCII.GetBytes(RgbIv);
+					byte[] key = Encoding.ASCII.GetBytes(RgbKey);
+					CryptoStream cryptoStream = new CryptoStream(memoryStream, symmetricAlgorithm.CreateEncryptor(key, rgbIV), CryptoStreamMode.Write);
 
-				cryptoStream.Write(clearTextBytes, 0, clearTextBytes.Length);
-				cryptoStream.Flush();
-				cryptoStream.Close();
-				returnValue = Convert.ToBase64String(memoryStream.ToArray());
+					cryptoStream.Write(clearTextBytes, 0, clearTextBytes.Length);
+					cryptoStream.Flush();
+					cryptoStream.Close();
+					returnValue = Convert.ToBase64String(memoryStream.ToArray());
+				}
 			}
 			return returnValue;
 		}
@@ -215,22 +218,22 @@ namespace Dapplo.Config.Ini
 			byte[] encryptedTextBytes = Convert.FromBase64String(encryptedText);
 
 			using (SymmetricAlgorithm symmetricAlgorithm = SymmetricAlgorithm.Create(Algorithm))
-			using (MemoryStream memoryStream = new MemoryStream())
 			{
+				using (MemoryStream memoryStream = new MemoryStream())
+				{
+					byte[] rgbIV = Encoding.ASCII.GetBytes(RgbIv);
+					byte[] key = Encoding.ASCII.GetBytes(RgbKey);
 
-				byte[] rgbIV = Encoding.ASCII.GetBytes(RgbIv);
-				byte[] key = Encoding.ASCII.GetBytes(RgbKey);
+					CryptoStream cryptoStream = new CryptoStream(memoryStream, symmetricAlgorithm.CreateDecryptor(key, rgbIV), CryptoStreamMode.Write);
 
-				CryptoStream cryptoStream = new CryptoStream(memoryStream, symmetricAlgorithm.CreateDecryptor(key, rgbIV), CryptoStreamMode.Write);
-
-				cryptoStream.Write(encryptedTextBytes, 0, encryptedTextBytes.Length);
-				cryptoStream.Flush();
-				cryptoStream.Close();
-				returnValue = Encoding.ASCII.GetString(memoryStream.ToArray());
+					cryptoStream.Write(encryptedTextBytes, 0, encryptedTextBytes.Length);
+					cryptoStream.Flush();
+					cryptoStream.Close();
+					returnValue = Encoding.ASCII.GetString(memoryStream.ToArray());
+				}
 			}
 
 			return returnValue;
 		}
-
 	}
 }
