@@ -19,25 +19,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.ComponentModel;
-using Dapplo.Config.Language;
+using System;
 
-namespace Dapplo.Config.Test.TestInterfaces {
-	[Language("Test")]
-	public interface ILanguageTest : ILanguage {
-		[DefaultValue(LanguageTest.Ok)]
-		string Ok {
-			get;
-		}
-		string TestValue {
-			get;
+namespace Dapplo.Config.Language
+{
+	[AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
+	public class LanguageAttribute : Attribute
+	{
+		public LanguageAttribute(string prefix)
+		{
+			Prefix = prefix;
 		}
 
-		string OnlyenUS {
+		/// <summary>
+		/// Name of the section in the ini file
+		/// </summary>
+		public string Prefix
+		{
 			get;
-		}
-		string OnlynlNL {
-			get;
+			private set;
 		}
 	}
 }

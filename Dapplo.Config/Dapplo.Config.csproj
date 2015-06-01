@@ -63,6 +63,7 @@
     <Compile Include="Extension\Implementation\NotifyPropertyChangedExtension.cs" />
     <Compile Include="Language\ILanguage.cs" />
     <Compile Include="Language\Implementation\LanguageExtension.cs" />
+    <Compile Include="Language\LanguageAttribute.cs" />
     <Compile Include="Language\LanguageLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyProxy.cs" />

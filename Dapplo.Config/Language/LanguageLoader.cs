@@ -193,10 +193,17 @@ namespace Dapplo.Config.Language {
 		/// </summary>
 		/// <param name="propertyProxy"></param>
 		private void FillLanguageConfig(IPropertyProxy propertyProxy) {
-			var propertyObject = (IDefaultValue)propertyProxy.PropertyObject;
+			var languageAttribute = propertyProxy.PropertyObjectType.GetCustomAttribute<LanguageAttribute>();
+			string prefix = "";
+			if (languageAttribute != null) {
+				prefix = languageAttribute.Prefix;
+			}
+
+			var propertyObject = (ILanguage)propertyProxy.PropertyObject;
 			foreach (PropertyInfo propertyInfo in propertyProxy.PropertyObjectType.GetProperties()) {
 				propertyObject.RestoreToDefault(propertyInfo.Name);
-				string key = _cleanup.Replace(propertyInfo.Name, "").ToLowerInvariant();
+
+				string key = _cleanup.Replace(string.Format("{0}{1}", prefix, propertyInfo.Name), "").ToLowerInvariant();
 				string translation;
 				if (_allProperties.TryGetValue(key, out translation)) {
 					propertyProxy.Set(propertyInfo.Name, translation);
