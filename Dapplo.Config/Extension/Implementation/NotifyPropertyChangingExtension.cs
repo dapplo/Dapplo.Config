@@ -62,7 +62,12 @@ namespace Dapplo.Config.Extension.Implementation
 			// Create the event if the property is changing
 			if (!setInfo.HasOldValue || !Equals(setInfo.NewValue, setInfo.OldValue))
 			{
-				PropertyChanging(_propertyObject, new PropertyChangingEventArgs(setInfo.PropertyName));
+				var propertyChangingEventArgs = new PropertyChangingEventArgs(setInfo.PropertyName);
+				if (DapploConfig.EventDispatcher != null && DapploConfig.EventDispatcher.CheckAccess()) {
+					DapploConfig.EventDispatcher.BeginInvoke(PropertyChanging, this, propertyChangingEventArgs);
+				} else {
+					PropertyChanging(_propertyObject, propertyChangingEventArgs);
+				}
 			}
 		}
 

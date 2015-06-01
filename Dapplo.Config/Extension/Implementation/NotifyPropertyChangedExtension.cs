@@ -19,8 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.ComponentModel;
 using Dapplo.Config.Support;
+using System.ComponentModel;
 
 namespace Dapplo.Config.Extension.Implementation
 {
@@ -61,7 +61,12 @@ namespace Dapplo.Config.Extension.Implementation
 			// Create the event if the property changed
 			if (!setInfo.HasOldValue || !Equals(setInfo.NewValue, setInfo.OldValue))
 			{
-				PropertyChanged(_propertyObject, new PropertyChangedEventArgs(setInfo.PropertyName));
+				var propertyChangedEventArgs = new PropertyChangedEventArgs(setInfo.PropertyName);
+				if (DapploConfig.EventDispatcher != null && DapploConfig.EventDispatcher.CheckAccess()) {
+					DapploConfig.EventDispatcher.BeginInvoke(PropertyChanged, this, propertyChangedEventArgs);
+				} else {
+					PropertyChanged(_propertyObject, propertyChangedEventArgs);
+				}
 			}
 		}
 

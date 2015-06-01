@@ -33,8 +33,10 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DapploConfig.cs" />
     <Compile Include="ExtensionAttribute.cs" />
     <Compile Include="Extension\IDescription.cs" />
     <Compile Include="Extension\IDefaultValue.cs" />
