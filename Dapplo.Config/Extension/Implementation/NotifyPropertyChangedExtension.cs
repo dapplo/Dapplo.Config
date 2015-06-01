@@ -62,7 +62,7 @@ namespace Dapplo.Config.Extension.Implementation
 			if (!setInfo.HasOldValue || !Equals(setInfo.NewValue, setInfo.OldValue))
 			{
 				var propertyChangedEventArgs = new PropertyChangedEventArgs(setInfo.PropertyName);
-				if (DapploConfig.EventDispatcher != null && DapploConfig.EventDispatcher.CheckAccess()) {
+				if (DapploConfig.EventDispatcher != null && !DapploConfig.EventDispatcher.CheckAccess()) {
 					DapploConfig.EventDispatcher.BeginInvoke(PropertyChanged, this, propertyChangedEventArgs);
 				} else {
 					PropertyChanged(_propertyObject, propertyChangedEventArgs);
