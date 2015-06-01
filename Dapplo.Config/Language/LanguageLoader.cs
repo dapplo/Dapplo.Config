@@ -205,12 +205,12 @@ namespace Dapplo.Config.Language {
 
 			var propertyObject = (ILanguage)propertyProxy.PropertyObject;
 			foreach (PropertyInfo propertyInfo in propertyProxy.PropertyObjectType.GetProperties()) {
-				propertyObject.RestoreToDefault(propertyInfo.Name);
-
 				string key = _cleanup.Replace(string.Format("{0}{1}", prefix, propertyInfo.Name), "").ToLowerInvariant();
 				string translation;
 				if (_allProperties.TryGetValue(key, out translation)) {
 					propertyProxy.Set(propertyInfo.Name, translation);
+				} else {
+					propertyProxy.Set(propertyInfo.Name, propertyObject.DefaultValueFor(propertyInfo.Name));
 				}
 			}
 		}
