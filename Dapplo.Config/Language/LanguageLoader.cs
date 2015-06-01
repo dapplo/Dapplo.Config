@@ -47,15 +47,19 @@ namespace Dapplo.Config.Language {
 		private readonly string _filePattern;
 		private readonly IList<string> _files;
 		private bool _initialReadDone;
-		private string _currentLanguage;
 		private IDictionary<string, string> _availableLanguages = new Dictionary<string, string>();
 
 		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language_([a-zA-Z]+-[a-zA-Z]+)\.ini") {
-			_currentLanguage = defaultLanguage;
+			CurrentLanguage = defaultLanguage;
 			_filePattern = filePatern;
 			_applicationName = applicationName;
 			_files = ScanForFiles(true);
 			_availableLanguages = (from filename in _files select Regex.Replace(Path.GetFileName(filename), _filePattern, "$1")).Distinct().ToDictionary(x => x, x => CultureInfo.GetCultureInfo(x).NativeName);
+		}
+
+		public string CurrentLanguage {
+			get;
+			private set;
 		}
 
 		public IDictionary<string, string> AvailableLanguages {
@@ -65,12 +69,12 @@ namespace Dapplo.Config.Language {
 		}
 
 		public async Task ChangeLanguage(string ietf, CancellationToken token = default(CancellationToken)) {
-			if (ietf == _currentLanguage) {
+			if (ietf == CurrentLanguage) {
 				return;
 			}
 			if (_availableLanguages.ContainsKey(ietf)) {
-				_currentLanguage = ietf;
-				await ReloadAsync(token);
+				CurrentLanguage = ietf;
+				await ReloadAsync(token).ConfigureAwait(false);
 			}
 		}
 
@@ -163,7 +167,7 @@ namespace Dapplo.Config.Language {
 		/// This is reloading all the .ini files, and will refill the language objects.
 		/// </summary>
 		public async Task ReloadAsync(CancellationToken token = default(CancellationToken)) {
-			var languageFiles = from file in _files where file.Contains(_currentLanguage) select file;
+			var languageFiles = from file in _files where file.Contains(CurrentLanguage) select file;
 			_allProperties.Clear();
 			foreach (var languageFile in languageFiles) {
 				var newIni = await IniFile.ReadAsync(languageFile, Encoding.UTF8, token).ConfigureAwait(false);
