@@ -43,8 +43,7 @@ namespace Dapplo.Config.Ini
 		private const string Defaults = "-defaults";
 		private const string Constants = "-constants";
 		private const string IniExtension = "ini";
-		private readonly SemaphoreSlim _sync = new SemaphoreSlim(1);
-
+        private readonly AsyncLock _asyncLock = new AsyncLock();
 		private readonly string _iniFile;
 		private readonly string _fixedDirectory;
 		private readonly IDictionary<string, IIniSection> _iniSections = new SortedDictionary<string, IIniSection>();
@@ -161,13 +160,39 @@ namespace Dapplo.Config.Ini
 			return sections;
 		}
 
-		/// <summary>
-		/// Register a Property Interface to this ini config, this method will return the property object 
-		/// </summary>
-		/// <param name="type">Type to register, this must extend IIniSection</param>
-		/// <param name="token"></param>
-		/// <returns>instance of type</returns>
-		public async Task<IIniSection> RegisterAndGetAsync(Type type, CancellationToken token = default(CancellationToken))
+        /// <summary>
+        /// Get the specified ini type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>T</returns>
+        public T Get<T>() where T : IIniSection
+        {
+            return (T)Get(typeof(T));
+        }
+
+        /// <summary>
+        /// Get the specified IIniSection type
+        /// </summary>
+        /// <param name="type">IIniSection to look for</param>
+        /// <returns>IIniSection</returns>
+        public IIniSection Get(Type type)
+        {
+            if (!typeof(IIniSection).IsAssignableFrom(type))
+            {
+                throw new ArgumentException("type is not a IIniSection");
+            }
+            var propertyProxy = ProxyBuilder.GetProxy(type);
+            var iniSection = (IIniSection)propertyProxy.PropertyObject;
+            return iniSection;
+        }
+
+        /// <summary>
+        /// Register a Property Interface to this ini config, this method will return the property object 
+        /// </summary>
+        /// <param name="type">Type to register, this must extend IIniSection</param>
+        /// <param name="token"></param>
+        /// <returns>instance of type</returns>
+        public async Task<IIniSection> RegisterAndGetAsync(Type type, CancellationToken token = default(CancellationToken))
 		{
 			if (!typeof (IIniSection).IsAssignableFrom(type))
 			{
@@ -177,9 +202,9 @@ namespace Dapplo.Config.Ini
 			var iniSection = (IIniSection) propertyProxy.PropertyObject;
 			var iniSectionName = iniSection.GetSectionName();
 
-			using (await Sync.WaitAsync(_sync, token).ConfigureAwait(false))
-			{
-				if (_iniSections.ContainsKey(iniSectionName))
+            using (await _asyncLock.LockAsync().ConfigureAwait(false))
+            {
+ 				if (_iniSections.ContainsKey(iniSectionName))
 				{
 					return iniSection;
 				}
@@ -236,8 +261,8 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		public async Task ResetAsync(CancellationToken token = default(CancellationToken))
 		{
-			using (await Sync.WaitAsync(_sync, token).ConfigureAwait(false))
-			{
+            using (await _asyncLock.LockAsync().ConfigureAwait(false))
+            {
 				foreach (var iniSection in _iniSections.Values)
 				{
 					foreach (var iniValue in iniSection.GetIniValues())
@@ -254,10 +279,10 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		public async Task WriteAsync(CancellationToken token = default(CancellationToken))
 		{
-			// Make sure only one write to file is running, other request will have to wait
-			using (await Sync.WaitAsync(_sync, token).ConfigureAwait(false))
-			{
-				string path = Path.GetDirectoryName(_iniFile);
+            // Make sure only one write to file is running, other request will have to wait
+            using (await _asyncLock.LockAsync().ConfigureAwait(false))
+            {
+                string path = Path.GetDirectoryName(_iniFile);
 
 				// Create the directory to write to, if it doesn't exist yet
 				if (path != null && !Directory.Exists(path))

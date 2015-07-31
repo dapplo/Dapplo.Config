@@ -42,7 +42,7 @@ namespace Dapplo.Config.Language
 	{
 		private readonly Regex _cleanup = new Regex(@"[^a-zA-Z0-9]+");
 		private readonly IDictionary<Type, IPropertyProxy> _languageConfigs = new Dictionary<Type, IPropertyProxy>();
-		private readonly SemaphoreSlim _sync = new SemaphoreSlim(1);
+		private readonly AsyncLock _asyncLock = new AsyncLock();
 		private readonly IDictionary<string, string> _allProperties = new Dictionary<string, string>();
 		private readonly string _applicationName;
 		private readonly string _filePattern;
@@ -175,9 +175,9 @@ namespace Dapplo.Config.Language
 			}
 			var propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
 			var languageObject = (ILanguage) propertyProxy.PropertyObject;
-			using (await Sync.WaitAsync(_sync, token).ConfigureAwait(false))
-			{
-				if (!_languageConfigs.ContainsKey(type))
+            using (await _asyncLock.LockAsync().ConfigureAwait(false))
+            {
+                if (!_languageConfigs.ContainsKey(type))
 				{
 					if (!_initialReadDone)
 					{

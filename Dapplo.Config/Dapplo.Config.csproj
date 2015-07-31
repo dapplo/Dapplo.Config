@@ -82,7 +82,7 @@
     <Compile Include="Support\ConfigUtils.cs" />
     <Compile Include="Support\SetInfo.cs" />
     <Compile Include="Support\Setter.cs" />
-    <Compile Include="Support\Sync.cs" />
+    <Compile Include="Support\AsyncLock.cs" />
     <Compile Include="Support\TypeDescriptorContext.cs" />
   </ItemGroup>
   <ItemGroup />

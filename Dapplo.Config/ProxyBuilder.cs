@@ -46,42 +46,67 @@ namespace Dapplo.Config
 			ExtensionTypes.AddRange(types);
 		}
 
-		/// <summary>
-		/// This can be used for Caching the Proxy generation, if there is only one proxy instance needed you want to call this!
-		/// </summary>
-		/// <typeparam name="T">Should be an interface</typeparam>
-		/// <returns>proxy</returns>
-		public static IPropertyProxy<T> GetOrCreateProxy<T>()
+        /// <summary>
+        /// Get a proxy, this throws an exception if it doesn't exist
+        /// </summary>
+        /// <typeparam name="T">Should be an interface</typeparam>
+        /// <returns>proxy</returns>
+        public static IPropertyProxy<T> GetProxy<T>()
+        {
+            return (IPropertyProxy<T>)GetProxy(typeof(T));
+        }
+
+        /// <summary>
+        /// Get a proxy, this throws an exception if it doesn't exist
+        /// </summary>
+        /// <param name="type">Type to get</param>
+        /// <returns>proxy</returns>
+        public static IPropertyProxy GetProxy(Type type)
+        {
+            IPropertyProxy proxy;
+            if (!Cache.TryGetValue(type, out proxy))
+            {
+                throw new KeyNotFoundException(type.FullName);
+            }
+            return proxy;
+        }
+
+        /// <summary>
+        /// This can be used for Caching the Proxy generation, if there is only one proxy instance needed you want to call this!
+        /// </summary>
+        /// <typeparam name="T">Should be an interface</typeparam>
+        /// <returns>proxy</returns>
+        public static IPropertyProxy<T> GetOrCreateProxy<T>()
 		{
 			return (IPropertyProxy<T>) GetOrCreateProxy(typeof (T));
 		}
 
-		/// <summary>
-		/// This can be used for Caching the Proxy generation, if there is only one proxy instance needed you want to call this!
-		/// </summary>
-		/// <param name="type">Type to create </param>
-		/// <returns>proxy</returns>
-		public static IPropertyProxy GetOrCreateProxy(Type type)
-		{
-			IPropertyProxy proxy;
-			lock (Cache)
-			{
-				if (!Cache.TryGetValue(type, out proxy))
-				{
-					proxy = CreateProxy(type);
-					Cache.Add(type, proxy);
-				}
-			}
-			return proxy;
-		}
+        /// <summary>
+        /// This can be used for Caching the Proxy generation, if there is only one proxy instance needed you want to call this!
+        /// </summary>
+        /// <param name="type">Type to create </param>
+        /// <returns>proxy</returns>
+        public static IPropertyProxy GetOrCreateProxy(Type type)
+        {
+            IPropertyProxy proxy;
+            lock (Cache)
+            {
+                if (!Cache.TryGetValue(type, out proxy))
+                {
+                    proxy = CreateProxy(type);
+                    Cache.Add(type, proxy);
+                }
+            }
+            return proxy;
+        }
 
-		/// <summary>
-		///     This method creates a proxy for the given type.
-		///     If the type implements certain interfaces, that are known, the matching proxy extensions are automatically added.
-		/// </summary>
-		/// <typeparam name="T">Should be an interface</typeparam>
-		/// <returns>proxy</returns>
-		public static IPropertyProxy<T> CreateProxy<T>()
+        /// <summary>
+        ///     This method creates a proxy for the given type.
+        ///     If the type implements certain interfaces, that are known, the matching proxy extensions are automatically added.
+        /// </summary>
+        /// <typeparam name="T">Should be an interface</typeparam>
+        /// <returns>proxy</returns>
+        public static IPropertyProxy<T> CreateProxy<T>()
 		{
 			return (IPropertyProxy<T>) CreateProxy(typeof (T));
 		}
