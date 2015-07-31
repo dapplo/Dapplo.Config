@@ -77,7 +77,7 @@ namespace Dapplo.Config.Ini
 			SetDefaultConverter(typeof (IList<string>), typeof (StringToGenericListConverter<string>));
 			SetDefaultConverter(typeof (List<string>), typeof (StringToGenericListConverter<string>));
 			SetDefaultConverter(typeof (IList<int>), typeof (StringToGenericListConverter<int>));
-			SetDefaultConverter(typeof (List<string>), typeof (StringToGenericListConverter<int>));
+			SetDefaultConverter(typeof(List<int>), typeof(StringToGenericListConverter<int>));
 		}
 
 		/// <summary>
