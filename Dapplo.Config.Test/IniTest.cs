@@ -26,93 +26,105 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Dapplo.Config.Test
+namespace Dapplo.Config.Ini
 {
-    [TestClass]
-    public class IniTest
-    {
-        private const string Name = "Dapplo";
-        private const string FirstName = "Robin";
-        private const string TestValueForNonSerialized = "Hello!";
+	[TestClass]
+	public class IniTest
+	{
+		private const string Name = "Dapplo";
+		private const string FirstName = "Robin";
+		private const string TestValueForNonSerialized = "Hello!";
 
-        [ClassInitialize]
-        public static void InitializeClass(TestContext textContext)
-        {
-            StringEncryptionTypeConverter.RgbIv = "fjr84hF49gp3911fFFg";
-            StringEncryptionTypeConverter.RgbKey = "ljew3lJfrS0rlddlfeelOekfekcvbAwE";
+		[TestCleanup]
+		public void Remove()
+		{
+			// Remove the IniConfig drom the IniConfig-store
+			IniConfig.Delete("Dapplo", "dapplo");
+		}
+
+		[ClassInitialize]
+		public static void InitializeClass(TestContext textContext)
+		{
+			StringEncryptionTypeConverter.RgbIv = "fjr84hF49gp3911fFFg";
+			StringEncryptionTypeConverter.RgbKey = "ljew3lJfrS0rlddlfeelOekfekcvbAwE";
+		}
+
+		[TestMethod]
+		public async Task TestIniInit()
+		{
+			var iniConfig = new IniConfig("Dapplo", "dapplo");
+
+			iniConfig.AfterLoad<IIniTest>((x) =>
+			{
+				if (!x.SomeValues.ContainsKey("dapplo"))
+				{
+					x.SomeValues.Add("dapplo", 2015);
+				}
+			});
+			using (var testMemoryStream = new MemoryStream())
+			{
+				await iniConfig.ReadFromStreamAsync(testMemoryStream).ConfigureAwait(false);
+			}
+			var iniTest = await iniConfig.RegisterAndGetAsync<IIniTest>().ConfigureAwait(false);
+			Assert.IsTrue(iniTest.WindowCornerCutShape.Count > 0);
+			Assert.IsTrue(iniTest.SomeValues.ContainsKey("dapplo"));
+
+			// Check second get, should have same value
+			var iniTest2 = iniConfig.Get<IIniTest>();
+			Assert.IsTrue(iniTest2.WindowCornerCutShape.Count > 0);
+			Assert.IsTrue(iniTest2.SomeValues.ContainsKey("dapplo"));
+
+			// Test static get
+			var iniTest3 = IniConfig.Get("Dapplo", "dapplo").Get<IIniTest>();
+			Assert.IsTrue(iniTest2.WindowCornerCutShape.Count > 0);
+			Assert.IsTrue(iniTest2.SomeValues.ContainsKey("dapplo"));
         }
 
-        [TestMethod]
-        public async Task TestIniInit()
-        {
-            var iniConfig = new IniConfig("Dapplo", "dapplo");
+		[TestMethod]
+		public async Task TestIniWriteRead()
+		{
+			var iniConfig = new IniConfig("Dapplo", "dapplo");
+			var iniTest = await iniConfig.RegisterAndGetAsync<IIniTest>().ConfigureAwait(false);
 
-            iniConfig.AfterLoad<IIniTest>((x) =>
-            {
-                if (!x.SomeValues.ContainsKey("dapplo"))
-                {
-                    x.SomeValues.Add("dapplo", 2015);
-                }
-            });
-            using (var testMemoryStream = new MemoryStream())
-            {
-                await iniConfig.ReadFromStreamAsync(testMemoryStream).ConfigureAwait(false);
-            }
-            var iniTest = await iniConfig.RegisterAndGetAsync<IIniTest>().ConfigureAwait(false);
-            Assert.IsTrue(iniTest.WindowCornerCutShape.Count > 0);
-            Assert.IsTrue(iniTest.SomeValues.ContainsKey("dapplo"));
+			// Change some values
+			iniTest.Name = Name;
+			iniTest.FirstName = FirstName;
 
-            // Check second get, should have same value
-            var iniTest2 = iniConfig.Get<IIniTest>();
-            Assert.IsTrue(iniTest2.WindowCornerCutShape.Count > 0);
-            Assert.IsTrue(iniTest2.SomeValues.ContainsKey("dapplo"));
-        }
+			// This value should not be written to the file
+			iniTest.NotWritten = "Whatever";
 
-        [TestMethod]
-        public async Task TestIniWriteRead()
-        {
-            var iniConfig = new IniConfig("Dapplo", "dapplo");
-            var iniTest = await iniConfig.RegisterAndGetAsync<IIniTest>().ConfigureAwait(false);
+			// Dictionary test
+			iniTest.SomeValues.Add("One", 1);
 
-            // Change some values
-            iniTest.Name = Name;
-            iniTest.FirstName = FirstName;
+			// Some "random" value that needs to be there again after reading.
+			long ticks = DateTimeOffset.Now.UtcTicks;
+			iniTest.Age = ticks;
+			using (var writeStream = new MemoryStream())
+			{
+				await iniConfig.WriteToStreamAsync(writeStream).ConfigureAwait(false);
+				//await iniConfig.WriteAsync().ConfigureAwait(false);
 
-            // This value should not be written to the file
-            iniTest.NotWritten = "Whatever";
+				// Set the not written value to a testable value, this should not be read (and overwritten) by reading the ini file.
+				iniTest.NotWritten = TestValueForNonSerialized;
 
-            // Dictionary test
-            iniTest.SomeValues.Add("One", 1);
+				// Make sure Age is set to some value, so we can see that it is re-read
+				iniTest.Age = 2;
 
-            // Some "random" value that needs to be there again after reading.
-            long ticks = DateTimeOffset.Now.UtcTicks;
-            iniTest.Age = ticks;
-            using (var writeStream = new MemoryStream())
-            {
-                await iniConfig.WriteToStreamAsync(writeStream).ConfigureAwait(false);
-                //await iniConfig.WriteAsync().ConfigureAwait(false);
+				// Test reading
+				writeStream.Seek(0, SeekOrigin.Begin);
+				await iniConfig.ReadFromStreamAsync(writeStream).ConfigureAwait(false);
+				//await iniConfig.ReloadAsync(false).ConfigureAwait(false);
 
-                // Set the not written value to a testable value, this should not be read (and overwritten) by reading the ini file.
-                iniTest.NotWritten = TestValueForNonSerialized;
+				Assert.IsTrue(iniTest.SomeValues.ContainsKey("One"));
+				Assert.AreEqual(Name, iniTest.Name);
+				Assert.AreEqual(FirstName, iniTest.FirstName);
+				Assert.AreEqual(ticks, iniTest.Age);
+				Assert.AreEqual(TestValueForNonSerialized, iniTest.NotWritten);
+			}
 
-                // Make sure Age is set to some value, so we can see that it is re-read
-                iniTest.Age = 2;
-
-                // Test reading
-                writeStream.Seek(0, SeekOrigin.Begin);
-                await iniConfig.ReadFromStreamAsync(writeStream).ConfigureAwait(false);
-                //await iniConfig.ReloadAsync(false).ConfigureAwait(false);
-
-                Assert.IsTrue(iniTest.SomeValues.ContainsKey("One"));
-                Assert.AreEqual(Name, iniTest.Name);
-                Assert.AreEqual(FirstName, iniTest.FirstName);
-                Assert.AreEqual(ticks, iniTest.Age);
-                Assert.AreEqual(TestValueForNonSerialized, iniTest.NotWritten);
-            }
-
-            // Check second get, should have same value
-            var iniTest2 = iniConfig.Get<IIniTest>();
-            Assert.AreEqual(TestValueForNonSerialized, iniTest2.NotWritten);
-        }
-    }
+			// Check second get, should have same value
+			var iniTest2 = iniConfig.Get<IIniTest>();
+			Assert.AreEqual(TestValueForNonSerialized, iniTest2.NotWritten);
+		}
+	}
 }

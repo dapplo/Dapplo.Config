@@ -43,15 +43,16 @@ namespace Dapplo.Config.Ini
 		private const string Defaults = "-defaults";
 		private const string Constants = "-constants";
 		private const string IniExtension = "ini";
-        private readonly AsyncLock _asyncLock = new AsyncLock();
+		private static IDictionary<string, IniConfig> ConfigStore = new Dictionary<string, IniConfig>();
+		private readonly AsyncLock _asyncLock = new AsyncLock();
 		private readonly string _iniFile;
 		private readonly string _fixedDirectory;
 		private readonly IDictionary<string, IIniSection> _iniSections = new SortedDictionary<string, IIniSection>();
 		private bool _initialReadDone;
-        private IDictionary<Type, Action<IIniSection>> _afterLoadActions = new Dictionary<Type, Action<IIniSection>>();
-        private IDictionary<Type, Action<IIniSection>> _beforeSaveActions = new Dictionary<Type, Action<IIniSection>>();
-        private IDictionary<Type, Action<IIniSection>> _afterSaveActions = new Dictionary<Type, Action<IIniSection>>();
-        private IDictionary<string, IDictionary<string, string>> _defaults;
+		private IDictionary<Type, Action<IIniSection>> _afterLoadActions = new Dictionary<Type, Action<IIniSection>>();
+		private IDictionary<Type, Action<IIniSection>> _beforeSaveActions = new Dictionary<Type, Action<IIniSection>>();
+		private IDictionary<Type, Action<IIniSection>> _afterSaveActions = new Dictionary<Type, Action<IIniSection>>();
+		private IDictionary<string, IDictionary<string, string>> _defaults;
 		private IDictionary<string, IDictionary<string, string>> _constants;
 		private IDictionary<string, IDictionary<string, string>> _ini = new SortedDictionary<string, IDictionary<string, string>>();
 
@@ -73,6 +74,28 @@ namespace Dapplo.Config.Ini
 		{
 			get;
 			set;
+		}
+
+		/// <summary>
+		/// Static helper to remove the IniConfig from the store.
+		/// This is interal, as it normally should not be used.
+		/// </summary>
+		/// <param name="applicationName"></param>
+		/// <param name="fileName"></param>
+		public static void Delete(string applicationName, string fileName)
+		{
+			ConfigStore.Remove(string.Format("{0}.{1}", applicationName, fileName));
+		}
+
+		/// <summary>
+		/// Static helper to retrieve the IniConfig that was created with the supplied parameters
+		/// </summary>
+		/// <param name="applicationName"></param>
+		/// <param name="fileName"></param>
+		/// <returns>IniConfig</returns>
+		public static IniConfig Get(string applicationName, string fileName)
+		{
+			return ConfigStore[string.Format("{0}.{1}", applicationName, fileName)];
 		}
 
 		/// <summary>
@@ -102,6 +125,7 @@ namespace Dapplo.Config.Ini
 					throw exception;
 				}
 			};
+
 			ReadErrorHandler = (iniSection, iniValue, exception) =>
 			{
 				if (!iniValue.Behavior.IgnoreErrors)
@@ -109,81 +133,82 @@ namespace Dapplo.Config.Ini
 					throw exception;
 				}
 			};
+			ConfigStore.Add(string.Format("{0}.{1}", applicationName, fileName), this);
 		}
 
-        /// <summary>
-        /// Set the default converter for the specified type
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="typeConverter"></param>
-        public IniConfig SetDefaultConverter(Type type, Type typeConverter)
-        {
-            _converters.SafelyAddOrOverwrite(type, typeConverter);
-            return this;
-        }
-
-        /// <summary>
-        /// Set the default converters
-        /// </summary>
-        public IniConfig SetDefaultConverters()
-        {
-            SetDefaultConverter(typeof(IDictionary<string, string>), typeof(GenericDictionaryConverter<string, string>));
-            SetDefaultConverter(typeof(Dictionary<string, string>), typeof(GenericDictionaryConverter<string, string>));
-            SetDefaultConverter(typeof(IDictionary<string, int>), typeof(GenericDictionaryConverter<string, int>));
-            SetDefaultConverter(typeof(Dictionary<string, int>), typeof(GenericDictionaryConverter<string, int>));
-
-            SetDefaultConverter(typeof(IList<string>), typeof(StringToGenericListConverter<string>));
-            SetDefaultConverter(typeof(List<string>), typeof(StringToGenericListConverter<string>));
-            SetDefaultConverter(typeof(IList<int>), typeof(StringToGenericListConverter<int>));
-            SetDefaultConverter(typeof(List<int>), typeof(StringToGenericListConverter<int>));
-            return this;
-        }
-
-        /// <summary>
-        /// Set the after load action for a IIniSection
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="afterLoadAction"></param>
-        /// <returns></returns>
-        public IniConfig AfterLoad<T>(Action<T> afterLoadAction) where T : IIniSection
-        {
-            _afterLoadActions.SafelyAddOrOverwrite(typeof(T), new Action<IIniSection>( (section) => afterLoadAction((T)section)));
-            return this;
-        }
-
-        /// <summary>
-        /// Set before save action for a IIniSection, this can be used to chance values before they are stored
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="beforeSaveAction"></param>
-        /// <returns></returns>
-        public IniConfig BeforeSave<T>(Action<T> beforeSaveAction)
-        {
-            _beforeSaveActions.SafelyAddOrOverwrite(typeof(T), new Action<IIniSection>((section) => beforeSaveAction((T)section)));
-            return this;
-        }
-
-
-        /// <summary>
-        /// Set after save action for a IIniSection, this can be used to change value changed in before save back, after saving
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="afterSaveAction"></param>
-        /// <returns>this</returns>
-        public IniConfig AfterSave<T>(Action<T> afterSaveAction)
-        {
-            _afterSaveActions.SafelyAddOrOverwrite(typeof(T), new Action<IIniSection>((section) => afterSaveAction((T)section)));
-            return this;
-        }
-
-        /// <summary>
-        /// Register a Property Interface to this ini config, this method will return the property object 
-        /// </summary>
-        /// <typeparam name="T">Your property interface, which extends IIniSection</typeparam>
-        /// <returns>instance of type T</returns>
-        public async Task<T> RegisterAndGetAsync<T>(CancellationToken token = default(CancellationToken)) where T : IIniSection
+		/// <summary>
+		/// Set the default converter for the specified type
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="typeConverter"></param>
+		public IniConfig SetDefaultConverter(Type type, Type typeConverter)
 		{
-			return (T) await RegisterAndGetAsync(typeof (T), token).ConfigureAwait(false);
+			_converters.SafelyAddOrOverwrite(type, typeConverter);
+			return this;
+		}
+
+		/// <summary>
+		/// Set the default converters
+		/// </summary>
+		public IniConfig SetDefaultConverters()
+		{
+			SetDefaultConverter(typeof(IDictionary<string, string>), typeof(GenericDictionaryConverter<string, string>));
+			SetDefaultConverter(typeof(Dictionary<string, string>), typeof(GenericDictionaryConverter<string, string>));
+			SetDefaultConverter(typeof(IDictionary<string, int>), typeof(GenericDictionaryConverter<string, int>));
+			SetDefaultConverter(typeof(Dictionary<string, int>), typeof(GenericDictionaryConverter<string, int>));
+
+			SetDefaultConverter(typeof(IList<string>), typeof(StringToGenericListConverter<string>));
+			SetDefaultConverter(typeof(List<string>), typeof(StringToGenericListConverter<string>));
+			SetDefaultConverter(typeof(IList<int>), typeof(StringToGenericListConverter<int>));
+			SetDefaultConverter(typeof(List<int>), typeof(StringToGenericListConverter<int>));
+			return this;
+		}
+
+		/// <summary>
+		/// Set the after load action for a IIniSection
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="afterLoadAction"></param>
+		/// <returns></returns>
+		public IniConfig AfterLoad<T>(Action<T> afterLoadAction) where T : IIniSection
+		{
+			_afterLoadActions.SafelyAddOrOverwrite(typeof(T), new Action<IIniSection>((section) => afterLoadAction((T)section)));
+			return this;
+		}
+
+		/// <summary>
+		/// Set before save action for a IIniSection, this can be used to chance values before they are stored
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="beforeSaveAction"></param>
+		/// <returns></returns>
+		public IniConfig BeforeSave<T>(Action<T> beforeSaveAction)
+		{
+			_beforeSaveActions.SafelyAddOrOverwrite(typeof(T), new Action<IIniSection>((section) => beforeSaveAction((T)section)));
+			return this;
+		}
+
+
+		/// <summary>
+		/// Set after save action for a IIniSection, this can be used to change value changed in before save back, after saving
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="afterSaveAction"></param>
+		/// <returns>this</returns>
+		public IniConfig AfterSave<T>(Action<T> afterSaveAction)
+		{
+			_afterSaveActions.SafelyAddOrOverwrite(typeof(T), new Action<IIniSection>((section) => afterSaveAction((T)section)));
+			return this;
+		}
+
+		/// <summary>
+		/// Register a Property Interface to this ini config, this method will return the property object 
+		/// </summary>
+		/// <typeparam name="T">Your property interface, which extends IIniSection</typeparam>
+		/// <returns>instance of type T</returns>
+		public async Task<T> RegisterAndGetAsync<T>(CancellationToken token = default(CancellationToken)) where T : IIniSection
+		{
+			return (T)await RegisterAndGetAsync(typeof(T), token).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -202,64 +227,65 @@ namespace Dapplo.Config.Ini
 			return sections;
 		}
 
-        /// <summary>
-        /// Get the specified ini type
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns>T</returns>
-        public T Get<T>() where T : IIniSection
-        {
-            return (T)Get(typeof(T));
-        }
-
-        /// <summary>
-        /// Get the specified IIniSection type
-        /// </summary>
-        /// <param name="type">IIniSection to look for</param>
-        /// <returns>IIniSection</returns>
-        public IIniSection Get(Type type)
-        {
-            if (!typeof(IIniSection).IsAssignableFrom(type))
-            {
-                throw new ArgumentException("type is not a IIniSection");
-            }
-            var propertyProxy = ProxyBuilder.GetProxy(type);
-            var iniSection = (IIniSection)propertyProxy.PropertyObject;
-            return iniSection;
-        }
-
-        /// <summary>
-        /// Register a Property Interface to this ini config, this method will return the property object 
-        /// </summary>
-        /// <param name="type">Type to register, this must extend IIniSection</param>
-        /// <param name="token"></param>
-        /// <returns>instance of type</returns>
-        public async Task<IIniSection> RegisterAndGetAsync(Type type, CancellationToken token = default(CancellationToken))
+		/// <summary>
+		/// Get the specified ini type
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns>T</returns>
+		public T Get<T>() where T : IIniSection
 		{
-			if (!typeof (IIniSection).IsAssignableFrom(type))
+			return (T)Get(typeof(T));
+		}
+
+		/// <summary>
+		/// Get the specified IIniSection type
+		/// </summary>
+		/// <param name="type">IIniSection to look for</param>
+		/// <returns>IIniSection</returns>
+		public IIniSection Get(Type type)
+		{
+			if (!typeof(IIniSection).IsAssignableFrom(type))
+			{
+				throw new ArgumentException("type is not a IIniSection");
+			}
+			var propertyProxy = ProxyBuilder.GetProxy(type);
+			var iniSection = (IIniSection)propertyProxy.PropertyObject;
+			return iniSection;
+		}
+
+		/// <summary>
+		/// Register a Property Interface to this ini config, this method will return the property object 
+		/// </summary>
+		/// <param name="type">Type to register, this must extend IIniSection</param>
+		/// <param name="token"></param>
+		/// <returns>instance of type</returns>
+		public async Task<IIniSection> RegisterAndGetAsync(Type type, CancellationToken token = default(CancellationToken))
+		{
+			if (!typeof(IIniSection).IsAssignableFrom(type))
 			{
 				throw new ArgumentException("type is not a IIniSection");
 			}
 			var propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
-			var iniSection = (IIniSection) propertyProxy.PropertyObject;
+			var iniSection = (IIniSection)propertyProxy.PropertyObject;
 			var iniSectionName = iniSection.GetSectionName();
 
-            using (await _asyncLock.LockAsync().ConfigureAwait(false))
-            {
- 				if (_iniSections.ContainsKey(iniSectionName))
+			using (await _asyncLock.LockAsync().ConfigureAwait(false))
+			{
+				if (_iniSections.ContainsKey(iniSectionName))
 				{
 					return iniSection;
 				}
-                // Add before loading, so it will be handled automatically
-                _iniSections.Add(iniSectionName, iniSection);
-                if (!_initialReadDone)
+				// Add before loading, so it will be handled automatically
+				_iniSections.Add(iniSectionName, iniSection);
+				if (!_initialReadDone)
 				{
-                    await ReloadInternalAsync(false, token).ConfigureAwait(false);
-				} else
-                {
-                    FillSection(iniSection);
-                }
-            }
+					await ReloadInternalAsync(false, token).ConfigureAwait(false);
+				}
+				else
+				{
+					FillSection(iniSection);
+				}
+			}
 
 			return iniSection;
 		}
@@ -306,8 +332,8 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		public async Task ResetAsync(CancellationToken token = default(CancellationToken))
 		{
-            using (await _asyncLock.LockAsync().ConfigureAwait(false))
-            {
+			using (await _asyncLock.LockAsync().ConfigureAwait(false))
+			{
 				foreach (var iniSection in _iniSections.Values)
 				{
 					foreach (var iniValue in iniSection.GetIniValues())
@@ -315,12 +341,12 @@ namespace Dapplo.Config.Ini
 						// TODO: Do we need to skip read/write protected values here?
 						iniSection.RestoreToDefault(iniValue.PropertyName);
 					}
-                    // Call the after load action
-                    Action<IIniSection> afterLoadAction;
-                    if (_afterLoadActions.TryGetValue(iniSection.GetType(), out afterLoadAction))
-                    {
-                        afterLoadAction(iniSection);
-                    }
+					// Call the after load action
+					Action<IIniSection> afterLoadAction;
+					if (_afterLoadActions.TryGetValue(iniSection.GetType(), out afterLoadAction))
+					{
+						afterLoadAction(iniSection);
+					}
 				}
 			}
 		}
@@ -330,10 +356,10 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		public async Task WriteAsync(CancellationToken token = default(CancellationToken))
 		{
-            // Make sure only one write to file is running, other request will have to wait
-            using (await _asyncLock.LockAsync().ConfigureAwait(false))
-            {
-                string path = Path.GetDirectoryName(_iniFile);
+			// Make sure only one write to file is running, other request will have to wait
+			using (await _asyncLock.LockAsync().ConfigureAwait(false))
+			{
+				string path = Path.GetDirectoryName(_iniFile);
 
 				// Create the directory to write to, if it doesn't exist yet
 				if (path != null && !Directory.Exists(path))
@@ -350,205 +376,205 @@ namespace Dapplo.Config.Ini
 			}
 		}
 
-        /// <summary>
-        /// Store the ini to the supplied stream
-        /// </summary>
-        /// <param name="stream"></param>
-        /// <param name="token"></param>
-        /// <returns>Task to await</returns>
-        private async Task WriteToStreamInternalAsync(Stream stream, CancellationToken token = default(CancellationToken))
-        {
-            IDictionary<string, IDictionary<string, string>> iniSectionsComments = new SortedDictionary<string, IDictionary<string, string>>();
-
-            // Loop over the "registered" sections
-            foreach (var iniSection in _iniSections.Values)
-            {
-                Action<IIniSection> beforeSaveAction;
-                if (_beforeSaveActions.TryGetValue(iniSection.GetType(), out beforeSaveAction))
-                {
-                    beforeSaveAction(iniSection);
-                }
-                try
-                {
-                    CreateSaveValues(iniSection, iniSectionsComments);
-                }
-                finally
-                {
-                    // Eventually set the values back
-                    Action<IIniSection> afterSaveAction;
-                    if (_beforeSaveActions.TryGetValue(iniSection.GetType(), out afterSaveAction))
-                    {
-                        afterSaveAction(iniSection);
-                    }
-
-                }
-            }
-            await IniFile.WriteAsync(stream, Encoding.UTF8, _ini, iniSectionsComments, token).ConfigureAwait(false);
-            await stream.FlushAsync(token).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Write all the IIniSections to the stream, this is also used for testing
-        /// </summary>
-        /// <param name="stream">Stream to write to</param>
-        /// <param name="token"></param>
-        /// <returns>Task</returns>
-        public async Task WriteToStreamAsync(Stream stream, CancellationToken token = default(CancellationToken))
+		/// <summary>
+		/// Store the ini to the supplied stream
+		/// </summary>
+		/// <param name="stream"></param>
+		/// <param name="token"></param>
+		/// <returns>Task to await</returns>
+		private async Task WriteToStreamInternalAsync(Stream stream, CancellationToken token = default(CancellationToken))
 		{
-            using (await _asyncLock.LockAsync().ConfigureAwait(false))
-            {
-                await WriteToStreamInternalAsync(stream, token);
-            }
-        }
+			IDictionary<string, IDictionary<string, string>> iniSectionsComments = new SortedDictionary<string, IDictionary<string, string>>();
 
-        /// <summary>
-        /// Helper method to create ini section values for writing.
-        /// The actual values are stored in the _ini
-        /// </summary>
-        /// <param name="iniSection">Section to write</param>
-        /// <param name="iniSectionsComments">Comments</param>
-        private void CreateSaveValues(IIniSection iniSection, IDictionary<string, IDictionary<string, string>> iniSectionsComments)
-        {
-            // This flag tells us if the header for the section is already written
-            bool isSectionCreated = false;
+			// Loop over the "registered" sections
+			foreach (var iniSection in _iniSections.Values)
+			{
+				Action<IIniSection> beforeSaveAction;
+				if (_beforeSaveActions.TryGetValue(iniSection.GetType(), out beforeSaveAction))
+				{
+					beforeSaveAction(iniSection);
+				}
+				try
+				{
+					CreateSaveValues(iniSection, iniSectionsComments);
+				}
+				finally
+				{
+					// Eventually set the values back
+					Action<IIniSection> afterSaveAction;
+					if (_beforeSaveActions.TryGetValue(iniSection.GetType(), out afterSaveAction))
+					{
+						afterSaveAction(iniSection);
+					}
 
-            IDictionary<string, string> sectionProperties = new SortedDictionary<string, string>();
-            IDictionary<string, string> sectionComments = new SortedDictionary<string, string>();
-            // Loop over the ini values, this automatically skips all NonSerialized properties
-            foreach (var iniValue in iniSection.GetIniValues())
-            {
-                // Check if we need to write the value, this is not needed when it has the default or if write is disabled
-                if (!iniValue.IsWriteNeeded)
-                {
-                    continue;
-                }
+				}
+			}
+			await IniFile.WriteAsync(stream, Encoding.UTF8, _ini, iniSectionsComments, token).ConfigureAwait(false);
+			await stream.FlushAsync(token).ConfigureAwait(false);
+		}
 
-                // Before we are going to write, we need to check if the section header "[Sectionname]" is already written.
-                // If not, do so now before writing the properties of the section itself
-                if (!isSectionCreated)
-                {
-                    if (_ini.ContainsKey(iniSection.GetSectionName()))
-                    {
-                        _ini.Remove(iniSection.GetSectionName());
-                    }
-                    _ini.Add(iniSection.GetSectionName(), sectionProperties);
-                    iniSectionsComments.Add(iniSection.GetSectionName(), sectionComments);
+		/// <summary>
+		/// Write all the IIniSections to the stream, this is also used for testing
+		/// </summary>
+		/// <param name="stream">Stream to write to</param>
+		/// <param name="token"></param>
+		/// <returns>Task</returns>
+		public async Task WriteToStreamAsync(Stream stream, CancellationToken token = default(CancellationToken))
+		{
+			using (await _asyncLock.LockAsync().ConfigureAwait(false))
+			{
+				await WriteToStreamInternalAsync(stream, token);
+			}
+		}
 
-                    string description = iniSection.GetSectionDescription();
-                    if (!string.IsNullOrEmpty(description))
-                    {
-                        sectionComments.Add(iniSection.GetSectionName(), description);
-                    }
-                    // Mark section as created!
-                    isSectionCreated = true;
-                }
+		/// <summary>
+		/// Helper method to create ini section values for writing.
+		/// The actual values are stored in the _ini
+		/// </summary>
+		/// <param name="iniSection">Section to write</param>
+		/// <param name="iniSectionsComments">Comments</param>
+		private void CreateSaveValues(IIniSection iniSection, IDictionary<string, IDictionary<string, string>> iniSectionsComments)
+		{
+			// This flag tells us if the header for the section is already written
+			bool isSectionCreated = false;
 
-                // Check if the property has a description, if so write it in the ini comment before the property
-                if (!string.IsNullOrEmpty(iniValue.Description))
-                {
-                    sectionComments.Add(iniValue.IniPropertyName, iniValue.Description);
-                }
+			IDictionary<string, string> sectionProperties = new SortedDictionary<string, string>();
+			IDictionary<string, string> sectionComments = new SortedDictionary<string, string>();
+			// Loop over the ini values, this automatically skips all NonSerialized properties
+			foreach (var iniValue in iniSection.GetIniValues())
+			{
+				// Check if we need to write the value, this is not needed when it has the default or if write is disabled
+				if (!iniValue.IsWriteNeeded)
+				{
+					continue;
+				}
 
-                ITypeDescriptorContext context = null;
-                try
-                {
-                    var propertyDescription = TypeDescriptor.GetProperties(iniSection.GetType()).Find(iniValue.PropertyName, false);
-                    context = new TypeDescriptorContext(iniSection, propertyDescription);
-                }
-                // ReSharper disable once EmptyGeneralCatchClause
-                catch
-                {
-                    // Ignore any exceptions
-                }
+				// Before we are going to write, we need to check if the section header "[Sectionname]" is already written.
+				// If not, do so now before writing the properties of the section itself
+				if (!isSectionCreated)
+				{
+					if (_ini.ContainsKey(iniSection.GetSectionName()))
+					{
+						_ini.Remove(iniSection.GetSectionName());
+					}
+					_ini.Add(iniSection.GetSectionName(), sectionProperties);
+					iniSectionsComments.Add(iniSection.GetSectionName(), sectionComments);
 
-                // Check if a converter is specified
-                TypeConverter converter = iniValue.Converter;
-                // If not, use the default converter for the property type
-                if (converter == null)
-                {
-                    Type value;
-                    if (_converters.TryGetValue(iniValue.ValueType, out value))
-                    {
-                        converter = (TypeConverter)Activator.CreateInstance(value);
-                    }
-                    else
-                    {
-                        converter = TypeDescriptor.GetConverter(iniValue.ValueType);
-                    }
-                }
-                else if (converter.CanConvertTo(typeof(IDictionary<string, string>)))
-                {
-                    try
-                    {
-                        // Convert the dictionary to a string,string variant.
-                        var dictionaryProperties = (IDictionary<string, string>)converter.ConvertTo(context, CultureInfo.CurrentCulture, iniValue.Value, typeof(IDictionary<string, string>));
-                        // Use this to build a separate "section" which is called "[section-propertyname]"
-                        string dictionaryIdentifier = string.Format("{0}-{1}", iniSection.GetSectionName(), iniValue.IniPropertyName);
-                        if (_ini.ContainsKey(dictionaryIdentifier))
-                        {
-                            _ini.Remove(dictionaryIdentifier);
-                        }
-                        _ini.Add(dictionaryIdentifier, dictionaryProperties);
-                        if (!string.IsNullOrWhiteSpace(iniValue.Description))
-                        {
-                            IDictionary<string, string> dictionaryComments = new SortedDictionary<string, string>();
-                            dictionaryComments.Add(dictionaryIdentifier, iniValue.Description);
-                            iniSectionsComments.Add(dictionaryIdentifier, dictionaryComments);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        WriteErrorHandler(iniSection, iniValue, ex);
-                    }
-                    continue;
-                }
+					string description = iniSection.GetSectionDescription();
+					if (!string.IsNullOrEmpty(description))
+					{
+						sectionComments.Add(iniSection.GetSectionName(), description);
+					}
+					// Mark section as created!
+					isSectionCreated = true;
+				}
 
-                try
-                {
-                    // Convert the value to a string
-                    string writingValue;
-                    if (context != null)
-                    {
-                        writingValue = converter.ConvertToInvariantString(context, iniValue.Value);
-                    }
-                    else
-                    {
-                        writingValue = converter.ConvertToInvariantString(iniValue.Value);
-                    }
-                    // And write the value with the IniPropertyName (which does NOT have to be the property name) to the file
-                    sectionProperties.Add(iniValue.IniPropertyName, writingValue);
-                }
-                catch (Exception ex)
-                {
-                    WriteErrorHandler(iniSection, iniValue, ex);
-                }
-            }
+				// Check if the property has a description, if so write it in the ini comment before the property
+				if (!string.IsNullOrEmpty(iniValue.Description))
+				{
+					sectionComments.Add(iniValue.IniPropertyName, iniValue.Description);
+				}
 
-        }
+				ITypeDescriptorContext context = null;
+				try
+				{
+					var propertyDescription = TypeDescriptor.GetProperties(iniSection.GetType()).Find(iniValue.PropertyName, false);
+					context = new TypeDescriptorContext(iniSection, propertyDescription);
+				}
+				// ReSharper disable once EmptyGeneralCatchClause
+				catch
+				{
+					// Ignore any exceptions
+				}
 
-        /// <summary>
-        /// This is reloading all the .ini files, and will refill the sections.
-        /// If reset = true, ALL setting are lost
-        /// Otherwise only the properties in the files will overwrite your settings.
-        /// Usually this should not directly be called, unless you know that the file was changed by an external process.
-        /// </summary>
-        public async Task ReloadAsync(bool reset = true, CancellationToken token = default(CancellationToken))
-        {
-            using (await _asyncLock.LockAsync().ConfigureAwait(false))
-            {
-                await ReloadInternalAsync(reset, token);
-            }
-        }
+				// Check if a converter is specified
+				TypeConverter converter = iniValue.Converter;
+				// If not, use the default converter for the property type
+				if (converter == null)
+				{
+					Type value;
+					if (_converters.TryGetValue(iniValue.ValueType, out value))
+					{
+						converter = (TypeConverter)Activator.CreateInstance(value);
+					}
+					else
+					{
+						converter = TypeDescriptor.GetConverter(iniValue.ValueType);
+					}
+				}
+				else if (converter.CanConvertTo(typeof(IDictionary<string, string>)))
+				{
+					try
+					{
+						// Convert the dictionary to a string,string variant.
+						var dictionaryProperties = (IDictionary<string, string>)converter.ConvertTo(context, CultureInfo.CurrentCulture, iniValue.Value, typeof(IDictionary<string, string>));
+						// Use this to build a separate "section" which is called "[section-propertyname]"
+						string dictionaryIdentifier = string.Format("{0}-{1}", iniSection.GetSectionName(), iniValue.IniPropertyName);
+						if (_ini.ContainsKey(dictionaryIdentifier))
+						{
+							_ini.Remove(dictionaryIdentifier);
+						}
+						_ini.Add(dictionaryIdentifier, dictionaryProperties);
+						if (!string.IsNullOrWhiteSpace(iniValue.Description))
+						{
+							IDictionary<string, string> dictionaryComments = new SortedDictionary<string, string>();
+							dictionaryComments.Add(dictionaryIdentifier, iniValue.Description);
+							iniSectionsComments.Add(dictionaryIdentifier, dictionaryComments);
+						}
+					}
+					catch (Exception ex)
+					{
+						WriteErrorHandler(iniSection, iniValue, ex);
+					}
+					continue;
+				}
 
-        /// <summary>
-        /// This is reloading all the .ini files, and will refill the sections.
-        /// If reset = true, ALL setting are lost
-        /// Otherwise only the properties in the files will overwrite your settings.
-        /// Usually this should not directly be called, unless you know that the file was changed by an external process.
-        /// </summary>
-        private async Task ReloadInternalAsync(bool reset = true, CancellationToken token = default(CancellationToken))
-        {
-            if (reset)
+				try
+				{
+					// Convert the value to a string
+					string writingValue;
+					if (context != null)
+					{
+						writingValue = converter.ConvertToInvariantString(context, iniValue.Value);
+					}
+					else
+					{
+						writingValue = converter.ConvertToInvariantString(iniValue.Value);
+					}
+					// And write the value with the IniPropertyName (which does NOT have to be the property name) to the file
+					sectionProperties.Add(iniValue.IniPropertyName, writingValue);
+				}
+				catch (Exception ex)
+				{
+					WriteErrorHandler(iniSection, iniValue, ex);
+				}
+			}
+
+		}
+
+		/// <summary>
+		/// This is reloading all the .ini files, and will refill the sections.
+		/// If reset = true, ALL setting are lost
+		/// Otherwise only the properties in the files will overwrite your settings.
+		/// Usually this should not directly be called, unless you know that the file was changed by an external process.
+		/// </summary>
+		public async Task ReloadAsync(bool reset = true, CancellationToken token = default(CancellationToken))
+		{
+			using (await _asyncLock.LockAsync().ConfigureAwait(false))
+			{
+				await ReloadInternalAsync(reset, token);
+			}
+		}
+
+		/// <summary>
+		/// This is reloading all the .ini files, and will refill the sections.
+		/// If reset = true, ALL setting are lost
+		/// Otherwise only the properties in the files will overwrite your settings.
+		/// Usually this should not directly be called, unless you know that the file was changed by an external process.
+		/// </summary>
+		private async Task ReloadInternalAsync(bool reset = true, CancellationToken token = default(CancellationToken))
+		{
+			if (reset)
 			{
 				await ResetAsync(token).ConfigureAwait(false);
 			}
@@ -566,23 +592,23 @@ namespace Dapplo.Config.Ini
 			FillSections();
 		}
 
-        /// <summary>
-        /// Internal method, use the supplied ini-sections & properties to fill the sectoins
-        /// </summary>
-        /// <returns></returns>
-        private void FillSections()
-        {
-            foreach (var iniSection in _iniSections.Values)
-            {
-                FillSection(iniSection);
-            }
-        }
+		/// <summary>
+		/// Internal method, use the supplied ini-sections & properties to fill the sectoins
+		/// </summary>
+		/// <returns></returns>
+		private void FillSections()
+		{
+			foreach (var iniSection in _iniSections.Values)
+			{
+				FillSection(iniSection);
+			}
+		}
 
-        /// <summary>
-        /// Helper method to fill the values of one section
-        /// </summary>
-        /// <param name="iniSection"></param>
-        private void FillSection(IIniSection iniSection)
+		/// <summary>
+		/// Helper method to fill the values of one section
+		/// </summary>
+		/// <param name="iniSection"></param>
+		private void FillSection(IIniSection iniSection)
 		{
 			// Make sure there is no write protection
 			iniSection.RemoveWriteProtection();
@@ -604,12 +630,12 @@ namespace Dapplo.Config.Ini
 				iniSection.StopWriteProtecting();
 			}
 
-            // After loadd
-            Action<IIniSection> afterLoadAction;
-            if (_afterLoadActions.TryGetValue(iniSection.GetType(), out afterLoadAction))
-            {
-                afterLoadAction(iniSection);
-            } 
+			// After loadd
+			Action<IIniSection> afterLoadAction;
+			if (_afterLoadActions.TryGetValue(iniSection.GetType(), out afterLoadAction))
+			{
+				afterLoadAction(iniSection);
+			}
 		}
 
 		/// <summary>
@@ -620,15 +646,15 @@ namespace Dapplo.Config.Ini
 		private void FillSection(IDictionary<string, IDictionary<string, string>> iniSections, IIniSection iniSection)
 		{
 			IDictionary<string, string> iniProperties;
-            if (!iniSections.TryGetValue(iniSection.GetSectionName(), out iniProperties))
-            {
-                // No properties
-                return;
-            }
+			if (!iniSections.TryGetValue(iniSection.GetSectionName(), out iniProperties))
+			{
+				// No properties
+				return;
+			}
 
 			IEnumerable<IniValue> iniValues = (from iniValue in iniSection.GetIniValues()
-				where iniValue.Behavior.Read
-				select iniValue);
+											   where iniValue.Behavior.Read
+											   select iniValue);
 
 			foreach (var iniValue in iniValues)
 			{
@@ -658,7 +684,7 @@ namespace Dapplo.Config.Ini
 				{
 					continue;
 				}
-				Type stringType = typeof (string);
+				Type stringType = typeof(string);
 				Type destinationType = iniValue.ValueType;
 				if (iniValue.Converter != null && iniValue.Converter.CanConvertFrom(stringType))
 				{
@@ -677,7 +703,7 @@ namespace Dapplo.Config.Ini
 				Type converterType;
 				if (_converters.TryGetValue(iniValue.ValueType, out converterType))
 				{
-					var converter = (TypeConverter) Activator.CreateInstance(converterType);
+					var converter = (TypeConverter)Activator.CreateInstance(converterType);
 					try
 					{
 						iniValue.Value = converter.ConvertFrom(stringValue);
@@ -710,20 +736,20 @@ namespace Dapplo.Config.Ini
 			}
 		}
 
-        /// <summary>
-        /// Initialize the IniConfig by reading all the properties from the stream
-        /// If this is called directly after construction, no files will be read which is useful for testing!
-        /// </summary>
-        public async Task ReadFromStreamAsync(Stream stream, CancellationToken token = default(CancellationToken))
-        {
-            _initialReadDone = true;
-            // This is for testing, clear all defaults & constants as the 
-            _defaults = null;
-            _constants = null;
-            _ini = await IniFile.ReadAsync(stream, Encoding.UTF8, token).ConfigureAwait(false);
+		/// <summary>
+		/// Initialize the IniConfig by reading all the properties from the stream
+		/// If this is called directly after construction, no files will be read which is useful for testing!
+		/// </summary>
+		public async Task ReadFromStreamAsync(Stream stream, CancellationToken token = default(CancellationToken))
+		{
+			_initialReadDone = true;
+			// This is for testing, clear all defaults & constants as the 
+			_defaults = null;
+			_constants = null;
+			_ini = await IniFile.ReadAsync(stream, Encoding.UTF8, token).ConfigureAwait(false);
 
-            // Reset the current sections
-            FillSections();
-        }
-    }
+			// Reset the current sections
+			FillSections();
+		}
+	}
 }
