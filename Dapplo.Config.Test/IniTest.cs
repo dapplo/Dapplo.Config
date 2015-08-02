@@ -47,15 +47,25 @@ namespace Dapplo.Config.Test
         {
             var iniConfig = new IniConfig("Dapplo", "dapplo");
 
+            iniConfig.AfterLoad<IIniTest>((x) =>
+            {
+                if (!x.SomeValues.ContainsKey("dapplo"))
+                {
+                    x.SomeValues.Add("dapplo", 2015);
+                }
+            });
             using (var testMemoryStream = new MemoryStream())
             {
                 await iniConfig.ReadFromStreamAsync(testMemoryStream).ConfigureAwait(false);
             }
             var iniTest = await iniConfig.RegisterAndGetAsync<IIniTest>().ConfigureAwait(false);
             Assert.IsTrue(iniTest.WindowCornerCutShape.Count > 0);
+            Assert.IsTrue(iniTest.SomeValues.ContainsKey("dapplo"));
+
             // Check second get, should have same value
             var iniTest2 = iniConfig.Get<IIniTest>();
             Assert.IsTrue(iniTest2.WindowCornerCutShape.Count > 0);
+            Assert.IsTrue(iniTest2.SomeValues.ContainsKey("dapplo"));
         }
 
         [TestMethod]
