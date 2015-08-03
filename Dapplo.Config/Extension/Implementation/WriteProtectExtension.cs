@@ -42,12 +42,12 @@ namespace Dapplo.Config.Extension.Implementation
 			proxy.RegisterSetter((int) CallOrder.First, WriteProtectSetter);
 
 			// Use Lambdas to make refactoring possible
-			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties>(x => x.StartWriteProtecting()), StartWriteProtecting);
-			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties>(x => x.RemoveWriteProtection()), RemoveWriteProtection);
-			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties>(x => x.StopWriteProtecting()), StopWriteProtecting);
-			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties>(x => x.WriteProtect("")), WriteProtect);
-			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties>(x => x.DisableWriteProtect("")), DisableWriteProtect);
-			proxy.RegisterMethod(ConfigUtils.GetMemberName<IWriteProtectProperties>(x => x.IsWriteProtected("")), IsWriteProtected);
+			proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IWriteProtectProperties>(x => x.StartWriteProtecting()), StartWriteProtecting);
+			proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IWriteProtectProperties>(x => x.RemoveWriteProtection()), RemoveWriteProtection);
+			proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IWriteProtectProperties>(x => x.StopWriteProtecting()), StopWriteProtecting);
+			proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IWriteProtectProperties>(x => x.WriteProtect("")), WriteProtect);
+			proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IWriteProtectProperties>(x => x.DisableWriteProtect("")), DisableWriteProtect);
+			proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IWriteProtectProperties>(x => x.IsWriteProtected("")), IsWriteProtected);
 		}
 
 		/// <summary>

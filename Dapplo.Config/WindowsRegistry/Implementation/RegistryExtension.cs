@@ -45,7 +45,7 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 			{
 				_registryAttribute = new RegistryAttribute();
 			}
-			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IRegistry, object>(x => x.PathFor("")), PathFor);
+			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IRegistry, object>(x => x.PathFor("")), PathFor);
 		}
 
 		/// <summary>

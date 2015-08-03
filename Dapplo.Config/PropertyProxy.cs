@@ -52,7 +52,7 @@ namespace Dapplo.Config
 		public PropertyProxy() : base(typeof (T))
 		{
 			// Register the GetType handler, use Lambda to make refactoring possible
-			RegisterMethod(ConfigUtils.GetMemberName<object>(x => x.GetType()), HandleGetType);
+			RegisterMethod(ExpressionExtensions.GetMemberName<object>(x => x.GetType()), HandleGetType);
 
 			// Make sure the default set logic is registered
 			RegisterSetter((int) CallOrder.Middle, DefaultSet);

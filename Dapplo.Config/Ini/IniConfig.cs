@@ -19,6 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Dapplo.Config.Converters;
 using Dapplo.Config.Support;
 using System;
 using System.Collections.Generic;
@@ -664,12 +665,9 @@ namespace Dapplo.Config.Ini
 		/// <param name="iniSection"></param>
 		private void FillSection(IDictionary<string, IDictionary<string, string>> iniSections, IIniSection iniSection)
 		{
-			IDictionary<string, string> iniProperties;
-			if (!iniSections.TryGetValue(iniSection.GetSectionName(), out iniProperties))
-			{
-				// No properties
-				return;
-			}
+			IDictionary<string, string> iniProperties = null;
+			// Might be null
+			iniSections.TryGetValue(iniSection.GetSectionName(), out iniProperties);
 
 			IEnumerable<IniValue> iniValues = (from iniValue in iniSection.GetIniValues()
 											   where iniValue.Behavior.Read
@@ -693,6 +691,7 @@ namespace Dapplo.Config.Ini
 
 					continue;
 				}
+				// Skip if the iniValue does not have a default value and there is nothing to set
 				if (iniProperties == null)
 				{
 					continue;

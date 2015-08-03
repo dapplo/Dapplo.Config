@@ -36,7 +36,7 @@ namespace Dapplo.Config.Extension.Implementation
 			CheckType(typeof (IDescription));
 
 			// this registers one method and the overloading is handled in the GetDescription
-			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IDescription>(x => x.DescriptionFor("")), GetDescription);
+			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IDescription>(x => x.DescriptionFor("")), GetDescription);
 		}
 
 		/// <summary>

@@ -43,10 +43,10 @@ namespace Dapplo.Config.Extension.Implementation
 			proxy.RegisterGetter((int) CallOrder.First, TransactionalGetter);
 
 			// Use Lambdas to make refactoring possible
-			proxy.RegisterMethod(ConfigUtils.GetMemberName<ITransactionalProperties>(x => x.StartTransaction()), StartTransaction);
-			proxy.RegisterMethod(ConfigUtils.GetMemberName<ITransactionalProperties>(x => x.CommitTransaction()), CommitTransaction);
-			proxy.RegisterMethod(ConfigUtils.GetMemberName<ITransactionalProperties>(x => x.RollbackTransaction()), RollbackTransaction);
-			proxy.RegisterMethod(ConfigUtils.GetMemberName<ITransactionalProperties>(x => x.IsTransactionDirty()), IsTransactionDirty);
+			proxy.RegisterMethod(ExpressionExtensions.GetMemberName<ITransactionalProperties>(x => x.StartTransaction()), StartTransaction);
+			proxy.RegisterMethod(ExpressionExtensions.GetMemberName<ITransactionalProperties>(x => x.CommitTransaction()), CommitTransaction);
+			proxy.RegisterMethod(ExpressionExtensions.GetMemberName<ITransactionalProperties>(x => x.RollbackTransaction()), RollbackTransaction);
+			proxy.RegisterMethod(ExpressionExtensions.GetMemberName<ITransactionalProperties>(x => x.IsTransactionDirty()), IsTransactionDirty);
 		}
 
 		/// <summary>

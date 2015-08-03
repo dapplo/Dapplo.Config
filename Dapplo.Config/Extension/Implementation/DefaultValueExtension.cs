@@ -38,8 +38,8 @@ namespace Dapplo.Config.Extension.Implementation
 			CheckType(typeof (IDefaultValue));
 
 			// this registers one method and the overloading is handled in the GetDefaultValue
-			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IDefaultValue>(x => x.DefaultValueFor("")), GetDefaultValue);
-			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IDefaultValue>(x => x.RestoreToDefault("")), RestoreToDefault);
+			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IDefaultValue>(x => x.DefaultValueFor("")), GetDefaultValue);
+			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IDefaultValue>(x => x.RestoreToDefault("")), RestoreToDefault);
 		}
 
 		/// <summary>

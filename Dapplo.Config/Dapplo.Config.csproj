@@ -51,9 +51,9 @@
     <Compile Include="Extension\Implementation\WriteProtectExtension.cs" />
     <Compile Include="Extension\Implementation\TransactionExtension.cs" />
     <Compile Include="Ini\IniPropertyBehaviorAttribute.cs" />
-    <Compile Include="Ini\StringEncryptionTypeConverter.cs" />
-    <Compile Include="Ini\GenericDictionaryConverter.cs" />
-    <Compile Include="Ini\StringToGenericListConverter.cs" />
+    <Compile Include="Converters\StringEncryptionTypeConverter.cs" />
+    <Compile Include="Converters\GenericDictionaryConverter.cs" />
+    <Compile Include="Converters\StringToGenericListConverter.cs" />
     <Compile Include="Ini\IIniSection.cs" />
     <Compile Include="Ini\IniFile.cs" />
     <Compile Include="Ini\IniSectionAttribute.cs" />
@@ -70,6 +70,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyProxy.cs" />
     <Compile Include="ProxyBuilder.cs" />
+    <Compile Include="Support\DictionaryExtensions.cs" />
+    <Compile Include="Support\MethodCallExtensions.cs" />
+    <Compile Include="Support\PropertyInfoExtension.cs" />
+    <Compile Include="Support\TypeExtensions.cs" />
     <Compile Include="WindowsRegistry\Implementation\RegistryExtension.cs" />
     <Compile Include="WindowsRegistry\RegistryAttribute.cs" />
     <Compile Include="WindowsRegistry\RegistryPropertyAttribute.cs" />
@@ -79,7 +83,7 @@
     <Compile Include="Support\Getter.cs" />
     <Compile Include="Support\GetterSetter.cs" />
     <Compile Include="Support\MethodCallInfo.cs" />
-    <Compile Include="Support\ConfigUtils.cs" />
+    <Compile Include="Support\ExpressionExtensions.cs" />
     <Compile Include="Support\SetInfo.cs" />
     <Compile Include="Support\Setter.cs" />
     <Compile Include="Support\AsyncLock.cs" />

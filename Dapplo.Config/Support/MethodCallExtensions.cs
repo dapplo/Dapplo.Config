@@ -19,30 +19,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Dapplo.Config.Converters;
-using Dapplo.Config.Extension;
-using System.Collections.Generic;
-using System.ComponentModel;
+using System.Linq.Expressions;
 
-namespace Dapplo.Config.Test.TestInterfaces
-{
-	/// <summary>
-	/// This is the interface under test
-	/// </summary>
-	public interface IDefaultValueTest : IDefaultValue<IDefaultValueTest>
-	{
-		[DefaultValue(21)]
-		int Age
-		{
-			get;
-			set;
-		}
-
-		[DefaultValue("10,20,30"), TypeConverter(typeof (StringToGenericListConverter<int>))]
-		IList<int> Ages
-		{
-			get;
-			set;
+namespace Dapplo.Config.Support {
+	public static class MethodCallExtensions {
+		/// <summary>
+		/// Get the property name from the argument "index" of the MethodCallInfo
+		/// If the argument is a string, it will be returned.
+		/// If the arugment is a LambdaExpression, the member name will be retrieved
+		/// </summary>
+		/// <param name="methodCallInfo">MethodCallInfo</param>
+		/// <param name="index">Index of the argument</param>
+		/// <returns>Property name</returns>
+		public static string PropertyNameOf(this MethodCallInfo methodCallInfo, int index) {
+			string propertyName = methodCallInfo.Arguments[index] as string;
+			if (propertyName == null) {
+				LambdaExpression propertyExpression = (LambdaExpression)methodCallInfo.Arguments[index];
+				propertyName = propertyExpression.GetMemberName();
+			}
+			return propertyName;
 		}
 	}
 }

@@ -26,7 +26,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Dapplo.Config.Ini
+namespace Dapplo.Config.Converters
 {
 	/// <summary>
 	/// This converter makes it possible to store values in an ini file, somewhat secure.

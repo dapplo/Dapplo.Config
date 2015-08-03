@@ -19,6 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Dapplo.Config.Converters;
 using Dapplo.Config.Ini;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -69,7 +70,7 @@ namespace Dapplo.Config.Test.TestInterfaces
 		}
 
 		[Description("Here are some values"), TypeConverter(typeof (GenericDictionaryConverter<string, int>))]
-		Dictionary<string, int> SomeValues
+		IDictionary<string, int> SomeValues
 		{
 			get;
 			set;

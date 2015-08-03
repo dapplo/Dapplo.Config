@@ -37,8 +37,8 @@ namespace Dapplo.Config.Extension.Implementation
 			CheckType(typeof (ITagging));
 
 			// Use Lambda to make refactoring possible, this registers one method and the overloading is handled in the IsTaggedWith
-			proxy.RegisterMethod(ConfigUtils.GetMemberName<ITagging>(x => x.IsTaggedWith("", null)), IsTaggedWith);
-			proxy.RegisterMethod(ConfigUtils.GetMemberName<ITagging>(x => x.GetTagValue("", null)), GetTagValue);
+			proxy.RegisterMethod(ExpressionExtensions.GetMemberName<ITagging>(x => x.IsTaggedWith("", null)), IsTaggedWith);
+			proxy.RegisterMethod(ExpressionExtensions.GetMemberName<ITagging>(x => x.GetTagValue("", null)), GetTagValue);
 		}
 
 		/// <summary>

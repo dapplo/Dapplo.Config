@@ -38,13 +38,13 @@ namespace Dapplo.Config.Ini.Implementation
 			CheckType(typeof (IIniSection));
 
 			//_proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection>(x => x.IniValueFor<T>(y => default(T))), IniValueFor);
-			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.GetIniValues()), GetIniValues);
-			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.GetIniValue(null)), GetIniValue);
+			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IIniSection, object>(x => x.GetIniValues()), GetIniValues);
+			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IIniSection, object>(x => x.GetIniValue(null)), GetIniValue);
 
 			IniValue dummy;
-			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.TryGetIniValue(null, out dummy)), TryGetIniValue);
-			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.GetSectionName()), GetSectionName);
-			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.GetSectionDescription()), GetDescription);
+			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IIniSection, object>(x => x.TryGetIniValue(null, out dummy)), TryGetIniValue);
+			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IIniSection, object>(x => x.GetSectionName()), GetSectionName);
+			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IIniSection, object>(x => x.GetSectionDescription()), GetDescription);
 		}
 
 		/// <summary>
