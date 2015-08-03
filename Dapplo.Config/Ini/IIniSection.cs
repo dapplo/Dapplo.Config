@@ -20,7 +20,9 @@
  */
 
 using Dapplo.Config.Extension;
+using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace Dapplo.Config.Ini
 {
@@ -66,5 +68,21 @@ namespace Dapplo.Config.Ini
 	/// </summary>
 	public interface IIniSection<T> : IIniSection, IDefaultValue<T>, IWriteProtectProperties<T>
 	{
+		/// <summary>
+		/// Get the IniValue for a property, this is quicker and uses less memory than to iterate over the GetIniValues result
+		/// </summary>
+		/// <typeparam name="TProp">Your interface</typeparam>
+		/// <param name="propertyExpression">expression for the property name</param>
+		/// <returns>IniValue</returns>
+		IniValue GetIniValue<TProp>(Expression<Func<T, TProp>> propertyExpression);
+
+		/// <summary>
+		/// Try to get the IniValue for a property, this is quicker and uses less memory than to iterate over the GetIniValues result
+		/// </summary>
+		/// <typeparam name="TProp">Your interface</typeparam>
+		/// <param name="propertyExpression">expression for the property name</param>
+		/// <param name="iniValue">out IniValue</param>
+		/// <returns>bool with true if found</returns>
+		bool TryGetIniValue<TProp>(Expression<Func<T, TProp>> propertyExpression, out IniValue iniValue);
 	}
 }
