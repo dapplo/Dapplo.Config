@@ -78,6 +78,17 @@ namespace Dapplo.Config.Ini
 		}
 
 		/// <summary>
+		/// Location of the file where the ini config is stored
+		/// </summary>
+		public string IniLocation
+		{
+			get
+			{
+				return _iniFile;
+			}
+		}
+
+		/// <summary>
 		/// Static helper to remove the IniConfig from the store.
 		/// This is interal, as it normally should not be used.
 		/// </summary>
