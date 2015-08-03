@@ -63,6 +63,8 @@ namespace Dapplo.Config.Test
 
 			Assert.IsTrue(properties.IsTaggedWith(x => x.FirstName, TestTags.Tag1));
 			Assert.IsTrue(properties.IsTaggedWith("FirstName", TestTags.Tag1));
+			// Test if we can access the value of a tag
+			Assert.AreEqual("Robin", properties.GetTagValue("FirstName", TestTags.Tag1));
 
 			Assert.IsFalse(properties.IsTaggedWith(x => x.FirstName, TestTags.Expert));
 			Assert.IsFalse(properties.IsTaggedWith("FirstName", TestTags.Expert));

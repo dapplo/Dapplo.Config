@@ -41,7 +41,7 @@ namespace Dapplo.Config.Test.TestInterfaces
 			set;
 		}
 
-		[Tag(TestTags.Tag2), Tag(TestTags.Tag1)]
+		[Tag(TestTags.Tag2), Tag(TestTags.Tag1, "Robin")]
 		string FirstName
 		{
 			get;

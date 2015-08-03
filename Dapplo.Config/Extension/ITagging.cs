@@ -36,9 +36,19 @@ namespace Dapplo.Config.Extension
 			set;
 		}
 
+		public object TagValue
+		{
+			get;
+			set;
+		}
+
 		public TagAttribute(object tag)
 		{
 			Tag = tag;
+		}
+
+		public TagAttribute(object tag, object tagValue) : this(tag) {
+			TagValue = tagValue;
 		}
 	}
 
@@ -54,6 +64,13 @@ namespace Dapplo.Config.Extension
 		/// <param name="tag">Tag to check if the property is tagged with</param>
 		/// <returns>true if the property has the expert attribute, else false</returns>
 		bool IsTaggedWith(string propertyName, object tag);
+
+		/// <summary>
+		/// Retrieve the value for tag
+		/// </summary>
+		/// <param name="propertyName"></param>
+		/// <returns>Tagged value or null</returns>
+		object GetTagValue(string propertyName, object tag);
 	}
 
 	/// <summary>
@@ -70,5 +87,14 @@ namespace Dapplo.Config.Extension
 		/// <param name="tag">Tag to check if the property is tagged with</param>
 		/// <returns>true if the property has the expert attribute, else false</returns>
 		bool IsTaggedWith<TProp>(Expression<Func<T, TProp>> propertyExpression, object tag);
+
+		/// <summary>
+		/// Retrieve the value for tag
+		/// </summary>
+		/// <typeparam name="TProp">Your interfaces</typeparam>
+		/// <param name="propertyExpression"></param>
+		/// <param name="tag">Tag to check if the property is tagged with</param>
+		/// <returns>Tagged value or null</returns>
+		object GetTagValue<TProp>(Expression<Func<T, TProp>> propertyExpression, object tag);
 	}
 }
