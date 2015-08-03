@@ -75,6 +75,14 @@ namespace Dapplo.Config.Ini
 			Assert.IsTrue(iniValue.ValueType == typeof(IList<int>));
 			Assert.IsTrue(((IList<int>)iniValue.Value).Count > 0);
 
+			// Test try get
+			IIniSection section;
+			Assert.IsTrue(iniConfig.TryGet("Test", out section));
+			IniValue tryGetValue;
+			Assert.IsTrue(section.TryGetIniValue("WindowCornerCutShape", out tryGetValue));
+			Assert.IsTrue(((IList<int>)tryGetValue.Value).Count > 0);
+			Assert.IsFalse(section.TryGetIniValue("DoesNotExist", out tryGetValue));
+
 			// Check second get, should have same value
 			var iniTest2 = iniConfig.Get<IIniTest>();
 			Assert.IsTrue(iniTest2.WindowCornerCutShape.Count > 0);

@@ -290,7 +290,8 @@ namespace Dapplo.Config
 				{
 					return new ReturnMessage(methodCallInfo.Error, methodCallMessage);
 				}
-				return new ReturnMessage(methodCallInfo.ReturnValue, null, 0, null, methodCallMessage);
+				// Note: the methodCallInfo will fix an issue here, the ReturnMessage outArgs also has the return value!!
+				return new ReturnMessage(methodCallInfo.ReturnValue, methodCallInfo.OutArguments, methodCallInfo.OutArgsCount, null, methodCallMessage);
 			}
 
 			// Preparations for the property access

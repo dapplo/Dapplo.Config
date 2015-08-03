@@ -40,6 +40,9 @@ namespace Dapplo.Config.Ini.Implementation
 			//_proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection>(x => x.IniValueFor<T>(y => default(T))), IniValueFor);
 			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.GetIniValues()), GetIniValues);
 			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.GetIniValue(null)), GetIniValue);
+
+			IniValue dummy;
+			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.TryGetIniValue(null, out dummy)), TryGetIniValue);
 			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.GetSectionName()), GetSectionName);
 			Proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.GetSectionDescription()), GetDescription);
 		}
@@ -56,7 +59,7 @@ namespace Dapplo.Config.Ini.Implementation
 		}
 
 		/// <summary>
-		/// Get all the ini values, these are generated and not cached!
+		/// Get a single ini value
 		/// </summary>
 		private void GetIniValue(MethodCallInfo methodCallInfo) {
 			// return IniValue
@@ -65,6 +68,20 @@ namespace Dapplo.Config.Ini.Implementation
 				in typeof(T).GetProperties()
 				where propertyInfo.Name == methodCallInfo.PropertyNameOf(0)
 				select GenerateIniValue(propertyInfo)).First();
+		}
+
+		/// <summary>
+		/// Try to get a single ini value
+		/// </summary>
+		private void TryGetIniValue(MethodCallInfo methodCallInfo) {
+			var iniValue = (from propertyInfo
+				in typeof(T).GetProperties()
+				where propertyInfo.Name == methodCallInfo.PropertyNameOf(0)
+				select GenerateIniValue(propertyInfo)).FirstOrDefault();
+
+			// return IniValue
+			methodCallInfo.ReturnValue = iniValue != null;
+			methodCallInfo.OutArguments = new object[] { iniValue };
 		}
 
 		/// <summary>

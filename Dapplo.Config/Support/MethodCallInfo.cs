@@ -24,34 +24,85 @@ using System;
 namespace Dapplo.Config.Support
 {
 	/// <summary>
-	///     This container holds all the information that is needed for extending the proxy with a method call
+	/// This container holds all the information that is needed for extending the proxy with a method call
+	/// It contains the arguments, return value and out arguments for an invoke.    
 	/// </summary>
 	public class MethodCallInfo
 	{
+		private object[] _outArgs;
+
+		/// <summary>
+		/// Name of the invoked method
+		/// </summary>
 		public string MethodName
 		{
 			get;
 			set;
 		}
 
+		/// <summary>
+		/// the supplied arguments for the invoke
+		/// </summary>
 		public object[] Arguments
 		{
 			get;
 			set;
 		}
 
+		/// <summary>
+		/// get the Out-Arguments-count
+		/// The ReturnMessage expects the outArgs/outArgsCount to have the return value in there too, this is why the get honors this.
+		/// See: https://connect.microsoft.com/VisualStudio/feedback/details/752487/realproxy-invoke-method-throws-an-overflowexception-when-calling-endinvoke
+		/// </summary>
+		public int OutArgsCount {
+			get {
+				return _outArgs == null? 0 :_outArgs.Length + 1;
+			}
+		}
+
+		/// <summary>
+		/// get/set the Out-Arguments
+		/// The ReturnMessage expects the outArgs/outArgsCount to have the return value in there too, this is why the get honors this.
+		/// See: https://connect.microsoft.com/VisualStudio/feedback/details/752487/realproxy-invoke-method-throws-an-overflowexception-when-calling-endinvoke
+		/// </summary>
+		public object[] OutArguments {
+			get {
+				if (_outArgs == null) {
+					return null;
+				}
+				var newOutArgs = new object[_outArgs.Length +1];
+				newOutArgs[0] = ReturnValue;
+				for (int i = 0; i < _outArgs.Length; i++ ) {
+					newOutArgs[i + 1] = _outArgs[i];
+				}
+				return newOutArgs;
+			}
+			set {
+				_outArgs = value;
+			}
+		}
+
+		/// <summary>
+		/// Return value for the invoke
+		/// </summary>
 		public object ReturnValue
 		{
 			get;
 			set;
 		}
 
+		/// <summary>
+		/// Exception which will be passed to the invoking code
+		/// </summary>
 		public Exception Error
 		{
 			get;
 			set;
 		}
 
+		/// <summary>
+		/// Simple check for the exception
+		/// </summary>
 		public bool HasError
 		{
 			get
