@@ -44,6 +44,13 @@ namespace Dapplo.Config.Ini
 		/// Get the Description of the Ini-Section
 		/// </summary>
 		string GetSectionDescription();
+
+		/// <summary>
+		/// Get the IniValue for a property, this is quicker and uses less memory than to iterate over the GetIniValues result
+		/// </summary>
+		/// <param name="propertyName">Name of the property</param>
+		/// <returns>IniValue</returns>
+		IniValue GetIniValue(string propertyName);
 	}
 
 	/// <summary>

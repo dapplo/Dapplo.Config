@@ -254,6 +254,15 @@ namespace Dapplo.Config.Ini
 		}
 
 		/// <summary>
+		/// A simple get by name for the IniSection
+		/// </summary>
+		/// <param name="sectionName"></param>
+		/// <returns>IIniSection</returns>
+		public IIniSection Get(string sectionName) {
+			return _iniSections[sectionName];
+		}
+
+		/// <summary>
 		/// Register a Property Interface to this ini config, this method will return the property object 
 		/// </summary>
 		/// <param name="type">Type to register, this must extend IIniSection</param>

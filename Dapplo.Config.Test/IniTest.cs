@@ -23,6 +23,7 @@ using Dapplo.Config.Ini;
 using Dapplo.Config.Test.TestInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -69,6 +70,11 @@ namespace Dapplo.Config.Ini
 			Assert.IsTrue(iniTest.WindowCornerCutShape.Count > 0);
 			Assert.IsTrue(iniTest.SomeValues.ContainsKey("dapplo"));
 
+			// Test ini value retrieval, by checking the Type and return value
+			var iniValue = iniTest.GetIniValue("WindowCornerCutShape");
+			Assert.IsTrue(iniValue.ValueType == typeof(IList<int>));
+			Assert.IsTrue(((IList<int>)iniValue.Value).Count > 0);
+
 			// Check second get, should have same value
 			var iniTest2 = iniConfig.Get<IIniTest>();
 			Assert.IsTrue(iniTest2.WindowCornerCutShape.Count > 0);
@@ -78,6 +84,7 @@ namespace Dapplo.Config.Ini
 			var iniTest3 = IniConfig.Get("Dapplo", "dapplo").Get<IIniTest>();
 			Assert.IsTrue(iniTest2.WindowCornerCutShape.Count > 0);
 			Assert.IsTrue(iniTest2.SomeValues.ContainsKey("dapplo"));
+
         }
 
 		[TestMethod]
