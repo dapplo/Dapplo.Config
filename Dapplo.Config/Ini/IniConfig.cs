@@ -169,18 +169,7 @@ namespace Dapplo.Config.Ini
 			SetDefaultConverter(typeof(System.Drawing.Point), typeof(PointTypeConverter));
 			SetDefaultConverter(typeof(System.Drawing.Rectangle), typeof(RectangleTypeConverter));
 			SetDefaultConverter(typeof(System.Drawing.Color), typeof(ColorTypeConverter));
-			
-			// Dictionary
-			SetDefaultConverter(typeof(IDictionary<string, string>), typeof(GenericDictionaryConverter<string, string>));
-			SetDefaultConverter(typeof(Dictionary<string, string>), typeof(GenericDictionaryConverter<string, string>));
-			SetDefaultConverter(typeof(IDictionary<string, int>), typeof(GenericDictionaryConverter<string, int>));
-			SetDefaultConverter(typeof(Dictionary<string, int>), typeof(GenericDictionaryConverter<string, int>));
-
-			// List
-			SetDefaultConverter(typeof(IList<string>), typeof(StringToGenericListConverter<string>));
-			SetDefaultConverter(typeof(List<string>), typeof(StringToGenericListConverter<string>));
-			SetDefaultConverter(typeof(IList<int>), typeof(StringToGenericListConverter<int>));
-			SetDefaultConverter(typeof(List<int>), typeof(StringToGenericListConverter<int>));
+		
 			return this;
 		}
 

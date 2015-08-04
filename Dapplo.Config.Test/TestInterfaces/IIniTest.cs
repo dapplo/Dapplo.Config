@@ -55,7 +55,7 @@ namespace Dapplo.Config.Test.TestInterfaces
 			set;
 		}
 
-		[DefaultValue("5,3,2,1,1"), TypeConverter(typeof (StringToGenericListConverter<int>))]
+		[DefaultValue("5,3,2,1,1")]
 		IList<int> WindowCornerCutShape
 		{
 			get;
@@ -69,7 +69,7 @@ namespace Dapplo.Config.Test.TestInterfaces
 			set;
 		}
 
-		[Description("Here are some values"), TypeConverter(typeof (GenericDictionaryConverter<string, int>))]
+		[Description("Here are some values")]
 		IDictionary<string, int> SomeValues
 		{
 			get;

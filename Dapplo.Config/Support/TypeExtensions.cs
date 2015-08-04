@@ -19,8 +19,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Dapplo.Config.Converters;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Dapplo.Config.Support {
 	/// <summary>
@@ -41,7 +43,7 @@ namespace Dapplo.Config.Support {
 		/// </summary>
 		/// <param name="valueType">Type to check for</param>
 		/// <returns>true if it is a generic list</returns>
-		public  static bool IsGenericList(this Type valueType) {
+		public static bool IsGenericList(this Type valueType) {
 			return valueType.IsGenericType && (valueType.GetGenericTypeDefinition() == typeof(List<>) || valueType.GetGenericTypeDefinition() == typeof(IList<>));
 		}
 
@@ -62,5 +64,21 @@ namespace Dapplo.Config.Support {
 			}
 			return Activator.CreateInstance(valueType);
 		}
+
+		/// <summary>
+		/// Create a type converter for the supplied type
+		/// </summary>
+		/// <param name="valueType"></param>
+		/// <returns>TypeConverter</returns>
+		public static TypeConverter GetTypeConverter(this Type valueType) {
+			if (IsGenericList(valueType)) {
+				return (TypeConverter)Activator.CreateInstance(typeof(StringToGenericListConverter<>).MakeGenericType(valueType.GetGenericArguments()[0]));
+			} else if (IsGenericDirectory(valueType)) {
+				Type type1 = valueType.GetGenericArguments()[0];
+				Type type2 = valueType.GetGenericArguments()[1];
+				return (TypeConverter)Activator.CreateInstance(typeof(GenericDictionaryConverter<,>).MakeGenericType(type1, type2));
+			}
+			return null;
+		} 
 	}
 }

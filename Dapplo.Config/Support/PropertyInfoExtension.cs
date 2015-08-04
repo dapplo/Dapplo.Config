@@ -68,7 +68,8 @@ namespace Dapplo.Config.Support {
 					return (TypeConverter)Activator.CreateInstance(typeConverterType);
 				}
 			}
-			return null;
+
+			return propertyInfo.PropertyType.GetTypeConverter();
 		}
 
 		/// <summary>
