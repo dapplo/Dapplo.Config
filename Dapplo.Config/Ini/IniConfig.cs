@@ -164,11 +164,19 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		public IniConfig SetDefaultConverters()
 		{
+			// System.Drawing
+			SetDefaultConverter(typeof(System.Drawing.Size), typeof(SizeTypeConverter));
+			SetDefaultConverter(typeof(System.Drawing.Point), typeof(PointTypeConverter));
+			SetDefaultConverter(typeof(System.Drawing.Rectangle), typeof(RectangleTypeConverter));
+			SetDefaultConverter(typeof(System.Drawing.Color), typeof(ColorTypeConverter));
+			
+			// Dictionary
 			SetDefaultConverter(typeof(IDictionary<string, string>), typeof(GenericDictionaryConverter<string, string>));
 			SetDefaultConverter(typeof(Dictionary<string, string>), typeof(GenericDictionaryConverter<string, string>));
 			SetDefaultConverter(typeof(IDictionary<string, int>), typeof(GenericDictionaryConverter<string, int>));
 			SetDefaultConverter(typeof(Dictionary<string, int>), typeof(GenericDictionaryConverter<string, int>));
 
+			// List
 			SetDefaultConverter(typeof(IList<string>), typeof(StringToGenericListConverter<string>));
 			SetDefaultConverter(typeof(List<string>), typeof(StringToGenericListConverter<string>));
 			SetDefaultConverter(typeof(IList<int>), typeof(StringToGenericListConverter<int>));
@@ -259,6 +267,9 @@ namespace Dapplo.Config.Ini
 			if (!typeof(IIniSection).IsAssignableFrom(type))
 			{
 				throw new ArgumentException("type is not a IIniSection");
+			}
+			if (!_initialReadDone) {
+				throw new InvalidOperationException("Please load before retrieving the ini-sections");
 			}
 			var propertyProxy = ProxyBuilder.GetProxy(type);
 			var iniSection = (IIniSection)propertyProxy.PropertyObject;
