@@ -31,7 +31,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
 using System.Xml.Linq;
 
 namespace Dapplo.Config.Language
@@ -62,7 +61,14 @@ namespace Dapplo.Config.Language
 			return LoaderStore[applicationName];
 		}
 
-		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language_([a-zA-Z]+-[a-zA-Z]+)\.(ini|xml)")
+		/// <summary>
+		/// Create a LanguageLoader, this is your container for all the ILanguage implementing interfaces.
+		/// You can supply a default language right away.
+		/// </summary>
+		/// <param name="applicationName"></param>
+		/// <param name="defaultLanguage"></param>
+		/// <param name="filePatern">Pattern for the filename, the ietf group needs to be in there!</param>
+		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language_(?<IETF>[a-zA-Z]+-[a-zA-Z]+)\.(ini|xml)")
 		{
 			CurrentLanguage = defaultLanguage;
 			_filePattern = filePatern;
@@ -71,7 +77,7 @@ namespace Dapplo.Config.Language
 			_availableLanguages = (
 				from filename
 				in _files
-				select Regex.Replace(Path.GetFileName(filename), _filePattern, "$1")).Distinct().ToDictionary(x => x, x => CultureInfo.GetCultureInfo(x).NativeName
+				select Regex.Match(Path.GetFileName(filename), _filePattern).Groups["IETF"].Value).Distinct().ToDictionary(x => x, x => CultureInfo.GetCultureInfo(x).NativeName
 			);
 		}
 
@@ -253,10 +259,10 @@ namespace Dapplo.Config.Language
 					newIni = await IniFile.ReadAsync(languageFile, Encoding.UTF8, token).ConfigureAwait(false);
 				} else if (languageFile.EndsWith(".xml")) {
 					newIni =
-						(from resourcesItem in XDocument.Load(languageFile).Descendants("resources")
-						 group resourcesItem by resourcesItem.Attribute("prefix").Value into resourceItem
-						 from resource in resourceItem.Descendants("resource")
-						select resourceItem).ToDictionary(group => group.Key, group => (IDictionary<string,string>)group.ToDictionary(x => x.Attribute("name").Value, x => x.Value));
+						(from resourcesElement in XDocument.Load(languageFile).Root.Elements("resources")
+						 from resourceElement in resourcesElement.Elements("resource")
+						 group resourceElement by resourcesElement.Attribute("prefix").Value into resourceElementGroup
+						 select resourceElementGroup).ToDictionary(group => group.Key, group => (IDictionary<string,string>)group.ToDictionary(x => x.Attribute("name").Value, x => x.Value));
 				} else {
 					throw new NotSupportedException(string.Format("Can't read the file format for {0}", languageFile));
 				}

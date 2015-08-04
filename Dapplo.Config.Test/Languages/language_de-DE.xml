@@ -4,4 +4,7 @@
 		<resource name="TestValue">Abbrechen</resource>
 		<resource name="OnlydeDE">BlubDE</resource>
 	</resources>
+	<resources prefix="Core">
+		<resource name="TestValue2">Another value</resource>
+	</resources>
 </language>

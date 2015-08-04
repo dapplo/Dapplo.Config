@@ -26,9 +26,12 @@ namespace Dapplo.Config.Language
 {
 	/// <summary>
 	/// The base interface for all language objects.
-	/// It is important to have INotifyPropertyChanged, so language changes are directly shown in the UI.
+	/// My advice is that you extend your inteface with this, and the INotifyPropertyChanged,
+	/// so language changes are directly reflected in the UI.
+	/// 
+	/// This extends IDefaultValue, as this it is very common to start with english hard-coded
 	/// </summary>
-	public interface ILanguage : IDefaultValue, INotifyPropertyChanged
+	public interface ILanguage : IDefaultValue
 	{
 	}
 }
