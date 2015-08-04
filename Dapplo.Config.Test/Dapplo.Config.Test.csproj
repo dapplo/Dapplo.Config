@@ -88,7 +88,11 @@
       <Name>Dapplo.Config</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Languages\language_de-DE.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <ItemGroup>
     <None Include="Languages\language_nl-NL.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

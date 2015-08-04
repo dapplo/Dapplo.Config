@@ -47,5 +47,9 @@ namespace Dapplo.Config.Test.TestInterfaces
 		{
 			get;
 		}
+
+		string OnlydeDE {
+			get;
+		}
 	}
 }

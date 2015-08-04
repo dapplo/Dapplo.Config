@@ -19,6 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Dapplo.Config.Ini;
+using Dapplo.Config.Support;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -29,8 +31,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Dapplo.Config.Ini;
-using Dapplo.Config.Support;
+using System.Xml;
+using System.Xml.Linq;
 
 namespace Dapplo.Config.Language
 {
@@ -44,20 +46,33 @@ namespace Dapplo.Config.Language
 		private readonly IDictionary<Type, IPropertyProxy> _languageConfigs = new Dictionary<Type, IPropertyProxy>();
 		private readonly AsyncLock _asyncLock = new AsyncLock();
 		private readonly IDictionary<string, string> _allProperties = new Dictionary<string, string>();
+		private static readonly IDictionary<string, LanguageLoader> LoaderStore = new Dictionary<string, LanguageLoader>();
 		private readonly string _applicationName;
 		private readonly string _filePattern;
 		private readonly IList<string> _files;
 		private bool _initialReadDone;
 		private readonly IDictionary<string, string> _availableLanguages = new Dictionary<string, string>();
 
-		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language_([a-zA-Z]+-[a-zA-Z]+)\.ini")
+		/// <summary>
+		/// Static helper to retrieve the LanguageLoader that was created with the supplied parameters
+		/// </summary>
+		/// <param name="applicationName"></param>
+		/// <returns>LanguageLoader</returns>
+		public static LanguageLoader Get(string applicationName) {
+			return LoaderStore[applicationName];
+		}
+
+		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language_([a-zA-Z]+-[a-zA-Z]+)\.(ini|xml)")
 		{
 			CurrentLanguage = defaultLanguage;
 			_filePattern = filePatern;
 			_applicationName = applicationName;
 			_files = ScanForFiles(true);
-			_availableLanguages = (from filename in _files
-				select Regex.Replace(Path.GetFileName(filename), _filePattern, "$1")).Distinct().ToDictionary(x => x, x => CultureInfo.GetCultureInfo(x).NativeName);
+			_availableLanguages = (
+				from filename
+				in _files
+				select Regex.Replace(Path.GetFileName(filename), _filePattern, "$1")).Distinct().ToDictionary(x => x, x => CultureInfo.GetCultureInfo(x).NativeName
+			);
 		}
 
 		public string CurrentLanguage
@@ -87,6 +102,7 @@ namespace Dapplo.Config.Language
 			}
 		}
 
+	
 		/// <summary>
 		/// Helper to create the location of a file
 		/// </summary>
@@ -128,7 +144,7 @@ namespace Dapplo.Config.Language
 			}
 			var files = (from path in directories
 				where Directory.Exists(path)
-				select Directory.GetFiles(path, "*.ini", SearchOption.AllDirectories).Where(f => Regex.IsMatch(Path.GetFileName(f), _filePattern)))
+				select Directory.EnumerateFiles(path, "*.*", SearchOption.AllDirectories).Where(f => Regex.IsMatch(Path.GetFileName(f), _filePattern)))
 // See: https://youtrack.jetbrains.com/issue/RSRP-413613
 // ReSharper disable once PossibleMultipleEnumeration
 				.SelectMany(i => i).ToList();
@@ -174,20 +190,46 @@ namespace Dapplo.Config.Language
 				throw new ArgumentException("type is not a ILanguage");
 			}
 			var propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
-			var languageObject = (ILanguage) propertyProxy.PropertyObject;
+			var languageObject = (ILanguage)propertyProxy.PropertyObject;
             using (await _asyncLock.LockAsync().ConfigureAwait(false))
             {
                 if (!_languageConfigs.ContainsKey(type))
 				{
+					_languageConfigs.Add(type, propertyProxy);
 					if (!_initialReadDone)
 					{
 						await ReloadAsync(token).ConfigureAwait(false);
 					}
 					FillLanguageConfig(propertyProxy);
-					_languageConfigs.Add(type, propertyProxy);
 				}
 			}
 
+			return languageObject;
+		}
+
+		/// <summary>
+		/// Get the specified ILanguage type
+		/// </summary>
+		/// <typeparam name="T">ILanguage</typeparam>
+		/// <returns>T</returns>
+		public T Get<T>() where T : ILanguage {
+			return (T)Get(typeof(T));
+		}
+
+		/// <summary>
+		/// Get the specified ILanguage type
+		/// </summary>
+		/// <param name="type">ILanguage to look for</param>
+		/// <returns>ILanguage</returns>
+		public ILanguage Get(Type type) {
+			if (!typeof(ILanguage).IsAssignableFrom(type)) {
+				throw new ArgumentException("type is not a ILanguage");
+			}
+			if (!_initialReadDone) {
+				throw new InvalidOperationException("Please load before retrieving the language");
+			}
+			var propertyProxy = ProxyBuilder.GetProxy(type);
+			var languageObject = (ILanguage)propertyProxy.PropertyObject;
 			return languageObject;
 		}
 
@@ -196,18 +238,31 @@ namespace Dapplo.Config.Language
 		/// </summary>
 		public async Task ReloadAsync(CancellationToken token = default(CancellationToken))
 		{
-			var languageFiles = from file in _files
+			var languageFiles =
+				from file
+				in _files
 				where file.Contains(CurrentLanguage)
 				select file;
+
 			_allProperties.Clear();
+
 			foreach (var languageFile in languageFiles)
 			{
-				var newIni = await IniFile.ReadAsync(languageFile, Encoding.UTF8, token).ConfigureAwait(false);
-				foreach (var section in newIni.Keys)
-				{
+				IDictionary<string, IDictionary<string, string>> newIni;
+				if (languageFile.EndsWith(".ini")) {
+					newIni = await IniFile.ReadAsync(languageFile, Encoding.UTF8, token).ConfigureAwait(false);
+				} else if (languageFile.EndsWith(".xml")) {
+					newIni =
+						(from resourcesItem in XDocument.Load(languageFile).Descendants("resources")
+						 group resourcesItem by resourcesItem.Attribute("prefix").Value into resourceItem
+						 from resource in resourceItem.Descendants("resource")
+						select resourceItem).ToDictionary(group => group.Key, group => (IDictionary<string,string>)group.ToDictionary(x => x.Attribute("name").Value, x => x.Value));
+				} else {
+					throw new NotSupportedException(string.Format("Can't read the file format for {0}", languageFile));
+				}
+				foreach (var section in newIni.Keys) {
 					var properties = newIni[section];
-					foreach (var key in properties.Keys)
-					{
+					foreach (var key in properties.Keys) {
 						var cleanKey = _cleanup.Replace(string.Format("{0}{1}", section, key), "").ToLowerInvariant();
 						_allProperties.SafelyAddOrOverwrite(cleanKey, properties[key]);
 					}

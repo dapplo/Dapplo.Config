@@ -20,16 +20,21 @@ namespace Dapplo.Config.Test
 			var language = await languageLoader.RegisterAndGetAsync<ILanguageTest>();
 			Assert.IsTrue(languageLoader.AvailableLanguages.ContainsKey("nl-NL"));
 			Assert.IsTrue(languageLoader.AvailableLanguages.ContainsKey("en-US"));
+			Assert.IsTrue(languageLoader.AvailableLanguages.ContainsKey("de-DE"));
 			Assert.AreEqual("Nederlands (Nederland)", languageLoader.AvailableLanguages["nl-NL"]);
 
 			Assert.AreEqual(Ok, language.Ok);
 			Assert.AreEqual("Cancel", language.TestValue);
-			Assert.AreEqual("Blub", language.OnlyenUS);
-			Assert.AreNotEqual("Blub", language.OnlynlNL);
+			Assert.AreEqual("BlubEN", language.OnlyenUS);
+			Assert.AreNotEqual("BlubNL", language.OnlynlNL);
+			Assert.AreNotEqual("BlubDE", language.OnlydeDE);
 			await languageLoader.ChangeLanguage("nl-NL");
 			Assert.AreEqual("Afbreken", language.TestValue);
-			Assert.AreNotEqual("Blub", language.OnlyenUS);
-			Assert.AreEqual("Blub", language.OnlynlNL);
+			Assert.AreNotEqual("BlubEN", language.OnlyenUS);
+			Assert.AreNotEqual("BlubDE", language.OnlydeDE);
+			Assert.AreEqual("BlubNL", language.OnlynlNL);
+			await languageLoader.ChangeLanguage("de-DE");
+			Assert.AreEqual("BlubDE", language.OnlydeDE);
 		}
 	}
 }
