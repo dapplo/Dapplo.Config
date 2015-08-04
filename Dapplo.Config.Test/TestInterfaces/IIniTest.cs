@@ -23,6 +23,7 @@ using Dapplo.Config.Converters;
 using Dapplo.Config.Ini;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Runtime.Serialization;
 
 namespace Dapplo.Config.Test.TestInterfaces
@@ -78,6 +79,17 @@ namespace Dapplo.Config.Test.TestInterfaces
 		[Description("Here are some values")]
 		IDictionary<string, int> SomeValues
 		{
+			get;
+			set;
+		}
+
+		[DefaultValue("16,16")]
+		Size PropertySize {
+			get;
+			set;
+		}
+		[DefaultValue("16,16,100,100")]
+		Rectangle PropertyArea {
 			get;
 			set;
 		}

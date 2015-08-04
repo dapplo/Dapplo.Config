@@ -117,18 +117,13 @@ namespace Dapplo.Config.Ini
 		/// <param name="fileName"></param>
 		/// <param name="fixedDirectory">Specify a path if you don't want to use the default loading</param>
 		/// <param name="registerDefaultConverters">false if you don't want to have any default converters</param>
-		public IniConfig(string applicationName, string fileName, string fixedDirectory = null, bool registerDefaultConverters = true)
+		public IniConfig(string applicationName, string fileName, string fixedDirectory = null)
 		{
 			_applicationName = applicationName;
 			_fileName = fileName;
 			_fixedDirectory = fixedDirectory;
 			// Look for the ini file, this is only done 1 time.
 			_iniFile = CreateFileLocation(false, "", _fixedDirectory);
-
-			if (registerDefaultConverters)
-			{
-				SetDefaultConverters();
-			}
 
 			WriteErrorHandler = (iniSection, iniValue, exception) =>
 			{
@@ -156,20 +151,6 @@ namespace Dapplo.Config.Ini
 		public IniConfig SetDefaultConverter(Type type, Type typeConverter)
 		{
 			_converters.SafelyAddOrOverwrite(type, typeConverter);
-			return this;
-		}
-
-		/// <summary>
-		/// Set the default converters
-		/// </summary>
-		public IniConfig SetDefaultConverters()
-		{
-			// System.Drawing
-			SetDefaultConverter(typeof(System.Drawing.Size), typeof(SizeTypeConverter));
-			SetDefaultConverter(typeof(System.Drawing.Point), typeof(PointTypeConverter));
-			SetDefaultConverter(typeof(System.Drawing.Rectangle), typeof(RectangleTypeConverter));
-			SetDefaultConverter(typeof(System.Drawing.Color), typeof(ColorTypeConverter));
-		
 			return this;
 		}
 

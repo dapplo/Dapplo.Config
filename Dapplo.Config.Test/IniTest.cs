@@ -68,6 +68,8 @@ namespace Dapplo.Config.Ini
 			}
 			var iniTest = await iniConfig.RegisterAndGetAsync<IIniTest>().ConfigureAwait(false);
 			Assert.IsTrue(iniTest.Height == 185);
+			Assert.IsTrue(iniTest.PropertySize.Width == 16);
+			Assert.IsTrue(iniTest.PropertyArea.Width == 100);
 			Assert.IsTrue(iniTest.WindowCornerCutShape.Count > 0);
 			Assert.IsTrue(iniTest.SomeValues.ContainsKey("dapplo"));
 

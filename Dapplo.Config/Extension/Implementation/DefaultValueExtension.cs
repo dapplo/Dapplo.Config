@@ -76,7 +76,12 @@ namespace Dapplo.Config.Extension.Implementation
 				if (typeConverter != null && typeConverter.CanConvertFrom(defaultValue.GetType()))
 				{
 					// Convert
-					return typeConverter.ConvertFrom(defaultValue);
+					var defaultStringValue = defaultValue as string;
+					if (defaultStringValue != null) {
+						return typeConverter.ConvertFromInvariantString(defaultStringValue);
+					} else {
+						return typeConverter.ConvertFrom(defaultValue);
+					}
 				}
 			}
 			return defaultValue;
