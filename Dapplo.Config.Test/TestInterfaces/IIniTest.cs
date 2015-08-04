@@ -48,6 +48,12 @@ namespace Dapplo.Config.Test.TestInterfaces
 			set;
 		}
 
+		[DefaultValue("185"), DataMember(EmitDefaultValue = true)]
+		int Height {
+			get;
+			set;
+		}
+
 		[TypeConverter(typeof (StringEncryptionTypeConverter))]
 		string FirstName
 		{

@@ -78,7 +78,7 @@ namespace Dapplo.Config.Support {
 				Type type2 = valueType.GetGenericArguments()[1];
 				return (TypeConverter)Activator.CreateInstance(typeof(GenericDictionaryConverter<,>).MakeGenericType(type1, type2));
 			}
-			return null;
+			return TypeDescriptor.GetConverter(valueType);
 		} 
 	}
 }
