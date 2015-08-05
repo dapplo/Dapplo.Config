@@ -79,6 +79,7 @@ namespace Dapplo.Config.Language
 				in _files
 				select Regex.Match(Path.GetFileName(filename), _filePattern).Groups["IETF"].Value).Distinct().ToDictionary(x => x, x => CultureInfo.GetCultureInfo(x).NativeName
 			);
+			LoaderStore.SafelyAddOrOverwrite(applicationName, this);
 		}
 
 		public string CurrentLanguage
