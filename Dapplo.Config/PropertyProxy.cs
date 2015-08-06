@@ -53,6 +53,8 @@ namespace Dapplo.Config
 		{
 			// Register the GetType handler, use Lambda to make refactoring possible
 			RegisterMethod(ExpressionExtensions.GetMemberName<object>(x => x.GetType()), HandleGetType);
+			RegisterMethod(ExpressionExtensions.GetMemberName<object>(x => x.GetHashCode()), HandleGetHashCode);
+			RegisterMethod(ExpressionExtensions.GetMemberName<object>(x => x.Equals(null)), HandleEquals);
 
 			// Make sure the default set logic is registered
 			RegisterSetter((int) CallOrder.Middle, DefaultSet);
@@ -134,6 +136,24 @@ namespace Dapplo.Config
 		private void HandleGetType(MethodCallInfo methodCallInfo)
 		{
 			methodCallInfo.ReturnValue = typeof (T);
+		}
+
+		/// <summary>
+		/// This is an implementation of the GetHashCode which returns the GetHashCode of this
+		/// </summary>
+		/// <param name="methodCallInfo">IMethodCallMessage</param>
+		private void HandleGetHashCode(MethodCallInfo methodCallInfo)
+		{
+			methodCallInfo.ReturnValue = GetHashCode();
+		}
+
+		/// <summary>
+		/// This is an implementation of the Equals which returns the Equals for this
+		/// </summary>
+		/// <param name="methodCallInfo">IMethodCallMessage</param>
+		private void HandleEquals(MethodCallInfo methodCallInfo)
+		{
+			methodCallInfo.ReturnValue = Equals(methodCallInfo.Arguments[0]);
 		}
 
 		/// <summary>

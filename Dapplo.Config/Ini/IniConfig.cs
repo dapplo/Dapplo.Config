@@ -279,16 +279,16 @@ namespace Dapplo.Config.Ini
 			}
 			var propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
 			var iniSection = (IIniSection)propertyProxy.PropertyObject;
-			var iniSectionName = iniSection.GetSectionName();
+			var sectionName = iniSection.GetSectionName();
 
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
-				if (_iniSections.ContainsKey(iniSectionName))
+				if (_iniSections.ContainsKey(sectionName))
 				{
 					return iniSection;
 				}
 				// Add before loading, so it will be handled automatically
-				_iniSections.Add(iniSectionName, iniSection);
+				_iniSections.Add(sectionName, iniSection);
 				if (!_initialReadDone)
 				{
 					await ReloadInternalAsync(false, token).ConfigureAwait(false);
@@ -460,22 +460,23 @@ namespace Dapplo.Config.Ini
 				{
 					continue;
 				}
+				var sectionName = iniSection.GetSectionName();
 
 				// Before we are going to write, we need to check if the section header "[Sectionname]" is already written.
 				// If not, do so now before writing the properties of the section itself
 				if (!isSectionCreated)
 				{
-					if (_ini.ContainsKey(iniSection.GetSectionName()))
+					if (_ini.ContainsKey(sectionName))
 					{
-						_ini.Remove(iniSection.GetSectionName());
+						_ini.Remove(sectionName);
 					}
-					_ini.Add(iniSection.GetSectionName(), sectionProperties);
-					iniSectionsComments.Add(iniSection.GetSectionName(), sectionComments);
+					_ini.Add(sectionName, sectionProperties);
+					iniSectionsComments.Add(sectionName, sectionComments);
 
 					string description = iniSection.GetSectionDescription();
 					if (!string.IsNullOrEmpty(description))
 					{
-						sectionComments.Add(iniSection.GetSectionName(), description);
+						sectionComments.Add(sectionName, description);
 					}
 					// Mark section as created!
 					isSectionCreated = true;
@@ -521,7 +522,7 @@ namespace Dapplo.Config.Ini
 						// Convert the dictionary to a string,string variant.
 						var dictionaryProperties = (IDictionary<string, string>)converter.ConvertTo(context, CultureInfo.CurrentCulture, iniValue.Value, typeof(IDictionary<string, string>));
 						// Use this to build a separate "section" which is called "[section-propertyname]"
-						string dictionaryIdentifier = string.Format("{0}-{1}", iniSection.GetSectionName(), iniValue.IniPropertyName);
+						string dictionaryIdentifier = string.Format("{0}-{1}", sectionName, iniValue.IniPropertyName);
 						if (_ini.ContainsKey(dictionaryIdentifier))
 						{
 							_ini.Remove(dictionaryIdentifier);
@@ -658,8 +659,9 @@ namespace Dapplo.Config.Ini
 		private void FillSection(IDictionary<string, IDictionary<string, string>> iniSections, IIniSection iniSection)
 		{
 			IDictionary<string, string> iniProperties = null;
+			var sectionName = iniSection.GetSectionName();
 			// Might be null
-			iniSections.TryGetValue(iniSection.GetSectionName(), out iniProperties);
+			iniSections.TryGetValue(sectionName, out iniProperties);
 
 			IEnumerable<IniValue> iniValues = (from iniValue in iniSection.GetIniValues()
 											   where iniValue.Behavior.Read
@@ -667,7 +669,7 @@ namespace Dapplo.Config.Ini
 
 			foreach (var iniValue in iniValues)
 			{
-				string dictionaryIdentifier = string.Format("{0}-{1}", iniSection.GetSectionName(), iniValue.IniPropertyName);
+				string dictionaryIdentifier = string.Format("{0}-{1}", sectionName, iniValue.IniPropertyName);
 				// If there are no properties, there might still be a separate section for a dictionary
 				IDictionary<string, string> value;
 				if (iniValue.Converter != null && iniSections.TryGetValue(dictionaryIdentifier, out value))

@@ -39,10 +39,13 @@ namespace Dapplo.Config
 
 		static ProxyBuilder()
 		{
-			IEnumerable<Type> types = from someAssembly in AppDomain.CurrentDomain.GetAssemblies()
-				from someType in someAssembly.GetTypes()
-				where someType.GetCustomAttributes(typeof (ExtensionAttribute), true).Length > 0
-				select someType;
+			IEnumerable<Type> types =
+				from assembly in AppDomain.CurrentDomain.GetAssemblies()
+				where !assembly.FullName.StartsWith("System") && !assembly.FullName.StartsWith("mscorlib") && !assembly.FullName.StartsWith("Microsoft")
+
+				from someType in assembly.GetTypes()
+					where someType.GetCustomAttributes(typeof (ExtensionAttribute), true).Length > 0
+						select someType;
 			ExtensionTypes.AddRange(types);
 		}
 
