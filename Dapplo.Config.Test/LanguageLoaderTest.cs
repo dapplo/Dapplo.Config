@@ -9,7 +9,7 @@ namespace Dapplo.Config.Test
 	/// This test class tests the transactional capabilities of the proxy
 	/// </summary>
 	[TestClass]
-	public class LanguageTest
+	public class LanguageLoaderTest
 	{
 		public const string Ok = "Ok";
 
@@ -17,7 +17,7 @@ namespace Dapplo.Config.Test
 		public async Task TestTranslations()
 		{
 			var languageLoader = new LanguageLoader("Dapplo");
-			var language = await languageLoader.RegisterAndGetAsync<ILanguageTest>();
+			var language = await languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
 			Assert.IsTrue(languageLoader.AvailableLanguages.ContainsKey("nl-NL"));
 			Assert.IsTrue(languageLoader.AvailableLanguages.ContainsKey("en-US"));
 			Assert.IsTrue(languageLoader.AvailableLanguages.ContainsKey("de-DE"));

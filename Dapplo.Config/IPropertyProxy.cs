@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using Dapplo.Config.Support;
+using System.Reflection;
 
 namespace Dapplo.Config
 {
@@ -68,6 +69,13 @@ namespace Dapplo.Config
 		/// </summary>
 		Type PropertyObjectType
 		{
+			get;
+		}
+
+		/// <summary>
+		/// Return all the property infos for the proxies type, including sub-interfaces
+		/// </summary>
+		IEnumerable<PropertyInfo> AllPropertyInfos {
 			get;
 		}
 

@@ -33,7 +33,7 @@ namespace Dapplo.Config.Test.TestInterfaces
 	/// </summary>
 	[IniSection("Test")]
 	[Description("Test Configuration")]
-	public interface IIniTest : IIniSection
+	public interface IIniConfigTest : IIniConfigSubInterfaceTest, IIniSection
 	{
 		[Description("Name of the person")]
 		string Name

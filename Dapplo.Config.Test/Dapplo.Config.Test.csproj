@@ -59,14 +59,15 @@
   <ItemGroup>
     <Compile Include="ObjectTest.cs" />
     <Compile Include="DescriptionTest.cs" />
-    <Compile Include="LanguageTest.cs" />
+    <Compile Include="LanguageLoaderTest.cs" />
     <Compile Include="NotifyPropertyChangingTest.cs" />
     <Compile Include="TestInterfaces\IDescriptionTest.cs" />
     <Compile Include="TestInterfaces\IBassicAssignTest.cs" />
     <Compile Include="TestInterfaces\IDefaultValueTest.cs" />
-    <Compile Include="TestInterfaces\ILanguageTest.cs" />
+    <Compile Include="TestInterfaces\IIniConfigSubInterfaceTest.cs" />
+    <Compile Include="TestInterfaces\ILanguageLoaderTest.cs" />
     <Compile Include="TestInterfaces\INotifyPropertyChangedTest.cs" />
-    <Compile Include="TestInterfaces\IIniTest.cs" />
+    <Compile Include="TestInterfaces\IIniConfigTest.cs" />
     <Compile Include="TagAttributeTest.cs" />
     <Compile Include="TestInterfaces\INotifyPropertyChangingTest.cs" />
     <Compile Include="TestInterfaces\ITagAttributeTest.cs" />
@@ -79,7 +80,7 @@
     <Compile Include="DefaultValueTest.cs" />
     <Compile Include="RegistryTest .cs" />
     <Compile Include="TransactionTest.cs" />
-    <Compile Include="IniTest.cs" />
+    <Compile Include="IniConfigTest.cs" />
     <Compile Include="TypeConverterTest.cs" />
     <Compile Include="WriteProtectTest.cs" />
   </ItemGroup>

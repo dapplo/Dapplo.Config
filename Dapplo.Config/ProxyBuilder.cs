@@ -42,10 +42,9 @@ namespace Dapplo.Config
 			IEnumerable<Type> types =
 				from assembly in AppDomain.CurrentDomain.GetAssemblies()
 				where !assembly.FullName.StartsWith("System") && !assembly.FullName.StartsWith("mscorlib") && !assembly.FullName.StartsWith("Microsoft")
-
-				from someType in assembly.GetTypes()
+					from someType in assembly.GetTypes()
 					where someType.GetCustomAttributes(typeof (ExtensionAttribute), true).Length > 0
-						select someType;
+					select someType;
 			ExtensionTypes.AddRange(types);
 		}
 

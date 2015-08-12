@@ -55,7 +55,7 @@ namespace Dapplo.Config
 			RegisterMethod(ExpressionExtensions.GetMemberName<object>(x => x.GetType()), HandleGetType);
 			RegisterMethod(ExpressionExtensions.GetMemberName<object>(x => x.GetHashCode()), HandleGetHashCode);
 			RegisterMethod(ExpressionExtensions.GetMemberName<object>(x => x.Equals(null)), HandleEquals);
-
+			RegisterMethod(ExpressionExtensions.GetMemberName<object>(x => x.Equals(null)), HandleEquals);
 			// Make sure the default set logic is registered
 			RegisterSetter((int) CallOrder.Middle, DefaultSet);
 			// Make sure the default get logic is registered
@@ -74,7 +74,7 @@ namespace Dapplo.Config
 				orderby sortedExtension.InitOrder ascending
 				select sortedExtension;
 
-			foreach (PropertyInfo propertyInfo in proxiedType.GetProperties())
+			foreach (PropertyInfo propertyInfo in AllPropertyInfos)
 			{
 				_propertyTypes[propertyInfo.Name] = propertyInfo.PropertyType;
 
@@ -186,6 +186,28 @@ namespace Dapplo.Config
 			get
 			{
 				return typeof (T);
+			}
+		}
+
+
+		/// <summary>
+		/// Simple getter for all properties on the type, including derrived interfaces
+		/// </summary>
+		public IEnumerable<PropertyInfo> AllPropertyInfos {
+			get {
+				// Exclude properties from this assembly
+				var thisAssembly = this.GetType().Assembly;
+
+				// as GetInterfaces doesn't return the type itself (makes sense), the following 2 lines makes a list of all
+				var interfacesToCheck = new List<Type>(typeof(T).GetInterfaces());
+				interfacesToCheck.Add(typeof(T));
+
+				// Now, create an IEnumerable for all the property info of all the properties in the interfaces that the
+				// "user" code introduced in the type. (e.g skip all types & properties from this assembly)
+				return from interfaceType in interfacesToCheck
+					   where interfaceType.Assembly != thisAssembly
+					   from propertyInfo in interfaceType.GetProperties()
+					   select propertyInfo;
 			}
 		}
 

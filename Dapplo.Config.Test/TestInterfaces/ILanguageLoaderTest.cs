@@ -25,9 +25,9 @@ using Dapplo.Config.Language;
 namespace Dapplo.Config.Test.TestInterfaces
 {
 	[Language("Test")]
-	public interface ILanguageTest : ILanguage
+	public interface ILanguageLoaderTest : ILanguage
 	{
-		[DefaultValue(LanguageTest.Ok)]
+		[DefaultValue(LanguageLoaderTest.Ok)]
 		string Ok
 		{
 			get;

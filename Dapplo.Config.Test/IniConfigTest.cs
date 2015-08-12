@@ -30,7 +30,7 @@ using System.Threading.Tasks;
 namespace Dapplo.Config.Ini
 {
 	[TestClass]
-	public class IniTest
+	public class IniConfigTest
 	{
 		private const string Name = "Dapplo";
 		private const string FirstName = "Robin";
@@ -55,7 +55,7 @@ namespace Dapplo.Config.Ini
 		{
 			var iniConfig = new IniConfig("Dapplo", "dapplo");
 
-			iniConfig.AfterLoad<IIniTest>((x) =>
+			iniConfig.AfterLoad<IIniConfigTest>((x) =>
 			{
 				if (!x.SomeValues.ContainsKey("dapplo"))
 				{
@@ -66,11 +66,12 @@ namespace Dapplo.Config.Ini
 			{
 				await iniConfig.ReadFromStreamAsync(testMemoryStream).ConfigureAwait(false);
 			}
-			var iniTest = await iniConfig.RegisterAndGetAsync<IIniTest>().ConfigureAwait(false);
+			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 			Assert.IsTrue(iniTest.Height == 185);
 			Assert.IsTrue(iniTest.PropertySize.Width == 16);
 			Assert.IsTrue(iniTest.PropertyArea.Width == 100);
 			Assert.IsTrue(iniTest.WindowCornerCutShape.Count > 0);
+			Assert.AreEqual("It works!", iniTest.SubValuewithDefault);
 			Assert.IsTrue(iniTest.SomeValues.ContainsKey("dapplo"));
 
 			// Test ini value retrieval, by checking the Type and return value
@@ -87,12 +88,12 @@ namespace Dapplo.Config.Ini
 			Assert.IsFalse(section.TryGetIniValue("DoesNotExist", out tryGetValue));
 
 			// Check second get, should have same value
-			var iniTest2 = iniConfig.Get<IIniTest>();
+			var iniTest2 = iniConfig.Get<IIniConfigTest>();
 			Assert.IsTrue(iniTest2.WindowCornerCutShape.Count > 0);
 			Assert.IsTrue(iniTest2.SomeValues.ContainsKey("dapplo"));
 
 			// Test static get
-			var iniTest3 = IniConfig.Get("Dapplo", "dapplo").Get<IIniTest>();
+			var iniTest3 = IniConfig.Get("Dapplo", "dapplo").Get<IIniConfigTest>();
 			Assert.IsTrue(iniTest2.WindowCornerCutShape.Count > 0);
 			Assert.IsTrue(iniTest2.SomeValues.ContainsKey("dapplo"));
 
@@ -102,7 +103,7 @@ namespace Dapplo.Config.Ini
 		public async Task TestIniWriteRead()
 		{
 			var iniConfig = new IniConfig("Dapplo", "dapplo");
-			var iniTest = await iniConfig.RegisterAndGetAsync<IIniTest>().ConfigureAwait(false);
+			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 
 			// Change some values
 			iniTest.Name = Name;
@@ -141,7 +142,7 @@ namespace Dapplo.Config.Ini
 			}
 
 			// Check second get, should have same value
-			var iniTest2 = iniConfig.Get<IIniTest>();
+			var iniTest2 = iniConfig.Get<IIniConfigTest>();
 			Assert.AreEqual(TestValueForNonSerialized, iniTest2.NotWritten);
 		}
 	}

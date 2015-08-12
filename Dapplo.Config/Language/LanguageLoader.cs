@@ -304,7 +304,7 @@ namespace Dapplo.Config.Language
 			}
 
 			var propertyObject = (ILanguage) propertyProxy.PropertyObject;
-			foreach (PropertyInfo propertyInfo in propertyProxy.PropertyObjectType.GetProperties())
+			foreach (PropertyInfo propertyInfo in propertyProxy.AllPropertyInfos)
 			{
 				string key = _cleanup.Replace(string.Format("{0}{1}", prefix, propertyInfo.Name), "").ToLowerInvariant();
 				string translation;
