@@ -40,7 +40,8 @@ namespace Dapplo.Config.Extension.Implementation
 
 		/// <summary>
 		/// This returns 0, which means somewhere in the middle
-		/// If an extension needs to be called last, it should override this and return int.MaxValue
+		/// If an extension needs to be called last, it should override this and for example return int.MaxValue
+		/// If an extension needs to be called first, it should override this and for example return int.MinValue
 		/// </summary>
 		public virtual int InitOrder
 		{

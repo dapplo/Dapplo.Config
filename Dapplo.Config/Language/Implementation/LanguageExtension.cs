@@ -20,6 +20,8 @@
  */
 
 using Dapplo.Config.Extension.Implementation;
+using System;
+using System.Reflection;
 
 namespace Dapplo.Config.Language.Implementation
 {
@@ -32,8 +34,13 @@ namespace Dapplo.Config.Language.Implementation
 		public LanguageExtension(IPropertyProxy<T> proxy) : base(proxy)
 		{
 			CheckType(typeof (ILanguage));
+		}
 
-			//Proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection, object>(x => x.GetIniValues()), GetIniValues);
+		public override void InitProperty(PropertyInfo propertyInfo) {
+			base.InitProperty(propertyInfo);
+			if (propertyInfo.CanWrite && propertyInfo.GetSetMethod(true).IsPublic) {
+				throw new NotSupportedException(string.Format("Property {0}.{1} has defined a set, this is not allowed for {2} derrived interfaces. Fix by removing the set for the property, leave the get.", propertyInfo.DeclaringType, propertyInfo.Name, typeof(ILanguage).Name));
+			}
 		}
 	}
 }

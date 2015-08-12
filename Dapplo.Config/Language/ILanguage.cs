@@ -29,7 +29,9 @@ namespace Dapplo.Config.Language
 	/// My advice is that you extend your inteface with this, and the INotifyPropertyChanged,
 	/// so language changes are directly reflected in the UI.
 	/// 
-	/// This extends IDefaultValue, as this it is very common to start with english hard-coded
+	/// This extends IDefaultValue, as this it is very common to start with default translations.
+	/// These defaults, usually en-US, can be set with the DefaultValueAttribute
+	/// 
 	/// </summary>
 	public interface ILanguage : IDefaultValue
 	{

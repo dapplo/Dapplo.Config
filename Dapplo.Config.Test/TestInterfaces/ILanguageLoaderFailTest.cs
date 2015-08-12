@@ -20,16 +20,17 @@
  */
 
 using System.ComponentModel;
+using Dapplo.Config.Language;
 
-namespace Dapplo.Config.Test.TestInterfaces {
-	public interface IIniConfigSubInterfaceTest {
-		string SubValue {
+namespace Dapplo.Config.Test.TestInterfaces
+{
+	[Language("TestFail")]
+	public interface ILanguageLoaderFailTest : ILanguage
+	{
+		[DefaultValue(LanguageLoaderTest.Ok)]
+		string Ok {
 			get;
-			set;
-		}
-		[DefaultValue("It works!")]
-		string SubValuewithDefault {
-			get;
+			// Set is not allowed!
 			set;
 		}
 	}

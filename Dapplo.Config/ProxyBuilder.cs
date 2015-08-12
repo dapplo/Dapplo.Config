@@ -152,7 +152,11 @@ namespace Dapplo.Config
 				}
 			}
 			// Call the init, this will also process any extensions
-			genericType.GetMethod("Init", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(proxy, null);
+			try {
+				genericType.GetMethod("Init", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(proxy, null);
+			} catch (TargetInvocationException ex) {
+				throw ex.InnerException;
+			}
 			return proxy;
 		}
 	}

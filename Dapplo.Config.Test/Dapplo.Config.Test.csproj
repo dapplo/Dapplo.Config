@@ -65,6 +65,7 @@
     <Compile Include="TestInterfaces\IBassicAssignTest.cs" />
     <Compile Include="TestInterfaces\IDefaultValueTest.cs" />
     <Compile Include="TestInterfaces\IIniConfigSubInterfaceTest.cs" />
+    <Compile Include="TestInterfaces\ILanguageLoaderFailTest.cs" />
     <Compile Include="TestInterfaces\ILanguageLoaderTest.cs" />
     <Compile Include="TestInterfaces\INotifyPropertyChangedTest.cs" />
     <Compile Include="TestInterfaces\IIniConfigTest.cs" />
