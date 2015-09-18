@@ -110,14 +110,26 @@ namespace Dapplo.Config.Ini
 			return ConfigStore[string.Format("{0}.{1}", applicationName, fileName)];
 		}
 
-		/// <summary>
-		/// Setup the management of an .ini file location
-		/// </summary>
-		/// <param name="applicationName"></param>
-		/// <param name="fileName"></param>
-		/// <param name="fixedDirectory">Specify a path if you don't want to use the default loading</param>
-		/// <param name="registerDefaultConverters">false if you don't want to have any default converters</param>
-		public IniConfig(string applicationName, string fileName, string fixedDirectory = null)
+        /// <summary>
+        /// Static helper to retrieve the first IniConfig, the result when multiple IniConfigs are used is undefined!
+        /// </summary>
+        /// <returns>IniConfig or null if none</returns>
+        public static IniConfig Current
+        {
+            get
+            {
+                return ConfigStore.FirstOrDefault().Value;
+            }
+        }
+
+        /// <summary>
+        /// Setup the management of an .ini file location
+        /// </summary>
+        /// <param name="applicationName"></param>
+        /// <param name="fileName"></param>
+        /// <param name="fixedDirectory">Specify a path if you don't want to use the default loading</param>
+        /// <param name="registerDefaultConverters">false if you don't want to have any default converters</param>
+        public IniConfig(string applicationName, string fileName, string fixedDirectory = null)
 		{
 			_applicationName = applicationName;
 			_fileName = fileName;
@@ -143,12 +155,36 @@ namespace Dapplo.Config.Ini
 			ConfigStore.Add(string.Format("{0}.{1}", applicationName, fileName), this);
 		}
 
-		/// <summary>
-		/// Set the default converter for the specified type
-		/// </summary>
-		/// <param name="type"></param>
-		/// <param name="typeConverter"></param>
-		public IniConfig SetDefaultConverter(Type type, Type typeConverter)
+        /// <summary>
+        /// Get all the names (from the IniSection annotation) for the sections
+        /// </summary>
+        /// <returns>all keys</returns>
+        public ICollection<string> SectionNames
+        {
+            get
+            {
+                return _iniSections.Keys;
+            }
+        }
+
+        /// <summary>
+        /// Get all sections
+        /// </summary>
+        /// <returns>all keys</returns>
+        public IEnumerable<IIniSection> Sections
+        {
+            get
+            {
+                return _iniSections.Values;
+            }
+        }
+
+        /// <summary>
+        /// Set the default converter for the specified type
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="typeConverter"></param>
+        public IniConfig SetDefaultConverter(Type type, Type typeConverter)
 		{
 			_converters.SafelyAddOrOverwrite(type, typeConverter);
 			return this;
@@ -224,36 +260,63 @@ namespace Dapplo.Config.Ini
 		/// <returns>T</returns>
 		public T Get<T>() where T : IIniSection
 		{
-			return (T)Get(typeof(T));
+			return (T)this[typeof(T)];
 		}
 
-		/// <summary>
-		/// Get the specified IIniSection type
-		/// </summary>
-		/// <param name="type">IIniSection to look for</param>
-		/// <returns>IIniSection</returns>
-		public IIniSection Get(Type type)
+        /// <summary>
+        /// Get the specified IIniSection type
+        /// </summary>
+        /// <param name="type">IIniSection to look for</param>
+        /// <returns>IIniSection</returns>
+        public IIniSection Get(Type type)
+        {
+            return this[type];
+        }
+
+        /// <summary>
+        /// Get the specified IIniSection type
+        /// </summary>
+        /// <param name="type">IIniSection to look for</param>
+        /// <returns>IIniSection</returns>
+        public IIniSection this[Type type]
 		{
-			if (!typeof(IIniSection).IsAssignableFrom(type))
-			{
-				throw new ArgumentException("type is not a IIniSection");
-			}
-			if (!_initialReadDone) {
-				throw new InvalidOperationException("Please load before retrieving the ini-sections");
-			}
-			var propertyProxy = ProxyBuilder.GetProxy(type);
-			var iniSection = (IIniSection)propertyProxy.PropertyObject;
-			return iniSection;
-		}
+            get
+            {
+                if (!typeof(IIniSection).IsAssignableFrom(type))
+                {
+                    throw new ArgumentException("type is not a IIniSection");
+                }
+                if (!_initialReadDone)
+                {
+                    throw new InvalidOperationException("Please load before retrieving the ini-sections");
+                }
+                var propertyProxy = ProxyBuilder.GetProxy(type);
+                var iniSection = (IIniSection)propertyProxy.PropertyObject;
+                return iniSection;
+            }
+        }
 
-		/// <summary>
-		/// A simple get by name for the IniSection
-		/// </summary>
-		/// <param name="sectionName"></param>
-		/// <returns>IIniSection</returns>
-		public IIniSection Get(string sectionName) {
-			return _iniSections[sectionName];
-		}
+        /// <summary>
+        /// A simple get by name (from the IniSection annotation) for the IniSection
+        /// </summary>
+        /// <param name="sectionName"></param>
+        /// <returns>IIniSection</returns>
+        public IIniSection Get(string sectionName)
+        {
+            return this[sectionName];
+        }
+
+        /// <summary>
+        /// A simple indexer by name (from the IniSection annotation) for the IniSection
+        /// </summary>
+        /// <param name="sectionName"></param>
+        /// <returns>IIniSection</returns>
+        public IIniSection this[string sectionName] {
+            get
+            {
+                return _iniSections[sectionName];
+            }
+        }
 
 		/// <summary>
 		/// A simple try get by name for the IniSection

@@ -54,6 +54,13 @@ namespace Dapplo.Config.Ini
 		/// <returns>IniValue</returns>
 		IniValue GetIniValue(string propertyName);
 
+        /// <summary>
+		/// Get the IniValue for a property, this is quicker and uses less memory than to iterate over the GetIniValues result
+		/// </summary>
+		/// <param name="propertyName">Name of the property</param>
+		/// <returns>IniValue</returns>
+        IniValue this[string propertyName] { get; }
+
 		/// <summary>
 		/// Try to get the IniValue for a property, this is quicker and uses less memory than to iterate over the GetIniValues result
 		/// </summary>

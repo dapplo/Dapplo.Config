@@ -50,56 +50,60 @@ namespace Dapplo.Config.Ini
 			StringEncryptionTypeConverter.RgbKey = "ljew3lJfrS0rlddlfeelOekfekcvbAwE";
 		}
 
-		[TestMethod]
-		public async Task TestIniInit()
-		{
-			var iniConfig = new IniConfig("Dapplo", "dapplo");
+        [TestMethod]
+        public async Task TestIniInit()
+        {
+            var iniConfig = new IniConfig("Dapplo", "dapplo");
 
-			iniConfig.AfterLoad<IIniConfigTest>((x) =>
-			{
-				if (!x.SomeValues.ContainsKey("dapplo"))
-				{
-					x.SomeValues.Add("dapplo", 2015);
-				}
-			});
-			using (var testMemoryStream = new MemoryStream())
-			{
-				await iniConfig.ReadFromStreamAsync(testMemoryStream).ConfigureAwait(false);
-			}
-			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
-			Assert.IsTrue(iniTest.Height == 185);
-			Assert.IsTrue(iniTest.PropertySize.Width == 16);
-			Assert.IsTrue(iniTest.PropertyArea.Width == 100);
-			Assert.IsTrue(iniTest.WindowCornerCutShape.Count > 0);
-			Assert.AreEqual("It works!", iniTest.SubValuewithDefault);
-			Assert.IsTrue(iniTest.SomeValues.ContainsKey("dapplo"));
+            iniConfig.AfterLoad<IIniConfigTest>((x) =>
+            {
+                if (!x.SomeValues.ContainsKey("dapplo"))
+                {
+                    x.SomeValues.Add("dapplo", 2015);
+                }
+            });
+            using (var testMemoryStream = new MemoryStream())
+            {
+                await iniConfig.ReadFromStreamAsync(testMemoryStream).ConfigureAwait(false);
+            }
+            var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
+            Assert.IsTrue(iniTest.Height == 185);
+            Assert.IsTrue(iniTest.PropertySize.Width == 16);
+            Assert.IsTrue(iniTest.PropertyArea.Width == 100);
+            Assert.IsTrue(iniTest.WindowCornerCutShape.Count > 0);
+            Assert.AreEqual("It works!", iniTest.SubValuewithDefault);
+            Assert.IsTrue(iniTest.SomeValues.ContainsKey("dapplo"));
 
-			// Test ini value retrieval, by checking the Type and return value
-			var iniValue = iniTest.GetIniValue("WindowCornerCutShape");
-			Assert.IsTrue(iniValue.ValueType == typeof(IList<int>));
-			Assert.IsTrue(((IList<int>)iniValue.Value).Count > 0);
+            // Test ini value retrieval, by checking the Type and return value
+            var iniValue = iniTest["WindowCornerCutShape"];
+            Assert.IsTrue(iniValue.ValueType == typeof(IList<int>));
+            Assert.IsTrue(((IList<int>)iniValue.Value).Count > 0);
 
-			// Test try get
-			IIniSection section;
-			Assert.IsTrue(iniConfig.TryGet("Test", out section));
-			IniValue tryGetValue;
-			Assert.IsTrue(section.TryGetIniValue("WindowCornerCutShape", out tryGetValue));
-			Assert.IsTrue(((IList<int>)tryGetValue.Value).Count > 0);
-			Assert.IsFalse(section.TryGetIniValue("DoesNotExist", out tryGetValue));
+            // Test try get
+            IIniSection section;
+            Assert.IsTrue(iniConfig.TryGet("Test", out section));
+            IniValue tryGetValue;
+            Assert.IsTrue(section.TryGetIniValue("WindowCornerCutShape", out tryGetValue));
+            Assert.IsTrue(((IList<int>)tryGetValue.Value).Count > 0);
+            Assert.IsFalse(section.TryGetIniValue("DoesNotExist", out tryGetValue));
 
-			// Check second get, should have same value
-			var iniTest2 = iniConfig.Get<IIniConfigTest>();
+            // Check second get, should have same value
+            var iniTest2 = iniConfig.Get<IIniConfigTest>();
+            Assert.IsTrue(iniTest2.WindowCornerCutShape.Count > 0);
+			Assert.IsTrue(iniTest2.SomeValues.ContainsKey("dapplo"));
+
+			// Test static Current and the static get
+			var iniTest3 = IniConfig.Current.Get<IIniConfigTest>();
 			Assert.IsTrue(iniTest2.WindowCornerCutShape.Count > 0);
 			Assert.IsTrue(iniTest2.SomeValues.ContainsKey("dapplo"));
 
-			// Test static get
-			var iniTest3 = IniConfig.Get("Dapplo", "dapplo").Get<IIniConfigTest>();
-			Assert.IsTrue(iniTest2.WindowCornerCutShape.Count > 0);
-			Assert.IsTrue(iniTest2.SomeValues.ContainsKey("dapplo"));
-
+            // Test indexers
+            Assert.IsTrue(iniConfig.SectionNames.Contains("Test"));
+            var iniTest4 = iniConfig["Test"];
+            Assert.AreEqual("It works!", iniTest4["SubValuewithDefault"].Value);
         }
 
-		[TestMethod]
+        [TestMethod]
 		public async Task TestIniWriteRead()
 		{
 			var iniConfig = new IniConfig("Dapplo", "dapplo");
