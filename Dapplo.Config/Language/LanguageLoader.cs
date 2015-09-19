@@ -68,7 +68,7 @@ namespace Dapplo.Config.Language
 		/// <param name="applicationName"></param>
 		/// <param name="defaultLanguage"></param>
 		/// <param name="filePatern">Pattern for the filename, the ietf group needs to be in there!</param>
-		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language_(?<IETF>[a-zA-Z]+-[a-zA-Z]+)\.(ini|xml)")
+		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language(-(?<module>[a-zA-Z0-9]*))?_(?<IETF>[a-zA-Z]+-[a-zA-Z]+)\.(ini|xml)")
 		{
 			CurrentLanguage = defaultLanguage;
 			_filePattern = filePatern;
@@ -82,12 +82,19 @@ namespace Dapplo.Config.Language
 			LoaderStore.SafelyAddOrOverwrite(applicationName, this);
 		}
 
+		/// <summary>
+		/// Get the IETF of the current language.
+		/// For the name of the language, use the AvailableLanguages with this value as the key.
+		/// </summary>
 		public string CurrentLanguage
 		{
 			get;
 			private set;
 		}
 
+		/// <summary>
+		/// All languages that were found in the files during the scan. 
+		/// </summary>
 		public IDictionary<string, string> AvailableLanguages
 		{
 			get
@@ -96,6 +103,24 @@ namespace Dapplo.Config.Language
 			}
 		}
 
+		/// <summary>
+		/// Get the list of the files which were found during the scan
+		/// </summary>
+		public IList<string> Files
+		{
+			get
+			{
+				return _files;
+			}
+		}
+
+		/// <summary>
+		/// Change the language, this will only do something if the language actually changed.
+		/// All files are reloaded. 
+		/// </summary>
+		/// <param name="ietf">The iso code for the language to use</param>
+		/// <param name="token">CancellationToken for the loading</param>
+		/// <returns>Task</returns>
 		public async Task ChangeLanguage(string ietf, CancellationToken token = default(CancellationToken))
 		{
 			if (ietf == CurrentLanguage)

@@ -66,6 +66,7 @@
     <Compile Include="TestInterfaces\IDefaultValueTest.cs" />
     <Compile Include="TestInterfaces\IIniConfigSubInterfaceTest.cs" />
     <Compile Include="TestInterfaces\ILanguageLoaderFailTest.cs" />
+    <Compile Include="TestInterfaces\ILanguageLoaderMyModule.cs" />
     <Compile Include="TestInterfaces\ILanguageLoaderTest.cs" />
     <Compile Include="TestInterfaces\INotifyPropertyChangedTest.cs" />
     <Compile Include="TestInterfaces\IIniConfigTest.cs" />
@@ -93,6 +94,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Languages\language_de-DE.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Languages\Modules\language-mymodule_en-US.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -564,22 +564,10 @@ namespace Dapplo.Config.Ini
 				}
 
 				// Check if a converter is specified
-				TypeConverter converter = iniValue.Converter;
-				// If not, use the default converter for the property type
-				if (converter == null)
+				TypeConverter converter = GetConverter(iniValue);
+				if (converter != null && converter.CanConvertTo(typeof(IDictionary<string, string>)))
 				{
-					Type value;
-					if (_converters.TryGetValue(iniValue.ValueType, out value))
-					{
-						converter = (TypeConverter)Activator.CreateInstance(value);
-					}
-					else
-					{
-						converter = TypeDescriptor.GetConverter(iniValue.ValueType);
-					}
-				}
-				else if (converter.CanConvertTo(typeof(IDictionary<string, string>)))
-				{
+					// Only the special dictionary types have such a converter
 					try
 					{
 						// Convert the dictionary to a string,string variant.
@@ -625,7 +613,31 @@ namespace Dapplo.Config.Ini
 					WriteErrorHandler(iniSection, iniValue, ex);
 				}
 			}
+		}
 
+		/// <summary>
+		/// Get the TypeConverter for the IniValue, this does a bit more than just calling the Converter property
+		/// </summary>
+		/// <param name="iniValue">IniValue</param>
+		/// <returns>TypeConverter</returns>
+		public TypeConverter GetConverter(IniValue iniValue)
+		{
+			// Check if a converter is specified
+			TypeConverter converter = iniValue.Converter;
+			// If not, use the default converter for the property type
+			if (converter == null)
+			{
+				Type converterType;
+				if (_converters.TryGetValue(iniValue.ValueType, out converterType))
+				{
+					converter = (TypeConverter)Activator.CreateInstance(converterType);
+				}
+				else
+				{
+					converter = TypeDescriptor.GetConverter(iniValue.ValueType);
+				}
+			}
+			return converter;
 		}
 
 		/// <summary>

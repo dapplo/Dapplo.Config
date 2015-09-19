@@ -24,6 +24,7 @@ using Dapplo.Config.Test.TestInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Dapplo.Config.Test
 {
@@ -43,6 +44,19 @@ namespace Dapplo.Config.Test
 		}
 
 		[TestMethod]
+		public async Task TestModules()
+		{
+			var languageLoader = new LanguageLoader("Dapplo");
+
+			// Make sure that the module (for testing) is available, we count all file-path which end with the filename 
+			var count = languageLoader.Files.Where(file => file.EndsWith("language-mymodule_en-US.ini")).Count();
+			Assert.IsTrue(count > 0);
+
+			var languageMyModule = await languageLoader.RegisterAndGetAsync<ILanguageLoaderMyModuleTest>();
+			Assert.AreEqual("Some value", languageMyModule.ModuleSettings);
+		}
+
+        [TestMethod]
 		public async Task TestTranslations()
 		{
 			var languageLoader = new LanguageLoader("Dapplo");
