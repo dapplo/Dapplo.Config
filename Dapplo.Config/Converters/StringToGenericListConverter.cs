@@ -78,7 +78,7 @@ namespace Dapplo.Config.Converters
 				// Split, and where all element are not null or empty, convert the item to T and add the items to a list<T>
 				return (from item in ((string) value).Split(',')
 					where !string.IsNullOrWhiteSpace(item)
-					select (T) _typeConverter.ConvertFromInvariantString(item.Trim())).ToList<T>();
+					select (T) _typeConverter.ConvertFromInvariantString(item.Trim())).ToList();
 			}
 
 			return base.ConvertFrom(context, culture, value);

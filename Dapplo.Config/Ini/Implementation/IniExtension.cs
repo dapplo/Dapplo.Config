@@ -24,7 +24,6 @@ using System.Reflection;
 using Dapplo.Config.Support;
 using System.ComponentModel;
 using Dapplo.Config.Extension.Implementation;
-using System.Collections.Generic;
 
 namespace Dapplo.Config.Ini.Implementation
 {

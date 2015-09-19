@@ -52,10 +52,12 @@ namespace Dapplo.Config
 		public PropertyProxy() : base(typeof (T))
 		{
 			// Register the GetType handler, use Lambda to make refactoring possible
+			// ReSharper disable ReturnValueOfPureMethodIsNotUsed
 			RegisterMethod(ExpressionExtensions.GetMemberName<object>(x => x.GetType()), HandleGetType);
 			RegisterMethod(ExpressionExtensions.GetMemberName<object>(x => x.GetHashCode()), HandleGetHashCode);
 			RegisterMethod(ExpressionExtensions.GetMemberName<object>(x => x.Equals(null)), HandleEquals);
 			RegisterMethod(ExpressionExtensions.GetMemberName<object>(x => x.Equals(null)), HandleEquals);
+			// ReSharper restore ReturnValueOfPureMethodIsNotUsed
 			// Make sure the default set logic is registered
 			RegisterSetter((int) CallOrder.Middle, DefaultSet);
 			// Make sure the default get logic is registered
@@ -68,7 +70,6 @@ namespace Dapplo.Config
 		/// </summary>
 		internal void Init()
 		{
-			Type proxiedType = typeof (T);
 			//Init in the right order
 			var extensions = from sortedExtension in _extensions
 				orderby sortedExtension.InitOrder ascending
@@ -196,7 +197,7 @@ namespace Dapplo.Config
 		public IEnumerable<PropertyInfo> AllPropertyInfos {
 			get {
 				// Exclude properties from this assembly
-				var thisAssembly = this.GetType().Assembly;
+				var thisAssembly = GetType().Assembly;
 
 				// as GetInterfaces doesn't return the type itself (makes sense), the following 2 lines makes a list of all
 				var interfacesToCheck = new List<Type>(typeof(T).GetInterfaces());

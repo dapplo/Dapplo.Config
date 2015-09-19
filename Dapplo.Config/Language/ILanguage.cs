@@ -19,7 +19,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.ComponentModel;
 using Dapplo.Config.Extension;
 
 namespace Dapplo.Config.Language

@@ -66,6 +66,7 @@ namespace Dapplo.Config
         public static IPropertyProxy GetProxy(Type type)
         {
             IPropertyProxy proxy;
+	        // ReSharper disable once InconsistentlySynchronizedField
             if (!Cache.TryGetValue(type, out proxy))
             {
                 throw new KeyNotFoundException(type.FullName);

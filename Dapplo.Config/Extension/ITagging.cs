@@ -68,7 +68,8 @@ namespace Dapplo.Config.Extension
 		/// <summary>
 		/// Retrieve the value for tag
 		/// </summary>
-		/// <param name="propertyName"></param>
+		/// <param name="propertyName">Name of the property to get the tag value</param>
+		/// <param name="tag">The tag value to get</param>
 		/// <returns>Tagged value or null</returns>
 		object GetTagValue(string propertyName, object tag);
 	}

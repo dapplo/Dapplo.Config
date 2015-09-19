@@ -50,7 +50,7 @@ namespace Dapplo.Config.Language
 		private readonly string _filePattern;
 		private readonly IList<string> _files;
 		private bool _initialReadDone;
-		private readonly IDictionary<string, string> _availableLanguages = new Dictionary<string, string>();
+		private readonly IDictionary<string, string> _availableLanguages;
 
 		/// <summary>
 		/// Static helper to retrieve the LanguageLoader that was created with the supplied parameters
@@ -61,6 +61,17 @@ namespace Dapplo.Config.Language
 			return LoaderStore[applicationName];
 		}
 
+		/// <summary>
+		/// Static helper to retrieve the first LanguageLoader that was created
+		/// </summary>
+		/// <returns>LanguageLoader</returns>
+		public static LanguageLoader Current
+		{
+			get
+			{
+				return LoaderStore.First().Value;
+			}
+		}
 		/// <summary>
 		/// Create a LanguageLoader, this is your container for all the ILanguage implementing interfaces.
 		/// You can supply a default language right away.

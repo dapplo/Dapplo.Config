@@ -52,12 +52,13 @@ namespace Dapplo.Config.Support
             }
         }
 
-        #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
+		#region IDisposable Support
+		// To detect redundant calls
+		private bool _disposedValue;
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
@@ -65,7 +66,7 @@ namespace Dapplo.Config.Support
                     _semaphoreSlim.Dispose();
                 }
 
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 

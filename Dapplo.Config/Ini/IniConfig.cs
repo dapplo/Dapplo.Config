@@ -19,7 +19,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Dapplo.Config.Converters;
 using Dapplo.Config.Support;
 using System;
 using System.Collections.Generic;
@@ -128,7 +127,6 @@ namespace Dapplo.Config.Ini
         /// <param name="applicationName"></param>
         /// <param name="fileName"></param>
         /// <param name="fixedDirectory">Specify a path if you don't want to use the default loading</param>
-        /// <param name="registerDefaultConverters">false if you don't want to have any default converters</param>
         public IniConfig(string applicationName, string fileName, string fixedDirectory = null)
 		{
 			_applicationName = applicationName;
@@ -198,7 +196,7 @@ namespace Dapplo.Config.Ini
 		/// <returns></returns>
 		public IniConfig AfterLoad<T>(Action<T> afterLoadAction) where T : IIniSection
 		{
-			_afterLoadActions.SafelyAddOrOverwrite(typeof(T), new Action<IIniSection>((section) => afterLoadAction((T)section)));
+			_afterLoadActions.SafelyAddOrOverwrite(typeof(T), section => afterLoadAction((T)section));
 			return this;
 		}
 
@@ -210,7 +208,7 @@ namespace Dapplo.Config.Ini
 		/// <returns></returns>
 		public IniConfig BeforeSave<T>(Action<T> beforeSaveAction)
 		{
-			_beforeSaveActions.SafelyAddOrOverwrite(typeof(T), new Action<IIniSection>((section) => beforeSaveAction((T)section)));
+			_beforeSaveActions.SafelyAddOrOverwrite(typeof(T), section => beforeSaveAction((T)section));
 			return this;
 		}
 
@@ -223,7 +221,7 @@ namespace Dapplo.Config.Ini
 		/// <returns>this</returns>
 		public IniConfig AfterSave<T>(Action<T> afterSaveAction)
 		{
-			_afterSaveActions.SafelyAddOrOverwrite(typeof(T), new Action<IIniSection>((section) => afterSaveAction((T)section)));
+			_afterSaveActions.SafelyAddOrOverwrite(typeof(T), section => afterSaveAction((T)section));
 			return this;
 		}
 
@@ -597,13 +595,20 @@ namespace Dapplo.Config.Ini
 				{
 					// Convert the value to a string
 					string writingValue;
-					if (context != null)
+					if (converter != null)
 					{
-						writingValue = converter.ConvertToInvariantString(context, iniValue.Value);
+						if (context != null)
+						{
+							writingValue = converter.ConvertToInvariantString(context, iniValue.Value);
+						}
+						else
+						{
+							writingValue = converter.ConvertToInvariantString(iniValue.Value);
+						}
 					}
 					else
 					{
-						writingValue = converter.ConvertToInvariantString(iniValue.Value);
+						writingValue = iniValue.Value as string;
 					}
 					// And write the value with the IniPropertyName (which does NOT have to be the property name) to the file
 					sectionProperties.Add(iniValue.IniPropertyName, writingValue);
@@ -733,7 +738,7 @@ namespace Dapplo.Config.Ini
 		/// <param name="iniSection"></param>
 		private void FillSection(IDictionary<string, IDictionary<string, string>> iniSections, IIniSection iniSection)
 		{
-			IDictionary<string, string> iniProperties = null;
+			IDictionary<string, string> iniProperties;
 			var sectionName = iniSection.GetSectionName();
 			// Might be null
 			iniSections.TryGetValue(sectionName, out iniProperties);
