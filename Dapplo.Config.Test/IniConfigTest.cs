@@ -19,15 +19,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Dapplo.Config.Converters;
-using Dapplo.Config.Test.TestInterfaces;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Dapplo.Config.Converters;
+using Dapplo.Config.Ini;
+using Dapplo.Config.Test.TestInterfaces;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Dapplo.Config.Ini
+namespace Dapplo.Config.Test
 {
 	[TestClass]
 	public class IniConfigTest
@@ -37,7 +38,7 @@ namespace Dapplo.Config.Ini
 		private const string TestValueForNonSerialized = "Hello!";
 
 		[TestCleanup]
-		public void Remove()
+		public void Cleanup()
 		{
 			// Remove the IniConfig drom the IniConfig-store
 			IniConfig.Delete("Dapplo", "dapplo");
@@ -50,63 +51,100 @@ namespace Dapplo.Config.Ini
 			StringEncryptionTypeConverter.RgbKey = "ljew3lJfrS0rlddlfeelOekfekcvbAwE";
 		}
 
-		[TestMethod]
-		public async Task TestIniInit()
+		private async Task<IniConfig> InitializeAsync()
 		{
-			var iniConfig = new IniConfig("Dapplo", "dapplo");
+			var iniConfig = Create();
+			await ConfigureMemoryStreamAsync();
+			return iniConfig;
+		}
 
-			iniConfig.AfterLoad<IIniConfigTest>((x) =>
+		private async Task ConfigureMemoryStreamAsync()
+		{
+			using (var testMemoryStream = new MemoryStream())
+			{
+				await IniConfig.Current.ReadFromStreamAsync(testMemoryStream).ConfigureAwait(false);
+			}
+		}
+
+		private IniConfig Create()
+		{
+			return new IniConfig("Dapplo", "dapplo");
+		}
+
+		/// <summary>
+		/// This method tests that the initialization of the ini works.
+		/// Including the after load
+		/// </summary>
+		[TestMethod]
+		public async Task TestIniAfterLoad()
+		{
+			var iniConfig = Create();
+			iniConfig.AfterLoad<IIniConfigTest>(x =>
 			{
 				if (!x.SomeValues.ContainsKey("dapplo"))
 				{
 					x.SomeValues.Add("dapplo", 2015);
 				}
 			});
-			using (var testMemoryStream = new MemoryStream())
-			{
-				await iniConfig.ReadFromStreamAsync(testMemoryStream).ConfigureAwait(false);
-			}
+			await ConfigureMemoryStreamAsync();
+
+			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
+			Assert.IsTrue(iniTest.SomeValues.ContainsKey("dapplo"));
+			Assert.IsTrue(iniTest.SomeValues["dapplo"] == 2015);
+		}
+
+		[TestMethod]
+		public async Task TestIniGeneral()
+		{
+			var iniConfig = await InitializeAsync();
 			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 			Assert.IsTrue(iniTest.Height == 185);
 			Assert.IsTrue(iniTest.PropertySize.Width == 16);
 			Assert.IsTrue(iniTest.PropertyArea.Width == 100);
 			Assert.IsTrue(iniTest.WindowCornerCutShape.Count > 0);
 			Assert.AreEqual("It works!", iniTest.SubValuewithDefault);
-			Assert.IsTrue(iniTest.SomeValues.ContainsKey("dapplo"));
+		}
 
+		[TestMethod]
+		public async Task TestIniIndexAccess()
+		{
+			var iniConfig = await InitializeAsync();
+			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 			// Test ini value retrieval, by checking the Type and return value
 			var iniValue = iniTest["WindowCornerCutShape"];
-			Assert.IsTrue(iniValue.ValueType == typeof(IList<int>));
-			Assert.IsTrue(((IList<int>)iniValue.Value).Count > 0);
+			Assert.IsTrue(iniValue.ValueType == typeof (IList<int>));
+			Assert.IsTrue(((IList<int>) iniValue.Value).Count > 0);
+		}
 
+		[TestMethod]
+		public async Task TestIniSectionTryGet()
+		{
+			var iniConfig = await InitializeAsync();
+			await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 			// Test try get
 			IIniSection section;
 			Assert.IsTrue(iniConfig.TryGet("Test", out section));
 			IniValue tryGetValue;
 			Assert.IsTrue(section.TryGetIniValue("WindowCornerCutShape", out tryGetValue));
-			Assert.IsTrue(((IList<int>)tryGetValue.Value).Count > 0);
+			Assert.IsTrue(((IList<int>) tryGetValue.Value).Count > 0);
 			Assert.IsFalse(section.TryGetIniValue("DoesNotExist", out tryGetValue));
+		}
 
-			// Check second get, should have same value
-			var iniTest2 = iniConfig.Get<IIniConfigTest>();
-			Assert.IsTrue(iniTest2.WindowCornerCutShape.Count > 0);
-			Assert.IsTrue(iniTest2.SomeValues.ContainsKey("dapplo"));
-
-			// Test static Current and the static get
-			var iniTest3 = IniConfig.Current.Get<IIniConfigTest>();
-			Assert.IsTrue(iniTest2.WindowCornerCutShape.Count > 0);
-			Assert.IsTrue(iniTest2.SomeValues.ContainsKey("dapplo"));
-
+		[TestMethod]
+		public async Task TestIniConfigIndex()
+		{
+			var iniConfig = await InitializeAsync();
+			await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 			// Test indexers
 			Assert.IsTrue(iniConfig.SectionNames.Contains("Test"));
-			var iniTest4 = iniConfig["Test"];
-			Assert.AreEqual("It works!", iniTest4["SubValuewithDefault"].Value);
+			var iniTest = iniConfig["Test"];
+			Assert.AreEqual("It works!", iniTest["SubValuewithDefault"].Value);
 		}
 
 		[TestMethod]
 		public async Task TestIniWriteRead()
 		{
-			var iniConfig = new IniConfig("Dapplo", "dapplo");
+			var iniConfig = await InitializeAsync();
 			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 
 			// Change some values
@@ -148,16 +186,6 @@ namespace Dapplo.Config.Ini
 			// Check second get, should have same value
 			var iniTest2 = iniConfig.Get<IIniConfigTest>();
 			Assert.AreEqual(TestValueForNonSerialized, iniTest2.NotWritten);
-		}
-
-		[TestMethod]
-		public async Task TestIniStringConvertion()
-		{
-			var iniConfig = new IniConfig("Dapplo", "dapplo");
-			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
-			var iniValue = iniTest["WindowCornerCutShape"];
-			iniValue.ToString();
-
 		}
 	}
 }

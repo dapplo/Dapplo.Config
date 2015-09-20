@@ -27,13 +27,13 @@ namespace Dapplo.Config.Support
 	[ImmutableObject(true)]
 	public sealed class TypeDescriptorContext : ITypeDescriptorContext
 	{
-		private readonly object component;
-		private readonly PropertyDescriptor property;
+		private readonly object _component;
+		private readonly PropertyDescriptor _property;
 
 		public TypeDescriptorContext(object component, PropertyDescriptor property)
 		{
-			this.component = component;
-			this.property = property;
+			_component = component;
+			_property = property;
 		}
 
 		IContainer ITypeDescriptorContext.Container
@@ -48,7 +48,7 @@ namespace Dapplo.Config.Support
 		{
 			get
 			{
-				return component;
+				return _component;
 			}
 		}
 
@@ -65,7 +65,7 @@ namespace Dapplo.Config.Support
 		{
 			get
 			{
-				return property;
+				return _property;
 			}
 		}
 

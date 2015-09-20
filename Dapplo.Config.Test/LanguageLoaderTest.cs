@@ -38,9 +38,10 @@ namespace Dapplo.Config.Test
 
 		[TestMethod]
 		[ExpectedException(typeof(NotSupportedException))]
-		public async Task TestIllegalInterface() {
+		public async Task TestIllegalInterface()
+		{
 			var languageLoader = new LanguageLoader("Dapplo");
-			var language = await languageLoader.RegisterAndGetAsync<ILanguageLoaderFailTest>();
+			await languageLoader.RegisterAndGetAsync<ILanguageLoaderFailTest>();
 		}
 
 		[TestMethod]
@@ -49,7 +50,7 @@ namespace Dapplo.Config.Test
 			var languageLoader = new LanguageLoader("Dapplo");
 
 			// Make sure that the module (for testing) is available, we count all file-path which end with the filename 
-			var count = languageLoader.Files.Where(file => file.EndsWith("language-mymodule_en-US.ini")).Count();
+			var count = languageLoader.Files.Count(file => file.EndsWith("language_mymodule-en-US.ini"));
 			Assert.IsTrue(count > 0);
 
 			var languageMyModule = await languageLoader.RegisterAndGetAsync<ILanguageLoaderMyModuleTest>();

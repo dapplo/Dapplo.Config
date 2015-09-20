@@ -93,18 +93,18 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Languages\language_de-DE.xml">
+    <None Include="Languages\language-de-DE.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Languages\Modules\language-mymodule_en-US.ini">
+    <None Include="Languages\Modules\language_mymodule-en-US.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Languages\language_nl-NL.ini">
+    <None Include="Languages\language-nl-NL.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Languages\language_en-US.ini">
+    <None Include="Languages\language-en-US.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

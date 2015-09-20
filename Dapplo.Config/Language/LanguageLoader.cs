@@ -79,7 +79,7 @@ namespace Dapplo.Config.Language
 		/// <param name="applicationName"></param>
 		/// <param name="defaultLanguage"></param>
 		/// <param name="filePatern">Pattern for the filename, the ietf group needs to be in there!</param>
-		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language(-(?<module>[a-zA-Z0-9]*))?_(?<IETF>[a-zA-Z]+-[a-zA-Z]+)\.(ini|xml)")
+		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language(_(?<module>[a-zA-Z0-9]*))?-(?<IETF>[a-zA-Z]+-[a-zA-Z]+)\.(ini|xml)")
 		{
 			CurrentLanguage = defaultLanguage;
 			_filePattern = filePatern;
@@ -172,10 +172,7 @@ namespace Dapplo.Config.Language
 					else
 					{
 						var executingAssembly = Assembly.GetExecutingAssembly();
-						if (executingAssembly != null)
-						{
-							startupDirectory = Path.GetDirectoryName(executingAssembly.Location);
-						}
+						startupDirectory = Path.GetDirectoryName(executingAssembly.Location);
 					}
 					if (startupDirectory != null)
 					{
@@ -291,11 +288,11 @@ namespace Dapplo.Config.Language
 
 			foreach (var languageFile in languageFiles)
 			{
-				IDictionary<string, IDictionary<string, string>> newIni;
+				IDictionary<string, IDictionary<string, string>> newResources;
 				if (languageFile.EndsWith(".ini")) {
-					newIni = await IniFile.ReadAsync(languageFile, Encoding.UTF8, token).ConfigureAwait(false);
+					newResources = await IniFile.ReadAsync(languageFile, Encoding.UTF8, token).ConfigureAwait(false);
 				} else if (languageFile.EndsWith(".xml")) {
-					newIni =
+					newResources =
 						(from resourcesElement in XDocument.Load(languageFile).Root.Elements("resources")
 						 from resourceElement in resourcesElement.Elements("resource")
 						 group resourceElement by resourcesElement.Attribute("prefix").Value into resourceElementGroup
@@ -303,8 +300,8 @@ namespace Dapplo.Config.Language
 				} else {
 					throw new NotSupportedException(string.Format("Can't read the file format for {0}", languageFile));
 				}
-				foreach (var section in newIni.Keys) {
-					var properties = newIni[section];
+				foreach (var section in newResources.Keys) {
+					var properties = newResources[section];
 					foreach (var key in properties.Keys) {
 						var cleanKey = _cleanup.Replace(string.Format("{0}{1}", section, key), "").ToLowerInvariant();
 						_allProperties.SafelyAddOrOverwrite(cleanKey, properties[key]);
