@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <language>
-	<resources>
+	<resources prefix="Test">
 		<resource name="TestValue">Abbrechen</resource>
 		<resource name="OnlydeDE">BlubDE</resource>
 	</resources>

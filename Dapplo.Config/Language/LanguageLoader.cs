@@ -294,8 +294,8 @@ namespace Dapplo.Config.Language
 				} else if (languageFile.EndsWith(".xml")) {
 					newResources =
 						(from resourcesElement in XDocument.Load(languageFile).Root.Elements("resources")
+						 where resourcesElement.Attribute("prefix") != null
 						 from resourceElement in resourcesElement.Elements("resource")
-						 where resourceElement.Attribute("prefix") != null
 						 group resourceElement by resourcesElement.Attribute("prefix").Value into resourceElementGroup
 						 select resourceElementGroup).ToDictionary(group => group.Key, group => (IDictionary<string,string>)group.ToDictionary(x => x.Attribute("name").Value, x => x.Value));
 				} else {
