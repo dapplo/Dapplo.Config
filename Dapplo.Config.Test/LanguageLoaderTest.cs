@@ -35,20 +35,24 @@ namespace Dapplo.Config.Test
 	public class LanguageLoaderTest
 	{
 		public const string Ok = "Ok";
+		private LanguageLoader languageLoader;
+
+		[TestInitialize]
+		public void Initialize()
+		{
+			languageLoader = new LanguageLoader("Dapplo");
+		}
 
 		[TestMethod]
 		[ExpectedException(typeof(NotSupportedException))]
 		public async Task TestIllegalInterface()
 		{
-			var languageLoader = new LanguageLoader("Dapplo");
 			await languageLoader.RegisterAndGetAsync<ILanguageLoaderFailTest>();
 		}
 
 		[TestMethod]
 		public async Task TestModules()
 		{
-			var languageLoader = new LanguageLoader("Dapplo");
-
 			// Make sure that the module (for testing) is available, we count all file-path which end with the filename 
 			var count = languageLoader.Files.Count(file => file.EndsWith("language_mymodule-en-US.ini"));
 			Assert.IsTrue(count > 0);
@@ -57,10 +61,17 @@ namespace Dapplo.Config.Test
 			Assert.AreEqual("Some value", languageMyModule.ModuleSettings);
 		}
 
-        [TestMethod]
+		[TestMethod]
+		public async Task TestIndexer()
+		{
+			var language = await languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
+			await languageLoader.ChangeLanguage("nl-NL");
+			Assert.AreEqual("Afbreken", language["TestValue"]);
+		}
+
+		[TestMethod]
 		public async Task TestTranslations()
 		{
-			var languageLoader = new LanguageLoader("Dapplo");
 			var language = await languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
 			Assert.IsTrue(languageLoader.AvailableLanguages.ContainsKey("nl-NL"));
 			Assert.IsTrue(languageLoader.AvailableLanguages.ContainsKey("en-US"));

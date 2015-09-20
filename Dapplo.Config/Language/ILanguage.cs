@@ -34,5 +34,11 @@ namespace Dapplo.Config.Language
 	/// </summary>
 	public interface ILanguage : IDefaultValue
 	{
+		/// <summary>
+		/// Get the translation for a key
+		/// </summary>
+		/// <param name="languageKey">Key for the translation</param>
+		/// <returns>IniValue</returns>
+		string this[string languageKey] { get; }
 	}
 }
