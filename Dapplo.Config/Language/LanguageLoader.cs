@@ -79,7 +79,7 @@ namespace Dapplo.Config.Language
 		/// <param name="applicationName"></param>
 		/// <param name="defaultLanguage"></param>
 		/// <param name="filePatern">Pattern for the filename, the ietf group needs to be in there!</param>
-		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language(_(?<module>[a-zA-Z0-9]*))?-(?<IETF>[a-zA-Z]+-[a-zA-Z]+)\.(ini|xml)")
+		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language(_(?<module>[a-zA-Z0-9]*))?-(?<IETF>[a-zA-Z]+-(x-)?[a-zA-Z]+)\.(ini|xml)")
 		{
 			CurrentLanguage = defaultLanguage;
 			_filePattern = filePatern;
@@ -295,6 +295,7 @@ namespace Dapplo.Config.Language
 					newResources =
 						(from resourcesElement in XDocument.Load(languageFile).Root.Elements("resources")
 						 from resourceElement in resourcesElement.Elements("resource")
+						 where resourceElement.Attribute("prefix") != null
 						 group resourceElement by resourcesElement.Attribute("prefix").Value into resourceElementGroup
 						 select resourceElementGroup).ToDictionary(group => group.Key, group => (IDictionary<string,string>)group.ToDictionary(x => x.Attribute("name").Value, x => x.Value));
 				} else {
