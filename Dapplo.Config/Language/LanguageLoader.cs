@@ -79,7 +79,7 @@ namespace Dapplo.Config.Language
 		/// <param name="applicationName"></param>
 		/// <param name="defaultLanguage"></param>
 		/// <param name="filePatern">Pattern for the filename, the ietf group needs to be in there!</param>
-		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language(_(?<module>[a-zA-Z0-9]*))?-(?<IETF>[a-zA-Z]+-(x-)?[a-zA-Z]+)\.(ini|xml)")
+		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language(_(?<module>[a-zA-Z0-9]*))?-(?<IETF>[a-zA-Z]{2}(-[a-zA-Z]+)?-[a-zA-Z]+)\.(ini|xml)")
 		{
 			CurrentLanguage = defaultLanguage;
 			_filePattern = filePatern;
@@ -88,9 +88,28 @@ namespace Dapplo.Config.Language
 			_availableLanguages = (
 				from filename
 				in _files
-				select Regex.Match(Path.GetFileName(filename), _filePattern).Groups["IETF"].Value).Distinct().ToDictionary(x => x, x => CultureInfo.GetCultureInfo(x).NativeName
+				select Regex.Match(Path.GetFileName(filename), _filePattern).Groups["IETF"].Value)
+				.Distinct()
+				.Where(x => SavelyGetCultureInfo(x) != null)
+				.ToDictionary(x => x, x => CultureInfo.GetCultureInfo(x).NativeName
 			);
 			LoaderStore.SafelyAddOrOverwrite(applicationName, this);
+		}
+
+		/// <summary>
+		/// Try to get the GetCultureInfo, return null if this is not available
+		/// </summary>
+		/// <param name="ietf"></param>
+		/// <returns></returns>
+		private CultureInfo SavelyGetCultureInfo(string ietf)
+		{
+			try
+			{
+                return CultureInfo.GetCultureInfo(ietf);
+            } catch {
+				Console.WriteLine(ietf);
+			}
+			return null;
 		}
 
 		/// <summary>

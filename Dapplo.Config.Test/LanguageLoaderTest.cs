@@ -76,6 +76,7 @@ namespace Dapplo.Config.Test
 			Assert.IsTrue(languageLoader.AvailableLanguages.ContainsKey("nl-NL"));
 			Assert.IsTrue(languageLoader.AvailableLanguages.ContainsKey("en-US"));
 			Assert.IsTrue(languageLoader.AvailableLanguages.ContainsKey("de-DE"));
+			Assert.IsTrue(languageLoader.AvailableLanguages.ContainsKey("sr-Cyrl-RS"));
 			Assert.AreEqual("Nederlands (Nederland)", languageLoader.AvailableLanguages["nl-NL"]);
 
 			Assert.AreEqual(Ok, language.Ok);
