@@ -2,9 +2,9 @@
 <language>
 	<resources prefix="Test">
 		<resource name="TestValue">Abbrechen</resource>
-		<resource name="OnlydeDE">BlubDE</resource>
+		<resource name="only_de_de">BlubDE</resource>
 	</resources>
 	<resources prefix="Core">
-		<resource name="TestValue2">Another value</resource>
-	</resources>
+		<resource name="test_value_2">Another value</resource>
+  </resources>
 </language>

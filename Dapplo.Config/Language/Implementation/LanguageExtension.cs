@@ -24,24 +24,27 @@ using System;
 using System.Reflection;
 using System.Linq;
 using Dapplo.Config.Support;
+using System.Text.RegularExpressions;
 
 namespace Dapplo.Config.Language.Implementation
 {
 	/// <summary>
 	/// Extend the PropertyProxy with Ini functionality
 	/// </summary>
-	[Extension(typeof (ILanguage))]
+	[Extension(typeof(ILanguage))]
 	internal class LanguageExtension<T> : AbstractPropertyProxyExtension<T>
 	{
 		public LanguageExtension(IPropertyProxy<T> proxy) : base(proxy)
 		{
-			CheckType(typeof (ILanguage));
+			CheckType(typeof(ILanguage));
 			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<ILanguage, object>(x => x[null]), GetTranslation);
 		}
 
-		public override void InitProperty(PropertyInfo propertyInfo) {
+		public override void InitProperty(PropertyInfo propertyInfo)
+		{
 			base.InitProperty(propertyInfo);
-			if (propertyInfo.CanWrite && propertyInfo.GetSetMethod(true).IsPublic) {
+			if (propertyInfo.CanWrite && propertyInfo.GetSetMethod(true).IsPublic)
+			{
 				throw new NotSupportedException(string.Format("Property {0}.{1} has defined a set, this is not allowed for {2} derrived interfaces. Fix by removing the set for the property, leave the get.", propertyInfo.DeclaringType, propertyInfo.Name, typeof(ILanguage).Name));
 			}
 		}
@@ -51,7 +54,11 @@ namespace Dapplo.Config.Language.Implementation
 		/// </summary>
 		private void GetTranslation(MethodCallInfo methodCallInfo)
 		{
-			methodCallInfo.ReturnValue = Proxy.Properties[methodCallInfo.PropertyNameOf(0)] as string; 
+            var key = methodCallInfo.CleanedPropertyNameOf(0);
+			if (Proxy.Properties.ContainsKey(key))
+			{
+				methodCallInfo.ReturnValue = Proxy.Properties[key] as string;
+			}
 		}
 	}
 }

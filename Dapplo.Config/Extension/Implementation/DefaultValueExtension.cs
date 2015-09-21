@@ -112,6 +112,7 @@ namespace Dapplo.Config.Extension.Implementation
 		private void RestoreToDefault(PropertyInfo propertyInfo)
 		{
 			var defaultValue = GetConvertedDefaultValue(propertyInfo);
+
 			if (defaultValue != null)
 			{
 				Proxy.Set(propertyInfo.Name, defaultValue);
@@ -131,10 +132,11 @@ namespace Dapplo.Config.Extension.Implementation
 					// Ignore creating the default type, this might happen if there is no default constructor.
 				}
 			}
-			if (Proxy.Properties.ContainsKey(propertyInfo.Name))
+			var key = GetSetInfo.CleanupPropertyName(propertyInfo.Name);
+			if (Proxy.Properties.ContainsKey(key))
 			{
 				// TODO: This doesn't create a NotifyPropertyChanged/ing event as set isn't called.
-				Proxy.Properties.Remove(propertyInfo.Name);
+				Proxy.Properties.Remove(key);
 			}
 		}
 	}

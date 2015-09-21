@@ -58,15 +58,15 @@ namespace Dapplo.Config.Extension.Implementation
 			if (_inTransaction)
 			{
 				object oldValue;
-				if (_transactionProperties.TryGetValue(setInfo.PropertyName, out oldValue))
+				if (_transactionProperties.TryGetValue(setInfo.CleanedPropertyName, out oldValue))
 				{
-					_transactionProperties[setInfo.PropertyName] = setInfo.NewValue;
+					_transactionProperties[setInfo.CleanedPropertyName] = setInfo.NewValue;
 					setInfo.OldValue = oldValue;
 					setInfo.HasOldValue = true;
 				}
 				else
 				{
-					_transactionProperties.Add(setInfo.PropertyName, setInfo.NewValue);
+					_transactionProperties.Add(setInfo.CleanedPropertyName, setInfo.NewValue);
 					setInfo.OldValue = null;
 					setInfo.HasOldValue = false;
 				}
@@ -85,7 +85,7 @@ namespace Dapplo.Config.Extension.Implementation
 			{
 				// Get the value from the dictionary
 				object value;
-				if (_transactionProperties.TryGetValue(getInfo.PropertyName, out value))
+				if (_transactionProperties.TryGetValue(getInfo.CleanedPropertyName, out value))
 				{
 					getInfo.Value = value;
 					getInfo.CanContinue = false;

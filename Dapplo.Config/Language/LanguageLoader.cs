@@ -41,13 +41,13 @@ namespace Dapplo.Config.Language
 	/// </summary>
 	public class LanguageLoader
 	{
-		private readonly Regex _cleanup = new Regex(@"[^a-zA-Z0-9]+");
+		private readonly Regex _propertyCleanup = new Regex(@"[^a-zA-Z0-9]+", RegexOptions.Compiled);
 		private readonly IDictionary<Type, IPropertyProxy> _languageConfigs = new Dictionary<Type, IPropertyProxy>();
 		private readonly AsyncLock _asyncLock = new AsyncLock();
 		private readonly IDictionary<string, string> _allProperties = new Dictionary<string, string>();
 		private static readonly IDictionary<string, LanguageLoader> LoaderStore = new Dictionary<string, LanguageLoader>();
 		private readonly string _applicationName;
-		private readonly string _filePattern;
+		private readonly Regex _filePattern;
 		private readonly IList<string> _files;
 		private bool _initialReadDone;
 		private readonly IDictionary<string, string> _availableLanguages;
@@ -82,13 +82,13 @@ namespace Dapplo.Config.Language
 		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language(_(?<module>[a-zA-Z0-9]*))?-(?<IETF>[a-zA-Z]{2}(-[a-zA-Z]+)?-[a-zA-Z]+)\.(ini|xml)")
 		{
 			CurrentLanguage = defaultLanguage;
-			_filePattern = filePatern;
+			_filePattern = new Regex(filePatern, RegexOptions.Compiled);
 			_applicationName = applicationName;
 			_files = ScanForFiles(true);
 			_availableLanguages = (
 				from filename
 				in _files
-				select Regex.Match(Path.GetFileName(filename), _filePattern).Groups["IETF"].Value)
+				select _filePattern.Match(Path.GetFileName(filename)).Groups["IETF"].Value)
 				.Distinct()
 				.Where(x => SavelyGetCultureInfo(x) != null)
 				.ToDictionary(x => x, x => CultureInfo.GetCultureInfo(x).NativeName
@@ -203,7 +203,7 @@ namespace Dapplo.Config.Language
 			}
 			var files = (from path in directories
 				where Directory.Exists(path)
-				select Directory.EnumerateFiles(path, "*.*", SearchOption.AllDirectories).Where(f => Regex.IsMatch(Path.GetFileName(f), _filePattern)))
+				select Directory.EnumerateFiles(path, "*.*", SearchOption.AllDirectories).Where(f => _filePattern.IsMatch(Path.GetFileName(f))))
 // See: https://youtrack.jetbrains.com/issue/RSRP-413613
 // ReSharper disable once PossibleMultipleEnumeration
 				.SelectMany(i => i).ToList();
@@ -323,7 +323,7 @@ namespace Dapplo.Config.Language
 				foreach (var section in newResources.Keys) {
 					var properties = newResources[section];
 					foreach (var key in properties.Keys) {
-						var cleanKey = _cleanup.Replace(string.Format("{0}{1}", section, key), "").ToLowerInvariant();
+						var cleanKey = _propertyCleanup.Replace(string.Format("{0}{1}", section, key), "").ToLowerInvariant();
 						_allProperties.SafelyAddOrOverwrite(cleanKey, properties[key]);
 					}
 				}
@@ -359,7 +359,7 @@ namespace Dapplo.Config.Language
 			var propertyObject = (ILanguage) propertyProxy.PropertyObject;
 			foreach (PropertyInfo propertyInfo in propertyProxy.AllPropertyInfos)
 			{
-				string key = _cleanup.Replace(string.Format("{0}{1}", prefix, propertyInfo.Name), "").ToLowerInvariant();
+				string key = _propertyCleanup.Replace(string.Format("{0}{1}", prefix, propertyInfo.Name), "").ToLowerInvariant();
 				string translation;
 				if (_allProperties.TryGetValue(key, out translation))
 				{

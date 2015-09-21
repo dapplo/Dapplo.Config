@@ -77,7 +77,7 @@ namespace Dapplo.Config
 
 			foreach (PropertyInfo propertyInfo in AllPropertyInfos)
 			{
-				_propertyTypes[propertyInfo.Name] = propertyInfo.PropertyType;
+				_propertyTypes[GetSetInfo.CleanupPropertyName(propertyInfo.Name)] = propertyInfo.PropertyType;
 
 				foreach (var extension in extensions)
 				{
@@ -190,25 +190,33 @@ namespace Dapplo.Config
 			}
 		}
 
+		/// <summary>
+		/// Cache the AllPropertyInfos
+		/// </summary>
+		private IEnumerable<PropertyInfo> _allPropertyInfos;
 
 		/// <summary>
 		/// Simple getter for all properties on the type, including derrived interfaces
 		/// </summary>
 		public IEnumerable<PropertyInfo> AllPropertyInfos {
 			get {
-				// Exclude properties from this assembly
-				var thisAssembly = GetType().Assembly;
+				if (_allPropertyInfos == null)
+				{
+					// Exclude properties from this assembly
+					var thisAssembly = GetType().Assembly;
 
-				// as GetInterfaces doesn't return the type itself (makes sense), the following 2 lines makes a list of all
-				var interfacesToCheck = new List<Type>(typeof(T).GetInterfaces());
-				interfacesToCheck.Add(typeof(T));
+					// as GetInterfaces doesn't return the type itself (makes sense), the following 2 lines makes a list of all
+					var interfacesToCheck = new List<Type>(typeof(T).GetInterfaces());
+					interfacesToCheck.Add(typeof(T));
+					// Now, create an IEnumerable for all the property info of all the properties in the interfaces that the
+					// "user" code introduced in the type. (e.g skip all types & properties from this assembly)
+					_allPropertyInfos = from interfaceType in interfacesToCheck
+										where interfaceType.Assembly != thisAssembly
+										from propertyInfo in interfaceType.GetProperties()
+										select propertyInfo;
+				}
 
-				// Now, create an IEnumerable for all the property info of all the properties in the interfaces that the
-				// "user" code introduced in the type. (e.g skip all types & properties from this assembly)
-				return from interfaceType in interfacesToCheck
-					   where interfaceType.Assembly != thisAssembly
-					   from propertyInfo in interfaceType.GetProperties()
-					   select propertyInfo;
+				return _allPropertyInfos;
 			}
 		}
 
@@ -249,7 +257,7 @@ namespace Dapplo.Config
 			{
 				foreach (string key in value.Keys)
 				{
-					_properties.SafelyAddOrOverwrite(key, value[key]);
+					_properties.SafelyAddOrOverwrite(key.ToLowerInvariant(), value[key]);
 				}
 			}
 		}
@@ -272,7 +280,7 @@ namespace Dapplo.Config
 		private void DefaultSet(SetInfo setInfo)
 		{
 			// Add the value to the dictionary
-			_properties.SafelyAddOrOverwrite(setInfo.PropertyName, setInfo.NewValue);
+			_properties.SafelyAddOrOverwrite(setInfo.CleanedPropertyName, setInfo.NewValue);
 		}
 
 		/// <summary>
@@ -282,7 +290,12 @@ namespace Dapplo.Config
 		private void DefaultGet(GetInfo getInfo)
 		{
 			object value;
-			if (getInfo.PropertyName != null && _properties.TryGetValue(getInfo.PropertyName, out value))
+			if (getInfo.PropertyName == null)
+			{
+				getInfo.HasValue = false;
+				return;
+			}
+            if (_properties.TryGetValue(getInfo.CleanedPropertyName, out value))
 			{
 				getInfo.Value = value;
 				getInfo.HasValue = true;
@@ -290,7 +303,7 @@ namespace Dapplo.Config
 			else
 			{
 				// Make sure we return the right default value
-				Type propType = _propertyTypes[getInfo.PropertyName];
+				Type propType = _propertyTypes[getInfo.CleanedPropertyName];
 				if (propType.IsValueType)
 				{
 					getInfo.Value = Activator.CreateInstance(propType);
@@ -396,7 +409,8 @@ namespace Dapplo.Config
 		public SetInfo Set(string propertyName, object newValue)
 		{
 			object oldValue;
-			bool hasOldValue = _properties.TryGetValue(propertyName, out oldValue);
+			var cleanedPropertyName = GetSetInfo.CleanupPropertyName(propertyName);
+			bool hasOldValue = _properties.TryGetValue(cleanedPropertyName, out oldValue);
 			var setInfo = new SetInfo
 			{
 				NewValue = newValue, PropertyName = propertyName, HasOldValue = hasOldValue, CanContinue = true, OldValue = oldValue

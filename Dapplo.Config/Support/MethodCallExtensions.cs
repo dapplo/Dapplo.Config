@@ -22,7 +22,8 @@
 using System.Linq.Expressions;
 
 namespace Dapplo.Config.Support {
-	public static class MethodCallExtensions {
+	public static class MethodCallExtensions
+	{
 		/// <summary>
 		/// Get the property name from the argument "index" of the MethodCallInfo
 		/// If the argument is a string, it will be returned.
@@ -31,13 +32,26 @@ namespace Dapplo.Config.Support {
 		/// <param name="methodCallInfo">MethodCallInfo</param>
 		/// <param name="index">Index of the argument</param>
 		/// <returns>Property name</returns>
-		public static string PropertyNameOf(this MethodCallInfo methodCallInfo, int index) {
+		public static string PropertyNameOf(this MethodCallInfo methodCallInfo, int index)
+		{
 			string propertyName = methodCallInfo.Arguments[index] as string;
-			if (propertyName == null) {
+			if (propertyName == null)
+			{
 				LambdaExpression propertyExpression = (LambdaExpression)methodCallInfo.Arguments[index];
 				propertyName = propertyExpression.GetMemberName();
 			}
 			return propertyName;
+		}
+
+		/// <summary>
+		/// This is the same as PropertyNameOf, only the returned value is cleaned up
+		/// </summary>
+		/// <param name="methodCallInfo">MethodCallInfo</param>
+		/// <param name="index">Index of the argument</param>
+		/// <returns>cleaned up property name</returns>
+		public static string CleanedPropertyNameOf(this MethodCallInfo methodCallInfo, int index)
+		{
+			return GetSetInfo.CleanupPropertyName(methodCallInfo.PropertyNameOf(index));
 		}
 	}
 }

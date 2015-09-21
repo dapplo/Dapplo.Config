@@ -65,7 +65,7 @@ namespace Dapplo.Config.Ini.Implementation
 			// return IniValue
 			methodCallInfo.ReturnValue = (
 				from propertyInfo in Proxy.AllPropertyInfos
-				where propertyInfo.Name == methodCallInfo.PropertyNameOf(0)
+				where GetSetInfo.CleanupPropertyName(propertyInfo.Name) == methodCallInfo.CleanedPropertyNameOf(0)
 				select GenerateIniValue(propertyInfo)).First();
 		}
 
@@ -75,7 +75,7 @@ namespace Dapplo.Config.Ini.Implementation
 		private void TryGetIniValue(MethodCallInfo methodCallInfo) {
 			var iniValue = (
 				from propertyInfo in Proxy.AllPropertyInfos
-				where propertyInfo.Name == methodCallInfo.PropertyNameOf(0)
+				where GetSetInfo.CleanupPropertyName(propertyInfo.Name) == methodCallInfo.CleanedPropertyNameOf(0)
 				select GenerateIniValue(propertyInfo)).FirstOrDefault();
 
 			// return IniValue

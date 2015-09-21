@@ -20,18 +20,52 @@
  */
 
 using System;
+using System.Text.RegularExpressions;
 
 namespace Dapplo.Config.Support
 {
 	public class GetSetInfo
 	{
+		private static readonly Regex _propertyCleanup = new Regex(@"[^a-zA-Z0-9]+", RegexOptions.Compiled);
+
 		/// <summary>
-		///     Property name of the property that is being set
+		/// Make a clean & "tolower" string of a property name, this will be used internally
+		/// </summary>
+		/// <param name="propertyName"></param>
+		/// <returns></returns>
+		public static string CleanupPropertyName(string propertyName)
+		{
+			if (propertyName == null)
+			{
+				return null;
+			}
+			return _propertyCleanup.Replace(propertyName, "").ToLowerInvariant();
+        }
+
+		private string _propertyName;
+		/// <summary>
+		///     Property name of the property that is being get/set
 		/// </summary>
 		public string PropertyName
 		{
+			get
+			{
+				return _propertyName;
+            }
+			set
+			{
+				_propertyName = value;
+				CleanedPropertyName = CleanupPropertyName(value);
+            }
+		}
+
+		/// <summary>
+		/// The property name of the property that is being get/set, but tolower and without special characters
+		/// </summary>
+		public string CleanedPropertyName
+		{
 			get;
-			set;
+			private set;
 		}
 
 		/// <summary>

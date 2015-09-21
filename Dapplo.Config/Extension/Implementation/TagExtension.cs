@@ -47,17 +47,18 @@ namespace Dapplo.Config.Extension.Implementation
 		/// <param name="propertyInfo"></param>
 		public override void InitProperty(PropertyInfo propertyInfo)
 		{
-			Attribute[] customAttributes = Attribute.GetCustomAttributes(propertyInfo);
+			var key = GetSetInfo.CleanupPropertyName(propertyInfo.Name);
+            Attribute[] customAttributes = Attribute.GetCustomAttributes(propertyInfo);
 			foreach (Attribute customAttribute in customAttributes)
 			{
 				TagAttribute tagAttribute = customAttribute as TagAttribute;
 				if (tagAttribute != null)
 				{
 					IDictionary<object, object> tags;
-					if (!_taggedProperties.TryGetValue(propertyInfo.Name, out tags))
+					if (!_taggedProperties.TryGetValue(key, out tags))
 					{
 						tags = new Dictionary<object, object>();
-						_taggedProperties.Add(propertyInfo.Name, tags);
+						_taggedProperties.Add(key, tags);
 					}
 					tags.SafelyAddOrOverwrite(tagAttribute.Tag, tagAttribute.TagValue);
 				}
@@ -72,7 +73,7 @@ namespace Dapplo.Config.Extension.Implementation
 		{
 			methodCallInfo.ReturnValue = false;
 			IDictionary<object, object> tags;
-			if (_taggedProperties.TryGetValue(methodCallInfo.PropertyNameOf(0), out tags))
+			if (_taggedProperties.TryGetValue(methodCallInfo.CleanedPropertyNameOf(0), out tags))
 			{
 				methodCallInfo.ReturnValue = tags.ContainsKey(methodCallInfo.Arguments[1]);
 			}
@@ -85,7 +86,7 @@ namespace Dapplo.Config.Extension.Implementation
 		private void GetTagValue(MethodCallInfo methodCallInfo) {
 			methodCallInfo.ReturnValue = false;
 			IDictionary<object, object> tags;
-			if (_taggedProperties.TryGetValue(methodCallInfo.PropertyNameOf(0), out tags)) {
+			if (_taggedProperties.TryGetValue(methodCallInfo.CleanedPropertyNameOf(0), out tags)) {
 				bool hasTag = tags.ContainsKey(methodCallInfo.Arguments[1]);
 				object returnValue = null;
 				if (hasTag) {

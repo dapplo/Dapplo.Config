@@ -56,14 +56,14 @@ namespace Dapplo.Config.Extension.Implementation
 		/// <param name="setInfo">SetInfo with all the information on the set call</param>
 		private void WriteProtectSetter(SetInfo setInfo)
 		{
-			if (_writeProtectedProperties.Contains(setInfo.PropertyName))
+			if (_writeProtectedProperties.Contains(setInfo.CleanedPropertyName))
 			{
 				setInfo.CanContinue = false;
 				setInfo.Error = new AccessViolationException(string.Format("Property {0} is write protected", setInfo.PropertyName));
 			}
 			else if (_isProtecting)
 			{
-				_writeProtectedProperties.Add(setInfo.PropertyName);
+				_writeProtectedProperties.Add(setInfo.CleanedPropertyName);
 			}
 		}
 
@@ -101,7 +101,7 @@ namespace Dapplo.Config.Extension.Implementation
 		/// <param name="methodCallInfo">IMethodCallMessage</param>
 		private void IsWriteProtected(MethodCallInfo methodCallInfo)
 		{
-			methodCallInfo.ReturnValue = _writeProtectedProperties.Contains(methodCallInfo.PropertyNameOf(0));
+			methodCallInfo.ReturnValue = _writeProtectedProperties.Contains(methodCallInfo.CleanedPropertyNameOf(0));
 		}
 
 		/// <summary>
@@ -110,7 +110,7 @@ namespace Dapplo.Config.Extension.Implementation
 		/// <param name="methodCallInfo">IMethodCallMessage</param>
 		private void WriteProtect(MethodCallInfo methodCallInfo)
 		{
-			_writeProtectedProperties.Add(methodCallInfo.PropertyNameOf(0));
+			_writeProtectedProperties.Add(methodCallInfo.CleanedPropertyNameOf(0));
 		}
 
 		/// <summary>
@@ -119,7 +119,7 @@ namespace Dapplo.Config.Extension.Implementation
 		/// <param name="methodCallInfo">IMethodCallMessage</param>
 		private void DisableWriteProtect(MethodCallInfo methodCallInfo)
 		{
-			_writeProtectedProperties.Remove(methodCallInfo.PropertyNameOf(0));
+			_writeProtectedProperties.Remove(methodCallInfo.CleanedPropertyNameOf(0));
 		}
 	}
 }

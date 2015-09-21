@@ -30,7 +30,7 @@ namespace Dapplo.Config.Ini
 	public class IniValue
 	{
 		private readonly IPropertyProxy _proxy;
-
+		
 		public IniValue(IPropertyProxy proxy)
 		{
 			_proxy = proxy;
@@ -43,6 +43,12 @@ namespace Dapplo.Config.Ini
 		{
 			get;
 			set;
+		}
+
+		public string CleanPropertyName
+		{
+			get;
+			private set;
 		}
 
 		/// <summary>

@@ -67,6 +67,8 @@ namespace Dapplo.Config.Test
 			var language = await languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
 			await languageLoader.ChangeLanguage("nl-NL");
 			Assert.AreEqual("Afbreken", language["TestValue"]);
+			// Test using the raw property name with the indexer
+			Assert.AreEqual("Afbreken", language["test_value"]);
 		}
 
 		[TestMethod]
@@ -78,7 +80,7 @@ namespace Dapplo.Config.Test
 			Assert.IsTrue(languageLoader.AvailableLanguages.ContainsKey("de-DE"));
 			Assert.IsTrue(languageLoader.AvailableLanguages.ContainsKey("sr-Cyrl-RS"));
 			Assert.AreEqual("Nederlands (Nederland)", languageLoader.AvailableLanguages["nl-NL"]);
-
+			await languageLoader.ChangeLanguage("en-US");
 			Assert.AreEqual(Ok, language.Ok);
 			Assert.AreEqual("Cancel", language.TestValue);
 			Assert.AreEqual("BlubEN", language.OnlyenUS);
