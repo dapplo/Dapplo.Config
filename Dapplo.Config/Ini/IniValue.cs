@@ -45,12 +45,6 @@ namespace Dapplo.Config.Ini
 			set;
 		}
 
-		public string CleanPropertyName
-		{
-			get;
-			private set;
-		}
-
 		/// <summary>
 		/// Name of the property in the file, this could be different
 		/// </summary>

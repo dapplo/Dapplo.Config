@@ -21,6 +21,7 @@
 
 using Dapplo.Config.Support;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
@@ -842,6 +843,107 @@ namespace Dapplo.Config.Ini
 
 			// Reset the current sections
 			FillSections();
+		}
+
+		/// <summary>
+		/// Process an Rest URI, this can be used to read or write values via e.g. a HttpListener
+		/// format:
+		/// schema://hostname:port/IniConfig/Command/Applicationname/Configname/Section/Property/NewValue(optional)?query
+		/// schema is not important, this can be an application specific thing
+		/// hostname is not important, this can be an application specific thing
+		/// port is not important, this can be an application specific thing
+		/// The command is read/write/add/remove
+		/// the Applicationname & Configname must be registered by new IniConfig(Applicationname,Configname)
+		/// The Section is that which is used in the IniSection
+		/// The property needs to be available
+		/// NewValue is optional (read) can be used to set the property (write)
+		/// The query can be used to add or remove values from lists / dictionaries
+		/// </summary>
+		/// <param name="restUri"></param>
+		/// <returns>Value (before write) or actual value with read/add/remove</returns>
+		public static object ProcessRestUri(Uri restUri)
+		{
+			var segments = restUri.Segments.ToList();
+			if (segments[0] == "/")
+			{
+				segments.RemoveAt(0);
+            }
+			for(int i=0; i<segments.Count; i++)
+			{
+				if (segments[i].EndsWith("/"))
+				{
+					segments[i] = segments[i].Remove(segments[i].Length - 1);
+                }
+			}
+			if (segments[0] != "IniConfig")
+			{
+				return null;
+			}
+			segments.RemoveAt(0);
+			var command = segments[0];
+			segments.RemoveAt(0);
+			var iniConfig = IniConfig.Get(segments[0], segments[1]);
+			segments.RemoveAt(0);
+			segments.RemoveAt(0);
+			var iniSection = iniConfig[segments[0]];
+			segments.RemoveAt(0);
+			var iniValue = iniSection[segments[0]];
+			segments.RemoveAt(0);
+			var currentValue = iniValue.Value;
+			switch(command)
+			{
+				case "write":
+
+					if (segments.Count > 0)
+					{
+						if (iniValue.ValueType.IsGenericDirectory() || iniValue.ValueType.IsGenericList())
+						{
+							throw new NotSupportedException(string.Format("Can't write to type of {0}, used add/remove", iniValue.ValueType));
+						}
+						iniValue.Value = iniValue.Converter.ConvertFromInvariantString(segments[0]);
+					}
+					break;
+				case "read":
+					// Ignore, as the default logic covers a read
+					break;
+				case "remove":
+					if (iniValue.ValueType.IsGenericDirectory() || iniValue.ValueType.IsGenericList())
+					{
+						Type itemType = iniValue.ValueType.GetGenericArguments()[0];
+						var converter = itemType.GetTypeConverter();
+						var itemValue = converter.ConvertFromInvariantString(segments[0]);
+						var removeMethodInfo = iniValue.ValueType.GetMethod("Remove");
+						removeMethodInfo.Invoke(iniValue.Value, new[] { itemValue });
+					}
+					break;
+				case "add":
+					if (iniValue.ValueType.IsGenericDirectory())
+					{
+						var variables = restUri.QueryToDictionary();
+						Type keyType = iniValue.ValueType.GetGenericArguments()[0];
+						var keyConverter = keyType.GetTypeConverter();
+						Type valueType = iniValue.ValueType.GetGenericArguments()[1];
+						var valueConverter = valueType.GetTypeConverter();
+						var addMethodInfo = iniValue.ValueType.GetMethod("Add");
+						foreach (var key in variables.Keys)
+						{
+							var keyObject = keyConverter.ConvertFromInvariantString(key);
+							var valueObject = valueConverter.ConvertFromInvariantString(variables[key]);
+							addMethodInfo.Invoke(iniValue.Value, new[] { keyObject, valueObject });
+						}
+					} else if (iniValue.ValueType.IsGenericList())
+					{
+						Type itemType = iniValue.ValueType.GetGenericArguments()[0];
+						var converter = itemType.GetTypeConverter();
+						var itemValue = converter.ConvertFromInvariantString(segments[0]);
+						var addMethodInfo = iniValue.ValueType.GetMethod("Add");
+						addMethodInfo.Invoke(iniValue.Value, new[] { itemValue });
+					}
+					break;
+				default:
+					throw new NotSupportedException(string.Format("Don't know command {0}, there is only read/write/add/remove", command));
+			}
+            return currentValue;
 		}
 	}
 }

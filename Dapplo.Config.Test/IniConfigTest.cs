@@ -112,8 +112,8 @@ namespace Dapplo.Config.Test
 			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 			// Test ini value retrieval, by checking the Type and return value
 			var iniValue = iniTest["WindowCornerCutShape"];
-			Assert.IsTrue(iniValue.ValueType == typeof (IList<int>));
-			Assert.IsTrue(((IList<int>) iniValue.Value).Count > 0);
+			Assert.IsTrue(iniValue.ValueType == typeof(IList<int>));
+			Assert.IsTrue(((IList<int>)iniValue.Value).Count > 0);
 		}
 
 		[TestMethod]
@@ -126,7 +126,7 @@ namespace Dapplo.Config.Test
 			Assert.IsTrue(iniConfig.TryGet("Test", out section));
 			IniValue tryGetValue;
 			Assert.IsTrue(section.TryGetIniValue("WindowCornerCutShape", out tryGetValue));
-			Assert.IsTrue(((IList<int>) tryGetValue.Value).Count > 0);
+			Assert.IsTrue(((IList<int>)tryGetValue.Value).Count > 0);
 			Assert.IsFalse(section.TryGetIniValue("DoesNotExist", out tryGetValue));
 		}
 
@@ -186,6 +186,24 @@ namespace Dapplo.Config.Test
 			// Check second get, should have same value
 			var iniTest2 = iniConfig.Get<IIniConfigTest>();
 			Assert.AreEqual(TestValueForNonSerialized, iniTest2.NotWritten);
+		}
+
+		[TestMethod]
+		public async Task TestIniRest()
+		{
+			var iniConfig = await InitializeAsync();
+			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
+			iniTest.Name = Name;
+			iniTest.SomeValues.Add("Answer", 42);
+			var changeNameToRobinKromUri = new Uri("dummy:///IniConfig/write/Dapplo/dapplo/Test/Name/RobinKrom");
+			Assert.AreEqual(Name, IniConfig.ProcessRestUri(changeNameToRobinKromUri));
+			Assert.AreEqual("RobinKrom", iniTest.Name);
+			var removeValueUri = new Uri("dummy:///IniConfig/remove/Dapplo/dapplo/Test/SomeValues/Answer");
+			IniConfig.ProcessRestUri(removeValueUri);
+			Assert.IsFalse(iniTest.SomeValues.ContainsKey("NumberOfSongs"));
+
+			var addValueUri = new Uri("dummy:///IniConfig/add/Dapplo/dapplo/Test/SomeValues?Hightlight=10&Stop=20");
+			IniConfig.ProcessRestUri(addValueUri);
 		}
 	}
 }

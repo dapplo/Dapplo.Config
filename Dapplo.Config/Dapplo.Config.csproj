@@ -34,6 +34,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="WindowsBase" />
@@ -80,6 +81,7 @@
     <Compile Include="Support\PropertyInfoExtension.cs" />
     <Compile Include="Support\StringExtensions.cs" />
     <Compile Include="Support\TypeExtensions.cs" />
+    <Compile Include="Support\UriExtensions.cs" />
     <Compile Include="WindowsRegistry\Implementation\RegistryExtension.cs" />
     <Compile Include="WindowsRegistry\RegistryAttribute.cs" />
     <Compile Include="WindowsRegistry\RegistryPropertyAttribute.cs" />
