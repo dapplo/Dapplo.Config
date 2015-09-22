@@ -171,7 +171,14 @@ namespace Dapplo.Config.Converters
 			string valueString = value as string;
 			if (!string.IsNullOrWhiteSpace(valueString))
 			{
-				return Decrypt(valueString);
+				// Try to decrypt, ignore FormatException
+				try
+				{
+					return Decrypt(valueString);
+				} catch (FormatException)
+				{
+					return valueString;
+                }
 			}
 			if (valueString != null)
 			{
