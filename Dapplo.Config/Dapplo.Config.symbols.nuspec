@@ -14,7 +14,7 @@
 		<summary>A library with code to quickly add a configuration to your application.</summary>
         <language>en-us</language>
 		<copyright>Dapplo</copyright>
-		<tags>config ini</tags>
+		<tags>config ini language translations</tags>
     </metadata>
 	<files>
 		<file src="bin\release\Dapplo.Config.pdb" target="lib\net451" />
