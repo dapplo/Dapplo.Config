@@ -32,7 +32,7 @@ namespace Dapplo.Config.Extension.Implementation
 	internal class TransactionExtension<T> : AbstractPropertyProxyExtension<T>
 	{
 		// A store for the values that are set during the transaction
-		private readonly IDictionary<string, object> _transactionProperties = new Dictionary<string, object>();
+		private readonly IDictionary<string, object> _transactionProperties = new NonStrictLookup<object>();
 		// This boolean has the value true if we are currently in a transaction
 		private bool _inTransaction;
 
@@ -58,15 +58,15 @@ namespace Dapplo.Config.Extension.Implementation
 			if (_inTransaction)
 			{
 				object oldValue;
-				if (_transactionProperties.TryGetValue(setInfo.CleanedPropertyName, out oldValue))
+				if (_transactionProperties.TryGetValue(setInfo.PropertyName, out oldValue))
 				{
-					_transactionProperties[setInfo.CleanedPropertyName] = setInfo.NewValue;
+					_transactionProperties[setInfo.PropertyName] = setInfo.NewValue;
 					setInfo.OldValue = oldValue;
 					setInfo.HasOldValue = true;
 				}
 				else
 				{
-					_transactionProperties.Add(setInfo.CleanedPropertyName, setInfo.NewValue);
+					_transactionProperties.Add(setInfo.PropertyName, setInfo.NewValue);
 					setInfo.OldValue = null;
 					setInfo.HasOldValue = false;
 				}
@@ -85,7 +85,7 @@ namespace Dapplo.Config.Extension.Implementation
 			{
 				// Get the value from the dictionary
 				object value;
-				if (_transactionProperties.TryGetValue(getInfo.CleanedPropertyName, out value))
+				if (_transactionProperties.TryGetValue(getInfo.PropertyName, out value))
 				{
 					getInfo.Value = value;
 					getInfo.CanContinue = false;

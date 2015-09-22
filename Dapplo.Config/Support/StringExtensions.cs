@@ -19,28 +19,27 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 
-namespace Dapplo.Config.Support {
-	public static class MethodCallExtensions
+namespace Dapplo.Config.Support
+{
+	public static class StringExtensions
 	{
+		private static readonly Regex _cleanup = new Regex(@"[^a-z0-9]+", RegexOptions.Compiled);
 		/// <summary>
-		/// Get the property name from the argument "index" of the MethodCallInfo
-		/// If the argument is a string, it will be returned.
-		/// If the arugment is a LambdaExpression, the member name will be retrieved
+		/// Helper method for converting a string to a non strict value.
+		/// This means, ToLowerInvariant and replace all non alpha/digits to ""
 		/// </summary>
-		/// <param name="methodCallInfo">MethodCallInfo</param>
-		/// <param name="index">Index of the argument</param>
-		/// <returns>Property name</returns>
-		public static string PropertyNameOf(this MethodCallInfo methodCallInfo, int index)
+		/// <param name="key"></param>
+		/// <returns>clean string</returns>
+		public static string Cleanup(this string value)
 		{
-			string propertyName = methodCallInfo.Arguments[index] as string;
-			if (propertyName == null)
-			{
-				LambdaExpression propertyExpression = (LambdaExpression)methodCallInfo.Arguments[index];
-				propertyName = propertyExpression.GetMemberName();
-			}
-			return propertyName;
+			return _cleanup.Replace(value.ToLowerInvariant(), "");
 		}
+
+		public static bool NonStrictEquals(this string value1, string value2)
+		{
+			return value1.Cleanup().Equals(value2.Cleanup());
+        }
 	}
 }

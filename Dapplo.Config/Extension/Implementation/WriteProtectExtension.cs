@@ -33,7 +33,7 @@ namespace Dapplo.Config.Extension.Implementation
 	internal class WriteProtectExtension<T> : AbstractPropertyProxyExtension<T>
 	{
 		// A store for the values that are write protected
-		private readonly ISet<string> _writeProtectedProperties = new HashSet<string>();
+		private readonly ISet<string> _writeProtectedProperties = new NonStrictStringSet();
 		private bool _isProtecting;
 
 		public WriteProtectExtension(IPropertyProxy<T> proxy) : base(proxy)
@@ -56,14 +56,14 @@ namespace Dapplo.Config.Extension.Implementation
 		/// <param name="setInfo">SetInfo with all the information on the set call</param>
 		private void WriteProtectSetter(SetInfo setInfo)
 		{
-			if (_writeProtectedProperties.Contains(setInfo.CleanedPropertyName))
+			if (_writeProtectedProperties.Contains(setInfo.PropertyName))
 			{
 				setInfo.CanContinue = false;
 				setInfo.Error = new AccessViolationException(string.Format("Property {0} is write protected", setInfo.PropertyName));
 			}
 			else if (_isProtecting)
 			{
-				_writeProtectedProperties.Add(setInfo.CleanedPropertyName);
+				_writeProtectedProperties.Add(setInfo.PropertyName);
 			}
 		}
 
@@ -101,7 +101,7 @@ namespace Dapplo.Config.Extension.Implementation
 		/// <param name="methodCallInfo">IMethodCallMessage</param>
 		private void IsWriteProtected(MethodCallInfo methodCallInfo)
 		{
-			methodCallInfo.ReturnValue = _writeProtectedProperties.Contains(methodCallInfo.CleanedPropertyNameOf(0));
+			methodCallInfo.ReturnValue = _writeProtectedProperties.Contains(methodCallInfo.PropertyNameOf(0));
 		}
 
 		/// <summary>
@@ -110,7 +110,7 @@ namespace Dapplo.Config.Extension.Implementation
 		/// <param name="methodCallInfo">IMethodCallMessage</param>
 		private void WriteProtect(MethodCallInfo methodCallInfo)
 		{
-			_writeProtectedProperties.Add(methodCallInfo.CleanedPropertyNameOf(0));
+			_writeProtectedProperties.Add(methodCallInfo.PropertyNameOf(0));
 		}
 
 		/// <summary>
@@ -119,7 +119,7 @@ namespace Dapplo.Config.Extension.Implementation
 		/// <param name="methodCallInfo">IMethodCallMessage</param>
 		private void DisableWriteProtect(MethodCallInfo methodCallInfo)
 		{
-			_writeProtectedProperties.Remove(methodCallInfo.CleanedPropertyNameOf(0));
+			_writeProtectedProperties.Remove(methodCallInfo.PropertyNameOf(0));
 		}
 	}
 }

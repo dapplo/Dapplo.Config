@@ -54,7 +54,7 @@ namespace Dapplo.Config.Language.Implementation
 		/// </summary>
 		private void GetTranslation(MethodCallInfo methodCallInfo)
 		{
-            var key = methodCallInfo.CleanedPropertyNameOf(0);
+            var key = methodCallInfo.PropertyNameOf(0);
 			if (Proxy.Properties.ContainsKey(key))
 			{
 				methodCallInfo.ReturnValue = Proxy.Properties[key] as string;

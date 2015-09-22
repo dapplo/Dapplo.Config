@@ -39,8 +39,8 @@ namespace Dapplo.Config
 		private readonly List<IPropertyProxyExtension> _extensions = new List<IPropertyProxyExtension>();
 		private readonly List<Getter> _getters = new List<Getter>();
 		private readonly IDictionary<string, List<Action<MethodCallInfo>>> _methodMap = new Dictionary<string, List<Action<MethodCallInfo>>>();
-		private readonly IDictionary<string, object> _properties = new Dictionary<string, object>();
-		private readonly IDictionary<string, Type> _propertyTypes = new Dictionary<string, Type>();
+		private readonly IDictionary<string, object> _properties = new NonStrictLookup<object>();
+		private readonly IDictionary<string, Type> _propertyTypes = new NonStrictLookup<Type>();
 		private readonly List<Setter> _setters = new List<Setter>();
 
 		// Cache the GetTransparentProxy value, as it makes more sense
@@ -75,9 +75,9 @@ namespace Dapplo.Config
 				orderby sortedExtension.InitOrder ascending
 				select sortedExtension;
 
-			foreach (PropertyInfo propertyInfo in AllPropertyInfos)
+			foreach (PropertyInfo propertyInfo in AllPropertyInfos.Values)
 			{
-				_propertyTypes[GetSetInfo.CleanupPropertyName(propertyInfo.Name)] = propertyInfo.PropertyType;
+				_propertyTypes[propertyInfo.Name] = propertyInfo.PropertyType;
 
 				foreach (var extension in extensions)
 				{
@@ -193,12 +193,12 @@ namespace Dapplo.Config
 		/// <summary>
 		/// Cache the AllPropertyInfos
 		/// </summary>
-		private IEnumerable<PropertyInfo> _allPropertyInfos;
+		private IDictionary<string, PropertyInfo> _allPropertyInfos;
 
 		/// <summary>
 		/// Simple getter for all properties on the type, including derrived interfaces
 		/// </summary>
-		public IEnumerable<PropertyInfo> AllPropertyInfos {
+		public IDictionary<string, PropertyInfo> AllPropertyInfos {
 			get {
 				if (_allPropertyInfos == null)
 				{
@@ -210,10 +210,15 @@ namespace Dapplo.Config
 					interfacesToCheck.Add(typeof(T));
 					// Now, create an IEnumerable for all the property info of all the properties in the interfaces that the
 					// "user" code introduced in the type. (e.g skip all types & properties from this assembly)
-					_allPropertyInfos = from interfaceType in interfacesToCheck
+					var allPropertyInfos = from interfaceType in interfacesToCheck
 										where interfaceType.Assembly != thisAssembly
 										from propertyInfo in interfaceType.GetProperties()
 										select propertyInfo;
+					_allPropertyInfos = new NonStrictLookup<PropertyInfo>();
+                    foreach(var propertyInfo in allPropertyInfos)
+					{
+						_allPropertyInfos.Add(propertyInfo.Name, propertyInfo);
+                    }
 				}
 
 				return _allPropertyInfos;
@@ -257,7 +262,7 @@ namespace Dapplo.Config
 			{
 				foreach (string key in value.Keys)
 				{
-					_properties.SafelyAddOrOverwrite(key.ToLowerInvariant(), value[key]);
+					_properties.SafelyAddOrOverwrite(key, value[key]);
 				}
 			}
 		}
@@ -280,7 +285,7 @@ namespace Dapplo.Config
 		private void DefaultSet(SetInfo setInfo)
 		{
 			// Add the value to the dictionary
-			_properties.SafelyAddOrOverwrite(setInfo.CleanedPropertyName, setInfo.NewValue);
+			_properties.SafelyAddOrOverwrite(setInfo.PropertyName, setInfo.NewValue);
 		}
 
 		/// <summary>
@@ -295,7 +300,7 @@ namespace Dapplo.Config
 				getInfo.HasValue = false;
 				return;
 			}
-            if (_properties.TryGetValue(getInfo.CleanedPropertyName, out value))
+            if (_properties.TryGetValue(getInfo.PropertyName, out value))
 			{
 				getInfo.Value = value;
 				getInfo.HasValue = true;
@@ -303,7 +308,7 @@ namespace Dapplo.Config
 			else
 			{
 				// Make sure we return the right default value
-				Type propType = _propertyTypes[getInfo.CleanedPropertyName];
+				Type propType = _propertyTypes[getInfo.PropertyName];
 				if (propType.IsValueType)
 				{
 					getInfo.Value = Activator.CreateInstance(propType);
@@ -409,8 +414,7 @@ namespace Dapplo.Config
 		public SetInfo Set(string propertyName, object newValue)
 		{
 			object oldValue;
-			var cleanedPropertyName = GetSetInfo.CleanupPropertyName(propertyName);
-			bool hasOldValue = _properties.TryGetValue(cleanedPropertyName, out oldValue);
+			bool hasOldValue = _properties.TryGetValue(propertyName, out oldValue);
 			var setInfo = new SetInfo
 			{
 				NewValue = newValue, PropertyName = propertyName, HasOldValue = hasOldValue, CanContinue = true, OldValue = oldValue

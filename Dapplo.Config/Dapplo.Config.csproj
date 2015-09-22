@@ -75,7 +75,10 @@
     <Compile Include="ProxyBuilder.cs" />
     <Compile Include="Support\DictionaryExtensions.cs" />
     <Compile Include="Support\MethodCallExtensions.cs" />
+    <Compile Include="Support\NonStrictLookup.cs" />
+    <Compile Include="Support\NonStrictStringSet.cs" />
     <Compile Include="Support\PropertyInfoExtension.cs" />
+    <Compile Include="Support\StringExtensions.cs" />
     <Compile Include="Support\TypeExtensions.cs" />
     <Compile Include="WindowsRegistry\Implementation\RegistryExtension.cs" />
     <Compile Include="WindowsRegistry\RegistryAttribute.cs" />

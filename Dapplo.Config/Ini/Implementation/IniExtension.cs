@@ -54,7 +54,7 @@ namespace Dapplo.Config.Ini.Implementation
 		private void GetIniValues(MethodCallInfo methodCallInfo) {
 			// return a linq which loops over all the properties and generates GetIniValues
 			methodCallInfo.ReturnValue =
-				from propertyInfo in Proxy.AllPropertyInfos
+				from propertyInfo in Proxy.AllPropertyInfos.Values
 				select GenerateIniValue(propertyInfo);
 		}
 
@@ -64,8 +64,8 @@ namespace Dapplo.Config.Ini.Implementation
 		private void GetIniValue(MethodCallInfo methodCallInfo) {
 			// return IniValue
 			methodCallInfo.ReturnValue = (
-				from propertyInfo in Proxy.AllPropertyInfos
-				where GetSetInfo.CleanupPropertyName(propertyInfo.Name) == methodCallInfo.CleanedPropertyNameOf(0)
+				from propertyInfo in Proxy.AllPropertyInfos.Values
+				where propertyInfo.Name.NonStrictEquals(methodCallInfo.PropertyNameOf(0))
 				select GenerateIniValue(propertyInfo)).First();
 		}
 
@@ -74,8 +74,8 @@ namespace Dapplo.Config.Ini.Implementation
 		/// </summary>
 		private void TryGetIniValue(MethodCallInfo methodCallInfo) {
 			var iniValue = (
-				from propertyInfo in Proxy.AllPropertyInfos
-				where GetSetInfo.CleanupPropertyName(propertyInfo.Name) == methodCallInfo.CleanedPropertyNameOf(0)
+				from propertyInfo in Proxy.AllPropertyInfos.Values
+				where propertyInfo.Name.NonStrictEquals(methodCallInfo.PropertyNameOf(0))
 				select GenerateIniValue(propertyInfo)).FirstOrDefault();
 
 			// return IniValue

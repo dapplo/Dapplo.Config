@@ -26,22 +26,6 @@ namespace Dapplo.Config.Support
 {
 	public class GetSetInfo
 	{
-		private static readonly Regex _propertyCleanup = new Regex(@"[^a-zA-Z0-9]+", RegexOptions.Compiled);
-
-		/// <summary>
-		/// Make a clean & "tolower" string of a property name, this will be used internally
-		/// </summary>
-		/// <param name="propertyName"></param>
-		/// <returns></returns>
-		public static string CleanupPropertyName(string propertyName)
-		{
-			if (propertyName == null)
-			{
-				return null;
-			}
-			return _propertyCleanup.Replace(propertyName, "").ToLowerInvariant();
-        }
-
 		private string _propertyName;
 		/// <summary>
 		///     Property name of the property that is being get/set
@@ -55,17 +39,7 @@ namespace Dapplo.Config.Support
 			set
 			{
 				_propertyName = value;
-				CleanedPropertyName = CleanupPropertyName(value);
             }
-		}
-
-		/// <summary>
-		/// The property name of the property that is being get/set, but tolower and without special characters
-		/// </summary>
-		public string CleanedPropertyName
-		{
-			get;
-			private set;
 		}
 
 		/// <summary>

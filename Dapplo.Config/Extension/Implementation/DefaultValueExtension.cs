@@ -132,11 +132,10 @@ namespace Dapplo.Config.Extension.Implementation
 					// Ignore creating the default type, this might happen if there is no default constructor.
 				}
 			}
-			var key = GetSetInfo.CleanupPropertyName(propertyInfo.Name);
-			if (Proxy.Properties.ContainsKey(key))
+			if (Proxy.Properties.ContainsKey(propertyInfo.Name))
 			{
 				// TODO: This doesn't create a NotifyPropertyChanged/ing event as set isn't called.
-				Proxy.Properties.Remove(key);
+				Proxy.Properties.Remove(propertyInfo.Name);
 			}
 		}
 	}

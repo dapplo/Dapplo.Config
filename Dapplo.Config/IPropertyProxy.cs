@@ -75,7 +75,7 @@ namespace Dapplo.Config
 		/// <summary>
 		/// Return all the property infos for the proxies type, including sub-interfaces
 		/// </summary>
-		IEnumerable<PropertyInfo> AllPropertyInfos {
+		IDictionary<string, PropertyInfo> AllPropertyInfos {
 			get;
 		}
 

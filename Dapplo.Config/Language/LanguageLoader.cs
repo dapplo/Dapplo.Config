@@ -41,11 +41,11 @@ namespace Dapplo.Config.Language
 	/// </summary>
 	public class LanguageLoader
 	{
-		private readonly Regex _propertyCleanup = new Regex(@"[^a-zA-Z0-9]+", RegexOptions.Compiled);
-		private readonly IDictionary<Type, IPropertyProxy> _languageConfigs = new Dictionary<Type, IPropertyProxy>();
+		private static readonly IDictionary<string, LanguageLoader> LoaderStore = new NonStrictLookup<LanguageLoader>();
+		private readonly IDictionary<Type, IPropertyProxy> _languageTypeConfigs = new Dictionary<Type, IPropertyProxy>();
+		private readonly IDictionary<string, ILanguage> _languageConfigs = new NonStrictLookup<ILanguage>();
 		private readonly AsyncLock _asyncLock = new AsyncLock();
-		private readonly IDictionary<string, string> _allProperties = new Dictionary<string, string>();
-		private static readonly IDictionary<string, LanguageLoader> LoaderStore = new Dictionary<string, LanguageLoader>();
+		private readonly IDictionary<string, string> _allProperties = new NonStrictLookup<string>();
 		private readonly string _applicationName;
 		private readonly Regex _filePattern;
 		private readonly IList<string> _files;
@@ -72,6 +72,12 @@ namespace Dapplo.Config.Language
 				return LoaderStore.First().Value;
 			}
 		}
+
+		public static void Delete(string applicationName)
+		{
+			LoaderStore.Remove(applicationName);
+		}
+
 		/// <summary>
 		/// Create a LanguageLoader, this is your container for all the ILanguage implementing interfaces.
 		/// You can supply a default language right away.
@@ -81,6 +87,10 @@ namespace Dapplo.Config.Language
 		/// <param name="filePatern">Pattern for the filename, the ietf group needs to be in there!</param>
 		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language(_(?<module>[a-zA-Z0-9]*))?-(?<IETF>[a-zA-Z]{2}(-[a-zA-Z]+)?-[a-zA-Z]+)\.(ini|xml)")
 		{
+			if (LoaderStore.ContainsKey(applicationName))
+			{
+				throw new InvalidOperationException(string.Format("{0} was already created!", applicationName));
+			}
 			CurrentLanguage = defaultLanguage;
 			_filePattern = new Regex(filePatern, RegexOptions.Compiled);
 			_applicationName = applicationName;
@@ -252,14 +262,15 @@ namespace Dapplo.Config.Language
 			var languageObject = (ILanguage)propertyProxy.PropertyObject;
             using (await _asyncLock.LockAsync().ConfigureAwait(false))
             {
-                if (!_languageConfigs.ContainsKey(type))
+                if (!_languageTypeConfigs.ContainsKey(type))
 				{
-					_languageConfigs.Add(type, propertyProxy);
+					_languageTypeConfigs.Add(type, propertyProxy);
 					if (!_initialReadDone)
 					{
 						await ReloadAsync(token).ConfigureAwait(false);
 					}
 					FillLanguageConfig(propertyProxy);
+					_languageConfigs.Add(GetPrefix(propertyProxy), languageObject);
 				}
 			}
 
@@ -293,6 +304,19 @@ namespace Dapplo.Config.Language
 		}
 
 		/// <summary>
+		/// Get the specified ILanguage type
+		/// </summary>
+		/// <param name="string">ILanguage prefix to look for</param>
+		/// <returns>ILanguage</returns>
+		public ILanguage this[string prefix]
+		{
+			get
+			{
+				return _languageConfigs[prefix];
+			}
+		}
+
+		/// <summary>
 		/// This is reloading all the .ini files, and will refill the language objects.
 		/// </summary>
 		public async Task ReloadAsync(CancellationToken token = default(CancellationToken))
@@ -323,8 +347,8 @@ namespace Dapplo.Config.Language
 				foreach (var section in newResources.Keys) {
 					var properties = newResources[section];
 					foreach (var key in properties.Keys) {
-						var cleanKey = _propertyCleanup.Replace(string.Format("{0}{1}", section, key), "").ToLowerInvariant();
-						_allProperties.SafelyAddOrOverwrite(cleanKey, properties[key]);
+						var prefixedKey = string.Format("{0}{1}", section, key);
+						_allProperties.SafelyAddOrOverwrite(prefixedKey, properties[key]);
 					}
 				}
 			}
@@ -336,10 +360,26 @@ namespace Dapplo.Config.Language
 
 		private void FillLanguageConfigs()
 		{
-			foreach (var proxy in _languageConfigs.Values)
+			foreach (var proxy in _languageTypeConfigs.Values)
 			{
 				FillLanguageConfig(proxy);
 			}
+		}
+
+		/// <summary>
+		/// Retrieve the language prefix from the IPropertyProxy
+		/// </summary>
+		/// <param name="propertyProxy"></param>
+		/// <returns>string</returns>
+		private string GetPrefix(IPropertyProxy propertyProxy)
+		{
+			string prefix = "";
+			var languageAttribute = propertyProxy.PropertyObjectType.GetCustomAttribute<LanguageAttribute>();
+			if (languageAttribute != null)
+			{
+				prefix = languageAttribute.Prefix;
+			}
+			return prefix;
 		}
 
 		/// <summary>
@@ -349,17 +389,11 @@ namespace Dapplo.Config.Language
 		/// <param name="propertyProxy"></param>
 		private void FillLanguageConfig(IPropertyProxy propertyProxy)
 		{
-			var languageAttribute = propertyProxy.PropertyObjectType.GetCustomAttribute<LanguageAttribute>();
-			string prefix = "";
-			if (languageAttribute != null)
-			{
-				prefix = languageAttribute.Prefix;
-			}
-
+			string prefix = GetPrefix(propertyProxy);
 			var propertyObject = (ILanguage) propertyProxy.PropertyObject;
-			foreach (PropertyInfo propertyInfo in propertyProxy.AllPropertyInfos)
+			foreach (PropertyInfo propertyInfo in propertyProxy.AllPropertyInfos.Values)
 			{
-				string key = _propertyCleanup.Replace(string.Format("{0}{1}", prefix, propertyInfo.Name), "").ToLowerInvariant();
+				string key = string.Format("{0}{1}", prefix, propertyInfo.Name);
 				string translation;
 				if (_allProperties.TryGetValue(key, out translation))
 				{

@@ -43,6 +43,13 @@ namespace Dapplo.Config.Test
 			languageLoader = new LanguageLoader("Dapplo");
 		}
 
+
+		[TestCleanup]
+		public void Cleanup()
+		{
+			LanguageLoader.Delete("Dapplo");
+		}
+
 		[TestMethod]
 		[ExpectedException(typeof(NotSupportedException))]
 		public async Task TestIllegalInterface()
@@ -65,10 +72,10 @@ namespace Dapplo.Config.Test
 		public async Task TestIndexer()
 		{
 			var language = await languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
-			await languageLoader.ChangeLanguage("nl-NL");
+            await languageLoader.ChangeLanguage("nl-NL");
 			Assert.AreEqual("Afbreken", language["TestValue"]);
 			// Test using the raw property name with the indexer
-			Assert.AreEqual("Afbreken", language["test_value"]);
+			Assert.AreEqual("Afbreken", languageLoader["test"]["test_value"]);
 		}
 
 		[TestMethod]

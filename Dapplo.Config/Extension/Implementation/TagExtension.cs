@@ -30,7 +30,7 @@ namespace Dapplo.Config.Extension.Implementation
 	internal class TagExtension<T> : AbstractPropertyProxyExtension<T>
 	{
 		// The set of found expert properties
-		private readonly IDictionary<string, IDictionary<object, object>> _taggedProperties = new Dictionary<string, IDictionary<object, object>>();
+		private readonly IDictionary<string, IDictionary<object, object>> _taggedProperties = new NonStrictLookup<IDictionary<object, object>>();
 
 		public TagExtension(IPropertyProxy<T> proxy) : base(proxy)
 		{
@@ -47,7 +47,6 @@ namespace Dapplo.Config.Extension.Implementation
 		/// <param name="propertyInfo"></param>
 		public override void InitProperty(PropertyInfo propertyInfo)
 		{
-			var key = GetSetInfo.CleanupPropertyName(propertyInfo.Name);
             Attribute[] customAttributes = Attribute.GetCustomAttributes(propertyInfo);
 			foreach (Attribute customAttribute in customAttributes)
 			{
@@ -55,10 +54,10 @@ namespace Dapplo.Config.Extension.Implementation
 				if (tagAttribute != null)
 				{
 					IDictionary<object, object> tags;
-					if (!_taggedProperties.TryGetValue(key, out tags))
+					if (!_taggedProperties.TryGetValue(propertyInfo.Name, out tags))
 					{
 						tags = new Dictionary<object, object>();
-						_taggedProperties.Add(key, tags);
+						_taggedProperties.Add(propertyInfo.Name, tags);
 					}
 					tags.SafelyAddOrOverwrite(tagAttribute.Tag, tagAttribute.TagValue);
 				}
@@ -73,7 +72,7 @@ namespace Dapplo.Config.Extension.Implementation
 		{
 			methodCallInfo.ReturnValue = false;
 			IDictionary<object, object> tags;
-			if (_taggedProperties.TryGetValue(methodCallInfo.CleanedPropertyNameOf(0), out tags))
+			if (_taggedProperties.TryGetValue(methodCallInfo.PropertyNameOf(0), out tags))
 			{
 				methodCallInfo.ReturnValue = tags.ContainsKey(methodCallInfo.Arguments[1]);
 			}
@@ -86,7 +85,7 @@ namespace Dapplo.Config.Extension.Implementation
 		private void GetTagValue(MethodCallInfo methodCallInfo) {
 			methodCallInfo.ReturnValue = false;
 			IDictionary<object, object> tags;
-			if (_taggedProperties.TryGetValue(methodCallInfo.CleanedPropertyNameOf(0), out tags)) {
+			if (_taggedProperties.TryGetValue(methodCallInfo.PropertyNameOf(0), out tags)) {
 				bool hasTag = tags.ContainsKey(methodCallInfo.Arguments[1]);
 				object returnValue = null;
 				if (hasTag) {
