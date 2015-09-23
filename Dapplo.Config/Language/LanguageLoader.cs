@@ -193,7 +193,7 @@ namespace Dapplo.Config.Language
 				if (checkStartupDirectory)
 				{
 					var entryAssembly = Assembly.GetEntryAssembly();
-					string startupDirectory = null;
+					string startupDirectory;
 					if (entryAssembly != null)
 					{
 						startupDirectory = Path.GetDirectoryName(entryAssembly.Location);
@@ -208,7 +208,7 @@ namespace Dapplo.Config.Language
 						directories.Add(Path.Combine(startupDirectory, "languages"));
 					}
 				}
-				string appDataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), _applicationName);
+				var appDataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), _applicationName);
 				directories.Add(Path.Combine(appDataDirectory, "languages"));
 			}
 			var files = (from path in directories
@@ -306,7 +306,7 @@ namespace Dapplo.Config.Language
 		/// <summary>
 		/// Get the specified ILanguage type
 		/// </summary>
-		/// <param name="string">ILanguage prefix to look for</param>
+		/// <param name="prefix">ILanguage prefix to look for</param>
 		/// <returns>ILanguage</returns>
 		public ILanguage this[string prefix]
 		{
@@ -334,14 +334,21 @@ namespace Dapplo.Config.Language
 				IDictionary<string, IDictionary<string, string>> newResources;
 				if (languageFile.EndsWith(".ini")) {
 					newResources = await IniFile.ReadAsync(languageFile, Encoding.UTF8, token).ConfigureAwait(false);
-				} else if (languageFile.EndsWith(".xml")) {
+				} else if (languageFile.EndsWith(".xml"))
+				{
+					var xElement = XDocument.Load(languageFile).Root;
+					if (xElement == null)
+					{
+						continue;
+					}
 					newResources =
-						(from resourcesElement in XDocument.Load(languageFile).Root.Elements("resources")
-						 where resourcesElement.Attribute("prefix") != null
-						 from resourceElement in resourcesElement.Elements("resource")
-						 group resourceElement by resourcesElement.Attribute("prefix").Value into resourceElementGroup
-						 select resourceElementGroup).ToDictionary(group => group.Key, group => (IDictionary<string,string>)group.ToDictionary(x => x.Attribute("name").Value, x => x.Value));
-				} else {
+						(from resourcesElement in xElement.Elements("resources")
+							where resourcesElement.Attribute("prefix") != null
+							from resourceElement in resourcesElement.Elements("resource")
+							group resourceElement by resourcesElement.Attribute("prefix").Value into resourceElementGroup
+							select resourceElementGroup).ToDictionary(group => @group.Key, group => (IDictionary<string,string>)@group.ToDictionary(x => x.Attribute("name").Value, x => x.Value.Trim()));
+				}
+				else {
 					throw new NotSupportedException(string.Format("Can't read the file format for {0}", languageFile));
 				}
 				foreach (var section in newResources.Keys) {
