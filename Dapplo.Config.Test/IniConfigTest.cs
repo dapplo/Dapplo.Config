@@ -188,33 +188,5 @@ namespace Dapplo.Config.Test
 			var iniTest2 = iniConfig.Get<IIniConfigTest>();
 			Assert.AreEqual(TestValueForNonSerialized, iniTest2.NotWritten);
 		}
-
-		[TestMethod]
-		public async Task TestIniRest()
-		{
-			var iniConfig = await InitializeAsync();
-			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
-			iniTest.Name = Name;
-			iniTest.SomeValues.Add("Answer", 42);
-
-			var changeNameToRobinKromUri = new Uri("dummy:///IniConfig/set/Dapplo/dapplo/Test/Name/RobinKrom");
-			IniConfig.ProcessRestUri(changeNameToRobinKromUri);
-			Assert.AreEqual("RobinKrom", iniTest.Name);
-
-			var addValueUri = new Uri("dummy:///IniConfig/add/Dapplo/dapplo/Test/SomeValues?Highlight=10&Stop=20");
-			IniConfig.ProcessRestUri(addValueUri);
-			Assert.IsTrue(iniTest.SomeValues.ContainsKey("Highlight"));
-			Assert.IsTrue(iniTest.SomeValues.ContainsKey("Stop"));
-
-			// Test dictionary
-			var removeSomeValuesUri = new Uri("dummy:///IniConfig/remove/Dapplo/dapplo/Test/SomeValues?Answer&Stop");
-			IniConfig.ProcessRestUri(removeSomeValuesUri);
-			Assert.IsFalse(iniTest.SomeValues.ContainsKey("Answer"));
-
-			// Test list
-			var removeCutShapeUri = new Uri("dummy:///IniConfig/remove/Dapplo/dapplo/Test/WindowCornerCutShape?5&1");
-			IniConfig.ProcessRestUri(removeCutShapeUri);
-			Assert.IsFalse(iniTest.WindowCornerCutShape.First() != 5);
-        }
 	}
 }

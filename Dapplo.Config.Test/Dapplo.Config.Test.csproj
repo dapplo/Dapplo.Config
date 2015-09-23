@@ -57,6 +57,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="IniRestTest.cs" />
     <Compile Include="ObjectTest.cs" />
     <Compile Include="DescriptionTest.cs" />
     <Compile Include="LanguageLoaderTest.cs" />

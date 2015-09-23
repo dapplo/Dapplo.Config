@@ -21,7 +21,6 @@
 
 using Dapplo.Config.Support;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
@@ -29,7 +28,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -846,118 +844,6 @@ namespace Dapplo.Config.Ini
 
 			// Reset the current sections
 			FillSections();
-		}
-
-		/// <summary>
-		/// Process an Rest URI, this can be used to read or write values via e.g. a HttpListener
-		/// format:
-		/// schema://hostname:port/IniConfig/Command/Applicationname/Configname/Section/Property/NewValue(optional)?query
-		/// schema is not important, this can be an application specific thing
-		/// hostname is not important, this can be an application specific thing
-		/// port is not important, this can be an application specific thing
-		/// The command is read/write/add/remove
-		/// the Applicationname & Configname must be registered by new IniConfig(Applicationname,Configname)
-		/// The Section is that which is used in the IniSection
-		/// The property needs to be available
-		/// NewValue is optional (read) can be used to set the property (write)
-		/// The query can be used to add or remove values from lists / dictionaries
-		/// </summary>
-		/// <param name="restUri"></param>
-		/// <returns>Value (before write) or actual value with read/add/remove</returns>
-		public static IniValue ProcessRestUri(Uri restUri)
-		{
-			var removeSlash = new Regex(@"\/$");
-			var segments = (from segment in restUri.Segments.Skip(1)
-					select removeSlash.Replace(segment, "")).ToList();
-
-			if (segments[0] != "IniConfig")
-			{
-				return null;
-			}
-			segments.RemoveAt(0);
-			var command = segments[0];
-			segments.RemoveAt(0);
-			var iniConfig = IniConfig.Get(segments[0], segments[1]);
-			segments.RemoveAt(0);
-			segments.RemoveAt(0);
-			var iniSection = iniConfig[segments[0]];
-			segments.RemoveAt(0);
-			var iniValue = iniSection[segments[0]];
-			segments.RemoveAt(0);
-			switch (command)
-			{
-				case "set":
-					if (segments.Count > 0)
-					{
-						if (iniValue.ValueType.IsGenericDirectory() || iniValue.ValueType.IsGenericList())
-						{
-							throw new NotSupportedException(string.Format("Can't set type of {0}, use add/remove", iniValue.ValueType));
-						}
-						iniValue.Value = iniValue.Converter.ConvertFromInvariantString(segments[0]);
-					}
-					break;
-				case "reset":
-					iniValue.ResetToDefault();
-					break;
-				case "get":
-					// Ignore, as the default logic covers a read
-					break;
-				case "remove":
-					if (iniValue.ValueType.IsGenericDirectory() || iniValue.ValueType.IsGenericList())
-					{
-						Type itemType = iniValue.ValueType.GetGenericArguments()[0];
-						var converter = itemType.GetTypeConverter();
-						// TODO: Fix IList<T>.Remove not found!
-						var removeMethodInfo = iniValue.ValueType.GetMethod("Remove");
-						var removeQuestionmark = new Regex(@"^\?");
-						var itemsToRemove = (from item in restUri.Query.Split('&')
-							select converter.ConvertFromInvariantString(removeQuestionmark.Replace(item, ""))).ToList();
-						foreach (var item in itemsToRemove)
-						{
-							removeMethodInfo.Invoke(iniValue.Value, new[]{item});
-						}
-					}
-					else
-					{
-						throw new NotSupportedException(string.Format("Can't remove from type {0}, use set / reset", iniValue.ValueType));
-					}
-					break;
-				case "add":
-					if (iniValue.ValueType.IsGenericDirectory())
-					{
-						var variables = restUri.QueryToDictionary();
-						Type keyType = iniValue.ValueType.GetGenericArguments()[0];
-						var keyConverter = keyType.GetTypeConverter();
-						Type valueType = iniValue.ValueType.GetGenericArguments()[1];
-						var valueConverter = valueType.GetTypeConverter();
-						var addMethodInfo = iniValue.ValueType.GetMethod("Add");
-						foreach (var key in variables.Keys)
-						{
-							var keyObject = keyConverter.ConvertFromInvariantString(key);
-							var valueObject = valueConverter.ConvertFromInvariantString(variables[key]);
-							addMethodInfo.Invoke(iniValue.Value, new[] { keyObject, valueObject });
-						}
-					}
-					else if (iniValue.ValueType.IsGenericList())
-					{
-						Type itemType = iniValue.ValueType.GetGenericArguments()[0];
-						var converter = itemType.GetTypeConverter();
-						var itemValue = converter.ConvertFromInvariantString(segments[0]);
-						var addMethodInfo = iniValue.ValueType.GetMethod("Add");
-						addMethodInfo.Invoke(iniValue.Value, new[]
-						{
-							itemValue
-						});
-					}
-					else
-					{
-						throw new NotSupportedException(string.Format("Can't add to type {0}, use set / reset", iniValue.ValueType));
-					}
-					break;
-				default:
-					throw new NotSupportedException(string.Format("Don't know command {0}, there is only get/set/reset/add/remove", command));
-			}
-			return iniValue;
 		}
 	}
 }
