@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Dapplo.Config.Converters;
 using Dapplo.Config.Ini;
@@ -195,15 +196,25 @@ namespace Dapplo.Config.Test
 			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 			iniTest.Name = Name;
 			iniTest.SomeValues.Add("Answer", 42);
-			var changeNameToRobinKromUri = new Uri("dummy:///IniConfig/write/Dapplo/dapplo/Test/Name/RobinKrom");
-			Assert.AreEqual(Name, IniConfig.ProcessRestUri(changeNameToRobinKromUri));
-			Assert.AreEqual("RobinKrom", iniTest.Name);
-			var removeValueUri = new Uri("dummy:///IniConfig/remove/Dapplo/dapplo/Test/SomeValues/Answer");
-			IniConfig.ProcessRestUri(removeValueUri);
-			Assert.IsFalse(iniTest.SomeValues.ContainsKey("NumberOfSongs"));
 
-			var addValueUri = new Uri("dummy:///IniConfig/add/Dapplo/dapplo/Test/SomeValues?Hightlight=10&Stop=20");
+			var changeNameToRobinKromUri = new Uri("dummy:///IniConfig/set/Dapplo/dapplo/Test/Name/RobinKrom");
+			IniConfig.ProcessRestUri(changeNameToRobinKromUri);
+			Assert.AreEqual("RobinKrom", iniTest.Name);
+
+			var addValueUri = new Uri("dummy:///IniConfig/add/Dapplo/dapplo/Test/SomeValues?Highlight=10&Stop=20");
 			IniConfig.ProcessRestUri(addValueUri);
-		}
+			Assert.IsTrue(iniTest.SomeValues.ContainsKey("Highlight"));
+			Assert.IsTrue(iniTest.SomeValues.ContainsKey("Stop"));
+
+			// Test dictionary
+			var removeSomeValuesUri = new Uri("dummy:///IniConfig/remove/Dapplo/dapplo/Test/SomeValues?Answer&Stop");
+			IniConfig.ProcessRestUri(removeSomeValuesUri);
+			Assert.IsFalse(iniTest.SomeValues.ContainsKey("Answer"));
+
+			// Test list
+			var removeCutShapeUri = new Uri("dummy:///IniConfig/remove/Dapplo/dapplo/Test/WindowCornerCutShape?5&1");
+			IniConfig.ProcessRestUri(removeCutShapeUri);
+			Assert.IsFalse(iniTest.WindowCornerCutShape.First() != 5);
+        }
 	}
 }

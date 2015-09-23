@@ -29,6 +29,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -110,25 +111,25 @@ namespace Dapplo.Config.Ini
 			return ConfigStore[string.Format("{0}.{1}", applicationName, fileName)];
 		}
 
-        /// <summary>
-        /// Static helper to retrieve the first IniConfig, the result when multiple IniConfigs are used is undefined!
-        /// </summary>
-        /// <returns>IniConfig or null if none</returns>
-        public static IniConfig Current
-        {
-            get
-            {
-                return ConfigStore.FirstOrDefault().Value;
-            }
-        }
+		/// <summary>
+		/// Static helper to retrieve the first IniConfig, the result when multiple IniConfigs are used is undefined!
+		/// </summary>
+		/// <returns>IniConfig or null if none</returns>
+		public static IniConfig Current
+		{
+			get
+			{
+				return ConfigStore.FirstOrDefault().Value;
+			}
+		}
 
-        /// <summary>
-        /// Setup the management of an .ini file location
-        /// </summary>
-        /// <param name="applicationName"></param>
-        /// <param name="fileName"></param>
-        /// <param name="fixedDirectory">Specify a path if you don't want to use the default loading</param>
-        public IniConfig(string applicationName, string fileName, string fixedDirectory = null)
+		/// <summary>
+		/// Setup the management of an .ini file location
+		/// </summary>
+		/// <param name="applicationName"></param>
+		/// <param name="fileName"></param>
+		/// <param name="fixedDirectory">Specify a path if you don't want to use the default loading</param>
+		public IniConfig(string applicationName, string fileName, string fixedDirectory = null)
 		{
 			_applicationName = applicationName;
 			_fileName = fileName;
@@ -154,36 +155,36 @@ namespace Dapplo.Config.Ini
 			ConfigStore.Add(string.Format("{0}.{1}", applicationName, fileName), this);
 		}
 
-        /// <summary>
-        /// Get all the names (from the IniSection annotation) for the sections
-        /// </summary>
-        /// <returns>all keys</returns>
-        public ICollection<string> SectionNames
-        {
-            get
-            {
-                return _iniSections.Keys;
-            }
-        }
+		/// <summary>
+		/// Get all the names (from the IniSection annotation) for the sections
+		/// </summary>
+		/// <returns>all keys</returns>
+		public ICollection<string> SectionNames
+		{
+			get
+			{
+				return _iniSections.Keys;
+			}
+		}
 
-        /// <summary>
-        /// Get all sections
-        /// </summary>
-        /// <returns>all keys</returns>
-        public IEnumerable<IIniSection> Sections
-        {
-            get
-            {
-                return _iniSections.Values;
-            }
-        }
+		/// <summary>
+		/// Get all sections
+		/// </summary>
+		/// <returns>all keys</returns>
+		public IEnumerable<IIniSection> Sections
+		{
+			get
+			{
+				return _iniSections.Values;
+			}
+		}
 
-        /// <summary>
-        /// Set the default converter for the specified type
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="typeConverter"></param>
-        public IniConfig SetDefaultConverter(Type type, Type typeConverter)
+		/// <summary>
+		/// Set the default converter for the specified type
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="typeConverter"></param>
+		public IniConfig SetDefaultConverter(Type type, Type typeConverter)
 		{
 			_converters.SafelyAddOrOverwrite(type, typeConverter);
 			return this;
@@ -262,60 +263,61 @@ namespace Dapplo.Config.Ini
 			return (T)this[typeof(T)];
 		}
 
-        /// <summary>
-        /// Get the specified IIniSection type
-        /// </summary>
-        /// <param name="type">IIniSection to look for</param>
-        /// <returns>IIniSection</returns>
-        public IIniSection Get(Type type)
-        {
-            return this[type];
-        }
-
-        /// <summary>
-        /// Get the specified IIniSection type
-        /// </summary>
-        /// <param name="type">IIniSection to look for</param>
-        /// <returns>IIniSection</returns>
-        public IIniSection this[Type type]
+		/// <summary>
+		/// Get the specified IIniSection type
+		/// </summary>
+		/// <param name="type">IIniSection to look for</param>
+		/// <returns>IIniSection</returns>
+		public IIniSection Get(Type type)
 		{
-            get
-            {
-                if (!typeof(IIniSection).IsAssignableFrom(type))
-                {
-                    throw new ArgumentException("type is not a IIniSection");
-                }
-                if (!_initialReadDone)
-                {
-                    throw new InvalidOperationException("Please load before retrieving the ini-sections");
-                }
-                var propertyProxy = ProxyBuilder.GetProxy(type);
-                var iniSection = (IIniSection)propertyProxy.PropertyObject;
-                return iniSection;
-            }
-        }
+			return this[type];
+		}
 
-        /// <summary>
-        /// A simple get by name (from the IniSection annotation) for the IniSection
-        /// </summary>
-        /// <param name="sectionName"></param>
-        /// <returns>IIniSection</returns>
-        public IIniSection Get(string sectionName)
-        {
-            return this[sectionName];
-        }
+		/// <summary>
+		/// Get the specified IIniSection type
+		/// </summary>
+		/// <param name="type">IIniSection to look for</param>
+		/// <returns>IIniSection</returns>
+		public IIniSection this[Type type]
+		{
+			get
+			{
+				if (!typeof(IIniSection).IsAssignableFrom(type))
+				{
+					throw new ArgumentException("type is not a IIniSection");
+				}
+				if (!_initialReadDone)
+				{
+					throw new InvalidOperationException("Please load before retrieving the ini-sections");
+				}
+				var propertyProxy = ProxyBuilder.GetProxy(type);
+				var iniSection = (IIniSection)propertyProxy.PropertyObject;
+				return iniSection;
+			}
+		}
 
-        /// <summary>
-        /// A simple indexer by name (from the IniSection annotation) for the IniSection
-        /// </summary>
-        /// <param name="sectionName"></param>
-        /// <returns>IIniSection</returns>
-        public IIniSection this[string sectionName] {
-            get
-            {
-                return _iniSections[sectionName];
-            }
-        }
+		/// <summary>
+		/// A simple get by name (from the IniSection annotation) for the IniSection
+		/// </summary>
+		/// <param name="sectionName"></param>
+		/// <returns>IIniSection</returns>
+		public IIniSection Get(string sectionName)
+		{
+			return this[sectionName];
+		}
+
+		/// <summary>
+		/// A simple indexer by name (from the IniSection annotation) for the IniSection
+		/// </summary>
+		/// <param name="sectionName"></param>
+		/// <returns>IIniSection</returns>
+		public IIniSection this[string sectionName]
+		{
+			get
+			{
+				return _iniSections[sectionName];
+			}
+		}
 
 		/// <summary>
 		/// A simple try get by name for the IniSection
@@ -323,7 +325,8 @@ namespace Dapplo.Config.Ini
 		/// <param name="sectionName">Name of the section</param>
 		/// <param name="section">out parameter with the IIniSection</param>
 		/// <returns>bool with true if it worked</returns>
-		public bool TryGet(string sectionName, out IIniSection section) {
+		public bool TryGet(string sectionName, out IIniSection section)
+		{
 			return _iniSections.TryGetValue(sectionName, out section);
 		}
 
@@ -861,20 +864,12 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		/// <param name="restUri"></param>
 		/// <returns>Value (before write) or actual value with read/add/remove</returns>
-		public static object ProcessRestUri(Uri restUri)
+		public static IniValue ProcessRestUri(Uri restUri)
 		{
-			var segments = restUri.Segments.ToList();
-			if (segments[0] == "/")
-			{
-				segments.RemoveAt(0);
-            }
-			for(int i=0; i<segments.Count; i++)
-			{
-				if (segments[i].EndsWith("/"))
-				{
-					segments[i] = segments[i].Remove(segments[i].Length - 1);
-                }
-			}
+			var removeSlash = new Regex(@"\/$");
+			var segments = (from segment in restUri.Segments.Skip(1)
+					select removeSlash.Replace(segment, "")).ToList();
+
 			if (segments[0] != "IniConfig")
 			{
 				return null;
@@ -889,21 +884,22 @@ namespace Dapplo.Config.Ini
 			segments.RemoveAt(0);
 			var iniValue = iniSection[segments[0]];
 			segments.RemoveAt(0);
-			var currentValue = iniValue.Value;
-			switch(command)
+			switch (command)
 			{
-				case "write":
-
+				case "set":
 					if (segments.Count > 0)
 					{
 						if (iniValue.ValueType.IsGenericDirectory() || iniValue.ValueType.IsGenericList())
 						{
-							throw new NotSupportedException(string.Format("Can't write to type of {0}, used add/remove", iniValue.ValueType));
+							throw new NotSupportedException(string.Format("Can't set type of {0}, use add/remove", iniValue.ValueType));
 						}
 						iniValue.Value = iniValue.Converter.ConvertFromInvariantString(segments[0]);
 					}
 					break;
-				case "read":
+				case "reset":
+					iniValue.ResetToDefault();
+					break;
+				case "get":
 					// Ignore, as the default logic covers a read
 					break;
 				case "remove":
@@ -911,9 +907,19 @@ namespace Dapplo.Config.Ini
 					{
 						Type itemType = iniValue.ValueType.GetGenericArguments()[0];
 						var converter = itemType.GetTypeConverter();
-						var itemValue = converter.ConvertFromInvariantString(segments[0]);
+						// TODO: Fix IList<T>.Remove not found!
 						var removeMethodInfo = iniValue.ValueType.GetMethod("Remove");
-						removeMethodInfo.Invoke(iniValue.Value, new[] { itemValue });
+						var removeQuestionmark = new Regex(@"^\?");
+						var itemsToRemove = (from item in restUri.Query.Split('&')
+							select converter.ConvertFromInvariantString(removeQuestionmark.Replace(item, ""))).ToList();
+						foreach (var item in itemsToRemove)
+						{
+							removeMethodInfo.Invoke(iniValue.Value, new[]{item});
+						}
+					}
+					else
+					{
+						throw new NotSupportedException(string.Format("Can't remove from type {0}, use set / reset", iniValue.ValueType));
 					}
 					break;
 				case "add":
@@ -931,19 +937,27 @@ namespace Dapplo.Config.Ini
 							var valueObject = valueConverter.ConvertFromInvariantString(variables[key]);
 							addMethodInfo.Invoke(iniValue.Value, new[] { keyObject, valueObject });
 						}
-					} else if (iniValue.ValueType.IsGenericList())
+					}
+					else if (iniValue.ValueType.IsGenericList())
 					{
 						Type itemType = iniValue.ValueType.GetGenericArguments()[0];
 						var converter = itemType.GetTypeConverter();
 						var itemValue = converter.ConvertFromInvariantString(segments[0]);
 						var addMethodInfo = iniValue.ValueType.GetMethod("Add");
-						addMethodInfo.Invoke(iniValue.Value, new[] { itemValue });
+						addMethodInfo.Invoke(iniValue.Value, new[]
+						{
+							itemValue
+						});
+					}
+					else
+					{
+						throw new NotSupportedException(string.Format("Can't add to type {0}, use set / reset", iniValue.ValueType));
 					}
 					break;
 				default:
-					throw new NotSupportedException(string.Format("Don't know command {0}, there is only read/write/add/remove", command));
+					throw new NotSupportedException(string.Format("Don't know command {0}, there is only get/set/reset/add/remove", command));
 			}
-            return currentValue;
+			return iniValue;
 		}
 	}
 }
