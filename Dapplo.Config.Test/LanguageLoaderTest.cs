@@ -76,6 +76,10 @@ namespace Dapplo.Config.Test
 			Assert.AreEqual("Afbreken", language["TestValue"]);
 			// Test using the raw property name with the indexer
 			Assert.AreEqual("Afbreken", languageLoader["test"]["test_value"]);
+			Assert.AreEqual("cool", languageLoader["test"]["dapplo"]);
+			Assert.IsTrue(languageLoader["test"].Keys().Contains("dapplo"));
+
+
 		}
 
 		[TestMethod]

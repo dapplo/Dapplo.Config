@@ -19,6 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Collections.Generic;
 using Dapplo.Config.Extension;
 
 namespace Dapplo.Config.Language
@@ -40,5 +41,12 @@ namespace Dapplo.Config.Language
 		/// <param name="languageKey">Key for the translation</param>
 		/// <returns>IniValue</returns>
 		string this[string languageKey] { get; }
+
+		/// <summary>
+		/// Get all the language keys, this includes also the ones that don't have an access property.
+		/// This is a method, could have been a property, but this differentiates it from the properties.
+		/// </summary>
+		/// <returns></returns>
+		ICollection<string> Keys();
 	}
 }

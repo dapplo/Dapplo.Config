@@ -38,6 +38,7 @@ namespace Dapplo.Config.Language.Implementation
 		{
 			CheckType(typeof(ILanguage));
 			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<ILanguage, object>(x => x[null]), GetTranslation);
+			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<ILanguage, object>(x => x.Keys()), GetKeys);
 		}
 
 		public override void InitProperty(PropertyInfo propertyInfo)
@@ -59,6 +60,14 @@ namespace Dapplo.Config.Language.Implementation
 			{
 				methodCallInfo.ReturnValue = Proxy.Properties[key] as string;
 			}
+		}
+
+		/// <summary>
+		/// Get a all the keys
+		/// </summary>
+		private void GetKeys(MethodCallInfo methodCallInfo)
+		{
+			methodCallInfo.ReturnValue = Proxy.Properties.Keys;
 		}
 	}
 }
