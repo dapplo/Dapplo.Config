@@ -78,8 +78,6 @@ namespace Dapplo.Config.Test
 			Assert.AreEqual("Afbreken", languageLoader["test"]["test_value"]);
 			Assert.AreEqual("cool", languageLoader["test"]["dapplo"]);
 			Assert.IsTrue(languageLoader["test"].Keys().Contains("dapplo"));
-
-
 		}
 
 		[TestMethod]

@@ -48,9 +48,9 @@ namespace Dapplo.Config.Language
 		private readonly IDictionary<string, IDictionary<string, string>> _allTranslations = new NonStrictLookup<IDictionary<string, string>>();
 		private readonly string _applicationName;
 		private readonly Regex _filePattern;
-		private readonly IList<string> _files;
+		private IList<string> _files;
 		private bool _initialReadDone;
-		private readonly IDictionary<string, string> _availableLanguages;
+		private IDictionary<string, string> _availableLanguages;
 
 		/// <summary>
 		/// Static helper to retrieve the LanguageLoader that was created with the supplied parameters
@@ -95,15 +95,7 @@ namespace Dapplo.Config.Language
 			CurrentLanguage = defaultLanguage;
 			_filePattern = new Regex(filePatern, RegexOptions.Compiled);
 			_applicationName = applicationName;
-			_files = ScanForFiles(true);
-			_availableLanguages = (
-				from filename
-				in _files
-				select _filePattern.Match(Path.GetFileName(filename)).Groups["IETF"].Value)
-				.Distinct()
-				.Where(x => SavelyGetCultureInfo(x) != null)
-				.ToDictionary(x => x, x => CultureInfo.GetCultureInfo(x).NativeName
-			);
+			ScanForFiles(true);
 			LoaderStore.SafelyAddOrOverwrite(applicationName, this);
 		}
 
@@ -183,8 +175,7 @@ namespace Dapplo.Config.Language
 		/// </summary>
 		/// <param name="checkStartupDirectory"></param>
 		/// <param name="specifiedDirectory"></param>
-		/// <returns>all language files</returns>
-		private IList<string> ScanForFiles(bool checkStartupDirectory, string specifiedDirectory = null)
+		private void ScanForFiles(bool checkStartupDirectory, string specifiedDirectory = null)
 		{
 			IList<string> directories = new List<string>();
 			if (specifiedDirectory != null)
@@ -214,13 +205,23 @@ namespace Dapplo.Config.Language
 				var appDataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), _applicationName);
 				directories.Add(Path.Combine(appDataDirectory, "languages"));
 			}
-			var files = (from path in directories
+			_files = (from path in directories
 						 where Directory.Exists(path)
 						 select Directory.EnumerateFiles(path, "*.*", SearchOption.AllDirectories).Where(f => _filePattern.IsMatch(Path.GetFileName(f))))
 				// See: https://youtrack.jetbrains.com/issue/RSRP-413613
 				// ReSharper disable once PossibleMultipleEnumeration
 				.SelectMany(i => i).ToList();
-			return files;
+
+			_availableLanguages = (
+				from filenamePath
+				in _files
+				let filename = Path.GetFileName(filenamePath)
+				where filename != null
+				select _filePattern.Match(filename).Groups["IETF"].Value)
+				.Distinct()
+				.Where(x => SavelyGetCultureInfo(x) != null)
+				.ToDictionary(x => x, x => CultureInfo.GetCultureInfo(x).NativeName
+			);
 		}
 
 		/// <summary>
