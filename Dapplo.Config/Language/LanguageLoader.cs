@@ -205,19 +205,14 @@ namespace Dapplo.Config.Language
 				var appDataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), _applicationName);
 				directories.Add(Path.Combine(appDataDirectory, "languages"));
 			}
-			_files = (from path in directories
-						 where Directory.Exists(path)
-						 select Directory.EnumerateFiles(path, "*.*", SearchOption.AllDirectories).Where(f => _filePattern.IsMatch(Path.GetFileName(f))))
-				// See: https://youtrack.jetbrains.com/issue/RSRP-413613
-				// ReSharper disable once PossibleMultipleEnumeration
-				.SelectMany(i => i).ToList();
+			var scannedFiles = FileScanner.Scan(directories, _filePattern);
+			_files = scannedFiles.Select(x => x.Item1).ToList();
 
 			_availableLanguages = (
-				from filenamePath
-				in _files
-				let filename = Path.GetFileName(filenamePath)
-				where filename != null
-				select _filePattern.Match(filename).Groups["IETF"].Value)
+				from fileMatch in scannedFiles
+				let filename = Path.GetFileName(fileMatch.Item1)
+				where !string.IsNullOrEmpty(filename)
+				select fileMatch.Item2.Groups["IETF"].Value)
 				.Distinct()
 				.Where(x => SavelyGetCultureInfo(x) != null)
 				.ToDictionary(x => x, x => CultureInfo.GetCultureInfo(x).NativeName
