@@ -48,9 +48,7 @@ namespace Dapplo.Config.Language
 		private readonly IDictionary<string, IDictionary<string, string>> _allTranslations = new NonStrictLookup<IDictionary<string, string>>();
 		private readonly string _applicationName;
 		private readonly Regex _filePattern;
-		private IList<string> _files;
 		private bool _initialReadDone;
-		private IDictionary<string, string> _availableLanguages;
 
 		/// <summary>
 		/// Static helper to retrieve the LanguageLoader that was created with the supplied parameters
@@ -74,6 +72,10 @@ namespace Dapplo.Config.Language
 			}
 		}
 
+		/// <summary>
+		/// Delete the Language objects for the specified application, mostly used in tests
+		/// </summary>
+		/// <param name="applicationName"></param>
 		public static void Delete(string applicationName)
 		{
 			LoaderStore.Remove(applicationName);
@@ -95,8 +97,43 @@ namespace Dapplo.Config.Language
 			CurrentLanguage = defaultLanguage;
 			_filePattern = new Regex(filePatern, RegexOptions.Compiled);
 			_applicationName = applicationName;
-			ScanForFiles(true);
+			ScanFiles(true);
 			LoaderStore.SafelyAddOrOverwrite(applicationName, this);
+		}
+
+		/// <summary>
+		/// Call this to make sure that all languages have translations.
+		/// This will walk through the files of the supplied language (or the one with the most translations)
+		/// and copy the "missing" files to the others. By doing this, all non translated components should be in this language.
+		/// </summary>
+		public void CorrectMissingTranslations()
+		{
+			var baseIetf = (from ietf in Files.Keys
+					select new
+					{
+						ietf, Files[ietf].Count
+					}).OrderByDescending(x => x.Count).First().ietf;
+
+			var baseFileList = Files[baseIetf];
+			foreach (var ietf in Files.Keys)
+			{
+				if (ietf == baseIetf)
+				{
+					continue;
+				}
+				var comparingFiles = Files[ietf].Select(Path.GetFileNameWithoutExtension).ToList();
+				// Even if the count matches, there could be different files
+				foreach (var file in baseFileList)
+				{
+					var possibleTargetFile = Path.GetFileNameWithoutExtension(file.Replace(baseIetf, ietf));
+
+					if (!comparingFiles.Contains(possibleTargetFile))
+					{
+						// Add missing translation
+						Files[ietf].Add(file);
+                    }
+				}
+            }
 		}
 
 		/// <summary>
@@ -132,21 +169,17 @@ namespace Dapplo.Config.Language
 		/// </summary>
 		public IDictionary<string, string> AvailableLanguages
 		{
-			get
-			{
-				return _availableLanguages;
-			}
+			get;
+			private set;
 		}
 
 		/// <summary>
-		/// Get the list of the files which were found during the scan
+		/// The files, ordered to the IETF, that were found during the scan
 		/// </summary>
-		public IList<string> Files
+		public IDictionary<string, List<string>> Files
 		{
-			get
-			{
-				return _files;
-			}
+			get;
+			private set;
 		}
 
 		/// <summary>
@@ -162,7 +195,7 @@ namespace Dapplo.Config.Language
 			{
 				return;
 			}
-			if (_availableLanguages.ContainsKey(ietf))
+			if (AvailableLanguages.ContainsKey(ietf))
 			{
 				CurrentLanguage = ietf;
 				await ReloadAsync(token).ConfigureAwait(false);
@@ -174,46 +207,38 @@ namespace Dapplo.Config.Language
 		/// Helper to create the location of a file
 		/// </summary>
 		/// <param name="checkStartupDirectory"></param>
-		/// <param name="specifiedDirectory"></param>
-		private void ScanForFiles(bool checkStartupDirectory, string specifiedDirectory = null)
+		/// <param name="checkAppDataDirectory"></param>
+		/// <param name="specifiedDirectories">Specify your own directory</param>
+		private void ScanFiles(bool checkStartupDirectory, bool checkAppDataDirectory = true, ICollection<string> specifiedDirectories = null)
 		{
-			IList<string> directories = new List<string>();
-			if (specifiedDirectory != null)
+			var directories = new List<string>();
+			if (specifiedDirectories != null)
 			{
-				directories.Add(specifiedDirectory);
+				directories.AddRange(specifiedDirectories);
 			}
-			else
+			if (checkStartupDirectory)
 			{
-				if (checkStartupDirectory)
+				var startupDirectory = FileLocations.StartupDirectory();
+				if (startupDirectory != null)
 				{
-					var entryAssembly = Assembly.GetEntryAssembly();
-					string startupDirectory;
-					if (entryAssembly != null)
-					{
-						startupDirectory = Path.GetDirectoryName(entryAssembly.Location);
-					}
-					else
-					{
-						var executingAssembly = Assembly.GetExecutingAssembly();
-						startupDirectory = Path.GetDirectoryName(executingAssembly.Location);
-					}
-					if (startupDirectory != null)
-					{
-						directories.Add(Path.Combine(startupDirectory, "languages"));
-					}
+					directories.Add(Path.Combine(startupDirectory, "languages"));
 				}
-				var appDataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), _applicationName);
-				directories.Add(Path.Combine(appDataDirectory, "languages"));
 			}
-			var scannedFiles = FileScanner.Scan(directories, _filePattern);
-			_files = scannedFiles.Select(x => x.Item1).ToList();
+			if (checkAppDataDirectory)
+			{
+				var appDataDirectory = FileLocations.RoamingAppDataDirectory(_applicationName);
+				if (appDataDirectory != null)
+				{
+					directories.Add(Path.Combine(appDataDirectory, "languages"));
+				}
+			}
 
-			_availableLanguages = (
-				from fileMatch in scannedFiles
-				let filename = Path.GetFileName(fileMatch.Item1)
-				where !string.IsNullOrEmpty(filename)
-				select fileMatch.Item2.Groups["IETF"].Value)
-				.Distinct()
+			Files = FileLocations.Scan(directories, _filePattern)
+				.GroupBy(x => x.Item2.Groups["IETF"].Value)
+				.ToDictionary(group => group.Key, group => group.Select(x => x.Item1)
+				.ToList());
+
+			AvailableLanguages = Files.Keys
 				.Where(x => SavelyGetCultureInfo(x) != null)
 				.ToDictionary(x => x, x => CultureInfo.GetCultureInfo(x).NativeName
 			);
@@ -304,9 +329,7 @@ namespace Dapplo.Config.Language
 			{
 				throw new InvalidOperationException("Please load before retrieving the language");
 			}
-			var propertyProxy = ProxyBuilder.GetProxy(type);
-			var languageObject = (ILanguage)propertyProxy.PropertyObject;
-			return languageObject;
+			return (ILanguage)ProxyBuilder.GetProxy(type).PropertyObject;
 		}
 
 		/// <summary>
@@ -327,15 +350,9 @@ namespace Dapplo.Config.Language
 		/// </summary>
 		public async Task ReloadAsync(CancellationToken token = default(CancellationToken))
 		{
-			var languageFiles =
-				from file
-				in _files
-				where file.Contains(CurrentLanguage)
-				select file;
-
 			_allTranslations.Clear();
 
-			foreach (var languageFile in languageFiles)
+			foreach (var languageFile in Files[CurrentLanguage])
 			{
 				IDictionary<string, IDictionary<string, string>> newResources;
 				if (languageFile.EndsWith(".ini"))
@@ -344,21 +361,15 @@ namespace Dapplo.Config.Language
 				}
 				else if (languageFile.EndsWith(".xml"))
 				{
-					var xElement = XDocument.Load(languageFile).Root;
-					if (xElement == null)
-					{
-						continue;
-					}
-					newResources =
-						(from resourcesElement in xElement.Elements("resources")
-						 where resourcesElement.Attribute("prefix") != null
-						 from resourceElement in resourcesElement.Elements("resource")
-						 group resourceElement by resourcesElement.Attribute("prefix").Value into resourceElementGroup
-						 select resourceElementGroup).ToDictionary(group => @group.Key, group => (IDictionary<string, string>)@group.ToDictionary(x => x.Attribute("name").Value, x => x.Value.Trim()));
+					newResources = ReadXmlResources(languageFile);
 				}
 				else
 				{
 					throw new NotSupportedException(string.Format("Can't read the file format for {0}", languageFile));
+				}
+				if (newResources == null)
+				{
+					continue;
 				}
 				foreach (var section in newResources.Keys)
 				{
@@ -378,15 +389,29 @@ namespace Dapplo.Config.Language
 			_initialReadDone = true;
 
 			// Reset the sections that have already been registered
-			FillLanguageConfigs();
-		}
-
-		private void FillLanguageConfigs()
-		{
 			foreach (var proxy in _languageTypeConfigs.Values)
 			{
 				FillLanguageConfig(proxy);
 			}
+		}
+
+		/// <summary>
+		/// Read the resources from the specified file
+		/// </summary>
+		/// <param name="languageFile"></param>
+		/// <returns>name - values sorted to module</returns>
+		private IDictionary<string, IDictionary<string, string>> ReadXmlResources(string languageFile)
+		{
+			var xElement = XDocument.Load(languageFile).Root;
+			if (xElement == null)
+			{
+				return null;
+			}
+			return (from resourcesElement in xElement.Elements("resources")
+					where resourcesElement.Attribute("prefix") != null
+					from resourceElement in resourcesElement.Elements("resource")
+					group resourceElement by resourcesElement.Attribute("prefix").Value into resourceElementGroup
+					select resourceElementGroup).ToDictionary(group => @group.Key, group => (IDictionary<string, string>)@group.ToDictionary(x => x.Attribute("name").Value, x => x.Value.Trim()));
 		}
 
 		/// <summary>
@@ -412,20 +437,20 @@ namespace Dapplo.Config.Language
 		/// <param name="propertyProxy"></param>
 		private void FillLanguageConfig(IPropertyProxy propertyProxy)
 		{
-			string prefix = GetPrefix(propertyProxy);
+			var prefix = GetPrefix(propertyProxy);
 			var propertyObject = (ILanguage)propertyProxy.PropertyObject;
 			IDictionary<string, string> sectionTranslations;
 			if (!_allTranslations.TryGetValue(prefix, out sectionTranslations))
 			{
 				// No values, reset all
-				foreach (PropertyInfo propertyInfo in propertyProxy.AllPropertyInfos.Values)
+				foreach (var propertyInfo in propertyProxy.AllPropertyInfos.Values)
 				{
 					propertyObject.RestoreToDefault(propertyInfo.Name);
                 }
 				return;
 			}
 
-			foreach (PropertyInfo propertyInfo in propertyProxy.AllPropertyInfos.Values)
+			foreach (var propertyInfo in propertyProxy.AllPropertyInfos.Values)
 			{
 				var key = propertyInfo.Name;
                 string translation;
@@ -439,8 +464,9 @@ namespace Dapplo.Config.Language
 					propertyObject.RestoreToDefault(key);
 				}
 			}
+
 			// Add all unprocessed values
-			foreach (string key in sectionTranslations.Keys)
+			foreach (var key in sectionTranslations.Keys)
 			{
 				propertyProxy.Properties.SafelyAddOrOverwrite(key, sectionTranslations[key]);
 

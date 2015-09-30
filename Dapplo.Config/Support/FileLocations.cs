@@ -23,11 +23,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Dapplo.Config.Support
 {
-	public static class FileScanner
+	/// <summary>
+	/// Some utils for managing the location of files
+	/// </summary>
+	public static class FileLocations
 	{
 		/// <summary>
 		/// Scan the supplied directories for files which match the passed file pattern
@@ -37,15 +41,41 @@ namespace Dapplo.Config.Support
 		/// <returns>IEnumerable&lt;Tuple&lt;string,Match&gt;&gt;</returns>
 		public static IEnumerable<Tuple<string, Match>> Scan(ICollection<string> directories, Regex filePattern)
 		{
-			var files = from path in directories
-						where Directory.Exists(path)
-						from file in Directory.EnumerateFiles(path, "*.*", SearchOption.AllDirectories)
-						select file;
+			return from path in directories
+				where Directory.Exists(path)
+				from file in Directory.EnumerateFiles(path, "*.*", SearchOption.AllDirectories)
+				let match = filePattern.Match(file)
+				where match.Success
+				select Tuple.Create(file, match);
+		}
 
-			return from filePath in files
-				   let match = Tuple.Create<string, Match>(filePath, filePattern.Match(filePath))
-				   where match.Item2.Success
-				   select match;
+		/// <summary>
+		/// Get the startup location, which is either the location of the entry assemby, or the executing assembly
+		/// </summary>
+		/// <returns>string with the directory of where the running code/applicationName was started</returns>
+		public static string StartupDirectory()
+		{
+			var entryAssembly = Assembly.GetEntryAssembly();
+			string startupDirectory;
+			if (entryAssembly != null)
+			{
+				startupDirectory = Path.GetDirectoryName(entryAssembly.Location);
+			}
+			else
+			{
+				var executingAssembly = Assembly.GetExecutingAssembly();
+				startupDirectory = Path.GetDirectoryName(executingAssembly.Location);
+			}
+			return startupDirectory;
+		}
+
+		/// <summary>
+		/// Get the roaming AppData directory 
+		/// </summary>
+		/// <returns>string with the directory the appdata roaming directory</returns>
+		public static string RoamingAppDataDirectory(string applicationName)
+		{
+			return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), applicationName);
 		}
 	}
 }

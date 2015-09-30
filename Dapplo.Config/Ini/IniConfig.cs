@@ -26,7 +26,6 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -45,7 +44,6 @@ namespace Dapplo.Config.Ini
 		private const string IniExtension = "ini";
 		private static readonly IDictionary<string, IniConfig> ConfigStore = new Dictionary<string, IniConfig>();
 		private readonly AsyncLock _asyncLock = new AsyncLock();
-		private readonly string _iniFile;
 		private readonly string _fixedDirectory;
 		private readonly IDictionary<string, IIniSection> _iniSections = new SortedDictionary<string, IIniSection>();
 		private bool _initialReadDone;
@@ -81,10 +79,7 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		public string IniLocation
 		{
-			get
-			{
-				return _iniFile;
-			}
+			get;
 		}
 
 		/// <summary>
@@ -133,7 +128,7 @@ namespace Dapplo.Config.Ini
 			_fileName = fileName;
 			_fixedDirectory = fixedDirectory;
 			// Look for the ini file, this is only done 1 time.
-			_iniFile = CreateFileLocation(false, "", _fixedDirectory);
+			IniLocation = CreateFileLocation(false, "", _fixedDirectory);
 
 			WriteErrorHandler = (iniSection, iniValue, exception) =>
 			{
@@ -371,7 +366,7 @@ namespace Dapplo.Config.Ini
 		/// <param name="checkStartupDirectory"></param>
 		/// <param name="postfix"></param>
 		/// <param name="specifiedDirectory"></param>
-		/// <returns></returns>
+		/// <returns>File location</returns>
 		private string CreateFileLocation(bool checkStartupDirectory, string postfix = "", string specifiedDirectory = null)
 		{
 			string file = null;
@@ -383,19 +378,15 @@ namespace Dapplo.Config.Ini
 			{
 				if (checkStartupDirectory)
 				{
-					var entryAssembly = Assembly.GetEntryAssembly();
-					if (entryAssembly != null)
+					var startPath = FileLocations.StartupDirectory();
+					if (startPath != null)
 					{
-						string startupDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-						if (startupDirectory != null)
-						{
-							file = Path.Combine(startupDirectory, string.Format("{0}{1}.{2}", _fileName, postfix, IniExtension));
-						}
+						file = Path.Combine(startPath, string.Format("{0}{1}.{2}", _fileName, postfix, IniExtension));
 					}
 				}
 				if (file == null || !File.Exists(file))
 				{
-					string appDataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), _applicationName);
+					string appDataDirectory = FileLocations.RoamingAppDataDirectory(_applicationName);
 					file = Path.Combine(appDataDirectory, string.Format("{0}{1}.{2}", _fileName, postfix, IniExtension));
 				}
 			}
@@ -434,7 +425,7 @@ namespace Dapplo.Config.Ini
 			// Make sure only one write to file is running, other request will have to wait
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
-				string path = Path.GetDirectoryName(_iniFile);
+				string path = Path.GetDirectoryName(IniLocation);
 
 				// Create the directory to write to, if it doesn't exist yet
 				if (path != null && !Directory.Exists(path))
@@ -443,7 +434,7 @@ namespace Dapplo.Config.Ini
 				}
 
 				// Create the file as a stream
-				using (var stream = new FileStream(_iniFile, FileMode.Create, FileAccess.Write))
+				using (var stream = new FileStream(IniLocation, FileMode.Create, FileAccess.Write))
 				{
 					// Write the registered ini sections to the stream
 					await WriteToStreamInternalAsync(stream, token).ConfigureAwait(false);
@@ -676,7 +667,7 @@ namespace Dapplo.Config.Ini
 
 			_defaults = await IniFile.ReadAsync(CreateFileLocation(true, Defaults, _fixedDirectory), Encoding.UTF8, token).ConfigureAwait(false);
 			_constants = await IniFile.ReadAsync(CreateFileLocation(true, Constants, _fixedDirectory), Encoding.UTF8, token).ConfigureAwait(false);
-			var newIni = await IniFile.ReadAsync(_iniFile, Encoding.UTF8, token).ConfigureAwait(false);
+			var newIni = await IniFile.ReadAsync(IniLocation, Encoding.UTF8, token).ConfigureAwait(false);
 			if (newIni != null)
 			{
 				_ini = newIni;

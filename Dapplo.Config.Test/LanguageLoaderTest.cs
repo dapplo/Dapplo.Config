@@ -41,6 +41,7 @@ namespace Dapplo.Config.Test
 		public void Initialize()
 		{
 			languageLoader = new LanguageLoader("Dapplo");
+			languageLoader.CorrectMissingTranslations();
 		}
 
 
@@ -61,7 +62,7 @@ namespace Dapplo.Config.Test
 		public async Task TestModules()
 		{
 			// Make sure that the module (for testing) is available, we count all file-path which end with the filename 
-			var count = languageLoader.Files.Count(file => file.EndsWith("language_mymodule-en-US.ini"));
+			var count = languageLoader.Files["en-US"].Count(file => file.EndsWith("language_mymodule-en-US.ini"));
 			Assert.IsTrue(count > 0);
 
 			var languageMyModule = await languageLoader.RegisterAndGetAsync<ILanguageLoaderMyModuleTest>();

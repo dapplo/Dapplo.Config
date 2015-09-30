@@ -76,7 +76,7 @@
     <Compile Include="PropertyProxy.cs" />
     <Compile Include="ProxyBuilder.cs" />
     <Compile Include="Support\DictionaryExtensions.cs" />
-    <Compile Include="Support\FileScanner.cs" />
+    <Compile Include="Support\FileLocations.cs" />
     <Compile Include="Support\MethodCallExtensions.cs" />
     <Compile Include="Support\NonStrictLookup.cs" />
     <Compile Include="Support\NonStrictStringSet.cs" />
