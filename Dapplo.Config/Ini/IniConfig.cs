@@ -80,6 +80,7 @@ namespace Dapplo.Config.Ini
 		public string IniLocation
 		{
 			get;
+			private set;
 		}
 
 		/// <summary>
