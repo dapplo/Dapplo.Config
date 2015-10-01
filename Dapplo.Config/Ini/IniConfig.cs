@@ -379,7 +379,7 @@ namespace Dapplo.Config.Ini
 			{
 				if (checkStartupDirectory)
 				{
-					var startPath = FileLocations.StartupDirectory();
+					var startPath = FileLocations.StartupDirectory;
 					if (startPath != null)
 					{
 						file = Path.Combine(startPath, string.Format("{0}{1}.{2}", _fileName, postfix, IniExtension));

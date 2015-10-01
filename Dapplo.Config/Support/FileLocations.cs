@@ -37,7 +37,7 @@ namespace Dapplo.Config.Support
 		/// Scan the supplied directories for files which match the passed file pattern
 		/// </summary>
 		/// <param name="directories"></param>
-		/// <param name="filePattern"></param>
+		/// <param name="filePattern">Regular expression for the filename</param>
 		/// <returns>IEnumerable&lt;Tuple&lt;string,Match&gt;&gt;</returns>
 		public static IEnumerable<Tuple<string, Match>> Scan(ICollection<string> directories, Regex filePattern)
 		{
@@ -50,23 +50,39 @@ namespace Dapplo.Config.Support
 		}
 
 		/// <summary>
+		/// Scan the supplied directories for files which match the passed file pattern
+		/// </summary>
+		/// <param name="directories"></param>
+		/// <param name="simplePattern"></param>
+		/// <returns>IEnumerable&lt;string&gt;</returns>
+		public static IEnumerable<string> Scan(ICollection<string> directories, string simplePattern)
+		{
+			return from path in directories
+				   where Directory.Exists(path)
+				   from file in Directory.EnumerateFiles(path, simplePattern, SearchOption.AllDirectories)
+				   select file;
+		}
+
+		/// <summary>
 		/// Get the startup location, which is either the location of the entry assemby, or the executing assembly
 		/// </summary>
 		/// <returns>string with the directory of where the running code/applicationName was started</returns>
-		public static string StartupDirectory()
+		public static string StartupDirectory
 		{
-			var entryAssembly = Assembly.GetEntryAssembly();
-			string startupDirectory;
-			if (entryAssembly != null)
-			{
-				startupDirectory = Path.GetDirectoryName(entryAssembly.Location);
+			get {
+				var entryAssembly = Assembly.GetEntryAssembly();
+				string startupDirectory;
+				if (entryAssembly != null)
+				{
+					startupDirectory = Path.GetDirectoryName(entryAssembly.Location);
+				}
+				else
+				{
+					var executingAssembly = Assembly.GetExecutingAssembly();
+					startupDirectory = Path.GetDirectoryName(executingAssembly.Location);
+				}
+				return startupDirectory;
 			}
-			else
-			{
-				var executingAssembly = Assembly.GetExecutingAssembly();
-				startupDirectory = Path.GetDirectoryName(executingAssembly.Location);
-			}
-			return startupDirectory;
 		}
 
 		/// <summary>

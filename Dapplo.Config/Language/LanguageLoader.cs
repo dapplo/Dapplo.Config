@@ -218,7 +218,7 @@ namespace Dapplo.Config.Language
 			}
 			if (checkStartupDirectory)
 			{
-				var startupDirectory = FileLocations.StartupDirectory();
+				var startupDirectory = FileLocations.StartupDirectory;
 				if (startupDirectory != null)
 				{
 					directories.Add(Path.Combine(startupDirectory, "languages"));
