@@ -62,8 +62,8 @@ namespace Dapplo.Config.Test.TestInterfaces
 			set;
 		}
 
-		[DefaultValue("185"), DataMember(EmitDefaultValue = true)]
-		int Height {
+		[DefaultValue(185), DataMember(EmitDefaultValue = true)]
+		uint Height {
 			get;
 			set;
 		}

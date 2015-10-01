@@ -30,12 +30,12 @@ namespace Dapplo.Config.Extension.Implementation
 	///  This implements logic to set the default values on your property interface.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	[Extension(typeof (IDefaultValue))]
+	[Extension(typeof(IDefaultValue))]
 	internal class DefaultValueExtension<T> : AbstractPropertyProxyExtension<T>
 	{
 		public DefaultValueExtension(IPropertyProxy<T> proxy) : base(proxy)
 		{
-			CheckType(typeof (IDefaultValue));
+			CheckType(typeof(IDefaultValue));
 
 			// this registers one method and the overloading is handled in the GetDefaultValue
 			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IDefaultValue>(x => x.DefaultValueFor("")), GetDefaultValue);
@@ -72,15 +72,30 @@ namespace Dapplo.Config.Extension.Implementation
 			var defaultValue = propertyInfo.GetDefaultValue();
 			if (defaultValue != null)
 			{
+				Type defaultValueType = defaultValue.GetType();
 				TypeConverter typeConverter = propertyInfo.GetTypeConverter();
-				if (typeConverter != null && typeConverter.CanConvertFrom(defaultValue.GetType()))
+				if (typeConverter != null && typeConverter.CanConvertFrom(defaultValueType))
 				{
 					// Convert
 					var defaultStringValue = defaultValue as string;
-					if (defaultStringValue != null) {
-						return typeConverter.ConvertFromInvariantString(defaultStringValue);
-					} else {
-						return typeConverter.ConvertFrom(defaultValue);
+					if (defaultStringValue != null)
+					{
+						defaultValue = typeConverter.ConvertFromInvariantString(defaultStringValue);
+					}
+					else
+					{
+						defaultValue = typeConverter.ConvertFrom(defaultValue);
+					}
+				}
+				else if (defaultValueType != propertyInfo.PropertyType && !defaultValueType.IsGenericDirectory() && !defaultValueType.IsGenericList())
+				{
+					try
+					{
+						defaultValue = Convert.ChangeType(defaultValue, propertyInfo.PropertyType);
+					}
+					catch
+					{
+						// Ignore, can't convert the property
 					}
 				}
 			}
@@ -92,7 +107,7 @@ namespace Dapplo.Config.Extension.Implementation
 		/// </summary>
 		private void GetDefaultValue(MethodCallInfo methodCallInfo)
 		{
-			var propertyInfo = typeof (T).GetProperty(methodCallInfo.PropertyNameOf(0));
+			var propertyInfo = typeof(T).GetProperty(methodCallInfo.PropertyNameOf(0));
 			// Prevent ArgumentNullExceptions
 			if (propertyInfo != null)
 			{
@@ -105,7 +120,7 @@ namespace Dapplo.Config.Extension.Implementation
 		/// </summary>
 		private void RestoreToDefault(MethodCallInfo methodCallInfo)
 		{
-			var propertyInfo = typeof (T).GetProperty(methodCallInfo.PropertyNameOf(0));
+			var propertyInfo = typeof(T).GetProperty(methodCallInfo.PropertyNameOf(0));
 			// Prevent ArgumentNullExceptions
 			if (propertyInfo != null)
 			{
@@ -126,7 +141,7 @@ namespace Dapplo.Config.Extension.Implementation
 				Proxy.Set(propertyInfo.Name, defaultValue);
 				return;
 			}
-			if (!propertyInfo.PropertyType.IsInterface && !propertyInfo.PropertyType.IsByRef && propertyInfo.PropertyType != typeof (string))
+			if (!propertyInfo.PropertyType.IsInterface && !propertyInfo.PropertyType.IsByRef && propertyInfo.PropertyType != typeof(string))
 			{
 				try
 				{
@@ -134,7 +149,7 @@ namespace Dapplo.Config.Extension.Implementation
 					Proxy.Set(propertyInfo.Name, defaultValue);
 					return;
 				}
-					// ReSharper disable once EmptyGeneralCatchClause
+				// ReSharper disable once EmptyGeneralCatchClause
 				catch
 				{
 					// Ignore creating the default type, this might happen if there is no default constructor.

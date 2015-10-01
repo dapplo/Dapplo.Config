@@ -100,11 +100,15 @@ namespace Dapplo.Config.Test
 			var iniConfig = await InitializeAsync();
 			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 			Assert.IsTrue(iniTest.Height == 185);
+			iniTest.Height++;
+			Assert.IsTrue(iniTest.Height == 186);
 			Assert.IsTrue(iniTest.PropertySize.Width == 16);
 			Assert.IsTrue(iniTest.PropertyArea.Width == 100);
 			Assert.IsTrue(iniTest.WindowCornerCutShape.Count > 0);
 			Assert.AreEqual("It works!", iniTest.SubValuewithDefault);
 			Assert.AreEqual(IniConfigTestEnum.Value2, iniTest.TestWithEnum);
+			iniTest.RestoreToDefault("TestWithEnum");
+            Assert.AreEqual(IniConfigTestEnum.Value2, iniTest.TestWithEnum);
 			Assert.AreEqual(IniConfigTestEnum.Value2, iniTest.TestWithEnumSubValue);
 		}
 
