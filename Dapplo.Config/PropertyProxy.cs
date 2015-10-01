@@ -307,9 +307,9 @@ namespace Dapplo.Config
 			}
 			else
 			{
-				// Make sure we return the right default value
+				// Make sure we return the right default value, when passed by-ref there needs to be a value
 				Type propType = _propertyTypes[getInfo.PropertyName];
-				if (propType.IsValueType)
+				if (propType.IsValueType || propType.IsByRef)
 				{
 					getInfo.Value = Activator.CreateInstance(propType);
 				}
@@ -365,7 +365,7 @@ namespace Dapplo.Config
 				{
 					return new ReturnMessage(getInfo.Error, methodCallMessage);
 				}
-				return new ReturnMessage(getInfo.Value, null, 0, null, methodCallMessage);
+                return new ReturnMessage(getInfo.Value, null, 0, null, methodCallMessage);
 			}
 			if (methodName.StartsWith("set_"))
 			{

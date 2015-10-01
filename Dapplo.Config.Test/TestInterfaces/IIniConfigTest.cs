@@ -28,6 +28,12 @@ using System.Runtime.Serialization;
 
 namespace Dapplo.Config.Test.TestInterfaces
 {
+
+	public enum IniConfigTestEnum
+	{
+		Value1,
+		Value2
+	}
 	/// <summary>
 	/// This is the interface under test
 	/// </summary>
@@ -35,6 +41,13 @@ namespace Dapplo.Config.Test.TestInterfaces
 	[Description("Test Configuration")]
 	public interface IIniConfigTest : IIniConfigSubInterfaceTest, IIniSection
 	{
+		[Description("Test property for enums"), DefaultValue(IniConfigTestEnum.Value2)]
+        IniConfigTestEnum TestWithEnum
+		{
+			get;
+			set;
+		}
+
 		[Description("Name of the person")]
 		string Name
 		{

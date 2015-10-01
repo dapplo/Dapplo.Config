@@ -32,5 +32,12 @@ namespace Dapplo.Config.Test.TestInterfaces {
 			get;
 			set;
 		}
+
+		[Description("Test property 2 for enums"), DefaultValue(IniConfigTestEnum.Value2)]
+		IniConfigTestEnum TestWithEnumSubValue
+		{
+			get;
+			set;
+		}
 	}
 }

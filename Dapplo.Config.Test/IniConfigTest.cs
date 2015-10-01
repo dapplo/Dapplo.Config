@@ -104,6 +104,8 @@ namespace Dapplo.Config.Test
 			Assert.IsTrue(iniTest.PropertyArea.Width == 100);
 			Assert.IsTrue(iniTest.WindowCornerCutShape.Count > 0);
 			Assert.AreEqual("It works!", iniTest.SubValuewithDefault);
+			Assert.AreEqual(IniConfigTestEnum.Value2, iniTest.TestWithEnum);
+			Assert.AreEqual(IniConfigTestEnum.Value2, iniTest.TestWithEnumSubValue);
 		}
 
 		[TestMethod]
@@ -158,6 +160,10 @@ namespace Dapplo.Config.Test
 			// Dictionary test
 			iniTest.SomeValues.Add("One", 1);
 
+			// Enum test
+			iniTest.TestWithEnum = IniConfigTestEnum.Value1;
+			iniTest.TestWithEnumSubValue = IniConfigTestEnum.Value1;
+
 			// Some "random" value that needs to be there again after reading.
 			long ticks = DateTimeOffset.Now.UtcTicks;
 			iniTest.Age = ticks;
@@ -182,6 +188,8 @@ namespace Dapplo.Config.Test
 				Assert.AreEqual(FirstName, iniTest.FirstName);
 				Assert.AreEqual(ticks, iniTest.Age);
 				Assert.AreEqual(TestValueForNonSerialized, iniTest.NotWritten);
+				Assert.AreEqual(IniConfigTestEnum.Value1, iniTest.TestWithEnum);
+				Assert.AreEqual(IniConfigTestEnum.Value1, iniTest.TestWithEnumSubValue);
 			}
 
 			// Check second get, should have same value
