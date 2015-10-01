@@ -92,8 +92,12 @@ namespace Dapplo.Config.Extension.Implementation
 		/// </summary>
 		private void GetDefaultValue(MethodCallInfo methodCallInfo)
 		{
-			PropertyInfo propertyInfo = typeof (T).GetProperty(methodCallInfo.PropertyNameOf(0));
-			methodCallInfo.ReturnValue = GetConvertedDefaultValue(propertyInfo);
+			var propertyInfo = typeof (T).GetProperty(methodCallInfo.PropertyNameOf(0));
+			// Prevent ArgumentNullExceptions
+			if (propertyInfo != null)
+			{
+				methodCallInfo.ReturnValue = GetConvertedDefaultValue(propertyInfo);
+			}
 		}
 
 		/// <summary>
@@ -101,8 +105,12 @@ namespace Dapplo.Config.Extension.Implementation
 		/// </summary>
 		private void RestoreToDefault(MethodCallInfo methodCallInfo)
 		{
-			PropertyInfo propertyInfo = typeof (T).GetProperty(methodCallInfo.PropertyNameOf(0));
-			RestoreToDefault(propertyInfo);
+			var propertyInfo = typeof (T).GetProperty(methodCallInfo.PropertyNameOf(0));
+			// Prevent ArgumentNullExceptions
+			if (propertyInfo != null)
+			{
+				RestoreToDefault(propertyInfo);
+			}
 		}
 
 		/// <summary>

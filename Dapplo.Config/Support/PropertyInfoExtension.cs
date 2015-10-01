@@ -35,7 +35,7 @@ namespace Dapplo.Config.Support {
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>object with a default value</returns>
 		public static object GetDefaultValue(this PropertyInfo propertyInfo) {
-			var defaultValueAttribute = propertyInfo.GetCustomAttribute<DefaultValueAttribute>();
+			var defaultValueAttribute = propertyInfo.GetCustomAttribute<DefaultValueAttribute>(true);
 			if (defaultValueAttribute != null) {
 				return defaultValueAttribute.Value;
 			}
@@ -61,7 +61,7 @@ namespace Dapplo.Config.Support {
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>TypeConverter</returns>
 		public static TypeConverter GetTypeConverter(this PropertyInfo propertyInfo) {
-			var typeConverterAttribute = propertyInfo.GetCustomAttribute<TypeConverterAttribute>();
+			var typeConverterAttribute = propertyInfo.GetCustomAttribute<TypeConverterAttribute>(true);
 			if (typeConverterAttribute != null && !string.IsNullOrEmpty(typeConverterAttribute.ConverterTypeName)) {
 				Type typeConverterType = Type.GetType(typeConverterAttribute.ConverterTypeName);
 				if (typeConverterType != null) {
@@ -78,7 +78,7 @@ namespace Dapplo.Config.Support {
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>Description</returns>
 		public static string GetDescription(this PropertyInfo propertyInfo) {
-			var descriptionAttribute = propertyInfo.GetCustomAttribute<DescriptionAttribute>();
+			var descriptionAttribute = propertyInfo.GetCustomAttribute<DescriptionAttribute>(true);
 			if (descriptionAttribute != null) {
 				return descriptionAttribute.Description;
 			}
@@ -91,7 +91,7 @@ namespace Dapplo.Config.Support {
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>Name</returns>
 		public static string GetDataMemberName(this PropertyInfo propertyInfo) {
-			var dataMemberAttribute = propertyInfo.GetCustomAttribute<DataMemberAttribute>();
+			var dataMemberAttribute = propertyInfo.GetCustomAttribute<DataMemberAttribute>(true);
 			if (dataMemberAttribute != null) {
 				if (!string.IsNullOrEmpty(dataMemberAttribute.Name)) {
 					return dataMemberAttribute.Name;
@@ -106,7 +106,7 @@ namespace Dapplo.Config.Support {
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>EmitDefaultValue</returns>
 		public static bool GetEmitDefaultValue(this PropertyInfo propertyInfo) {
-			var dataMemberAttribute = propertyInfo.GetCustomAttribute<DataMemberAttribute>();
+			var dataMemberAttribute = propertyInfo.GetCustomAttribute<DataMemberAttribute>(true);
 			if (dataMemberAttribute != null) {
 				return dataMemberAttribute.EmitDefaultValue;
 			}
@@ -119,7 +119,7 @@ namespace Dapplo.Config.Support {
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>true if the NonSerialized attribute is set on the property</returns>
 		public static IniPropertyBehaviorAttribute GetIniPropertyBehavior(this PropertyInfo propertyInfo) {
-			var iniPropertyBehaviorAttribute = propertyInfo.GetCustomAttribute<IniPropertyBehaviorAttribute>();
+			var iniPropertyBehaviorAttribute = propertyInfo.GetCustomAttribute<IniPropertyBehaviorAttribute>(true);
 			if (iniPropertyBehaviorAttribute == null) {
 				iniPropertyBehaviorAttribute = new IniPropertyBehaviorAttribute();
 			}
@@ -132,7 +132,7 @@ namespace Dapplo.Config.Support {
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>IsReadOnly</returns>
 		public static bool GetReadOnly(this PropertyInfo propertyInfo) {
-			var readOnlyAttribute = propertyInfo.GetCustomAttribute<ReadOnlyAttribute>();
+			var readOnlyAttribute = propertyInfo.GetCustomAttribute<ReadOnlyAttribute>(true);
 			if (readOnlyAttribute != null) {
 				return readOnlyAttribute.IsReadOnly;
 			}
@@ -145,7 +145,7 @@ namespace Dapplo.Config.Support {
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>Category</returns>
 		public static string GetCategory(this PropertyInfo propertyInfo) {
-			var categoryAttribute = propertyInfo.GetCustomAttribute<CategoryAttribute>();
+			var categoryAttribute = propertyInfo.GetCustomAttribute<CategoryAttribute>(true);
 			if (categoryAttribute != null) {
 				return categoryAttribute.Category;
 			}
