@@ -79,6 +79,50 @@ namespace Dapplo.Config.Support {
 				return (TypeConverter)Activator.CreateInstance(typeof(GenericDictionaryConverter<,>).MakeGenericType(type1, type2));
 			}
 			return TypeDescriptor.GetConverter(valueType);
-		} 
+		}
+
+		/// <summary>
+		/// Convert or Cast the value so it matches the targetType
+		/// </summary>
+		/// <param name="targetType">target type</param>
+		/// <param name="value">value to convert</param>
+		/// <param name="typeConverter">A type converter can be passed for special cases</param>
+		/// <returns>object as targetType</returns>
+		public static object ConvertOrCastValueToType(this Type targetType, object value, TypeConverter typeConverter = null)
+		{
+			if (value == null)
+			{
+				return null;
+			}
+			var valueType = value.GetType();
+			if (targetType != valueType && !targetType.IsAssignableFrom(valueType))
+			{
+				if (typeConverter == null)
+				{
+					typeConverter = targetType.GetTypeConverter();
+				}
+				if (typeConverter.CanConvertFrom(valueType))
+				{
+					var stringValue = value as string;
+					if (stringValue != null)
+					{
+						return typeConverter.ConvertFromInvariantString(stringValue);
+					}
+					else
+					{
+						return typeConverter.ConvertFrom(value);
+					}
+				}
+                try
+				{
+					return Convert.ChangeType(value, targetType);
+				}
+				catch
+				{
+					// Ignore, can't convert the value
+				}
+			}
+			return value;
+		}
 	}
 }

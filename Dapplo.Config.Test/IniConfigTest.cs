@@ -102,6 +102,8 @@ namespace Dapplo.Config.Test
 			Assert.IsTrue(iniTest.Height == 185);
 			iniTest.Height++;
 			Assert.IsTrue(iniTest.Height == 186);
+			iniTest.Height = 185;
+			Assert.IsTrue(iniTest.Height == 185);
 			Assert.IsTrue(iniTest.PropertySize.Width == 16);
 			Assert.IsTrue(iniTest.PropertyArea.Width == 100);
 			Assert.IsTrue(iniTest.WindowCornerCutShape.Count > 0);
@@ -138,6 +140,21 @@ namespace Dapplo.Config.Test
 		}
 
 		[TestMethod]
+		public async Task TestIniConfigIndexConvertion()
+		{
+			var iniConfig = await InitializeAsync();
+			await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
+			// Test indexers
+			Assert.IsTrue(iniConfig.SectionNames.Contains("Test"));
+			var iniTest = (IIniConfigTest)iniConfig["Test"];
+
+			// Set value with wrong type (but valid value)
+			iniConfig["Test"]["Height"].Value = "100";
+
+			Assert.AreEqual((uint)100, iniTest.Height);
+        }
+
+		[TestMethod]
 		public async Task TestIniConfigIndex()
 		{
 			var iniConfig = await InitializeAsync();
@@ -171,6 +188,7 @@ namespace Dapplo.Config.Test
 			// Some "random" value that needs to be there again after reading.
 			long ticks = DateTimeOffset.Now.UtcTicks;
 			iniTest.Age = ticks;
+            var heightBefore = ++iniTest.Height;
 			using (var writeStream = new MemoryStream())
 			{
 				await iniConfig.WriteToStreamAsync(writeStream).ConfigureAwait(false);
@@ -181,6 +199,9 @@ namespace Dapplo.Config.Test
 
 				// Make sure Age is set to some value, so we can see that it is re-read
 				iniTest.Age = 2;
+
+				// Make sure we change the value, to see if it's overwritten
+                iniTest.Height++;
 
 				// Test reading
 				writeStream.Seek(0, SeekOrigin.Begin);
@@ -194,6 +215,7 @@ namespace Dapplo.Config.Test
 				Assert.AreEqual(TestValueForNonSerialized, iniTest.NotWritten);
 				Assert.AreEqual(IniConfigTestEnum.Value1, iniTest.TestWithEnum);
 				Assert.AreEqual(IniConfigTestEnum.Value1, iniTest.TestWithEnumSubValue);
+				Assert.AreEqual(heightBefore, iniTest.Height);
 			}
 
 			// Check second get, should have same value

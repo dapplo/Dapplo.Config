@@ -284,8 +284,11 @@ namespace Dapplo.Config
 		/// <param name="setInfo"></param>
 		private void DefaultSet(SetInfo setInfo)
 		{
+			var propertyType = _propertyTypes[setInfo.PropertyName];
+
+			var newValue = propertyType.ConvertOrCastValueToType(setInfo.NewValue);
 			// Add the value to the dictionary
-			_properties.SafelyAddOrOverwrite(setInfo.PropertyName, setInfo.NewValue);
+			_properties.SafelyAddOrOverwrite(setInfo.PropertyName, newValue);
 		}
 
 		/// <summary>

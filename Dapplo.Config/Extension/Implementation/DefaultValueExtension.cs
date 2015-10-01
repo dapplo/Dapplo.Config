@@ -72,32 +72,9 @@ namespace Dapplo.Config.Extension.Implementation
 			var defaultValue = propertyInfo.GetDefaultValue();
 			if (defaultValue != null)
 			{
-				Type defaultValueType = defaultValue.GetType();
 				TypeConverter typeConverter = propertyInfo.GetTypeConverter();
-				if (typeConverter != null && typeConverter.CanConvertFrom(defaultValueType))
-				{
-					// Convert
-					var defaultStringValue = defaultValue as string;
-					if (defaultStringValue != null)
-					{
-						defaultValue = typeConverter.ConvertFromInvariantString(defaultStringValue);
-					}
-					else
-					{
-						defaultValue = typeConverter.ConvertFrom(defaultValue);
-					}
-				}
-				else if (defaultValueType != propertyInfo.PropertyType && !defaultValueType.IsGenericDirectory() && !defaultValueType.IsGenericList())
-				{
-					try
-					{
-						defaultValue = Convert.ChangeType(defaultValue, propertyInfo.PropertyType);
-					}
-					catch
-					{
-						// Ignore, can't convert the property
-					}
-				}
+				Type targetType = propertyInfo.PropertyType;
+				defaultValue = targetType.ConvertOrCastValueToType(defaultValue, typeConverter);
 			}
 			return defaultValue;
 		}
