@@ -122,7 +122,7 @@ namespace Dapplo.Config.Extension.Implementation
 			{
 				try
 				{
-					defaultValue = Activator.CreateInstance(propertyInfo.PropertyType);
+					defaultValue = propertyInfo.PropertyType.CreateInstance();
 					Proxy.Set(propertyInfo.Name, defaultValue);
 					return;
 				}

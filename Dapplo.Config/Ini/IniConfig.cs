@@ -776,7 +776,7 @@ namespace Dapplo.Config.Ini
 				{
 					try
 					{
-						iniValue.Value = iniValue.Converter.ConvertFrom(stringValue);
+						iniValue.Value = iniValue.Converter.ConvertFromInvariantString(stringValue);
 					}
 					catch (Exception ex)
 					{
@@ -792,7 +792,7 @@ namespace Dapplo.Config.Ini
 					var converter = (TypeConverter)Activator.CreateInstance(converterType);
 					try
 					{
-						iniValue.Value = converter.ConvertFrom(stringValue);
+						iniValue.Value = converter.ConvertFromInvariantString(stringValue);
 					}
 					catch (Exception ex)
 					{
@@ -808,7 +808,7 @@ namespace Dapplo.Config.Ini
 					{
 						try
 						{
-							iniValue.Value = converter.ConvertFrom(stringValue);
+							iniValue.Value = converter.ConvertFromInvariantString(stringValue);
 						}
 						catch (Exception ex)
 						{

@@ -312,10 +312,7 @@ namespace Dapplo.Config
 			{
 				// Make sure we return the right default value, when passed by-ref there needs to be a value
 				Type propType = _propertyTypes[getInfo.PropertyName];
-				if (propType.IsValueType || propType.IsByRef)
-				{
-					getInfo.Value = Activator.CreateInstance(propType);
-				}
+				getInfo.Value = propType.CreateInstance();
 				getInfo.HasValue = false;
 			}
 		}

@@ -24,17 +24,20 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace Dapplo.Config.Support {
+namespace Dapplo.Config.Support
+{
 	/// <summary>
 	/// Extension for types
 	/// </summary>
-	public static class TypeExtensions {
+	public static class TypeExtensions
+	{
 		/// <summary>
 		/// check if the type is a generic dictionary: (I)Dictionary of T/>
 		/// </summary>
 		/// <param name="valueType">Type to check for</param>
 		/// <returns>true if it is a generic dictionary</returns>
-		public static bool IsGenericDirectory(this Type valueType) {
+		public static bool IsGenericDirectory(this Type valueType)
+		{
 			return valueType.IsGenericType && (valueType.GetGenericTypeDefinition() == typeof(Dictionary<,>) || valueType.GetGenericTypeDefinition() == typeof(IDictionary<,>));
 		}
 
@@ -43,7 +46,8 @@ namespace Dapplo.Config.Support {
 		/// </summary>
 		/// <param name="valueType">Type to check for</param>
 		/// <returns>true if it is a generic list</returns>
-		public static bool IsGenericList(this Type valueType) {
+		public static bool IsGenericList(this Type valueType)
+		{
 			return valueType.IsGenericType && (valueType.GetGenericTypeDefinition() == typeof(List<>) || valueType.GetGenericTypeDefinition() == typeof(IList<>));
 		}
 
@@ -52,15 +56,25 @@ namespace Dapplo.Config.Support {
 		/// </summary>
 		/// <param name="valueType"></param>
 		/// <returns></returns>
-		public static object CreateInstance(this Type valueType) {
-			if (valueType == typeof(string)) {
+		public static object CreateInstance(this Type valueType)
+		{
+			if (valueType == typeof(string) || valueType.IsArray)
+			{
 				return null;
-			} else if (IsGenericList(valueType)) {
+			}
+			else if (IsGenericList(valueType))
+			{
 				return Activator.CreateInstance(typeof(List<>).MakeGenericType(valueType.GetGenericArguments()[0]));
-			} else if (IsGenericDirectory(valueType)) {
+			}
+			else if (IsGenericDirectory(valueType))
+			{
 				Type type1 = valueType.GetGenericArguments()[0];
 				Type type2 = valueType.GetGenericArguments()[1];
 				return Activator.CreateInstance(typeof(Dictionary<,>).MakeGenericType(type1, type2));
+			}
+			else if (valueType.IsInterface || valueType.GetConstructor(Type.EmptyTypes) == null)
+			{
+				return null;
 			}
 			return Activator.CreateInstance(valueType);
 		}
@@ -70,10 +84,14 @@ namespace Dapplo.Config.Support {
 		/// </summary>
 		/// <param name="valueType"></param>
 		/// <returns>TypeConverter</returns>
-		public static TypeConverter GetTypeConverter(this Type valueType) {
-			if (IsGenericList(valueType)) {
+		public static TypeConverter GetTypeConverter(this Type valueType)
+		{
+			if (IsGenericList(valueType))
+			{
 				return (TypeConverter)Activator.CreateInstance(typeof(StringToGenericListConverter<>).MakeGenericType(valueType.GetGenericArguments()[0]));
-			} else if (IsGenericDirectory(valueType)) {
+			}
+			else if (IsGenericDirectory(valueType))
+			{
 				Type type1 = valueType.GetGenericArguments()[0];
 				Type type2 = valueType.GetGenericArguments()[1];
 				return (TypeConverter)Activator.CreateInstance(typeof(GenericDictionaryConverter<,>).MakeGenericType(type1, type2));
@@ -113,7 +131,7 @@ namespace Dapplo.Config.Support {
 						return typeConverter.ConvertFrom(value);
 					}
 				}
-                try
+				try
 				{
 					return Convert.ChangeType(value, targetType);
 				}

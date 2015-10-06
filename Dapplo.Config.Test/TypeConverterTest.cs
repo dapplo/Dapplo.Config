@@ -49,7 +49,7 @@ namespace Dapplo.Config.Test
 
 			var myTestStringWithStrings = string.Join(",", myTestStringList);
 
-			var stringList = (List<string>) stringListConverter.ConvertFrom(myTestStringWithStrings);
+			var stringList = (List<string>) stringListConverter.ConvertFromInvariantString(myTestStringWithStrings);
 			Assert.AreEqual(myTestStringList.Count, stringList.Count);
 			for (int i = 0; i < myTestStringList.Count; i++)
 			{
@@ -63,7 +63,7 @@ namespace Dapplo.Config.Test
 
 			var myTestStringWithInts = string.Join(",", myTestIntList);
 
-			var intList = (List<int>) intListConverter.ConvertFrom(myTestStringWithInts);
+			var intList = (List<int>) intListConverter.ConvertFromInvariantString(myTestStringWithInts);
 			Assert.AreEqual(myTestIntList.Count, intList.Count);
 			for (int i = 0; i < myTestIntList.Count; i++)
 			{

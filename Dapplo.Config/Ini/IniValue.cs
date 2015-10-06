@@ -170,7 +170,7 @@ namespace Dapplo.Config.Ini
 					return false;
 				}
 
-				object value = _proxy.Get(PropertyName);
+				object value = _proxy.Properties[PropertyName];
 
 				// Check if our value is default
 				bool isDefault = Equals(value, DefaultValue);
