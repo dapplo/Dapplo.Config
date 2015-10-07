@@ -3,6 +3,8 @@ skip_tags: true
 configuration: Release
 platform: Any CPU
 shallow_clone: true
+before_build:
+  - nuget restore
 assembly_info:
   patch: true
   file: '**\AssemblyInfo.*'
