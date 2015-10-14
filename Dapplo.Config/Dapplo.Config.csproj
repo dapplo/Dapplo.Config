@@ -85,6 +85,7 @@
     <Compile Include="Support\TypeExtensions.cs" />
     <Compile Include="Support\UriExtensions.cs" />
     <Compile Include="WindowsRegistry\Implementation\RegistryExtension.cs" />
+    <Compile Include="WindowsRegistry\ProtocolHandler.cs" />
     <Compile Include="WindowsRegistry\RegistryAttribute.cs" />
     <Compile Include="WindowsRegistry\RegistryPropertyAttribute.cs" />
     <Compile Include="WindowsRegistry\IRegistryConfig.cs" />

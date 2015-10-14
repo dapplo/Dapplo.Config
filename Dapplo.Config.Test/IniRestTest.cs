@@ -28,6 +28,7 @@ using Dapplo.Config.Converters;
 using Dapplo.Config.Ini;
 using Dapplo.Config.Test.TestInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Diagnostics;
 
 namespace Dapplo.Config.Test
 {
@@ -70,7 +71,6 @@ namespace Dapplo.Config.Test
 			return new IniConfig("Dapplo", "dapplo");
 		}
 
-
 		[TestMethod]
 		public async Task TestIniRest()
 		{
@@ -79,21 +79,30 @@ namespace Dapplo.Config.Test
 			iniTest.Name = Name;
 			iniTest.SomeValues.Add("Answer", 42);
 
+			// Test set
 			var changeNameToRobinKromUri = new Uri("dummy:///IniConfig/set/Dapplo/dapplo/Test/Name/RobinKrom");
 			IniRest.ProcessRestUri(changeNameToRobinKromUri);
 			Assert.AreEqual("RobinKrom", iniTest.Name);
 
+			// Test get
+			var readRobinKromUri = new Uri("dummy:///IniConfig/get/Dapplo/dapplo/Test/Name/RobinKrom");
+			var nameIniValue = IniRest.ProcessRestUri(readRobinKromUri);
+			Assert.AreEqual("RobinKrom", iniTest.Name);
+
+			// Test add
 			var addValueUri = new Uri("dummy:///IniConfig/add/Dapplo/dapplo/Test/SomeValues?Highlight=10&Stop=20");
 			IniRest.ProcessRestUri(addValueUri);
 			Assert.IsTrue(iniTest.SomeValues.ContainsKey("Highlight"));
 			Assert.IsTrue(iniTest.SomeValues.ContainsKey("Stop"));
+			Debug.WriteLine($"Highlight = {iniTest.SomeValues["Highlight"]}");
 
-			// Test dictionary
+			// Test remove from dictionary
 			var removeSomeValuesUri = new Uri("dummy:///IniConfig/remove/Dapplo/dapplo/Test/SomeValues?Answer&Stop");
 			IniRest.ProcessRestUri(removeSomeValuesUri);
 			Assert.IsFalse(iniTest.SomeValues.ContainsKey("Answer"));
+			Assert.IsFalse(iniTest.SomeValues.ContainsKey("Stop"));
 
-			// Test list
+			// Test remove from list
 			var listToTest = iniTest.WindowCornerCutShape;
 			var removeCutShapeUri = new Uri("dummy:///IniConfig/remove/Dapplo/dapplo/Test/WindowCornerCutShape?5&1");
 			IniRest.ProcessRestUri(removeCutShapeUri);

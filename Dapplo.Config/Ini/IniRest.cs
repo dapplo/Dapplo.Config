@@ -42,6 +42,9 @@ namespace Dapplo.Config.Ini
 		/// NewValue is optional (read) can be used to set the property (write)
 		/// The query can be used to add values to lists (?item1&item2&item2) or dictionaries (?key1=value1&key2=value2)
 		/// Or when removing from lists (?item1&item2&item2) or dictionaries (?key1&key2)
+		/// 
+		/// P.S.
+		/// You can use the ProtocolHandler to register a custom URL protocol.
 		/// </summary>
 		/// <param name="restUri"></param>
 		/// <returns>Value (before set) or actual value with get/add/remove</returns>
@@ -77,7 +80,8 @@ namespace Dapplo.Config.Ini
 						{
 							throw new NotSupportedException(string.Format("Can't set type of {0}, use add/remove", iniValueType));
 						}
-						iniValue.Value = iniValue.Converter.ConvertFromInvariantString(segments[0]);
+
+						iniValue.Value = segments[0];
 					}
 					break;
 				case "reset":
@@ -111,22 +115,19 @@ namespace Dapplo.Config.Ini
 					{
 						var variables = restUri.QueryToDictionary();
 						Type keyType = iniValueType.GetGenericArguments()[0];
-						var keyConverter = keyType.GetTypeConverter();
 						Type valueType = iniValueType.GetGenericArguments()[1];
-						var valueConverter = valueType.GetTypeConverter();
 						var addMethodInfo = iniValueType.GetMethod("Add");
 						foreach (var key in variables.Keys)
 						{
-							var keyObject = keyConverter.ConvertFromInvariantString(key);
-							var valueObject = valueConverter.ConvertFromInvariantString(variables[key]);
+							var keyObject = keyType.ConvertOrCastValueToType(key);
+							var valueObject = valueType.ConvertOrCastValueToType(variables[key]);
 							addMethodInfo.Invoke(iniValue.Value, new[] { keyObject, valueObject });
 						}
 					}
 					else if (iniValueType.IsGenericList())
 					{
 						Type itemType = iniValueType.GetGenericArguments()[0];
-						var converter = itemType.GetTypeConverter();
-						var itemValue = converter.ConvertFromInvariantString(segments[0]);
+						var itemValue = itemType.ConvertOrCastValueToType(segments[0]);
 						var addMethodInfo = iniValueType.GetMethod("Add");
 						addMethodInfo.Invoke(iniValue.Value, new[]{ itemValue });
 					}

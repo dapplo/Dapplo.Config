@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Net;
 using System.Web;
 
 namespace Dapplo.Config.Support
@@ -35,7 +36,7 @@ namespace Dapplo.Config.Support
 				var key = nameValues.AllKeys[i];
                 if (returnValue.ContainsKey(key))
 				{
-					returnValue[key] = value;
+					returnValue[key] = WebUtility.UrlDecode(value);
 				}
 				else
 				{
