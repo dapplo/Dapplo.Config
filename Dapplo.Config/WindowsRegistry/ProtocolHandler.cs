@@ -49,7 +49,7 @@ namespace Dapplo.Config.WindowsRegistry
 				// Create Shell
 				using (var shellKey = protocolKey.CreateSubKey("Shell"))
 				// Create open
-				using (var openKey = protocolKey.CreateSubKey("open"))
+				using (var openKey = shellKey.CreateSubKey("open"))
 				// Create command
 				using (var commandKey = openKey.CreateSubKey("command"))
 				{
