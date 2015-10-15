@@ -22,6 +22,7 @@
 using Dapplo.Config.Support;
 using System;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 
 namespace Dapplo.Config.Ini
@@ -81,7 +82,7 @@ namespace Dapplo.Config.Ini
 							throw new NotSupportedException(string.Format("Can't set type of {0}, use add/remove", iniValueType));
 						}
 
-						iniValue.Value = segments[0];
+						iniValue.Value = WebUtility.UrlDecode(segments[0]);
 					}
 					break;
 				case "reset":
