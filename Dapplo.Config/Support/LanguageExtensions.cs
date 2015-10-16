@@ -28,7 +28,7 @@ namespace Dapplo.Config.Support
 	/// <summary>
 	/// All ILanguage Extension methods go here.
 	/// </summary>
-	public static class LanguageExtension
+	public static class LanguageExtensions
 	{
 		/// <summary>
 		/// This extension can help when the language file cannot be created.
