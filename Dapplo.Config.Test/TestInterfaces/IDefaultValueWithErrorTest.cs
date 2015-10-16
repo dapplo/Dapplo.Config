@@ -19,32 +19,24 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.Reflection;
+using Dapplo.Config.Converters;
+using Dapplo.Config.Extension;
+using Dapplo.Config.Ini;
+using System.Collections.Generic;
+using System.ComponentModel;
 
-namespace Dapplo.Config
+namespace Dapplo.Config.Test.TestInterfaces
 {
 	/// <summary>
-	///     Extensions need to extend this interface.
+	/// This is the interface under test
 	/// </summary>
-	public interface IPropertyProxyExtension
+	public interface IDefaultValueWithErrorTest : IDefaultValue<IDefaultValueWithErrorTest>
 	{
-		/// <summary>
-		/// This is called for every Property on type T, so we only have 1x reflection
-		/// </summary>
-		/// <param name="propertyInfo"></param>
-		void InitProperty(PropertyInfo propertyInfo);
-
-		/// <summary>
-		/// Specify the Init-Order, low first and high later 
-		/// </summary>
-		int InitOrder
+		[Description("Test property for enums"), DefaultValue("Value3"), IniPropertyBehavior(IgnoreErrors = true)]
+		IniConfigTestEnum TestWithFalseEnum
 		{
 			get;
+			set;
 		}
-
-		/// <summary>
-		/// After property initialization, in here exceptions can be ignored or caches created
-		/// </summary>
-		void AfterInitialization();
 	}
 }

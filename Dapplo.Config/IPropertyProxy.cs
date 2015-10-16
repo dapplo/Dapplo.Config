@@ -117,11 +117,22 @@ namespace Dapplo.Config
 		/// <returns>GetInfo</returns>
 		GetInfo Get(string propertyName);
 
+		/// <summary>
+		/// The underlying object
+		/// </summary>
 		object PropertyObject
 		{
 			get;
 		}
-	}
+
+		/// <summary>
+		/// If an exception is catched during the initialization, it can be found here
+		/// </summary>
+		IDictionary<string, Exception> InitializationErrors
+		{
+			get;
+		}
+    }
 
 	/// <summary>
 	/// The property proxy is implemented with this interface.

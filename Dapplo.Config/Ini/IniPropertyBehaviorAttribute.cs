@@ -29,11 +29,12 @@ namespace Dapplo.Config.Ini
 	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
 	public class IniPropertyBehaviorAttribute : Attribute
 	{
+		private bool? _ignoreErrors;
+
 		public IniPropertyBehaviorAttribute()
 		{
 			Read = true;
 			Write = true;
-			IgnoreErrors = true;
 		}
 
 		/// <summary>
@@ -58,13 +59,30 @@ namespace Dapplo.Config.Ini
 		}
 
 		/// <summary>
+		/// Specifies if the IgnoreErrors was specified or is default
+		/// </summary>
+		public bool IsIgnoreErrorsSet
+		{
+			get
+			{
+				return _ignoreErrors.HasValue;
+            }
+		}
+
+		/// <summary>
 		/// Set ignore errors to false, if you want an exception when a parse error occurs.
 		/// Default this is set to true, which will cause the property to have the "default" value.
 		/// </summary>
 		public bool IgnoreErrors
 		{
-			get;
-			set;
+			get
+			{
+				return _ignoreErrors.HasValue?_ignoreErrors.Value:true;
+			}
+			set
+			{
+				_ignoreErrors = value;
+            }
 		}
 	}
 }

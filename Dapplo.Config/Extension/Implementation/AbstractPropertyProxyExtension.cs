@@ -70,5 +70,12 @@ namespace Dapplo.Config.Extension.Implementation
 		public virtual void InitProperty(PropertyInfo propertyInfo)
 		{
 		}
+
+		/// <summary>
+		/// After property initialization
+		/// </summary>
+		public virtual void AfterInitialization()
+		{
+		}
 	}
 }

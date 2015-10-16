@@ -72,7 +72,7 @@ namespace Dapplo.Config.Support
 				Type type2 = valueType.GetGenericArguments()[1];
 				return Activator.CreateInstance(typeof(Dictionary<,>).MakeGenericType(type1, type2));
 			}
-			else if (valueType.IsInterface || valueType.GetConstructor(Type.EmptyTypes) == null)
+			else if (!valueType.IsEnum && (valueType.IsInterface || valueType.GetConstructor(Type.EmptyTypes) == null))
 			{
 				return null;
 			}

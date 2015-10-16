@@ -22,6 +22,7 @@
 using Dapplo.Config.Extension;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 
 namespace Dapplo.Config.Ini
@@ -34,8 +35,8 @@ namespace Dapplo.Config.Ini
 		/// <summary>
 		/// Retrieve all the ini values
 		/// </summary>
-		/// <returns></returns>
-		IEnumerable<IniValue> GetIniValues();
+		/// <returns>readonly dictionary</returns>
+		IReadOnlyDictionary<string, IniValue> GetIniValues();
 
 		/// <summary>
 		/// Name of the Ini-Section, should be set on your property interface with

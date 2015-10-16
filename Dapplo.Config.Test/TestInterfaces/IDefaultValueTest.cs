@@ -21,6 +21,7 @@
 
 using Dapplo.Config.Converters;
 using Dapplo.Config.Extension;
+using Dapplo.Config.Ini;
 using System.Collections.Generic;
 using System.ComponentModel;
 

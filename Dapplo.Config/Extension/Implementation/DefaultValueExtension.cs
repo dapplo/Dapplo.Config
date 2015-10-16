@@ -59,7 +59,12 @@ namespace Dapplo.Config.Extension.Implementation
 		/// <param name="propertyInfo"></param>
 		public override void InitProperty(PropertyInfo propertyInfo)
 		{
-			RestoreToDefault(propertyInfo);
+			Exception ex;
+			RestoreToDefault(propertyInfo, out ex);
+			if (ex != null)
+			{
+				throw ex;
+			}
 		}
 
 		/// <summary>
@@ -97,11 +102,12 @@ namespace Dapplo.Config.Extension.Implementation
 		/// </summary>
 		private void RestoreToDefault(MethodCallInfo methodCallInfo)
 		{
+			Exception ex;
 			var propertyInfo = typeof(T).GetProperty(methodCallInfo.PropertyNameOf(0));
 			// Prevent ArgumentNullExceptions
 			if (propertyInfo != null)
 			{
-				RestoreToDefault(propertyInfo);
+				RestoreToDefault(propertyInfo, out ex);
 			}
 		}
 
@@ -109,9 +115,19 @@ namespace Dapplo.Config.Extension.Implementation
 		/// Method to restore a property to its default
 		/// </summary>
 		/// <param name="propertyInfo"></param>
-		private void RestoreToDefault(PropertyInfo propertyInfo)
+		private void RestoreToDefault(PropertyInfo propertyInfo, out Exception exception)
 		{
-			var defaultValue = GetConvertedDefaultValue(propertyInfo);
+			object defaultValue = null;
+			exception = null;
+            try
+			{
+				defaultValue = GetConvertedDefaultValue(propertyInfo);
+			}
+			catch (Exception ex)
+			{
+				// Store the exception so it can be used
+				exception = ex;
+			}
 
 			if (defaultValue != null)
 			{

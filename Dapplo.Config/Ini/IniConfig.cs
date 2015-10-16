@@ -403,10 +403,10 @@ namespace Dapplo.Config.Ini
 			{
 				foreach (var iniSection in _iniSections.Values)
 				{
-					foreach (var iniValue in iniSection.GetIniValues())
+					foreach (var propertyName in iniSection.GetIniValues().Keys)
 					{
 						// TODO: Do we need to skip read/write protected values here?
-						iniSection.RestoreToDefault(iniValue.PropertyName);
+						iniSection.RestoreToDefault(propertyName);
 					}
 					// Call the after load action
 					Action<IIniSection> afterLoadAction;
@@ -504,18 +504,18 @@ namespace Dapplo.Config.Ini
 		{
 			// This flag tells us if the header for the section is already written
 			bool isSectionCreated = false;
+			var sectionName = iniSection.GetSectionName();
 
 			IDictionary<string, string> sectionProperties = new SortedDictionary<string, string>();
 			IDictionary<string, string> sectionComments = new SortedDictionary<string, string>();
 			// Loop over the ini values, this automatically skips all NonSerialized properties
-			foreach (var iniValue in iniSection.GetIniValues())
+			foreach (var iniValue in iniSection.GetIniValues().Values)
 			{
 				// Check if we need to write the value, this is not needed when it has the default or if write is disabled
 				if (!iniValue.IsWriteNeeded)
 				{
 					continue;
 				}
-				var sectionName = iniSection.GetSectionName();
 
 				// Before we are going to write, we need to check if the section header "[Sectionname]" is already written.
 				// If not, do so now before writing the properties of the section itself
@@ -737,7 +737,7 @@ namespace Dapplo.Config.Ini
 			// Might be null
 			iniSections.TryGetValue(sectionName, out iniProperties);
 
-			IEnumerable<IniValue> iniValues = (from iniValue in iniSection.GetIniValues()
+			IEnumerable<IniValue> iniValues = (from iniValue in iniSection.GetIniValues().Values
 											   where iniValue.Behavior.Read
 											   select iniValue);
 

@@ -71,6 +71,7 @@
     <Compile Include="DescriptionTest.cs" />
     <Compile Include="LanguageLoaderTest.cs" />
     <Compile Include="NotifyPropertyChangingTest.cs" />
+    <Compile Include="TestInterfaces\IDefaultValueWithErrorTest.cs" />
     <Compile Include="TestInterfaces\IDescriptionTest.cs" />
     <Compile Include="TestInterfaces\IBassicAssignTest.cs" />
     <Compile Include="TestInterfaces\IDefaultValueTest.cs" />

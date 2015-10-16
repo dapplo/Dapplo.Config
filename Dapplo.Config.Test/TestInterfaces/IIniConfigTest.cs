@@ -55,6 +55,13 @@ namespace Dapplo.Config.Test.TestInterfaces
 			set;
 		}
 
+		[Description("Test property for wrong enums"), DefaultValue("Value3")]
+		IniConfigTestEnum TestWithFalseEnum
+		{
+			get;
+			set;
+		}
+
 		[DefaultValue(21), DataMember(EmitDefaultValue = true)]
 		long Age
 		{

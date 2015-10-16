@@ -21,6 +21,7 @@
 
 using Dapplo.Config.Test.TestInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace Dapplo.Config.Test
 {
@@ -55,6 +56,12 @@ namespace Dapplo.Config.Test
 			Assert.AreEqual(defaultValue, 21);
 			defaultValue = properties.DefaultValueFor("Age");
 			Assert.AreEqual(defaultValue, 21);
+		}
+
+		[ExpectedException(typeof(FormatException))]
+		public void TestDefaultValueWithError()
+		{
+			ProxyBuilder.CreateProxy<IDefaultValueWithErrorTest>();
 		}
 	}
 }

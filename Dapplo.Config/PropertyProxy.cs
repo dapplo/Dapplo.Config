@@ -41,6 +41,7 @@ namespace Dapplo.Config
 		private readonly IDictionary<string, List<Action<MethodCallInfo>>> _methodMap = new Dictionary<string, List<Action<MethodCallInfo>>>();
 		private readonly IDictionary<string, object> _properties = new NonStrictLookup<object>();
 		private readonly IDictionary<string, Type> _propertyTypes = new NonStrictLookup<Type>();
+		private readonly IDictionary<string, Exception> _initializationErrors = new NonStrictLookup<Exception>();
 		private readonly List<Setter> _setters = new List<Setter>();
 
 		// Cache the GetTransparentProxy value, as it makes more sense
@@ -70,10 +71,10 @@ namespace Dapplo.Config
 		/// </summary>
 		internal void Init()
 		{
-			//Init in the right order
-			var extensions = from sortedExtension in _extensions
+			// Init in the right order
+			var extensions = (from sortedExtension in _extensions
 				orderby sortedExtension.InitOrder ascending
-				select sortedExtension;
+				select sortedExtension).ToList();
 
 			foreach (PropertyInfo propertyInfo in AllPropertyInfos.Values)
 			{
@@ -81,9 +82,28 @@ namespace Dapplo.Config
 
 				foreach (var extension in extensions)
 				{
-					extension.InitProperty(propertyInfo);
+					try
+					{
+						extension.InitProperty(propertyInfo);
+					}
+					catch (Exception ex)
+					{
+						_initializationErrors.SafelyAddOrOverwrite(propertyInfo.Name, ex);
+					}
 				}
 			}
+
+			// Call all AfterInitialization, this allows us to ignore errors
+			foreach (var extension in extensions)
+			{
+				extension.AfterInitialization();
+			}
+
+			// Throw if an exception was left over
+			if (_initializationErrors.Count > 0)
+			{
+				throw _initializationErrors.Values.First();
+            }
 		}
 
 		/// <summary>
@@ -223,6 +243,17 @@ namespace Dapplo.Config
 
 				return _allPropertyInfos;
 			}
+		}
+
+		/// <summary>
+		/// If an exception is catched during the initialization, it can be found here
+		/// </summary>
+		public IDictionary<string, Exception> InitializationErrors
+		{
+			get
+			{
+				return _initializationErrors;
+            }
 		}
 
 		/// <summary>
