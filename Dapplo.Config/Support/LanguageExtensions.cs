@@ -41,11 +41,34 @@ namespace Dapplo.Config.Support
 		/// <typeparam name="TProp"></typeparam>
 		/// <param name="type"></param>
 		/// <param name="propertyExpression"></param>
-		/// <returns></returns>
+		/// <returns>string with the default translation</returns>
 		public static string DefaultTranslation<T, TProp>(this T type, Expression<Func<T, TProp>> propertyExpression) where T : ILanguage
 		{
 			var propertyName = propertyExpression.GetMemberName();
 			return (string)typeof(T).GetProperty(propertyName).GetDefaultValue();
+		}
+
+		/// <summary>
+		/// This extension can help when the language file cannot be created.
+		/// It gives you the translation, or the default translation if the instance is null.
+		/// Usage:
+		/// ILanguageExtendingInterface someInstance = .... ;
+		/// string defaultTranslation = someInstance.TranslationOrDefault(x => x.Ok);
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <typeparam name="TProp"></typeparam>
+		/// <param name="type"></param>
+		/// <param name="propertyExpression"></param>
+		/// <returns>string with the translation</returns>
+		public static string TranslationOrDefault<T, TProp>(this T type, Expression<Func<T, TProp>> propertyExpression) where T : ILanguage
+		{
+			var propertyName = propertyExpression.GetMemberName();
+			var propertyInfo = typeof(T).GetProperty(propertyName);
+            if (type != null)
+			{
+				return (string)propertyInfo.GetValue(type);
+            }
+			return (string)propertyInfo.GetDefaultValue();
 		}
 	}
 }

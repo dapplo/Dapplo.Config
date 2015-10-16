@@ -107,10 +107,14 @@ namespace Dapplo.Config.Test
 		}
 
 		[TestMethod]
-		public void TestExtension()
+		public async Task TestExtension()
 		{
 			ILanguageLoaderTest test = null;
 			var ok = test.DefaultTranslation(x => x.Ok);
+			Assert.AreEqual("Ok", ok);
+
+			test = await languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
+			ok = test.TranslationOrDefault(x => x.Ok);
 			Assert.AreEqual("Ok", ok);
 		}
 	}
