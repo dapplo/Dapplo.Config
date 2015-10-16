@@ -88,7 +88,7 @@ namespace Dapplo.Config.Language
 		/// <param name="applicationName"></param>
 		/// <param name="defaultLanguage"></param>
 		/// <param name="filePatern">Pattern for the filename, the ietf group needs to be in there!</param>
-		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language(_(?<module>[a-zA-Z0-9]*))?-(?<IETF>[a-zA-Z]{2}(-[a-zA-Z]+)?-[a-zA-Z]+)\.(ini|xml)")
+		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language(_(?<module>[a-zA-Z0-9]*))?-(?<IETF>[a-zA-Z]{2}(-[a-zA-Z]+)?-[a-zA-Z]+)\.(ini|xml)", bool checkStartupDirectory = true, bool checkAppDataDirectory = true, ICollection<string> specifiedDirectories = null)
 		{
 			if (LoaderStore.ContainsKey(applicationName))
 			{
@@ -97,7 +97,7 @@ namespace Dapplo.Config.Language
 			CurrentLanguage = defaultLanguage;
 			_filePattern = new Regex(filePatern, RegexOptions.Compiled);
 			_applicationName = applicationName;
-			ScanFiles(true);
+			ScanFiles(checkStartupDirectory, checkAppDataDirectory, specifiedDirectories);
 			LoaderStore.SafelyAddOrOverwrite(applicationName, this);
 		}
 

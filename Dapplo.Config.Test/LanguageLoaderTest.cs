@@ -21,6 +21,7 @@
 
 using Dapplo.Config.Language;
 using Dapplo.Config.Test.TestInterfaces;
+using Dapplo.Config.Support;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Threading.Tasks;
@@ -73,7 +74,7 @@ namespace Dapplo.Config.Test
 		public async Task TestIndexer()
 		{
 			var language = await languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
-            await languageLoader.ChangeLanguage("nl-NL");
+			await languageLoader.ChangeLanguage("nl-NL");
 			Assert.AreEqual("Afbreken", language["TestValue"]);
 			// Test using the raw property name with the indexer
 			Assert.AreEqual("Afbreken", languageLoader["test"]["test_value"]);
@@ -103,6 +104,14 @@ namespace Dapplo.Config.Test
 			Assert.AreEqual("BlubNL", language.OnlynlNL);
 			await languageLoader.ChangeLanguage("de-DE");
 			Assert.AreEqual("BlubDE", language.OnlydeDE);
+		}
+
+		[TestMethod]
+		public void TestExtension()
+		{
+			ILanguageLoaderTest test = null;
+			var ok = test.DefaultTranslation(x => x.Ok);
+			Assert.AreEqual("Ok", ok);
 		}
 	}
 }
