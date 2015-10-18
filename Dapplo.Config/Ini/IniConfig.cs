@@ -328,6 +328,32 @@ namespace Dapplo.Config.Ini
 		/// Register a Property Interface to this ini config, this method will return the property object 
 		/// </summary>
 		/// <param name="type">Type to register, this must extend IIniSection</param>
+		/// <returns>instance of type</returns>
+		public IIniSection RegisterAndGet(Type type)
+		{
+			if (!typeof(IIniSection).IsAssignableFrom(type))
+			{
+				throw new ArgumentException("type is not a IIniSection");
+			}
+			var propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
+			var iniSection = (IIniSection)propertyProxy.PropertyObject;
+			var sectionName = iniSection.GetSectionName();
+
+			if (_iniSections.ContainsKey(sectionName))
+			{
+				return iniSection;
+			}
+			// Add before loading, so it will be handled automatically
+			_iniSections.Add(sectionName, iniSection);
+			FillSection(iniSection);
+
+			return iniSection;
+		}
+
+		/// <summary>
+		/// Register a Property Interface to this ini config, this method will return the property object 
+		/// </summary>
+		/// <param name="type">Type to register, this must extend IIniSection</param>
 		/// <param name="token"></param>
 		/// <returns>instance of type</returns>
 		public async Task<IIniSection> RegisterAndGetAsync(Type type, CancellationToken token = default(CancellationToken))
