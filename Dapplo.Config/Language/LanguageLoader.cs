@@ -305,6 +305,29 @@ namespace Dapplo.Config.Language
 		}
 
 		/// <summary>
+		/// Register a Property Interface to this language loader, this method will return the filled property object 
+		/// </summary>
+		/// <param name="type">Type to register, this must extend ILanguage</param>
+		/// <returns>instance of type</returns>
+		public ILanguage RegisterAndGet(Type type)
+		{
+			if (!typeof(ILanguage).IsAssignableFrom(type))
+			{
+				throw new ArgumentException("type is not a ILanguage");
+			}
+			var propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
+			var languageObject = (ILanguage)propertyProxy.PropertyObject;
+			if (!_languageTypeConfigs.ContainsKey(type))
+			{
+				_languageTypeConfigs.Add(type, propertyProxy);
+				_languageConfigs.Add(GetPrefix(propertyProxy), languageObject);
+				FillLanguageConfig(propertyProxy);
+			}
+
+			return languageObject;
+		}
+
+		/// <summary>
 		/// Get the specified ILanguage type
 		/// </summary>
 		/// <typeparam name="T">ILanguage</typeparam>
@@ -351,38 +374,40 @@ namespace Dapplo.Config.Language
 		public async Task ReloadAsync(CancellationToken token = default(CancellationToken))
 		{
 			_allTranslations.Clear();
-
-			foreach (var languageFile in Files[CurrentLanguage])
+			if (Files.ContainsKey(CurrentLanguage))
 			{
-				IDictionary<string, IDictionary<string, string>> newResources;
-				if (languageFile.EndsWith(".ini"))
+				foreach (var languageFile in Files[CurrentLanguage])
 				{
-					newResources = await IniFile.ReadAsync(languageFile, Encoding.UTF8, token).ConfigureAwait(false);
-				}
-				else if (languageFile.EndsWith(".xml"))
-				{
-					newResources = ReadXmlResources(languageFile);
-				}
-				else
-				{
-					throw new NotSupportedException(string.Format("Can't read the file format for {0}", languageFile));
-				}
-				if (newResources == null)
-				{
-					continue;
-				}
-				foreach (var section in newResources.Keys)
-				{
-					var properties = newResources[section];
-					IDictionary<string, string> sectionTranslations;
-					if (!_allTranslations.TryGetValue(section, out sectionTranslations))
+					IDictionary<string, IDictionary<string, string>> newResources;
+					if (languageFile.EndsWith(".ini"))
 					{
-						sectionTranslations = new Dictionary<string, string>();
-						_allTranslations.Add(section, sectionTranslations);
+						newResources = await IniFile.ReadAsync(languageFile, Encoding.UTF8, token).ConfigureAwait(false);
 					}
-					foreach (var key in properties.Keys)
+					else if (languageFile.EndsWith(".xml"))
 					{
-						sectionTranslations.SafelyAddOrOverwrite(key, properties[key]);
+						newResources = ReadXmlResources(languageFile);
+					}
+					else
+					{
+						throw new NotSupportedException(string.Format("Can't read the file format for {0}", languageFile));
+					}
+					if (newResources == null)
+					{
+						continue;
+					}
+					foreach (var section in newResources.Keys)
+					{
+						var properties = newResources[section];
+						IDictionary<string, string> sectionTranslations;
+						if (!_allTranslations.TryGetValue(section, out sectionTranslations))
+						{
+							sectionTranslations = new Dictionary<string, string>();
+							_allTranslations.Add(section, sectionTranslations);
+						}
+						foreach (var key in properties.Keys)
+						{
+							sectionTranslations.SafelyAddOrOverwrite(key, properties[key]);
+						}
 					}
 				}
 			}

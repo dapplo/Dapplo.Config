@@ -31,6 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
@@ -54,6 +55,7 @@
     <Compile Include="Extension\Implementation\DefaultValueExtension.cs" />
     <Compile Include="Extension\Implementation\WriteProtectExtension.cs" />
     <Compile Include="Extension\Implementation\TransactionExtension.cs" />
+    <Compile Include="Ini\IniConfigExportProvider.cs" />
     <Compile Include="Ini\IniPropertyBehaviorAttribute.cs" />
     <Compile Include="Converters\StringEncryptionTypeConverter.cs" />
     <Compile Include="Converters\GenericDictionaryConverter.cs" />
@@ -70,6 +72,7 @@
     <Compile Include="Extension\Implementation\NotifyPropertyChangedExtension.cs" />
     <Compile Include="Language\ILanguage.cs" />
     <Compile Include="Language\Implementation\LanguageExtension.cs" />
+    <Compile Include="Language\LanguageExportProvider.cs" />
     <Compile Include="Language\LanguageAttribute.cs" />
     <Compile Include="Language\LanguageLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

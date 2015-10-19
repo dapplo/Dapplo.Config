@@ -421,25 +421,34 @@ namespace Dapplo.Config.Ini
 		}
 
 		/// <summary>
-		/// Reset all the values, in all the registered ini sections, to their default
+		/// Reset all the values, in all the registered ini sections, to their defaults
 		/// </summary>
 		public async Task ResetAsync(CancellationToken token = default(CancellationToken))
 		{
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
-				foreach (var iniSection in _iniSections.Values)
+				ResetInternal();
+			};
+		}
+
+		/// <summary>
+		/// Reset all the values, in all the registered ini sections, to their defaults
+		/// This is for internal usage, so no lock
+		/// </summary>
+		public void ResetInternal()
+		{
+			foreach (var iniSection in _iniSections.Values)
+			{
+				foreach (var propertyName in iniSection.GetIniValues().Keys)
 				{
-					foreach (var propertyName in iniSection.GetIniValues().Keys)
-					{
-						// TODO: Do we need to skip read/write protected values here?
-						iniSection.RestoreToDefault(propertyName);
-					}
-					// Call the after load action
-					Action<IIniSection> afterLoadAction;
-					if (_afterLoadActions.TryGetValue(iniSection.GetType(), out afterLoadAction))
-					{
-						afterLoadAction(iniSection);
-					}
+					// TODO: Do we need to skip read/write protected values here?
+					iniSection.RestoreToDefault(propertyName);
+				}
+				// Call the after load action
+				Action<IIniSection> afterLoadAction;
+				if (_afterLoadActions.TryGetValue(iniSection.GetType(), out afterLoadAction))
+				{
+					afterLoadAction(iniSection);
 				}
 			}
 		}
@@ -689,9 +698,8 @@ namespace Dapplo.Config.Ini
 		{
 			if (reset)
 			{
-				await ResetAsync(token).ConfigureAwait(false);
-			}
-
+				ResetInternal();
+            }
 			_defaults = await IniFile.ReadAsync(CreateFileLocation(true, Defaults, _fixedDirectory), Encoding.UTF8, token).ConfigureAwait(false);
 			_constants = await IniFile.ReadAsync(CreateFileLocation(true, Constants, _fixedDirectory), Encoding.UTF8, token).ConfigureAwait(false);
 			var newIni = await IniFile.ReadAsync(IniLocation, Encoding.UTF8, token).ConfigureAwait(false);

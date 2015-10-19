@@ -164,7 +164,7 @@ namespace Dapplo.Config.Ini.Implementation
 			newIniValue.Converter = propertyInfo.GetTypeConverter();
 			newIniValue.Category = propertyInfo.GetCategory();
 			newIniValue.Behavior = propertyInfo.GetIniPropertyBehavior();
-			if (!newIniValue.Behavior.IsIgnoreErrorsSet)
+			if (!newIniValue.Behavior.IsIgnoreErrorsSet && _iniSectionAttribute != null)
 			{
 				newIniValue.Behavior.IgnoreErrors = _iniSectionAttribute.IgnoreErrors;
             }
