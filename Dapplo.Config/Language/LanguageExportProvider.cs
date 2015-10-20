@@ -60,10 +60,9 @@ namespace Dapplo.Config.Language
 		{
 			Export export;
 			// See if we already cached the value
-			if (_loopup.TryGetValue(definition.ContractName, out export))
+			if (_loopup.TryGetValue(definition.ContractName, out export) && export != null)
 			{
 				yield return export;
-
 			}
 			else
 			{
@@ -73,10 +72,20 @@ namespace Dapplo.Config.Language
 					// Make an AssemblyQualifiedName from the contract name
 					var assemblyQualifiedName = $"{definition.ContractName}, {assembly.FullName}";
 					// Try to get it, don't throw if not found
-					var contractType = Type.GetType(assemblyQualifiedName, false, true);
+					Type contractType = null;
+					try
+					{
+						contractType = Type.GetType(assemblyQualifiedName, false, true);
+					}
+					catch
+					{
+						// Ignore
+					}
 					// Go to next assembly if it wasn't found
 					if (contractType == null)
 					{
+						// Add null value, so we don't try it again
+						_loopup.Add(definition.ContractName, null);
 						continue;
 					}
 					// Check if it is derrived from ILanguage
@@ -84,8 +93,8 @@ namespace Dapplo.Config.Language
 					{
 						// Generate the export & meta-data
 						var metadata = new Dictionary<string, object>(){
-						{CompositionConstants.ExportTypeIdentityMetadataName, _application}
-					};
+							{CompositionConstants.ExportTypeIdentityMetadataName, _application}
+						};
 
 						var exportDefinition = new ExportDefinition(_application, metadata);
 						export = new Export(exportDefinition, () => _languageLoader.RegisterAndGet(contractType));
