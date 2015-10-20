@@ -39,6 +39,7 @@ namespace Dapplo.Config.Ini
 		private readonly IList<Assembly> _assemblies;
 		private readonly IDictionary<string, Export> _loopup = new Dictionary<string, Export>();
 		private readonly IServiceLocator _serviceLocator;
+		private readonly Type iniSectionType = typeof(IIniSection);
 
 		/// <summary>
 		/// Create a IniConfigExportProvider which is for the specified applicatio, iniconfig and works with the supplied assemblies
@@ -94,8 +95,13 @@ namespace Dapplo.Config.Ini
 					{
 						continue;
 					}
+					if (contractType == iniSectionType)
+					{
+						// We can't export the IIniSection itself
+						break;
+					}
 					// Check if it is derrived from IIniSection
-					if (typeof(IIniSection).IsAssignableFrom(contractType))
+					if (iniSectionType.IsAssignableFrom(contractType))
 					{
 						// Generate the export & meta-data
 						var metadata = new Dictionary<string, object>(){

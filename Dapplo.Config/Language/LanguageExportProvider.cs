@@ -39,6 +39,7 @@ namespace Dapplo.Config.Language
 		private readonly IList<Assembly> _assemblies;
 		private readonly IDictionary<string, Export> _loopup = new Dictionary<string, Export>();
 		private readonly IServiceLocator _serviceLocator;
+		private readonly Type languageType = typeof(ILanguage);
 
 		/// <summary>
 		/// Create a IniConfigExportProvider which is for the specified applicatio, iniconfig and works with the supplied assemblies
@@ -95,8 +96,13 @@ namespace Dapplo.Config.Language
 						// Add null value, so we don't try it again
 						continue;
 					}
+					if (contractType == languageType)
+					{
+						// We can't export the ILanguage itself
+						break;
+					}
 					// Check if it is derrived from ILanguage
-					if (typeof(ILanguage).IsAssignableFrom(contractType))
+					if (languageType.IsAssignableFrom(contractType))
 					{
 						// Generate the export & meta-data
 						var metadata = new Dictionary<string, object>(){
