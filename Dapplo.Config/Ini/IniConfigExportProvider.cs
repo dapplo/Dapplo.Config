@@ -63,7 +63,10 @@ namespace Dapplo.Config.Ini
 			// See if we already cached the value
 			if (_loopup.TryGetValue(definition.ContractName, out export) && export != null)
 			{
-				yield return export;
+				if (export != null)
+				{
+					yield return export;
+				}
 			}
 			else
 			{
