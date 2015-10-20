@@ -19,6 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Dapplo.Config.Support;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Hosting;
@@ -37,18 +38,21 @@ namespace Dapplo.Config.Language
 		private readonly string _application;
 		private readonly IList<Assembly> _assemblies;
 		private readonly IDictionary<string, Export> _loopup = new Dictionary<string, Export>();
+		private readonly IServiceLocator _serviceLocator;
+
 		/// <summary>
 		/// Create a IniConfigExportProvider which is for the specified applicatio, iniconfig and works with the supplied assemblies
 		/// </summary>
 		/// <param name="application">Application name, used for the meta-data</param>
 		/// <param name="languageLoader">LanguageLoader needed for the registering</param>
 		/// <param name="assemblies">List of assemblies used for finding the type</param>
-		public LanguageExportProvider(string application, LanguageLoader languageLoader, IList<Assembly> assemblies)
+		public LanguageExportProvider(string application, LanguageLoader languageLoader, IList<Assembly> assemblies, IServiceLocator serviceLocator)
 		{
 			_application = application;
 			_languageLoader = languageLoader;
 			_assemblies = assemblies;
-        }
+			_serviceLocator = serviceLocator;
+		}
 
 		/// <summary>
 		/// Try to find the IniSection type that wants to be imported, and get/register it.
@@ -74,7 +78,7 @@ namespace Dapplo.Config.Language
 				{
 					// Make an AssemblyQualifiedName from the contract name
 					var assemblyQualifiedName = $"{definition.ContractName}, {assembly.FullName}";
-					// Try to get it, don't throw if not found
+					// Try to get it, don't throw an exception if not found
 					Type contractType = null;
 					try
 					{
@@ -82,7 +86,8 @@ namespace Dapplo.Config.Language
 					}
 					catch
 					{
-						// Ignore
+						// Ignore & break the loop at it is most likely a problem with the contract name
+						break;
 					}
 					// Go to next assembly if it wasn't found
 					if (contractType == null)
@@ -99,11 +104,20 @@ namespace Dapplo.Config.Language
 						};
 
 						var exportDefinition = new ExportDefinition(_application, metadata);
-						export = new Export(exportDefinition, () => _languageLoader.RegisterAndGet(contractType));
+
+						var instance = _languageLoader.RegisterAndGet(contractType);
+						// Make sure it's exported
+						if (_serviceLocator != null)
+						{
+							_serviceLocator.Export(instance);
+						}
+						export = new Export(exportDefinition, () => instance);
 
 						// store the export for fast retrieval
 						_loopup.Add(definition.ContractName, export);
 						yield return export;
+						// Nothing more to do, break
+						yield break;
 					}
 				}
 				// Add null value, so we don't try it again

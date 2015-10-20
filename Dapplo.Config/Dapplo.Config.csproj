@@ -80,6 +80,7 @@
     <Compile Include="ProxyBuilder.cs" />
     <Compile Include="Support\DictionaryExtensions.cs" />
     <Compile Include="Support\FileLocations.cs" />
+    <Compile Include="Support\IServiceLocator.cs" />
     <Compile Include="Support\LanguageExtensions.cs" />
     <Compile Include="Support\MethodCallExtensions.cs" />
     <Compile Include="Support\NonStrictLookup.cs" />

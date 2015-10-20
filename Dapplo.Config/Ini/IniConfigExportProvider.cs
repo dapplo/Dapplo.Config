@@ -19,6 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Dapplo.Config.Support;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Hosting;
@@ -37,6 +38,7 @@ namespace Dapplo.Config.Ini
 		private readonly string _application;
 		private readonly IList<Assembly> _assemblies;
 		private readonly IDictionary<string, Export> _loopup = new Dictionary<string, Export>();
+		private readonly IServiceLocator _serviceLocator;
 
 		/// <summary>
 		/// Create a IniConfigExportProvider which is for the specified applicatio, iniconfig and works with the supplied assemblies
@@ -44,11 +46,12 @@ namespace Dapplo.Config.Ini
 		/// <param name="application">Application name, used for the meta-data</param>
 		/// <param name="iniConfig">IniConfig needed for the registering</param>
 		/// <param name="assemblies">List of assemblies used for finding the type</param>
-		public IniConfigExportProvider(string application, IniConfig iniConfig, IList<Assembly> assemblies)
+		public IniConfigExportProvider(string application, IniConfig iniConfig, IList<Assembly> assemblies, IServiceLocator serviceLocator)
 		{
 			_application = application;
             _iniConfig = iniConfig;
 			_assemblies = assemblies;
+			_serviceLocator = serviceLocator;
         }
 
 		/// <summary>
@@ -75,7 +78,7 @@ namespace Dapplo.Config.Ini
 				{
 					// Make an AssemblyQualifiedName from the contract name
 					var assemblyQualifiedName = $"{definition.ContractName}, {assembly.FullName}";
-					// Try to get it, don't throw if not found
+					// Try to get it, don't throw an exception if not found
 					Type contractType = null;
 					try
 					{
@@ -83,7 +86,8 @@ namespace Dapplo.Config.Ini
 					}
 					catch
 					{
-						// Ignore
+						// Ignore & break the loop at it is most likely a problem with the contract name
+						break;
 					}
 					// Go to next assembly if it wasn't found
 					if (contractType == null)
@@ -99,11 +103,20 @@ namespace Dapplo.Config.Ini
 						};
 
 						var exportDefinition = new ExportDefinition(_application, metadata);
-						export = new Export(exportDefinition, () => _iniConfig.RegisterAndGet(contractType));
+
+						var instance = _iniConfig.RegisterAndGet(contractType);
+						// Make sure it's exported
+						if (_serviceLocator != null)
+						{
+							_serviceLocator.Export(instance);
+						}
+						export = new Export(exportDefinition, () => instance);
 
 						// store the export for fast retrieval
 						_loopup.Add(definition.ContractName, export);
 						yield return export;
+						// Nothing more to do, break
+						yield break;
 					}
 				}
 				// Add null value, so we don't try it again
