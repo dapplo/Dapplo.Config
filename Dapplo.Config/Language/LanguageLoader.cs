@@ -238,10 +238,14 @@ namespace Dapplo.Config.Language
 				.ToDictionary(group => group.Key, group => group.Select(x => x.Item1)
 				.ToList());
 
-			AvailableLanguages = Files.Keys
-				.Where(x => SavelyGetCultureInfo(x) != null)
-				.ToDictionary(x => x, x => CultureInfo.GetCultureInfo(x).NativeName
-			);
+			var allCultures = CultureInfo.GetCultures(CultureTypes.AllCultures)
+				.ToLookup(e => e.IetfLanguageTag, StringComparer.OrdinalIgnoreCase).ToDictionary(x=>x.Key, x=> x.First());
+
+			//TODO: Create custom culture for all not available, see: https://msdn.microsoft.com/en-us/library/ms172469(v=vs.90).aspx
+
+			AvailableLanguages = (from ietf in Files.Keys
+								  where allCultures.ContainsKey(ietf)
+								  select ietf).Distinct().ToDictionary(ietf => ietf, ietf => allCultures[ietf].NativeName);
 		}
 
 		/// <summary>
