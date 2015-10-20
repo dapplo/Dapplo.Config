@@ -88,7 +88,6 @@ namespace Dapplo.Config.Language
 					if (contractType == null)
 					{
 						// Add null value, so we don't try it again
-						_loopup.Add(definition.ContractName, null);
 						continue;
 					}
 					// Check if it is derrived from ILanguage
@@ -107,6 +106,8 @@ namespace Dapplo.Config.Language
 						yield return export;
 					}
 				}
+				// Add null value, so we don't try it again
+				_loopup.Add(definition.ContractName, null);
 			}
 			yield break;
 		}

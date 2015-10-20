@@ -61,7 +61,7 @@ namespace Dapplo.Config.Ini
 		{
 			Export export;
 			// See if we already cached the value
-			if (_loopup.TryGetValue(definition.ContractName, out export) && export != null)
+			if (_loopup.TryGetValue(definition.ContractName, out export))
 			{
 				if (export != null)
 				{
@@ -88,8 +88,6 @@ namespace Dapplo.Config.Ini
 					// Go to next assembly if it wasn't found
 					if (contractType == null)
 					{
-						// Add null value, so we don't try it again
-						_loopup.Add(definition.ContractName, null);
 						continue;
 					}
 					// Check if it is derrived from IIniSection
@@ -108,6 +106,8 @@ namespace Dapplo.Config.Ini
 						yield return export;
 					}
 				}
+				// Add null value, so we don't try it again
+				_loopup.Add(definition.ContractName, null);
 			}
 			yield break;
 		}
