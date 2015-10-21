@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 
 namespace Dapplo.Config.Ini
 {
+	
 	/// <summary>
 	/// The IniConfig is used to bind IIniSection proxy objects to an ini file.
 	/// </summary>
@@ -46,13 +47,26 @@ namespace Dapplo.Config.Ini
 		private readonly AsyncLock _asyncLock = new AsyncLock();
 		private readonly string _fixedDirectory;
 		private readonly IDictionary<string, IIniSection> _iniSections = new SortedDictionary<string, IIniSection>();
-		private bool _initialReadDone;
+		private ReadFrom _initialRead = ReadFrom.Nothing;
 		private readonly IDictionary<Type, Action<IIniSection>> _afterLoadActions = new Dictionary<Type, Action<IIniSection>>();
 		private readonly IDictionary<Type, Action<IIniSection>> _beforeSaveActions = new Dictionary<Type, Action<IIniSection>>();
 		private readonly IDictionary<Type, Action<IIniSection>> _afterSaveActions = new Dictionary<Type, Action<IIniSection>>();
 		private IDictionary<string, IDictionary<string, string>> _defaults;
 		private IDictionary<string, IDictionary<string, string>> _constants;
 		private IDictionary<string, IDictionary<string, string>> _ini = new SortedDictionary<string, IDictionary<string, string>>();
+		private readonly FileSystemWatcher _configFileWatcher;
+		private Timer _saveTimer;
+
+		/// <summary>
+		/// Used to detect if we have an intial read, and if so from where.
+		/// This is important for the auto-save & FileSystemWatcher
+		/// </summary>
+		private enum ReadFrom
+		{
+			Nothing,
+			File,
+			Stream
+		}
 
 		private readonly IDictionary<Type, Type> _converters = new Dictionary<Type, Type>();
 
@@ -123,7 +137,7 @@ namespace Dapplo.Config.Ini
 		/// <param name="applicationName"></param>
 		/// <param name="fileName"></param>
 		/// <param name="fixedDirectory">Specify a path if you don't want to use the default loading</param>
-		public IniConfig(string applicationName, string fileName, string fixedDirectory = null)
+		public IniConfig(string applicationName, string fileName, string fixedDirectory = null, uint autoSaveInterval = 1000,bool watchFileChanges = true)
 		{
 			_applicationName = applicationName;
 			_fileName = fileName;
@@ -131,6 +145,64 @@ namespace Dapplo.Config.Ini
 			// Look for the ini file, this is only done 1 time.
 			IniLocation = CreateFileLocation(false, "", _fixedDirectory);
 
+			// Configure file change watching, do not enable it untill we loaded the FILE (not used when streaming)
+			if (watchFileChanges)
+			{
+				_configFileWatcher = new FileSystemWatcher
+				{
+					Path = Path.GetDirectoryName(IniLocation),
+					IncludeSubdirectories = false,
+					NotifyFilter = NotifyFilters.LastWrite,
+					Filter = Path.GetFileName(IniLocation)
+				};
+
+				// change handling
+				_configFileWatcher.Changed += async (sender, eventArgs) =>
+				{
+					try
+					{
+						await ReloadAsync();
+					}
+					catch
+					{
+						// Ignore
+					}
+				};
+			}
+
+			// Configure the auto save
+			if (autoSaveInterval > 0)
+			{
+				_saveTimer = new Timer(async (state) => {
+					// If we didn't read from a file we can stop the "timer tick"
+					if (_initialRead != ReadFrom.File)
+					{
+						return;
+					}
+					bool needsSave = false;
+					foreach(var iniSection in _iniSections.Values)
+					{
+						if (iniSection.HasChanges())
+						{
+							needsSave = true;
+							iniSection.ResetHasChanges();
+						}
+					}
+					if (needsSave)
+					{
+						try
+						{
+							await WriteAsync();
+                        }
+						catch
+						{
+
+						}
+					}
+				}, null, TimeSpan.FromMilliseconds(autoSaveInterval), TimeSpan.FromMilliseconds(autoSaveInterval));
+			}
+
+			// Add error handlers for writing
 			WriteErrorHandler = (iniSection, iniValue, exception) =>
 			{
 				if (!iniValue.Behavior.IgnoreErrors)
@@ -139,6 +211,7 @@ namespace Dapplo.Config.Ini
 				}
 			};
 
+			// Add error handlers for reading
 			ReadErrorHandler = (iniSection, iniValue, exception) =>
 			{
 				if (!iniValue.Behavior.IgnoreErrors)
@@ -146,7 +219,18 @@ namespace Dapplo.Config.Ini
 					throw exception;
 				}
 			};
+
+			// Used for lookups
 			ConfigStore.Add(string.Format("{0}.{1}", applicationName, fileName), this);
+
+			// Make sure the configuration is save when the domain is exited
+			AppDomain.CurrentDomain.ProcessExit += (sender, eventArgs) => Task.Run(async () => {
+				// But only if there was reading from a file
+				if (_initialRead == ReadFrom.File)
+				{
+					await WriteAsync();
+				}
+			}).Wait();
 		}
 
 		/// <summary>
@@ -280,7 +364,7 @@ namespace Dapplo.Config.Ini
 				{
 					throw new ArgumentException("type is not a IIniSection");
 				}
-				if (!_initialReadDone)
+				if (_initialRead == ReadFrom.Nothing)
 				{
 					throw new InvalidOperationException("Please load before retrieving the ini-sections");
 				}
@@ -323,6 +407,16 @@ namespace Dapplo.Config.Ini
 		{
 			return _iniSections.TryGetValue(sectionName, out section);
 		}
+
+		/// <summary>
+		/// Register a Property Interface to this ini config, this method will return the property object 
+		/// </summary>
+		/// <typeparam name="T">Type to register, this must extend IIniSection</typeparam>
+		/// <returns>instance of T</returns>
+		public T RegisterAndGet<T>()
+		{
+			return (T)RegisterAndGet(typeof(T));
+        }
 
 		/// <summary>
 		/// Register a Property Interface to this ini config, this method will return the property object 
@@ -374,7 +468,7 @@ namespace Dapplo.Config.Ini
 				}
 				// Add before loading, so it will be handled automatically
 				_iniSections.Add(sectionName, iniSection);
-				if (!_initialReadDone)
+				if (_initialRead == ReadFrom.Nothing)
 				{
 					await ReloadInternalAsync(false, token).ConfigureAwait(false);
 				}
@@ -469,11 +563,23 @@ namespace Dapplo.Config.Ini
 					Directory.CreateDirectory(path);
 				}
 
+				// disable the File-Watcher so we don't get events from ourselves
+				if (_configFileWatcher != null)
+				{
+					_configFileWatcher.EnableRaisingEvents = false;
+                }
+
 				// Create the file as a stream
 				using (var stream = new FileStream(IniLocation, FileMode.Create, FileAccess.Write))
 				{
 					// Write the registered ini sections to the stream
 					await WriteToStreamInternalAsync(stream, token).ConfigureAwait(false);
+				}
+
+				// Enable the File-Watcher so we get events again
+				if (_configFileWatcher != null)
+				{
+					_configFileWatcher.EnableRaisingEvents = true;
 				}
 			}
 		}
@@ -703,11 +809,17 @@ namespace Dapplo.Config.Ini
 			_defaults = await IniFile.ReadAsync(CreateFileLocation(true, Defaults, _fixedDirectory), Encoding.UTF8, token).ConfigureAwait(false);
 			_constants = await IniFile.ReadAsync(CreateFileLocation(true, Constants, _fixedDirectory), Encoding.UTF8, token).ConfigureAwait(false);
 			var newIni = await IniFile.ReadAsync(IniLocation, Encoding.UTF8, token).ConfigureAwait(false);
-			if (newIni != null)
+			
+			// As we readed the file, make sure we enable the event raising (if the file watcher is wanted)
+			if (_configFileWatcher != null)
+			{
+				_configFileWatcher.EnableRaisingEvents = true;
+            }
+            if (newIni != null)
 			{
 				_ini = newIni;
 			}
-			_initialReadDone = true;
+			_initialRead = ReadFrom.File;
 
 			// Reset the sections that have already been registered
 			FillSections();
@@ -716,7 +828,6 @@ namespace Dapplo.Config.Ini
 		/// <summary>
 		/// Internal method, use the supplied ini-sections & properties to fill the sectoins
 		/// </summary>
-		/// <returns></returns>
 		private void FillSections()
 		{
 			foreach (var iniSection in _iniSections.Values)
@@ -862,7 +973,7 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		public async Task ReadFromStreamAsync(Stream stream, CancellationToken token = default(CancellationToken))
 		{
-			_initialReadDone = true;
+			_initialRead = ReadFrom.Stream;
 			// This is for testing, clear all defaults & constants as the 
 			_defaults = null;
 			_constants = null;

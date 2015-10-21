@@ -22,29 +22,20 @@
 namespace Dapplo.Config.Extension
 {
 	/// <summary>
-	///     Extending the to be property interface with this, adds transactional support
+	///     Extending the to be property interface with this, adds a way of know if there were changes sind the last reset
+	///     Is used internally in the IniConfig to detect if a write is needed
 	/// </summary>
-	public interface ITransactionalProperties
+	public interface IHasChanges
 	{
 		/// <summary>
-		/// This method will start the transaction, all changes will be stored in a separate cache.
+		/// Reset the has changes flag
 		/// </summary>
-		void StartTransaction();
-
-		/// <summary>
-		/// Apply the stored changes from the cache to the property object
-		/// </summary>
-		void CommitTransaction();
-
-		/// <summary>
-		/// Cancel the transaction, this will clear the stored changes
-		/// </summary>
-		void RollbackTransaction();
+		void ResetHasChanges();
 
 		/// <summary>
 		/// Check if there are changes pending
 		/// </summary>
 		/// <returns>true when there are changes</returns>
-		bool IsTransactionDirty();
+		bool HasChanges();
 	}
 }

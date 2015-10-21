@@ -53,7 +53,7 @@ namespace Dapplo.Config.Ini
 		{
 			if (File.Exists(path))
 			{
-				using (var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 1024))
+				using (var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 1024))
 				{
 					return await ReadAsync(fileStream, encoding, token).ConfigureAwait(false);
 				}

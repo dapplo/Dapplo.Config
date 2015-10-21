@@ -47,9 +47,11 @@
     <Compile Include="Extension\IDefaultValue.cs" />
     <Compile Include="Extension\Implementation\AbstractPropertyProxyExtension.cs" />
     <Compile Include="Extension\Implementation\DescriptionExtension.cs" />
+    <Compile Include="Extension\Implementation\HasChangesExtension.cs" />
     <Compile Include="Extension\ITagging.cs" />
     <Compile Include="Extension\Implementation\NotifyPropertyChangingExtension.cs" />
     <Compile Include="Extension\Implementation\TagExtension.cs" />
+    <Compile Include="Extension\IHasChanges.cs" />
     <Compile Include="Extension\IWriteProtectProperties.cs" />
     <Compile Include="Extension\ITransactionalProperties.cs" />
     <Compile Include="Extension\Implementation\DefaultValueExtension.cs" />
