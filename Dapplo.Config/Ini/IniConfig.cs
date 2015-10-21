@@ -54,7 +54,8 @@ namespace Dapplo.Config.Ini
 		private IDictionary<string, IDictionary<string, string>> _defaults;
 		private IDictionary<string, IDictionary<string, string>> _constants;
 		private IDictionary<string, IDictionary<string, string>> _ini = new SortedDictionary<string, IDictionary<string, string>>();
-		private readonly FileSystemWatcher _configFileWatcher;
+		private readonly bool _watchFileChanges;
+		private FileSystemWatcher _configFileWatcher;
 		private Timer _saveTimer;
 
 		/// <summary>
@@ -137,38 +138,14 @@ namespace Dapplo.Config.Ini
 		/// <param name="applicationName"></param>
 		/// <param name="fileName"></param>
 		/// <param name="fixedDirectory">Specify a path if you don't want to use the default loading</param>
-		public IniConfig(string applicationName, string fileName, string fixedDirectory = null, uint autoSaveInterval = 1000,bool watchFileChanges = true)
+		public IniConfig(string applicationName, string fileName, string fixedDirectory = null, uint autoSaveInterval = 1000, bool watchFileChanges = true)
 		{
 			_applicationName = applicationName;
 			_fileName = fileName;
 			_fixedDirectory = fixedDirectory;
+			_watchFileChanges = watchFileChanges;
 			// Look for the ini file, this is only done 1 time.
 			IniLocation = CreateFileLocation(false, "", _fixedDirectory);
-
-			// Configure file change watching, do not enable it untill we loaded the FILE (not used when streaming)
-			if (watchFileChanges)
-			{
-				_configFileWatcher = new FileSystemWatcher
-				{
-					Path = Path.GetDirectoryName(IniLocation),
-					IncludeSubdirectories = false,
-					NotifyFilter = NotifyFilters.LastWrite,
-					Filter = Path.GetFileName(IniLocation)
-				};
-
-				// change handling
-				_configFileWatcher.Changed += async (sender, eventArgs) =>
-				{
-					try
-					{
-						await ReloadAsync();
-					}
-					catch
-					{
-						// Ignore
-					}
-				};
-			}
 
 			// Configure the auto save
 			if (autoSaveInterval > 0)
@@ -231,6 +208,53 @@ namespace Dapplo.Config.Ini
 					await WriteAsync();
 				}
 			}).Wait();
+		}
+
+		/// <summary>
+		/// Create a FileSystemWatcher to detect changes
+		/// </summary>
+		/// <param name="enable">true to enable the watcher</param>
+		private void EnableFileWatcher(bool enable)
+		{
+			if (!_watchFileChanges)
+			{
+				return;
+			}
+
+			// If it is already created, just change the enable
+			if (_configFileWatcher != null)
+			{
+				_configFileWatcher.EnableRaisingEvents = enable;
+				return;
+			}
+			else if (!enable)
+			{
+				// if it is not created, and enable = false, do nothing
+				return;
+			}
+
+			// Configure file change watching
+			_configFileWatcher = new FileSystemWatcher
+			{
+				Path = Path.GetDirectoryName(IniLocation),
+				IncludeSubdirectories = false,
+				NotifyFilter = NotifyFilters.LastWrite,
+				Filter = Path.GetFileName(IniLocation),
+				EnableRaisingEvents = enable
+			};
+
+			// add change handling
+			_configFileWatcher.Changed += async (sender, eventArgs) =>
+			{
+				try
+				{
+					await ReloadAsync();
+				}
+				catch
+				{
+					// Ignore
+				}
+			};
 		}
 
 		/// <summary>
@@ -564,10 +588,7 @@ namespace Dapplo.Config.Ini
 				}
 
 				// disable the File-Watcher so we don't get events from ourselves
-				if (_configFileWatcher != null)
-				{
-					_configFileWatcher.EnableRaisingEvents = false;
-                }
+				EnableFileWatcher(false);
 
 				// Create the file as a stream
 				using (var stream = new FileStream(IniLocation, FileMode.Create, FileAccess.Write))
@@ -577,10 +598,7 @@ namespace Dapplo.Config.Ini
 				}
 
 				// Enable the File-Watcher so we get events again
-				if (_configFileWatcher != null)
-				{
-					_configFileWatcher.EnableRaisingEvents = true;
-				}
+				EnableFileWatcher(true);
 			}
 		}
 
@@ -809,12 +827,9 @@ namespace Dapplo.Config.Ini
 			_defaults = await IniFile.ReadAsync(CreateFileLocation(true, Defaults, _fixedDirectory), Encoding.UTF8, token).ConfigureAwait(false);
 			_constants = await IniFile.ReadAsync(CreateFileLocation(true, Constants, _fixedDirectory), Encoding.UTF8, token).ConfigureAwait(false);
 			var newIni = await IniFile.ReadAsync(IniLocation, Encoding.UTF8, token).ConfigureAwait(false);
-			
+
 			// As we readed the file, make sure we enable the event raising (if the file watcher is wanted)
-			if (_configFileWatcher != null)
-			{
-				_configFileWatcher.EnableRaisingEvents = true;
-            }
+			EnableFileWatcher(true);
             if (newIni != null)
 			{
 				_ini = newIni;
