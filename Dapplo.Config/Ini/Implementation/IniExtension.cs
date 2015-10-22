@@ -23,9 +23,9 @@ using System.Linq;
 using System.Reflection;
 using Dapplo.Config.Support;
 using System.ComponentModel;
-using Dapplo.Config.Extension.Implementation;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Dapplo.Config.Proxy.Implementation;
 
 namespace Dapplo.Config.Ini.Implementation
 {
@@ -122,14 +122,7 @@ namespace Dapplo.Config.Ini.Implementation
 		/// </summary>
 		private void GetSectionName(MethodCallInfo methodCallInfo)
 		{
-			if (_iniSectionAttribute != null && !string.IsNullOrEmpty(_iniSectionAttribute.Name))
-			{
-				methodCallInfo.ReturnValue = _iniSectionAttribute.Name;
-			}
-			else
-			{
-				methodCallInfo.ReturnValue = typeof (T).Name;
-			}
+			methodCallInfo.ReturnValue = !string.IsNullOrEmpty(_iniSectionAttribute?.Name) ? _iniSectionAttribute.Name : typeof (T).Name;
 		}
 
 		/// <summary>
@@ -138,7 +131,7 @@ namespace Dapplo.Config.Ini.Implementation
 		private void GetDescription(MethodCallInfo methodCallInfo)
 		{
 			var descriptionAttribute = typeof (T).GetCustomAttribute<DescriptionAttribute>();
-			if (descriptionAttribute != null && !string.IsNullOrEmpty(descriptionAttribute.Description))
+			if (!string.IsNullOrEmpty(descriptionAttribute?.Description))
 			{
 				methodCallInfo.ReturnValue = descriptionAttribute.Description;
 			}
@@ -151,24 +144,22 @@ namespace Dapplo.Config.Ini.Implementation
 		/// <returns>IniValue</returns>
 		private IniValue GenerateIniValue(PropertyInfo propertyInfo)
 		{
-			var newIniValue = new IniValue(Proxy);
-			newIniValue.PropertyName = propertyInfo.Name;
-			newIniValue.ValueType = propertyInfo.PropertyType;
-			newIniValue.IniPropertyName = propertyInfo.GetDataMemberName();
-			if (string.IsNullOrEmpty(newIniValue.IniPropertyName))
+			var newIniValue = new IniValue(Proxy)
 			{
-				newIniValue.IniPropertyName = newIniValue.PropertyName;
-			}
-			newIniValue.EmitDefaultValue = propertyInfo.GetEmitDefaultValue();
-			newIniValue.Description = propertyInfo.GetDescription();
-			newIniValue.Converter = propertyInfo.GetTypeConverter();
-			newIniValue.Category = propertyInfo.GetCategory();
-			newIniValue.Behavior = propertyInfo.GetIniPropertyBehavior();
+				PropertyName = propertyInfo.Name,
+				ValueType = propertyInfo.PropertyType,
+				IniPropertyName = propertyInfo.GetDataMemberName() ?? propertyInfo.Name,
+				EmitDefaultValue = propertyInfo.GetEmitDefaultValue(),
+				Description = propertyInfo.GetDescription(),
+				Converter = propertyInfo.GetTypeConverter(),
+				Category = propertyInfo.GetCategory(),
+				Behavior = propertyInfo.GetIniPropertyBehavior(),
+				DefaultValue = propertyInfo.GetDefaultValue()
+			};
 			if (!newIniValue.Behavior.IsIgnoreErrorsSet && _iniSectionAttribute != null)
 			{
 				newIniValue.Behavior.IgnoreErrors = _iniSectionAttribute.IgnoreErrors;
             }
-			newIniValue.DefaultValue = propertyInfo.GetDefaultValue();
 			return newIniValue;
 		}
 	}

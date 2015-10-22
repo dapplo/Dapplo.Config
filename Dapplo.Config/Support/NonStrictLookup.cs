@@ -19,7 +19,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +32,7 @@ namespace Dapplo.Config.Support
 	/// <typeparam name="T"></typeparam>
 	public class NonStrictLookup<T> : IDictionary<string, T>
 	{
-		private IDictionary<string, T> _base = new SortedDictionary<string, T>();
+		private readonly IDictionary<string, T> _base = new SortedDictionary<string, T>();
 		public ICollection<string> Keys
 		{
 			get

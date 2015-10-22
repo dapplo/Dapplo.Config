@@ -26,7 +26,7 @@ namespace Dapplo.Config.Ini
 	/// <summary>
 	/// Use this attribute on Properties where you want to influence the ini config behavior.
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Property)]
 	public class IniPropertyBehaviorAttribute : Attribute
 	{
 		private bool? _ignoreErrors;
@@ -77,7 +77,7 @@ namespace Dapplo.Config.Ini
 		{
 			get
 			{
-				return _ignoreErrors.HasValue?_ignoreErrors.Value:true;
+				return _ignoreErrors ?? true;
 			}
 			set
 			{

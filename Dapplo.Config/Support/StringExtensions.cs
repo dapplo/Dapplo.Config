@@ -25,16 +25,17 @@ namespace Dapplo.Config.Support
 {
 	public static class StringExtensions
 	{
-		private static readonly Regex _cleanup = new Regex(@"[^a-z0-9]+", RegexOptions.Compiled);
+		private static readonly Regex CleanupRegex = new Regex(@"[^a-z0-9]+", RegexOptions.Compiled);
+
 		/// <summary>
 		/// Helper method for converting a string to a non strict value.
 		/// This means, ToLowerInvariant and replace all non alpha/digits to ""
 		/// </summary>
-		/// <param name="key"></param>
+		/// <param name="value"></param>
 		/// <returns>clean string</returns>
 		public static string Cleanup(this string value)
 		{
-			return _cleanup.Replace(value.ToLowerInvariant(), "");
+			return CleanupRegex.Replace(value.ToLowerInvariant(), "");
 		}
 
 		public static bool NonStrictEquals(this string value1, string value2)

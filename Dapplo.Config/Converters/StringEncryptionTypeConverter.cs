@@ -52,22 +52,14 @@ namespace Dapplo.Config.Converters
 			set;
 		}
 
-		private static string _algorithm = "Rijndael";
-
 		/// <summary>
 		/// The algorithm to use for the encrypt/decrypt, default is Rijndael
 		/// </summary>
 		public static string Algorithm
 		{
-			get
-			{
-				return _algorithm;
-			}
-			set
-			{
-				_algorithm = value;
-			}
-		}
+			get;
+			set;
+		} = "Rijndael";
 
 		private static IList<int> ValidKeySizes()
 		{
@@ -98,7 +90,8 @@ namespace Dapplo.Config.Converters
 			var validKeySizes = ValidKeySizes();
 			if (!validKeySizes.Contains(currentKeySize))
 			{
-				throw new InvalidOperationException(string.Format("Bit-Length of StringEncryptionTypeConverter.RgbKey {0} is invalid, valid bit sizes are: {1}", currentKeySize, string.Join(",", validKeySizes)));
+				var keySizes = string.Join(",", validKeySizes);
+                throw new InvalidOperationException($"Bit-Length of StringEncryptionTypeConverter.RgbKey {currentKeySize} is invalid, valid bit sizes are: {keySizes}");
 			}
 		}
 
@@ -201,9 +194,9 @@ namespace Dapplo.Config.Converters
 			{
 				using (MemoryStream memoryStream = new MemoryStream())
 				{
-					byte[] rgbIV = Encoding.ASCII.GetBytes(RgbIv);
+					byte[] rgbIv = Encoding.ASCII.GetBytes(RgbIv);
 					byte[] key = Encoding.ASCII.GetBytes(RgbKey);
-					CryptoStream cryptoStream = new CryptoStream(memoryStream, symmetricAlgorithm.CreateEncryptor(key, rgbIV), CryptoStreamMode.Write);
+					CryptoStream cryptoStream = new CryptoStream(memoryStream, symmetricAlgorithm.CreateEncryptor(key, rgbIv), CryptoStreamMode.Write);
 
 					cryptoStream.Write(clearTextBytes, 0, clearTextBytes.Length);
 					cryptoStream.Flush();
@@ -228,10 +221,10 @@ namespace Dapplo.Config.Converters
 			{
 				using (MemoryStream memoryStream = new MemoryStream())
 				{
-					byte[] rgbIV = Encoding.ASCII.GetBytes(RgbIv);
+					byte[] rgbIv = Encoding.ASCII.GetBytes(RgbIv);
 					byte[] key = Encoding.ASCII.GetBytes(RgbKey);
 
-					CryptoStream cryptoStream = new CryptoStream(memoryStream, symmetricAlgorithm.CreateDecryptor(key, rgbIV), CryptoStreamMode.Write);
+					CryptoStream cryptoStream = new CryptoStream(memoryStream, symmetricAlgorithm.CreateDecryptor(key, rgbIv), CryptoStreamMode.Write);
 
 					cryptoStream.Write(encryptedTextBytes, 0, encryptedTextBytes.Length);
 					cryptoStream.Flush();

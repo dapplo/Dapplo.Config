@@ -34,8 +34,8 @@ namespace Dapplo.Config.Converters
 	/// <typeparam name="T2"></typeparam>
 	public class GenericDictionaryConverter<T1, T2> : TypeConverter
 	{
-		protected readonly TypeConverter _typeConverter1;
-		protected readonly TypeConverter _typeConverter2;
+		private readonly TypeConverter _typeConverter1;
+		private readonly TypeConverter _typeConverter2;
 
 		public GenericDictionaryConverter()
 		{

@@ -19,13 +19,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Dapplo.Config.Extension.Implementation;
 using Dapplo.Config.Support;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Dapplo.Config.Proxy.Implementation;
 
 namespace Dapplo.Config.WindowsRegistry.Implementation
 {
@@ -40,11 +40,7 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 		public RegistryExtension(IPropertyProxy<T> proxy) : base(proxy)
 		{
 			CheckType(typeof (IRegistry));
-			_registryAttribute = typeof (T).GetCustomAttribute<RegistryAttribute>();
-			if (_registryAttribute == null)
-			{
-				_registryAttribute = new RegistryAttribute();
-			}
+			_registryAttribute = typeof (T).GetCustomAttribute<RegistryAttribute>() ?? new RegistryAttribute();
 			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IRegistry, object>(x => x.PathFor("")), PathFor);
 		}
 
@@ -74,7 +70,7 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 			}
 			if (string.IsNullOrEmpty(path))
 			{
-				throw new ArgumentException(string.Format("{0} doesn't have a path mapping", propertyInfo.Name));
+				throw new ArgumentException($"{propertyInfo.Name} doesn't have a path mapping");
 			}
 			if (path.StartsWith(@"\"))
 			{
@@ -100,7 +96,7 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 					{
 						if (key == null)
 						{
-							throw new ArgumentException(string.Format("No registry entry in {0}/{1} for {2}", hive, path, view));
+							throw new ArgumentException($"No registry entry in {hive}/{path} for {view}");
 						}
 						if (registryPropertyAttribute.Value == null)
 						{

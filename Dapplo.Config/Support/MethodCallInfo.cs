@@ -56,7 +56,7 @@ namespace Dapplo.Config.Support
 		/// </summary>
 		public int OutArgsCount {
 			get {
-				return _outArgs == null? 0 :_outArgs.Length + 1;
+				return _outArgs?.Length + 1 ?? 0;
 			}
 		}
 

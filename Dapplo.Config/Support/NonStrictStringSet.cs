@@ -31,7 +31,7 @@ namespace Dapplo.Config.Support
 	/// </summary>
 	public class NonStrictStringSet : ISet<string>
 	{
-		ISet<string> _base = new HashSet<string>();
+		readonly ISet<string> _base = new HashSet<string>();
 
 		public int Count
 		{

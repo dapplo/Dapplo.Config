@@ -36,25 +36,47 @@ namespace Dapplo.Config.WindowsRegistry
 		/// <param name="protocolName">Name of the protocol (e.g. "rainbird" für "rainbird://...")</param>
 		/// <param name="applicationPath">Complete file system path to the EXE file, which processes the URL being called (the complete URL is handed over as a Command Line Parameter).</param>
 		/// <param name="description">Description (e.g. "URL:Rainbird Custom URL")</param>
-		public static void RegisterURLProtocol(string protocolName, string applicationPath, string description)
+		public static void RegisterUrlProtocol(string protocolName, string applicationPath, string description)
 		{
 			// Register at CurrentUser\Software\Classes
 			using (var softwareClassesKey = Registry.CurrentUser.OpenSubKey(@"Software\Classes", true))
-			// Apply protocol name
-			using (var protocolKey = softwareClassesKey.CreateSubKey(protocolName))
 			{
-				// Assign protocol
-				protocolKey.SetValue(null, description);
-				protocolKey.SetValue("URL Protocol", string.Empty);
-				// Create Shell
-				using (var shellKey = protocolKey.CreateSubKey("Shell"))
-				// Create open
-				using (var openKey = shellKey.CreateSubKey("open"))
-				// Create command
-				using (var commandKey = openKey.CreateSubKey("command"))
+				// Apply protocol name
+				if (softwareClassesKey == null)
 				{
-					// Specify application handling the URL protocol
-					commandKey.SetValue(null, "\"" + applicationPath + "\" %1");
+					return;
+				}
+				using (var protocolKey = softwareClassesKey.CreateSubKey(protocolName))
+				{
+					// Assign protocol
+					if (protocolKey == null)
+					{
+						return;
+					}
+					protocolKey.SetValue(null, description);
+					protocolKey.SetValue("URL Protocol", string.Empty);
+					// Create Shell
+					using (var shellKey = protocolKey.CreateSubKey("Shell"))
+					{
+						// Create open
+						if (shellKey == null)
+						{
+							return;
+						}
+						using (var openKey = shellKey.CreateSubKey("open"))
+						{
+							// Create command
+							if (openKey == null)
+							{
+								return;
+							}
+							using (var commandKey = openKey.CreateSubKey("command"))
+							{
+								// Specify application handling the URL protocol
+								commandKey?.SetValue(null, "\"" + applicationPath + "\" %1");
+							}
+						}
+					}
 				}
 			}
 		}

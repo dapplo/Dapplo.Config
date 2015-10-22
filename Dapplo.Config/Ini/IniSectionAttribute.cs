@@ -23,7 +23,7 @@ using System;
 
 namespace Dapplo.Config.Ini
 {
-	[AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Interface)]
 	public class IniSectionAttribute : Attribute
 	{
 		public IniSectionAttribute(string name)

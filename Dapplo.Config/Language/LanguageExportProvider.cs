@@ -39,7 +39,7 @@ namespace Dapplo.Config.Language
 		private readonly IList<Assembly> _assemblies;
 		private readonly IDictionary<string, Export> _loopup = new Dictionary<string, Export>();
 		private readonly IServiceLocator _serviceLocator;
-		private readonly Type languageType = typeof(ILanguage);
+		private readonly Type _languageType = typeof(ILanguage);
 
 		/// <summary>
 		/// Create a IniConfigExportProvider which is for the specified applicatio, iniconfig and works with the supplied assemblies
@@ -47,6 +47,7 @@ namespace Dapplo.Config.Language
 		/// <param name="application">Application name, used for the meta-data</param>
 		/// <param name="languageLoader">LanguageLoader needed for the registering</param>
 		/// <param name="assemblies">List of assemblies used for finding the type</param>
+		/// <param name="serviceLocator"></param>
 		public LanguageExportProvider(string application, LanguageLoader languageLoader, IList<Assembly> assemblies, IServiceLocator serviceLocator)
 		{
 			_application = application;
@@ -80,7 +81,7 @@ namespace Dapplo.Config.Language
 					// Make an AssemblyQualifiedName from the contract name
 					var assemblyQualifiedName = $"{definition.ContractName}, {assembly.FullName}";
 					// Try to get it, don't throw an exception if not found
-					Type contractType = null;
+					Type contractType;
 					try
 					{
 						contractType = Type.GetType(assemblyQualifiedName, false, true);
@@ -96,13 +97,13 @@ namespace Dapplo.Config.Language
 						// Add null value, so we don't try it again
 						continue;
 					}
-					if (contractType == languageType)
+					if (contractType == _languageType)
 					{
 						// We can't export the ILanguage itself
 						break;
 					}
 					// Check if it is derrived from ILanguage
-					if (languageType.IsAssignableFrom(contractType))
+					if (_languageType.IsAssignableFrom(contractType))
 					{
 						// Generate the export & meta-data
 						var metadata = new Dictionary<string, object>(){
@@ -113,10 +114,7 @@ namespace Dapplo.Config.Language
 
 						var instance = _languageLoader.RegisterAndGet(contractType);
 						// Make sure it's exported
-						if (_serviceLocator != null)
-						{
-							_serviceLocator.Export(instance);
-						}
+						_serviceLocator?.Export(instance);
 						export = new Export(exportDefinition, () => instance);
 
 						// store the export for fast retrieval
@@ -129,7 +127,6 @@ namespace Dapplo.Config.Language
 				// Add null value, so we don't try it again
 				_loopup.Add(definition.ContractName, null);
 			}
-			yield break;
 		}
 	}
 }

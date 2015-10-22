@@ -19,11 +19,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Dapplo.Config.Extension;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq.Expressions;
+using Dapplo.Config.Proxy;
 
 namespace Dapplo.Config.Ini
 {

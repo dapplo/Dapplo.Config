@@ -20,7 +20,7 @@
  */
 
 using System.Collections.Generic;
-using Dapplo.Config.Extension;
+using Dapplo.Config.Proxy;
 
 namespace Dapplo.Config.Language
 {

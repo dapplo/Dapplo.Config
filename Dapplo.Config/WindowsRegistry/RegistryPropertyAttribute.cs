@@ -24,7 +24,7 @@ using System;
 
 namespace Dapplo.Config.WindowsRegistry
 {
-	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Property)]
 	public class RegistryPropertyAttribute : Attribute
 	{
 		private RegistryHive _hive = RegistryHive.CurrentUser;

@@ -27,7 +27,7 @@ namespace Dapplo.Config.WindowsRegistry
 	/// <summary>
 	/// Specify the base settings for the registry property proxy interface
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Interface)]
 	public class RegistryAttribute : Attribute
 	{
 		public RegistryAttribute()

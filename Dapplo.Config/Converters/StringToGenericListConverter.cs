@@ -73,10 +73,11 @@ namespace Dapplo.Config.Converters
 		/// <returns>Converted value</returns>
 		public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
 		{
-			if (value is string)
+			var stringValue = value as string;
+			if (stringValue != null)
 			{
 				// Split, and where all element are not null or empty, convert the item to T and add the items to a list<T>
-				return (from item in ((string) value).Split(',')
+				return (from item in stringValue.Split(',')
 					where !string.IsNullOrWhiteSpace(item)
 					select (T) _typeConverter.ConvertFromInvariantString(item.Trim())).ToList();
 			}

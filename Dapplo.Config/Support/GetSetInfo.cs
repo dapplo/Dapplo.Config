@@ -20,26 +20,18 @@
  */
 
 using System;
-using System.Text.RegularExpressions;
 
 namespace Dapplo.Config.Support
 {
 	public class GetSetInfo
 	{
-		private string _propertyName;
 		/// <summary>
 		///     Property name of the property that is being get/set
 		/// </summary>
 		public string PropertyName
 		{
-			get
-			{
-				return _propertyName;
-            }
-			set
-			{
-				_propertyName = value;
-            }
+			get;
+			set;
 		}
 
 		/// <summary>

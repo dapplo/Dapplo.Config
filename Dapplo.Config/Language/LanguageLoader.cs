@@ -88,11 +88,14 @@ namespace Dapplo.Config.Language
 		/// <param name="applicationName"></param>
 		/// <param name="defaultLanguage"></param>
 		/// <param name="filePatern">Pattern for the filename, the ietf group needs to be in there!</param>
+		/// <param name="checkStartupDirectory"></param>
+		/// <param name="checkAppDataDirectory"></param>
+		/// <param name="specifiedDirectories"></param>
 		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language(_(?<module>[a-zA-Z0-9]*))?-(?<IETF>[a-zA-Z]{2}(-[a-zA-Z]+)?-[a-zA-Z]+)\.(ini|xml)", bool checkStartupDirectory = true, bool checkAppDataDirectory = true, ICollection<string> specifiedDirectories = null)
 		{
 			if (LoaderStore.ContainsKey(applicationName))
 			{
-				throw new InvalidOperationException(string.Format("{0} was already created!", applicationName));
+				throw new InvalidOperationException($"{applicationName} was already created!");
 			}
 			CurrentLanguage = defaultLanguage;
 			_filePattern = new Regex(filePatern, RegexOptions.Compiled);
@@ -134,24 +137,6 @@ namespace Dapplo.Config.Language
                     }
 				}
             }
-		}
-
-		/// <summary>
-		/// Try to get the GetCultureInfo, return null if this is not available
-		/// </summary>
-		/// <param name="ietf"></param>
-		/// <returns></returns>
-		private CultureInfo SavelyGetCultureInfo(string ietf)
-		{
-			try
-			{
-				return CultureInfo.GetCultureInfo(ietf);
-			}
-			catch
-			{
-				Console.WriteLine(ietf);
-			}
-			return null;
 		}
 
 		/// <summary>
@@ -393,7 +378,7 @@ namespace Dapplo.Config.Language
 					}
 					else
 					{
-						throw new NotSupportedException(string.Format("Can't read the file format for {0}", languageFile));
+						throw new NotSupportedException($"Can't read the file format for {languageFile}");
 					}
 					if (newResources == null)
 					{

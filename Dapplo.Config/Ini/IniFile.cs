@@ -178,11 +178,11 @@ namespace Dapplo.Config.Ini
 						{
 							if (!string.IsNullOrEmpty(sectionDescription))
 							{
-								await writer.WriteLineAsync(string.Format(";{0}", sectionDescription)).ConfigureAwait(false);
+								await writer.WriteLineAsync($";{sectionDescription}").ConfigureAwait(false);
 							}
 						}
 					}
-					await writer.WriteLineAsync(string.Format("[{0}]", sectionKey)).ConfigureAwait(false);
+					await writer.WriteLineAsync($"[{sectionKey}]").ConfigureAwait(false);
 					foreach (var propertyName in properties.Keys)
 					{
 						if (token.IsCancellationRequested)
@@ -194,10 +194,10 @@ namespace Dapplo.Config.Ini
 						{
 							if (!string.IsNullOrEmpty(propertyComment))
 							{
-								await writer.WriteLineAsync(string.Format(";{0}", propertyComment)).ConfigureAwait(false);
+								await writer.WriteLineAsync($";{propertyComment}").ConfigureAwait(false);
 							}
 						}
-						await writer.WriteLineAsync(string.Format("{0}={1}", propertyName, WriteEscape(properties[propertyName]))).ConfigureAwait(false);
+						await writer.WriteLineAsync($"{propertyName}={WriteEscape(properties[propertyName])}").ConfigureAwait(false);
 					}
 				}
 			}

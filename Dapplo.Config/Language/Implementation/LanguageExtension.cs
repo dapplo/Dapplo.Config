@@ -19,12 +19,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Dapplo.Config.Extension.Implementation;
 using System;
 using System.Reflection;
-using System.Linq;
 using Dapplo.Config.Support;
-using System.Text.RegularExpressions;
+using Dapplo.Config.Proxy.Implementation;
 
 namespace Dapplo.Config.Language.Implementation
 {
@@ -46,7 +44,7 @@ namespace Dapplo.Config.Language.Implementation
 			base.InitProperty(propertyInfo);
 			if (propertyInfo.CanWrite && propertyInfo.GetSetMethod(true).IsPublic)
 			{
-				throw new NotSupportedException(string.Format("Property {0}.{1} has defined a set, this is not allowed for {2} derrived interfaces. Fix by removing the set for the property, leave the get.", propertyInfo.DeclaringType, propertyInfo.Name, typeof(ILanguage).Name));
+				throw new NotSupportedException($"Property {propertyInfo.DeclaringType}.{propertyInfo.Name} has defined a set, this is not allowed for {typeof (ILanguage).Name} derrived interfaces. Fix by removing the set for the property, leave the get.");
 			}
 		}
 

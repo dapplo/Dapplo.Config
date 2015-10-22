@@ -39,7 +39,7 @@ namespace Dapplo.Config.Ini
 		private readonly IList<Assembly> _assemblies;
 		private readonly IDictionary<string, Export> _loopup = new Dictionary<string, Export>();
 		private readonly IServiceLocator _serviceLocator;
-		private readonly Type iniSectionType = typeof(IIniSection);
+		private readonly Type _iniSectionType = typeof(IIniSection);
 
 		/// <summary>
 		/// Create a IniConfigExportProvider which is for the specified applicatio, iniconfig and works with the supplied assemblies
@@ -47,10 +47,11 @@ namespace Dapplo.Config.Ini
 		/// <param name="application">Application name, used for the meta-data</param>
 		/// <param name="iniConfig">IniConfig needed for the registering</param>
 		/// <param name="assemblies">List of assemblies used for finding the type</param>
+		/// <param name="serviceLocator"></param>
 		public IniConfigExportProvider(string application, IniConfig iniConfig, IList<Assembly> assemblies, IServiceLocator serviceLocator)
 		{
 			_application = application;
-            _iniConfig = iniConfig;
+            _iniConfig = iniConfig ?? IniConfig.Current;
 			_assemblies = assemblies;
 			_serviceLocator = serviceLocator;
         }
@@ -75,12 +76,12 @@ namespace Dapplo.Config.Ini
 			else
 			{
 				// Loop over all the supplied assemblies, these should come from the bootstrapper
-				foreach (var assembly in _assemblies)
+				foreach (var assembly in _assemblies ?? new List<Assembly>())
 				{
 					// Make an AssemblyQualifiedName from the contract name
 					var assemblyQualifiedName = $"{definition.ContractName}, {assembly.FullName}";
 					// Try to get it, don't throw an exception if not found
-					Type contractType = null;
+					Type contractType;
 					try
 					{
 						contractType = Type.GetType(assemblyQualifiedName, false, true);
@@ -95,13 +96,13 @@ namespace Dapplo.Config.Ini
 					{
 						continue;
 					}
-					if (contractType == iniSectionType)
+					if (contractType == _iniSectionType)
 					{
 						// We can't export the IIniSection itself
 						break;
 					}
 					// Check if it is derrived from IIniSection
-					if (iniSectionType.IsAssignableFrom(contractType))
+					if (_iniSectionType.IsAssignableFrom(contractType))
 					{
 						// Generate the export & meta-data
 						var metadata = new Dictionary<string, object>(){
@@ -112,10 +113,7 @@ namespace Dapplo.Config.Ini
 
 						var instance = _iniConfig.RegisterAndGet(contractType);
 						// Make sure it's exported
-						if (_serviceLocator != null)
-						{
-							_serviceLocator.Export(instance);
-						}
+						_serviceLocator?.Export(instance);
 						export = new Export(exportDefinition, () => instance);
 
 						// store the export for fast retrieval
@@ -128,7 +126,6 @@ namespace Dapplo.Config.Ini
 				// Add null value, so we don't try it again
 				_loopup.Add(definition.ContractName, null);
 			}
-			yield break;
 		}
 	}
 }

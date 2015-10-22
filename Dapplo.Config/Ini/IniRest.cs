@@ -41,8 +41,8 @@ namespace Dapplo.Config.Ini
 		/// The Section is that which is used in the IniSection
 		/// The property needs to be available
 		/// NewValue is optional (read) can be used to set the property (write)
-		/// The query can be used to add values to lists (?item1&item2&item2) or dictionaries (?key1=value1&key2=value2)
-		/// Or when removing from lists (?item1&item2&item2) or dictionaries (?key1&key2)
+		/// The query can be used to add values to lists (?item1&amp;item2&amp;item2) or dictionaries (?key1=value1&amp;key2=value2)
+		/// Or when removing from lists (?item1&amp;item2&amp;item2) or dictionaries (?key1&amp;key2)
 		/// 
 		/// P.S.
 		/// You can use the ProtocolHandler to register a custom URL protocol.
@@ -70,7 +70,7 @@ namespace Dapplo.Config.Ini
 			var iniValue = iniSection[segments[0]];
 			segments.RemoveAt(0);
 
-			var iniValueType = iniValue.Value != null ? iniValue.Value.GetType() : iniValue.ValueType;
+			var iniValueType = iniValue.Value?.GetType() ?? iniValue.ValueType;
 
 			switch (command)
 			{
@@ -79,7 +79,7 @@ namespace Dapplo.Config.Ini
 					{
 						if (iniValueType.IsGenericDirectory() || iniValueType.IsGenericList())
 						{
-							throw new NotSupportedException(string.Format("Can't set type of {0}, use add/remove", iniValueType));
+							throw new NotSupportedException($"Can't set type of {iniValueType}, use add/remove");
 						}
 
 						iniValue.Value = WebUtility.UrlDecode(segments[0]);
@@ -108,7 +108,7 @@ namespace Dapplo.Config.Ini
 					}
 					else
 					{
-						throw new NotSupportedException(string.Format("Can't remove from type {0}, use set / reset", iniValueType));
+						throw new NotSupportedException($"Can't remove from type {iniValueType}, use set / reset");
 					}
 					break;
 				case "add":
@@ -134,11 +134,11 @@ namespace Dapplo.Config.Ini
 					}
 					else
 					{
-						throw new NotSupportedException(string.Format("Can't add to type {0}, use set / reset", iniValueType));
+						throw new NotSupportedException($"Can't add to type {iniValueType}, use set / reset");
 					}
 					break;
 				default:
-					throw new NotSupportedException(string.Format("Don't know command {0}, there is only get/set/reset/add/remove", command));
+					throw new NotSupportedException($"Don't know command {command}, there is only get/set/reset/add/remove");
 			}
 			return iniValue;
 		}

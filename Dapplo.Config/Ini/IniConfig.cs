@@ -56,7 +56,6 @@ namespace Dapplo.Config.Ini
 		private IDictionary<string, IDictionary<string, string>> _ini = new SortedDictionary<string, IDictionary<string, string>>();
 		private readonly bool _watchFileChanges;
 		private FileSystemWatcher _configFileWatcher;
-		private Timer _saveTimer;
 
 		/// <summary>
 		/// Used to detect if we have an intial read, and if so from where.
@@ -95,7 +94,6 @@ namespace Dapplo.Config.Ini
 		public string IniLocation
 		{
 			get;
-			private set;
 		}
 
 		/// <summary>
@@ -106,7 +104,7 @@ namespace Dapplo.Config.Ini
 		/// <param name="fileName"></param>
 		public static void Delete(string applicationName, string fileName)
 		{
-			ConfigStore.Remove(string.Format("{0}.{1}", applicationName, fileName));
+			ConfigStore.Remove($"{applicationName}.{fileName}");
 		}
 
 		/// <summary>
@@ -117,7 +115,7 @@ namespace Dapplo.Config.Ini
 		/// <returns>IniConfig</returns>
 		public static IniConfig Get(string applicationName, string fileName)
 		{
-			return ConfigStore[string.Format("{0}.{1}", applicationName, fileName)];
+			return ConfigStore[$"{applicationName}.{fileName}"];
 		}
 
 		/// <summary>
@@ -138,6 +136,8 @@ namespace Dapplo.Config.Ini
 		/// <param name="applicationName"></param>
 		/// <param name="fileName"></param>
 		/// <param name="fixedDirectory">Specify a path if you don't want to use the default loading</param>
+		/// <param name="autoSaveInterval">0 to disable or the amount of milliseconds that pending changes are written</param>
+		/// <param name="watchFileChanges">True to enable file system watching</param>
 		public IniConfig(string applicationName, string fileName, string fixedDirectory = null, uint autoSaveInterval = 1000, bool watchFileChanges = true)
 		{
 			_applicationName = applicationName;
@@ -150,7 +150,11 @@ namespace Dapplo.Config.Ini
 			// Configure the auto save
 			if (autoSaveInterval > 0)
 			{
-				_saveTimer = new Timer(async (state) => {
+				var saveTimer = new System.Timers.Timer
+				{
+					Interval = autoSaveInterval, Enabled = true, AutoReset = true
+				};
+				saveTimer.Elapsed += async (sender, eventArgs) => {
 					// If we didn't read from a file we can stop the "timer tick"
 					if (_initialRead != ReadFrom.File)
 					{
@@ -173,10 +177,10 @@ namespace Dapplo.Config.Ini
                         }
 						catch
 						{
-
+							// ignored
 						}
 					}
-				}, null, TimeSpan.FromMilliseconds(autoSaveInterval), TimeSpan.FromMilliseconds(autoSaveInterval));
+				};
 			}
 
 			// Add error handlers for writing
@@ -198,7 +202,7 @@ namespace Dapplo.Config.Ini
 			};
 
 			// Used for lookups
-			ConfigStore.Add(string.Format("{0}.{1}", applicationName, fileName), this);
+			ConfigStore.Add($"{applicationName}.{fileName}", this);
 
 			// Make sure the configuration is save when the domain is exited
 			AppDomain.CurrentDomain.ProcessExit += (sender, eventArgs) => Task.Run(async () => {
@@ -227,7 +231,8 @@ namespace Dapplo.Config.Ini
 				_configFileWatcher.EnableRaisingEvents = enable;
 				return;
 			}
-			else if (!enable)
+
+			if (!enable)
 			{
 				// if it is not created, and enable = false, do nothing
 				return;
@@ -240,7 +245,7 @@ namespace Dapplo.Config.Ini
 				IncludeSubdirectories = false,
 				NotifyFilter = NotifyFilters.LastWrite,
 				Filter = Path.GetFileName(IniLocation),
-				EnableRaisingEvents = enable
+				EnableRaisingEvents = true
 			};
 
 			// add change handling
@@ -517,7 +522,7 @@ namespace Dapplo.Config.Ini
 			string file = null;
 			if (specifiedDirectory != null)
 			{
-				file = Path.Combine(specifiedDirectory, string.Format("{0}{1}.{2}", _fileName, postfix, IniExtension));
+				file = Path.Combine(specifiedDirectory, $"{_fileName}{postfix}.{IniExtension}");
 			}
 			else
 			{
@@ -526,13 +531,13 @@ namespace Dapplo.Config.Ini
 					var startPath = FileLocations.StartupDirectory;
 					if (startPath != null)
 					{
-						file = Path.Combine(startPath, string.Format("{0}{1}.{2}", _fileName, postfix, IniExtension));
+						file = Path.Combine(startPath, $"{_fileName}{postfix}.{IniExtension}");
 					}
 				}
 				if (file == null || !File.Exists(file))
 				{
 					string appDataDirectory = FileLocations.RoamingAppDataDirectory(_applicationName);
-					file = Path.Combine(appDataDirectory, string.Format("{0}{1}.{2}", _fileName, postfix, IniExtension));
+					file = Path.Combine(appDataDirectory, $"{_fileName}{postfix}.{IniExtension}");
 				}
 			}
 			return file;
@@ -546,7 +551,7 @@ namespace Dapplo.Config.Ini
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
 				ResetInternal();
-			};
+			}
 		}
 
 		/// <summary>
@@ -724,7 +729,7 @@ namespace Dapplo.Config.Ini
 						// Convert the dictionary to a string,string variant.
 						var dictionaryProperties = (IDictionary<string, string>)converter.ConvertTo(context, CultureInfo.CurrentCulture, iniValue.Value, typeof(IDictionary<string, string>));
 						// Use this to build a separate "section" which is called "[section-propertyname]"
-						string dictionaryIdentifier = string.Format("{0}-{1}", sectionName, iniValue.IniPropertyName);
+						string dictionaryIdentifier = $"{sectionName}-{iniValue.IniPropertyName}";
 						if (_ini.ContainsKey(dictionaryIdentifier))
 						{
 							_ini.Remove(dictionaryIdentifier);
@@ -903,7 +908,7 @@ namespace Dapplo.Config.Ini
 
 			foreach (var iniValue in iniValues)
 			{
-				string dictionaryIdentifier = string.Format("{0}-{1}", sectionName, iniValue.IniPropertyName);
+				string dictionaryIdentifier = $"{sectionName}-{iniValue.IniPropertyName}";
 				// If there are no properties, there might still be a separate section for a dictionary
 				IDictionary<string, string> value;
 				if (iniValue.Converter != null && iniSections.TryGetValue(dictionaryIdentifier, out value))

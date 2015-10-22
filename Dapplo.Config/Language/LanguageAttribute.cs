@@ -23,7 +23,7 @@ using System;
 
 namespace Dapplo.Config.Language
 {
-	[AttributeUsage(AttributeTargets.Interface, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Interface)]
 	public class LanguageAttribute : Attribute
 	{
 		public LanguageAttribute(string prefix)

@@ -226,8 +226,10 @@ namespace Dapplo.Config
 					var thisAssembly = GetType().Assembly;
 
 					// as GetInterfaces doesn't return the type itself (makes sense), the following 2 lines makes a list of all
-					var interfacesToCheck = new List<Type>(typeof(T).GetInterfaces());
-					interfacesToCheck.Add(typeof(T));
+					var interfacesToCheck = new List<Type>(typeof (T).GetInterfaces())
+					{
+						typeof (T)
+					};
 					// Now, create an IEnumerable for all the property info of all the properties in the interfaces that the
 					// "user" code introduced in the type. (e.g skip all types & properties from this assembly)
 					var allPropertyInfos = from interfaceType in interfacesToCheck

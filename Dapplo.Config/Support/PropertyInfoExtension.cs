@@ -62,8 +62,8 @@ namespace Dapplo.Config.Support {
 		/// <returns>TypeConverter</returns>
 		public static TypeConverter GetTypeConverter(this PropertyInfo propertyInfo) {
 			var typeConverterAttribute = propertyInfo.GetCustomAttribute<TypeConverterAttribute>(true);
-			if (typeConverterAttribute != null && !string.IsNullOrEmpty(typeConverterAttribute.ConverterTypeName)) {
-				Type typeConverterType = Type.GetType(typeConverterAttribute.ConverterTypeName);
+			if (!string.IsNullOrEmpty(typeConverterAttribute?.ConverterTypeName)) {
+				var typeConverterType = Type.GetType(typeConverterAttribute.ConverterTypeName);
 				if (typeConverterType != null) {
 					return (TypeConverter)Activator.CreateInstance(typeConverterType);
 				}
@@ -79,10 +79,7 @@ namespace Dapplo.Config.Support {
 		/// <returns>Description</returns>
 		public static string GetDescription(this PropertyInfo propertyInfo) {
 			var descriptionAttribute = propertyInfo.GetCustomAttribute<DescriptionAttribute>(true);
-			if (descriptionAttribute != null) {
-				return descriptionAttribute.Description;
-			}
-			return null;
+			return descriptionAttribute?.Description;
 		}
 
 		/// <summary>
@@ -92,10 +89,8 @@ namespace Dapplo.Config.Support {
 		/// <returns>Name</returns>
 		public static string GetDataMemberName(this PropertyInfo propertyInfo) {
 			var dataMemberAttribute = propertyInfo.GetCustomAttribute<DataMemberAttribute>(true);
-			if (dataMemberAttribute != null) {
-				if (!string.IsNullOrEmpty(dataMemberAttribute.Name)) {
-					return dataMemberAttribute.Name;
-				}
+			if (!string.IsNullOrEmpty(dataMemberAttribute?.Name)) {
+				return dataMemberAttribute.Name;
 			}
 			return null;
 		}
@@ -119,10 +114,7 @@ namespace Dapplo.Config.Support {
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>true if the NonSerialized attribute is set on the property</returns>
 		public static IniPropertyBehaviorAttribute GetIniPropertyBehavior(this PropertyInfo propertyInfo) {
-			var iniPropertyBehaviorAttribute = propertyInfo.GetCustomAttribute<IniPropertyBehaviorAttribute>(true);
-			if (iniPropertyBehaviorAttribute == null) {
-				iniPropertyBehaviorAttribute = new IniPropertyBehaviorAttribute();
-			}
+			var iniPropertyBehaviorAttribute = propertyInfo.GetCustomAttribute<IniPropertyBehaviorAttribute>(true) ?? new IniPropertyBehaviorAttribute();
 			return iniPropertyBehaviorAttribute;
 		}
 
@@ -133,10 +125,7 @@ namespace Dapplo.Config.Support {
 		/// <returns>IsReadOnly</returns>
 		public static bool GetReadOnly(this PropertyInfo propertyInfo) {
 			var readOnlyAttribute = propertyInfo.GetCustomAttribute<ReadOnlyAttribute>(true);
-			if (readOnlyAttribute != null) {
-				return readOnlyAttribute.IsReadOnly;
-			}
-			return false;
+			return readOnlyAttribute != null && readOnlyAttribute.IsReadOnly;
 		}
 
 		/// <summary>
@@ -146,10 +135,7 @@ namespace Dapplo.Config.Support {
 		/// <returns>Category</returns>
 		public static string GetCategory(this PropertyInfo propertyInfo) {
 			var categoryAttribute = propertyInfo.GetCustomAttribute<CategoryAttribute>(true);
-			if (categoryAttribute != null) {
-				return categoryAttribute.Category;
-			}
-			return null;
+			return categoryAttribute?.Category;
 		}
 	}
 }
