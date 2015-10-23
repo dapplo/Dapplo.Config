@@ -615,10 +615,10 @@ namespace Dapplo.Config.Ini
 		/// <returns>Task to await</returns>
 		private async Task WriteToStreamInternalAsync(Stream stream, CancellationToken token = default(CancellationToken))
 		{
-			IDictionary<string, IDictionary<string, string>> iniSectionsComments = new SortedDictionary<string, IDictionary<string, string>>();
+			var iniSectionsComments = new SortedDictionary<string, IDictionary<string, string>>();
 
 			// Loop over the "registered" sections
-			foreach (var iniSection in _iniSections.Values)
+			foreach (var iniSection in _iniSections.Values.ToList())
 			{
 				Action<IIniSection> beforeSaveAction;
 				if (_beforeSaveActions.TryGetValue(iniSection.GetType(), out beforeSaveAction))
@@ -670,8 +670,8 @@ namespace Dapplo.Config.Ini
 			bool isSectionCreated = false;
 			var sectionName = iniSection.GetSectionName();
 
-			IDictionary<string, string> sectionProperties = new SortedDictionary<string, string>();
-			IDictionary<string, string> sectionComments = new SortedDictionary<string, string>();
+			var sectionProperties = new SortedDictionary<string, string>();
+			var sectionComments = new SortedDictionary<string, string>();
 			// Loop over the ini values, this automatically skips all NonSerialized properties
 			foreach (var iniValue in iniSection.GetIniValues().Values)
 			{
@@ -720,7 +720,7 @@ namespace Dapplo.Config.Ini
 				}
 
 				// Check if a converter is specified
-				TypeConverter converter = GetConverter(iniValue);
+				var converter = GetConverter(iniValue);
 				if (converter != null && converter.CanConvertTo(typeof(IDictionary<string, string>)))
 				{
 					// Only the special dictionary types have such a converter
@@ -737,7 +737,7 @@ namespace Dapplo.Config.Ini
 						_ini.Add(dictionaryIdentifier, dictionaryProperties);
 						if (!string.IsNullOrWhiteSpace(iniValue.Description))
 						{
-							IDictionary<string, string> dictionaryComments = new SortedDictionary<string, string>();
+							var dictionaryComments = new SortedDictionary<string, string>();
 							dictionaryComments.Add(dictionaryIdentifier, iniValue.Description);
 							iniSectionsComments.Add(dictionaryIdentifier, dictionaryComments);
 						}
@@ -786,7 +786,7 @@ namespace Dapplo.Config.Ini
 		public TypeConverter GetConverter(IniValue iniValue)
 		{
 			// Check if a converter is specified
-			TypeConverter converter = iniValue.Converter;
+			var converter = iniValue.Converter;
 			// If not, use the default converter for the property type
 			if (converter == null)
 			{
@@ -902,7 +902,7 @@ namespace Dapplo.Config.Ini
 			// Might be null
 			iniSections.TryGetValue(sectionName, out iniProperties);
 
-			IEnumerable<IniValue> iniValues = (from iniValue in iniSection.GetIniValues().Values
+			var iniValues = (from iniValue in iniSection.GetIniValues().Values
 											   where iniValue.Behavior.Read
 											   select iniValue);
 
@@ -935,8 +935,8 @@ namespace Dapplo.Config.Ini
 				{
 					continue;
 				}
-				Type stringType = typeof(string);
-				Type destinationType = iniValue.ValueType;
+				var stringType = typeof(string);
+				var destinationType = iniValue.ValueType;
 				if (iniValue.Converter != null && iniValue.Converter.CanConvertFrom(stringType))
 				{
 					try

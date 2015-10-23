@@ -45,7 +45,7 @@ namespace Dapplo.Config.Ini
 		/// Create a IniConfigExportProvider which is for the specified applicatio, iniconfig and works with the supplied assemblies
 		/// </summary>
 		/// <param name="application">Application name, used for the meta-data</param>
-		/// <param name="iniConfig">IniConfig needed for the registering</param>
+		/// <param name="iniConfig">IniConfig needed for the registering, can be null for the current</param>
 		/// <param name="assemblies">List of assemblies used for finding the type</param>
 		/// <param name="serviceLocator"></param>
 		public IniConfigExportProvider(string application, IniConfig iniConfig, IList<Assembly> assemblies, IServiceLocator serviceLocator)
