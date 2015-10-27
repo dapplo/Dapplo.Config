@@ -20,6 +20,7 @@
  */
 
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -134,6 +135,13 @@ namespace Dapplo.Config.Support
 					// Ignore, can't convert the value, this should actually not happen much
 				}
 			}
+			// Collection -> string
+			if (targetType == typeof(string) && typeof(IEnumerable).IsAssignableFrom(valueType))
+			{
+				var result = string.Join(",", ((IEnumerable)value).Cast<object>().ToArray());
+                return result;
+			}
+			// String -> collection
 			if (typeof(IEnumerable).IsAssignableFrom(targetType) && (stringValue != null || typeof(IEnumerable).IsAssignableFrom(valueType)))
 			{
 				// We can try to create the type

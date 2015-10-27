@@ -57,6 +57,7 @@ namespace Dapplo.Config.Ini
 		private IDictionary<string, IDictionary<string, string>> _ini = new SortedDictionary<string, IDictionary<string, string>>();
 		private readonly bool _watchFileChanges;
 		private FileSystemWatcher _configFileWatcher;
+		private System.Timers.Timer _saveTimer;
 
 		/// <summary>
 		/// Used to detect if we have an intial read, and if so from where.
@@ -160,11 +161,11 @@ namespace Dapplo.Config.Ini
 			// Configure the auto save
 			if (autoSaveInterval > 0)
 			{
-				var saveTimer = new System.Timers.Timer
+				_saveTimer = new System.Timers.Timer
 				{
 					Interval = autoSaveInterval, Enabled = true, AutoReset = true
 				};
-				saveTimer.Elapsed += async (sender, eventArgs) => {
+				_saveTimer.Elapsed += async (sender, eventArgs) => {
 					// If we didn't read from a file we can stop the "timer tick"
 					if (_initialRead != ReadFrom.File)
 					{
@@ -263,11 +264,18 @@ namespace Dapplo.Config.Ini
 			{
 				try
 				{
+					// Disable events before
+					_configFileWatcher.EnableRaisingEvents = false;
 					await ReloadAsync();
 				}
 				catch
 				{
 					// Ignore
+				}
+				finally
+				{
+					// Disable events after
+					_configFileWatcher.EnableRaisingEvents = true;
 				}
 			};
 		}
@@ -868,6 +876,10 @@ namespace Dapplo.Config.Ini
 		/// <param name="iniSection"></param>
 		private void FillSection(IIniSection iniSection)
 		{
+			if (_saveTimer != null)
+			{
+				_saveTimer.Enabled = false;
+            }
 			// Make sure there is no write protection
 			iniSection.RemoveWriteProtection();
 			// Defaults:
@@ -894,6 +906,11 @@ namespace Dapplo.Config.Ini
 			{
 				afterLoadAction(iniSection);
 			}
+			iniSection.ResetHasChanges();
+            if (_saveTimer != null)
+			{
+				_saveTimer.Enabled = true;
+			}
 		}
 
 		/// <summary>
@@ -918,23 +935,15 @@ namespace Dapplo.Config.Ini
 				IDictionary<string, string> value;
 				if (iniSections.TryGetValue($"{sectionName}-{iniValue.IniPropertyName}", out value))
 				{
-					if (iniValue.Converter != null)
+					try
 					{
-						try
-						{
-							iniValue.Value = iniValue.Converter.ConvertFrom(value);
-							continue;
-						}
-						catch (Exception ex)
-						{
-							ReadErrorHandler(iniSection, iniValue, ex);
-						}
+						iniValue.Value = iniValue.ValueType.ConvertOrCastValueToType(value, iniValue.Converter);
+						continue;
 					}
-					else
+					catch (Exception ex)
 					{
-
+						ReadErrorHandler(iniSection, iniValue, ex);
 					}
-
 				}
 				// Skip if the iniProperties doesn't have anything
 				if (iniProperties == null || iniProperties.Count == 0)

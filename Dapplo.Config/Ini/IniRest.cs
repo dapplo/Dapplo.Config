@@ -129,26 +129,44 @@ namespace Dapplo.Config.Ini
 				var iniValue = iniSection[restCommand.Target];
 				restCommand.Results.Add(iniValue);
 				var iniValueType = iniValue.Value?.GetType() ?? iniValue.ValueType;
+				var removeMethodInfo = iniValueType.GetMethod("Remove");
 				switch (restCommand.Command)
 				{
 					case IniRestCommands.Add:
-						Type keyType = iniValueType.GetGenericArguments()[0];
-						Type valueType = iniValueType.GetGenericArguments()[1];
-						var keyConverter = TypeDescriptor.GetConverter(keyType);
-						var valueConverter = TypeDescriptor.GetConverter(valueType);
+						var genericArguments = iniValueType.GetGenericArguments();
+						var keyConverter = TypeDescriptor.GetConverter(genericArguments[0]);
+
+						// Only for IDictionary
+						TypeConverter valueConverter = null;
+                        if (genericArguments.Length == 2)
+						{
+							valueConverter = TypeDescriptor.GetConverter(genericArguments[1]);
+						}
 						var addMethodInfo = iniValueType.GetMethod("Add");
-						//Type keyValuePairType = typeof(KeyValuePair<,>).MakeGenericType(keyType, valueType);
+
 						foreach (var valueKey in restCommand.Values.Keys)
 						{
-							//var keyValuePair = Activator.CreateInstance(keyValuePairType, new[] { keyConverter.ConvertFromInvariantString(valueKey), valueConverter.ConvertFromInvariantString(restCommand.Values[valueKey]) });
-							addMethodInfo.Invoke(iniValue.Value, new[] { keyConverter.ConvertFromInvariantString(valueKey), valueConverter.ConvertFromInvariantString(restCommand.Values[valueKey]) });
+							var key = keyConverter.ConvertFromInvariantString(valueKey);
+							if (valueConverter != null)
+							{
+								var value = valueConverter.ConvertFromInvariantString(restCommand.Values[valueKey]);
+
+								// IDictionary, remove the value for the key first, so we don't need to check if it's there
+								removeMethodInfo.Invoke(iniValue.Value, new[] { key });
+								// Now add it
+								addMethodInfo.Invoke(iniValue.Value, new[] { key, value });
+							}
+							else
+							{
+								// ICollection
+								addMethodInfo.Invoke(iniValue.Value, new[] { key });
+							}
 						}
 						return;
 					case IniRestCommands.Remove:
 						Type itemType = iniValueType.GetGenericArguments()[0];
 						var converter = TypeDescriptor.GetConverter(itemType);
 						// TODO: Fix IList<T>.Remove not found!
-						var removeMethodInfo = iniValueType.GetMethod("Remove");
 						foreach (var valueKey in restCommand.Values.Keys)
 						{
 							removeMethodInfo.Invoke(iniValue.Value, new[] { converter.ConvertFromInvariantString(valueKey) });
