@@ -27,6 +27,7 @@ using Dapplo.Config.Converters;
 using Dapplo.Config.Ini;
 using Dapplo.Config.Test.ConfigTests.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Diagnostics;
 
 namespace Dapplo.Config.Test.ConfigTests
 {
@@ -170,6 +171,7 @@ namespace Dapplo.Config.Test.ConfigTests
 			var iniConfig = await InitializeAsync();
 			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 
+			iniTest.DictionaryOfLists.Add("firstValue", new List<int>() { 10, 20 });
 			// Change some values
 			iniTest.Name = Name;
 			iniTest.FirstName = FirstName;
@@ -191,6 +193,7 @@ namespace Dapplo.Config.Test.ConfigTests
 			using (var writeStream = new MemoryStream())
 			{
 				await iniConfig.WriteToStreamAsync(writeStream).ConfigureAwait(false);
+
 				//await iniConfig.WriteAsync().ConfigureAwait(false);
 
 				// Set the not written value to a testable value, this should not be read (and overwritten) by reading the ini file.
@@ -206,8 +209,13 @@ namespace Dapplo.Config.Test.ConfigTests
 				writeStream.Seek(0, SeekOrigin.Begin);
 				await iniConfig.ReadFromStreamAsync(writeStream).ConfigureAwait(false);
 				//await iniConfig.ReloadAsync(false).ConfigureAwait(false);
+                Assert.IsTrue(iniTest.SomeValues.ContainsKey("One"));
 
-				Assert.IsTrue(iniTest.SomeValues.ContainsKey("One"));
+				// check if the dictionary of lists also has all values again
+				Assert.IsTrue(iniTest.DictionaryOfLists.ContainsKey("firstValue"));
+				Assert.IsTrue(iniTest.DictionaryOfLists["firstValue"].Count == 2);
+
+				// Rest of simple tests
 				Assert.AreEqual(Name, iniTest.Name);
 				Assert.AreEqual(FirstName, iniTest.FirstName);
 				Assert.AreEqual(ticks, iniTest.Age);

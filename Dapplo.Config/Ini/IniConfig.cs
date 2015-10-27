@@ -21,6 +21,7 @@
 
 using Dapplo.Config.Support;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
@@ -98,13 +99,22 @@ namespace Dapplo.Config.Ini
 
 		/// <summary>
 		/// Static helper to remove the IniConfig from the store.
-		/// This is interal, as it normally should not be used.
+		/// This is interal, mainly for tests, normally it should not be needed.
 		/// </summary>
 		/// <param name="applicationName"></param>
 		/// <param name="fileName"></param>
 		public static void Delete(string applicationName, string fileName)
 		{
-			ConfigStore.Remove($"{applicationName}.{fileName}");
+			var identifier = $"{applicationName}.{fileName}";
+			IniConfig iniConfig;
+			if (ConfigStore.TryGetValue(identifier, out iniConfig))
+			{
+				foreach(var section in iniConfig.Sections)
+				{
+					ProxyBuilder.DeleteProxy(section.GetType());
+				}
+                ConfigStore.Remove(identifier);
+			}
 		}
 
 		/// <summary>
@@ -721,32 +731,35 @@ namespace Dapplo.Config.Ini
 
 				// Check if a converter is specified
 				var converter = GetConverter(iniValue);
-				if (converter != null && converter.CanConvertTo(typeof(IDictionary<string, string>)))
+
+				// Special case, for idictionary derrivated types
+				if (iniValue.ValueType.IsGenericType && iniValue.ValueType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
 				{
-					// Only the special dictionary types have such a converter
-					try
+					var subSection = TypeExtensions.ConvertOrCastValueToType<IDictionary<string, string>>(iniValue.Value, converter);
+					if (subSection != null)
 					{
-						// Convert the dictionary to a string,string variant.
-						var dictionaryProperties = (IDictionary<string, string>)converter.ConvertTo(context, CultureInfo.CurrentCulture, iniValue.Value, typeof(IDictionary<string, string>));
-						// Use this to build a separate "section" which is called "[section-propertyname]"
-						string dictionaryIdentifier = $"{sectionName}-{iniValue.IniPropertyName}";
-						if (_ini.ContainsKey(dictionaryIdentifier))
+						try
 						{
-							_ini.Remove(dictionaryIdentifier);
+							// Use this to build a separate "section" which is called "[section-propertyname]"
+							string dictionaryIdentifier = $"{sectionName}-{iniValue.IniPropertyName}";
+							if (_ini.ContainsKey(dictionaryIdentifier))
+							{
+								_ini.Remove(dictionaryIdentifier);
+							}
+							_ini.Add(dictionaryIdentifier, subSection);
+							if (!string.IsNullOrWhiteSpace(iniValue.Description))
+							{
+								var dictionaryComments = new SortedDictionary<string, string>();
+								dictionaryComments.Add(dictionaryIdentifier, iniValue.Description);
+								iniSectionsComments.Add(dictionaryIdentifier, dictionaryComments);
+							}
 						}
-						_ini.Add(dictionaryIdentifier, dictionaryProperties);
-						if (!string.IsNullOrWhiteSpace(iniValue.Description))
+						catch (Exception ex)
 						{
-							var dictionaryComments = new SortedDictionary<string, string>();
-							dictionaryComments.Add(dictionaryIdentifier, iniValue.Description);
-							iniSectionsComments.Add(dictionaryIdentifier, dictionaryComments);
+							WriteErrorHandler(iniSection, iniValue, ex);
 						}
+						continue;
 					}
-					catch (Exception ex)
-					{
-						WriteErrorHandler(iniSection, iniValue, ex);
-					}
-					continue;
 				}
 
 				try
@@ -755,14 +768,7 @@ namespace Dapplo.Config.Ini
 					string writingValue;
 					if (converter != null)
 					{
-						if (context != null)
-						{
-							writingValue = converter.ConvertToInvariantString(context, iniValue.Value);
-						}
-						else
-						{
-							writingValue = converter.ConvertToInvariantString(iniValue.Value);
-						}
+						writingValue = converter.ConvertToInvariantString(context, iniValue.Value);
 					}
 					else
 					{
@@ -908,24 +914,30 @@ namespace Dapplo.Config.Ini
 
 			foreach (var iniValue in iniValues)
 			{
-				string dictionaryIdentifier = $"{sectionName}-{iniValue.IniPropertyName}";
-				// If there are no properties, there might still be a separate section for a dictionary
+				// Test if there is a separate section for this inivalue, this is used for Dictionaries
 				IDictionary<string, string> value;
-				if (iniValue.Converter != null && iniSections.TryGetValue(dictionaryIdentifier, out value))
+				if (iniSections.TryGetValue($"{sectionName}-{iniValue.IniPropertyName}", out value))
 				{
-					try
+					if (iniValue.Converter != null)
 					{
-						iniValue.Value = iniValue.Converter.ConvertFrom(value);
+						try
+						{
+							iniValue.Value = iniValue.Converter.ConvertFrom(value);
+							continue;
+						}
+						catch (Exception ex)
+						{
+							ReadErrorHandler(iniSection, iniValue, ex);
+						}
 					}
-					catch (Exception ex)
+					else
 					{
-						ReadErrorHandler(iniSection, iniValue, ex);
+
 					}
 
-					continue;
 				}
-				// Skip if the iniValue does not have a default value and there is nothing to set
-				if (iniProperties == null)
+				// Skip if the iniProperties doesn't have anything
+				if (iniProperties == null || iniProperties.Count == 0)
 				{
 					continue;
 				}

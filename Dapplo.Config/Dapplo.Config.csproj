@@ -30,6 +30,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
@@ -43,6 +44,7 @@
   <ItemGroup>
     <Compile Include="DapploConfig.cs" />
     <Compile Include="ExtensionAttribute.cs" />
+    <Compile Include="Ini\IniRestCommand.cs" />
     <Compile Include="Proxy\IDescription.cs" />
     <Compile Include="Proxy\IDefaultValue.cs" />
     <Compile Include="Proxy\Implementation\AbstractPropertyProxyExtension.cs" />

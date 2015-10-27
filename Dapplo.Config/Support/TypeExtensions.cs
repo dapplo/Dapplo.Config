@@ -19,8 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Dapplo.Config.Converters;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 
@@ -31,72 +31,68 @@ namespace Dapplo.Config.Support
 	/// </summary>
 	public static class TypeExtensions
 	{
-		/// <summary>
-		/// check if the type is a generic dictionary: (I)Dictionary of T/>
-		/// </summary>
-		/// <param name="valueType">Type to check for</param>
-		/// <returns>true if it is a generic dictionary</returns>
-		public static bool IsGenericDirectory(this Type valueType)
-		{
-			return valueType.IsGenericType && (valueType.GetGenericTypeDefinition() == typeof(Dictionary<,>) || valueType.GetGenericTypeDefinition() == typeof(IDictionary<,>));
-		}
-
-		/// <summary>
-		/// check if the type is a generic list (I)List of T/>
-		/// </summary>
-		/// <param name="valueType">Type to check for</param>
-		/// <returns>true if it is a generic list</returns>
-		public static bool IsGenericList(this Type valueType)
-		{
-			return valueType.IsGenericType && (valueType.GetGenericTypeDefinition() == typeof(List<>) || valueType.GetGenericTypeDefinition() == typeof(IList<>));
-		}
+		// A map for converting interfaces to types
+		private static readonly IDictionary<Type, Type> TypeMap = new Dictionary<Type, Type>
+			{
+				{ typeof(IList<>), typeof(List<>)},
+				{ typeof(IEnumerable<>), typeof(List<>)},
+				{ typeof(ICollection<>), typeof(List<>)},
+				{ typeof(ISet<>), typeof(HashSet<>)},
+				{ typeof(IDictionary<,>), typeof(Dictionary<,>) },
+				{ typeof(IReadOnlyDictionary<,>), typeof(Dictionary<,>) }
+				
+			};
 
 		/// <summary>
 		/// Create an instance of the supplied type
 		/// </summary>
-		/// <param name="valueType"></param>
-		/// <returns></returns>
+		/// <param name="valueType">Type which should be created</param>
+		/// <returns>instance of the type</returns>
 		public static object CreateInstance(this Type valueType)
 		{
-			if (valueType == typeof(string) || valueType.IsArray)
+			Type typeForInstance = valueType;
+			if (typeForInstance == typeof(string) || typeForInstance.IsArray)
 			{
 				return null;
 			}
-			else if (IsGenericList(valueType))
+
+			// If it's an interface and IEnumerable is assignable from it, we try to map it to a real type
+			if (typeForInstance.IsInterface && typeof(IEnumerable).IsAssignableFrom(typeForInstance))
 			{
-				return Activator.CreateInstance(typeof(List<>).MakeGenericType(valueType.GetGenericArguments()[0]));
+				// Get the type without the generic types, like IList<> or ICollection<> or IDictionary<,>, so we can map it
+				Type genericType = typeForInstance.GetGenericTypeDefinition();
+
+				// check if we have a mapping
+                if (TypeMap.ContainsKey(genericType))
+				{
+					// Get the generic arguments (IList<argument1> or Dictionary<argument1, argument2>)
+					Type[] genericArguments = typeForInstance.GetGenericArguments();
+					// Create the List<T> or similar
+					typeForInstance = TypeMap[genericType].MakeGenericType(genericArguments);
+				}
 			}
-			else if (IsGenericDirectory(valueType))
+
+			// If it's not an enum, check if it's an interface or doesn't have a default constructor
+			if (!typeForInstance.IsEnum && (typeForInstance.IsInterface || typeForInstance.GetConstructor(Type.EmptyTypes) == null))
 			{
-				Type type1 = valueType.GetGenericArguments()[0];
-				Type type2 = valueType.GetGenericArguments()[1];
-				return Activator.CreateInstance(typeof(Dictionary<,>).MakeGenericType(type1, type2));
-			}
-			else if (!valueType.IsEnum && (valueType.IsInterface || valueType.GetConstructor(Type.EmptyTypes) == null))
-			{
+				// Nope, we can't create it
 				return null;
 			}
-			return Activator.CreateInstance(valueType);
+
+			// Create
+			return Activator.CreateInstance(typeForInstance);
 		}
 
 		/// <summary>
-		/// Create a type converter for the supplied type
+		/// Generic version of the same method with Type parameter, 
 		/// </summary>
-		/// <param name="valueType"></param>
-		/// <returns>TypeConverter</returns>
-		public static TypeConverter GetTypeConverter(this Type valueType)
+		/// <typeparam name="T">target type</typeparam>
+		/// <param name="value"></param>
+		/// <param name="typeConverter"></param>
+		/// <returns>T</returns>
+		public static T ConvertOrCastValueToType<T>(object value, TypeConverter typeConverter = null)
 		{
-			if (IsGenericList(valueType))
-			{
-				return (TypeConverter)Activator.CreateInstance(typeof(StringToGenericListConverter<>).MakeGenericType(valueType.GetGenericArguments()[0]));
-			}
-			else if (IsGenericDirectory(valueType))
-			{
-				Type type1 = valueType.GetGenericArguments()[0];
-				Type type2 = valueType.GetGenericArguments()[1];
-				return (TypeConverter)Activator.CreateInstance(typeof(GenericDictionaryConverter<,>).MakeGenericType(type1, type2));
-			}
-			return TypeDescriptor.GetConverter(valueType);
+			return (T)ConvertOrCastValueToType(typeof(T), value, typeConverter);
 		}
 
 		/// <summary>
@@ -105,7 +101,7 @@ namespace Dapplo.Config.Support
 		/// <param name="targetType">target type</param>
 		/// <param name="value">value to convert</param>
 		/// <param name="typeConverter">A type converter can be passed for special cases</param>
-		/// <returns>object as targetType</returns>
+		/// <returns>object as targetType, or null if this wasn't possible</returns>
 		public static object ConvertOrCastValueToType(this Type targetType, object value, TypeConverter typeConverter = null)
 		{
 			if (value == null)
@@ -113,34 +109,91 @@ namespace Dapplo.Config.Support
 				return null;
 			}
 			var valueType = value.GetType();
-			if (targetType != valueType && !targetType.IsAssignableFrom(valueType))
+			if (targetType == valueType || targetType.IsAssignableFrom(valueType))
 			{
-				if (typeConverter == null)
-				{
-					typeConverter = targetType.GetTypeConverter();
-				}
-				if (typeConverter.CanConvertFrom(valueType))
-				{
-					var stringValue = value as string;
-					if (stringValue != null)
-					{
-						return typeConverter.ConvertFromInvariantString(stringValue);
-					}
-					else
-					{
-						return typeConverter.ConvertFrom(value);
-					}
-				}
+				return value;
+			}
+
+			if (typeConverter == null)
+			{
+				typeConverter = TypeDescriptor.GetConverter(targetType);
+			}
+			var stringValue = value as string;
+			if (stringValue != null && (bool)typeConverter?.CanConvertFrom(typeof(string)))
+			{
+				return typeConverter.ConvertFromInvariantString(stringValue);
+			}
+			if ((bool)typeConverter?.CanConvertFrom(valueType))
+			{
 				try
 				{
-					return Convert.ChangeType(value, targetType);
+					return typeConverter.ConvertFrom(value);
 				}
 				catch
 				{
-					// Ignore, can't convert the value
+					// Ignore, can't convert the value, this should actually not happen much
 				}
 			}
-			return value;
+			if (typeof(IEnumerable).IsAssignableFrom(targetType) && (stringValue != null || typeof(IEnumerable).IsAssignableFrom(valueType)))
+			{
+				// We can try to create the type
+				var instance = targetType.CreateInstance();
+				if (instance != null)
+				{
+					// Fill it
+					Type instanceType = instance.GetType();
+					Type[] genericArguments = instanceType.GetGenericArguments();
+
+					// Check if it's a collection like thing, has only one generic argument
+					if (genericArguments.Length == 1)
+					{
+						Type genericType = genericArguments[0];
+						var addMethod = instanceType.GetMethod("Add");
+
+						foreach (var item in stringValue != null ? stringValue.SplitCSV() : (IEnumerable)value)
+						{
+							try
+							{
+								addMethod.Invoke(instance, new[] { genericType.ConvertOrCastValueToType(item) });
+							}
+							catch
+							{
+								// Ignore
+							}
+						}
+						return instance;
+					}
+					else if (genericArguments.Length == 2)
+					{
+						Type valueType1 = genericArguments[0];
+						Type valueType2 = genericArguments[1];
+						var addMethod = instanceType.GetMethod("Add");
+						IDictionary dictionary = stringValue != null ? (IDictionary)stringValue.SplitDictionary() : (IDictionary)value;
+                        foreach (var key in dictionary.Keys)
+						{
+							try
+							{
+								addMethod.Invoke(instance, new[] { valueType1.ConvertOrCastValueToType(key), valueType2.ConvertOrCastValueToType(dictionary[key]) });
+							}
+							catch
+							{
+								// Ignore
+							}
+                        }
+						return instance;
+					}
+				}
+            }
+			try
+			{
+				return Convert.ChangeType(value, targetType);
+			}
+			catch
+			{
+				// Ignore, can't convert the value
+			}
+
+			return null;
 		}
 	}
 }

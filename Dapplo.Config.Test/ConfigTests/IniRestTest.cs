@@ -65,8 +65,13 @@ namespace Dapplo.Config.Test.ConfigTests
 			}
 		}
 
+		/// <summary>
+		/// Create an ini-config, but delete it first
+		/// </summary>
+		/// <returns></returns>
 		private IniConfig Create()
 		{
+			IniConfig.Delete("Dapplo", "dapplo");
 			return new IniConfig("Dapplo", "dapplo");
 		}
 
@@ -75,6 +80,7 @@ namespace Dapplo.Config.Test.ConfigTests
 		{
 			var iniConfig = await InitializeAsync();
 			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
+			var listToTest = iniTest.WindowCornerCutShape;
 			iniTest.Name = Name;
 			iniTest.SomeValues.Add("Answer", 42);
 
@@ -85,13 +91,20 @@ namespace Dapplo.Config.Test.ConfigTests
 
 			// Test get
 			var readRobinKromUri = new Uri("dummy:///IniConfig/get/Dapplo/dapplo/Test/Name/RobinKrom");
-			var nameIniValue = IniRest.ProcessRestUri(readRobinKromUri);
-			Assert.AreEqual(nameIniValue.PropertyName, "Name");
-			Assert.AreEqual("RobinKrom", iniTest.Name);
+			var iniRestCommand = IniRest.ProcessRestUri(readRobinKromUri);
+
+			Assert.IsTrue(iniRestCommand.Results.Count(x => x.PropertyName == "Name") == 1);
+			Assert.AreEqual("RobinKrom", iniRestCommand.Results.First(x=> x.PropertyName == "Name").Value);
+
+			// Test set multiple
+			var changeValuesUri = new Uri("dummy:///IniConfig/set/Dapplo/dapplo/Test?Name=JimBean&FirstName=50");
+			IniRest.ProcessRestUri(changeValuesUri);
+			Assert.AreEqual("JimBean", iniTest.Name);
+			Assert.AreEqual("50", iniTest.FirstName);
 
 			// Test add
 			var addValueUri = new Uri("dummy:///IniConfig/add/Dapplo/dapplo/Test/SomeValues?Highlight=10&Stop=20");
-			IniRest.ProcessRestUri(addValueUri);
+			var addValueResult = IniRest.ProcessRestUri(addValueUri);
 			Assert.IsTrue(iniTest.SomeValues.ContainsKey("Highlight"));
 			Assert.IsTrue(iniTest.SomeValues.ContainsKey("Stop"));
 			Debug.WriteLine($"Highlight = {iniTest.SomeValues["Highlight"]}");
@@ -103,7 +116,7 @@ namespace Dapplo.Config.Test.ConfigTests
 			Assert.IsFalse(iniTest.SomeValues.ContainsKey("Stop"));
 
 			// Test remove from list
-			var listToTest = iniTest.WindowCornerCutShape;
+			
 			var removeCutShapeUri = new Uri("dummy:///IniConfig/remove/Dapplo/dapplo/Test/WindowCornerCutShape?5&1");
 			IniRest.ProcessRestUri(removeCutShapeUri);
             Assert.IsTrue(listToTest.First() != 5);

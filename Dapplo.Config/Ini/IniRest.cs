@@ -19,8 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Dapplo.Config.Support;
 using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -48,9 +48,11 @@ namespace Dapplo.Config.Ini
 		/// You can use the ProtocolHandler to register a custom URL protocol.
 		/// </summary>
 		/// <param name="restUri"></param>
-		/// <returns>Value (before set) or actual value with get/add/remove</returns>
-		public static IniValue ProcessRestUri(Uri restUri)
+		/// <returns>IniRestCommand with all details and the result</returns>
+		public static IniRestCommand ProcessRestUri(Uri restUri)
 		{
+			var restCommand = new IniRestCommand();
+
 			var removeSlash = new Regex(@"\/$");
 			var segments = (from segment in restUri.Segments.Skip(1)
 							select removeSlash.Replace(segment, "")).ToList();
@@ -60,88 +62,124 @@ namespace Dapplo.Config.Ini
 				return null;
 			}
 			segments.RemoveAt(0);
-			var command = segments[0];
-			segments.RemoveAt(0);
-			var iniConfig = IniConfig.Get(segments[0], segments[1]);
-			segments.RemoveAt(0);
-			segments.RemoveAt(0);
-			var iniSection = iniConfig[segments[0]];
-			segments.RemoveAt(0);
-			var iniValue = iniSection[segments[0]];
-			segments.RemoveAt(0);
-
-			var iniValueType = iniValue.Value?.GetType() ?? iniValue.ValueType;
-
-			switch (command)
+			IniRestCommands command;
+			if (!Enum.TryParse(segments[0], true, out command))
 			{
-				case "set":
-					if (segments.Count > 0)
-					{
-						if (iniValueType.IsGenericDirectory() || iniValueType.IsGenericList())
-						{
-							throw new NotSupportedException($"Can't set type of {iniValueType}, use add/remove");
-						}
-
-						iniValue.Value = WebUtility.UrlDecode(segments[0]);
-					}
-					break;
-				case "reset":
-					iniValue.ResetToDefault();
-					break;
-				case "get":
-					// Ignore, as the default logic covers a read
-					break;
-				case "remove":
-					if (iniValueType.IsGenericDirectory() || iniValueType.IsGenericList())
-					{
-						Type itemType = iniValueType.GetGenericArguments()[0];
-						var converter = itemType.GetTypeConverter();
-						// TODO: Fix IList<T>.Remove not found!
-						var removeMethodInfo = iniValueType.GetMethod("Remove");
-						var removeQuestionmark = new Regex(@"^\?");
-						var itemsToRemove = (from item in restUri.Query.Split('&')
-											 select converter.ConvertFromInvariantString(removeQuestionmark.Replace(item, ""))).ToList();
-						foreach (var item in itemsToRemove)
-						{
-							removeMethodInfo.Invoke(iniValue.Value, new[] { item });
-						}
-					}
-					else
-					{
-						throw new NotSupportedException($"Can't remove from type {iniValueType}, use set / reset");
-					}
-					break;
-				case "add":
-					if (iniValueType.IsGenericDirectory())
-					{
-						var variables = restUri.QueryToDictionary();
-						Type keyType = iniValueType.GetGenericArguments()[0];
-						Type valueType = iniValueType.GetGenericArguments()[1];
-						var addMethodInfo = iniValueType.GetMethod("Add");
-						foreach (var key in variables.Keys)
-						{
-							var keyObject = keyType.ConvertOrCastValueToType(key);
-							var valueObject = valueType.ConvertOrCastValueToType(variables[key]);
-							addMethodInfo.Invoke(iniValue.Value, new[] { keyObject, valueObject });
-						}
-					}
-					else if (iniValueType.IsGenericList())
-					{
-						Type itemType = iniValueType.GetGenericArguments()[0];
-						var itemValue = itemType.ConvertOrCastValueToType(segments[0]);
-						var addMethodInfo = iniValueType.GetMethod("Add");
-						addMethodInfo.Invoke(iniValue.Value, new[]{ itemValue });
-					}
-					else
-					{
-						throw new NotSupportedException($"Can't add to type {iniValueType}, use set / reset");
-					}
-					break;
-				default:
-					throw new NotSupportedException($"Don't know command {command}, there is only get/set/reset/add/remove");
+				throw new ArgumentException($"{segments[0]} is not a valid command: get/set/reset/add/remove");
 			}
-			return iniValue;
+			restCommand.Command = command;
+
+			segments.RemoveAt(0);
+			restCommand.Application = segments[0];
+
+			segments.RemoveAt(0);
+			restCommand.File = segments[0];
+
+			segments.RemoveAt(0);
+			restCommand.Section = segments[0];
+
+			segments.RemoveAt(0);
+			if (segments.Count == 1)
+			{
+				restCommand.Target = WebUtility.UrlDecode(segments[0]);
+            }
+			else 
+			{
+				while(segments.Count > 1)
+				{
+					var key = WebUtility.UrlDecode(segments[0]);
+					segments.RemoveAt(0);
+					var value = segments.Count >= 1 ? WebUtility.UrlDecode(segments[0]) : null;
+					if (value != null)
+					{
+						segments.RemoveAt(0);
+					}
+					restCommand.Values.Add(key, value);
+				}
+			}
+
+			if (!string.IsNullOrEmpty(restUri.Query))
+			{
+				foreach (var item in restUri.Query.Substring(1).Split('&'))
+				{
+					var splitItem = item.Split('=');
+					restCommand.Values.Add(WebUtility.UrlDecode(splitItem[0]), splitItem.Length > 1 ? WebUtility.UrlDecode(splitItem[1]) : null);
+				}
+
+			}
+			ProcessRestCommand(restCommand);
+			return restCommand;
 		}
 
+		/// <summary>
+		/// Process the supplied IniRestCommand
+		/// </summary>
+		/// <param name="restCommand">IniRestCommand to process</param>
+		public static void ProcessRestCommand(IniRestCommand restCommand) {
+
+			var iniConfig = IniConfig.Get(restCommand.Application, restCommand.File);
+			var iniSection = iniConfig[restCommand.Section];
+
+			if (restCommand.Command == IniRestCommands.Add || restCommand.Command == IniRestCommands.Remove)
+			{
+				if (restCommand.Target == null && restCommand.Values.Count == 0)
+				{
+					throw new ArgumentException("add/remove needs a target");
+				}
+				var iniValue = iniSection[restCommand.Target];
+				restCommand.Results.Add(iniValue);
+				var iniValueType = iniValue.Value?.GetType() ?? iniValue.ValueType;
+				switch (restCommand.Command)
+				{
+					case IniRestCommands.Add:
+						Type keyType = iniValueType.GetGenericArguments()[0];
+						Type valueType = iniValueType.GetGenericArguments()[1];
+						var keyConverter = TypeDescriptor.GetConverter(keyType);
+						var valueConverter = TypeDescriptor.GetConverter(valueType);
+						var addMethodInfo = iniValueType.GetMethod("Add");
+						//Type keyValuePairType = typeof(KeyValuePair<,>).MakeGenericType(keyType, valueType);
+						foreach (var valueKey in restCommand.Values.Keys)
+						{
+							//var keyValuePair = Activator.CreateInstance(keyValuePairType, new[] { keyConverter.ConvertFromInvariantString(valueKey), valueConverter.ConvertFromInvariantString(restCommand.Values[valueKey]) });
+							addMethodInfo.Invoke(iniValue.Value, new[] { keyConverter.ConvertFromInvariantString(valueKey), valueConverter.ConvertFromInvariantString(restCommand.Values[valueKey]) });
+						}
+						return;
+					case IniRestCommands.Remove:
+						Type itemType = iniValueType.GetGenericArguments()[0];
+						var converter = TypeDescriptor.GetConverter(itemType);
+						// TODO: Fix IList<T>.Remove not found!
+						var removeMethodInfo = iniValueType.GetMethod("Remove");
+						foreach (var valueKey in restCommand.Values.Keys)
+						{
+							removeMethodInfo.Invoke(iniValue.Value, new[] { converter.ConvertFromInvariantString(valueKey) });
+						}
+						return;
+				}
+			}
+
+
+			foreach (var key in restCommand.Target != null ? new [] { restCommand.Target } : restCommand.Values.Keys)
+			{
+				var iniValue = iniSection[key];
+				if (iniValue == null)
+				{
+					continue;
+				}
+				switch (restCommand.Command)
+				{
+
+					case IniRestCommands.Set:
+						iniValue.Value = restCommand.Values[key];
+						restCommand.Results.Add(iniValue);
+						break;
+					case IniRestCommands.Get:
+						restCommand.Results.Add(iniValue);
+						break;
+					case IniRestCommands.Reset:
+						iniValue.ResetToDefault();
+						break;
+				}
+			}
+		}
 	}
 }

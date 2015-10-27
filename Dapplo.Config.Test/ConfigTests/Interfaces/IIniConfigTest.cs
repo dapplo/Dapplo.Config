@@ -103,6 +103,13 @@ namespace Dapplo.Config.Test.ConfigTests.Interfaces
 			set;
 		}
 
+		[Description("Here are some cool values")]
+		IDictionary<string, IList<int>> DictionaryOfLists
+		{
+			get;
+			set;
+		}
+
 		[DefaultValue("16,16")]
 		Size PropertySize {
 			get;

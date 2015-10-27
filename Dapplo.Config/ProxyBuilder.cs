@@ -48,12 +48,35 @@ namespace Dapplo.Config
 			ExtensionTypes.AddRange(types);
 		}
 
-        /// <summary>
-        /// Get a proxy, this throws an exception if it doesn't exist
-        /// </summary>
-        /// <typeparam name="T">Should be an interface</typeparam>
-        /// <returns>proxy</returns>
-        public static IPropertyProxy<T> GetProxy<T>()
+		/// <summary>
+		/// Delete a proxy
+		/// This is interal, mainly for tests, normally it should not be needed.
+		/// </summary>
+		/// <typeparam name="T">Should be an interface</typeparam>
+		public static void DeleteProxy<T>()
+		{
+			DeleteProxy(typeof(T));
+		}
+
+		/// <summary>
+		/// Delete a proxy
+		/// This is interal, mainly for tests, normally it should not be needed.
+		/// </summary>
+		/// <param name="proxyType">Should be an interface</typeparam>
+		public static void DeleteProxy(Type proxyType)
+		{
+			lock (Cache)
+			{
+				Cache.Remove(proxyType);
+			}
+		}
+
+		/// <summary>
+		/// Get a proxy, this throws an exception if it doesn't exist
+		/// </summary>
+		/// <typeparam name="T">Should be an interface</typeparam>
+		/// <returns>proxy</returns>
+		public static IPropertyProxy<T> GetProxy<T>()
         {
             return (IPropertyProxy<T>)GetProxy(typeof(T));
         }
@@ -66,11 +89,13 @@ namespace Dapplo.Config
         public static IPropertyProxy GetProxy(Type type)
         {
             IPropertyProxy proxy;
-	        // ReSharper disable once InconsistentlySynchronizedField
-            if (!Cache.TryGetValue(type, out proxy))
-            {
-                throw new KeyNotFoundException(type.FullName);
-            }
+			lock (Cache)
+			{
+				if (!Cache.TryGetValue(type, out proxy))
+				{
+					throw new KeyNotFoundException(type.FullName);
+				}
+			}
             return proxy;
         }
 

@@ -69,7 +69,7 @@ namespace Dapplo.Config.Support {
 				}
 			}
 
-			return propertyInfo.PropertyType.GetTypeConverter();
+			return TypeDescriptor.GetConverter(propertyInfo.PropertyType);
 		}
 
 		/// <summary>
