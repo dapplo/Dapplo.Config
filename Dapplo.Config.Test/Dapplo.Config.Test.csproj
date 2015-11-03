@@ -70,6 +70,7 @@
     <Compile Include="ConfigTests\IniConfigTest.cs" />
     <Compile Include="ConfigTests\IniRestTest.cs" />
     <Compile Include="ConfigTests\ConvertTest.cs" />
+    <Compile Include="ConfigTests\Interfaces\IIniConfigWrongEnumTest.cs" />
     <Compile Include="ProxyTests\ObjectTest.cs" />
     <Compile Include="ProxyTests\DescriptionTest.cs" />
     <Compile Include="LanguageTests\LanguageLoaderTest.cs" />

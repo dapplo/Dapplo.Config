@@ -155,6 +155,14 @@ namespace Dapplo.Config.Test.ConfigTests
         }
 
 		[TestMethod]
+		public async Task TestIniWrongEnumDefault()
+		{
+			var iniConfig = await InitializeAsync();
+			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigWrongEnumTest>().ConfigureAwait(false);
+			Assert.AreEqual(IniConfigTestEnum.Value1, iniTest.TestWithFalseEnum);
+		}
+
+		[TestMethod]
 		public async Task TestIniConfigIndex()
 		{
 			var iniConfig = await InitializeAsync();
@@ -182,7 +190,7 @@ namespace Dapplo.Config.Test.ConfigTests
 
 			// Dictionary test
 			iniTest.SomeValues.Add("One", 1);
-
+			iniTest.TestEnums.Add(IniConfigTestEnum.Value2);
 			// Enum test
 			iniTest.TestWithEnum = IniConfigTestEnum.Value1;
 			iniTest.TestWithEnumSubValue = IniConfigTestEnum.Value1;
@@ -224,6 +232,7 @@ namespace Dapplo.Config.Test.ConfigTests
 				Assert.AreEqual(IniConfigTestEnum.Value1, iniTest.TestWithEnum);
 				Assert.AreEqual(IniConfigTestEnum.Value1, iniTest.TestWithEnumSubValue);
 				Assert.AreEqual(heightBefore, iniTest.Height);
+				Assert.IsTrue(iniTest.TestEnums.Contains(IniConfigTestEnum.Value2));
 			}
 
 			// Check second get, should have same value

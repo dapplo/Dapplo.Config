@@ -47,16 +47,16 @@ namespace Dapplo.Config.Test.ConfigTests.Interfaces
 			get;
 			set;
 		}
-
-		[Description("Name of the person")]
-		string Name
+		[Description("List of enums")]
+		IList<IniConfigTestEnum> TestEnums
 		{
 			get;
 			set;
 		}
 
-		[Description("Test property for wrong enums"), DefaultValue("Value3")]
-		IniConfigTestEnum TestWithFalseEnum
+
+		[Description("Name of the person")]
+		string Name
 		{
 			get;
 			set;

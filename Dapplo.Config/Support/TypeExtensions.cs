@@ -132,6 +132,78 @@ namespace Dapplo.Config.Support
 		}
 
 		/// <summary>
+		/// A helper method, this will try to convert the value to the target type with the supplied converter
+		/// </summary>
+		/// <param name="value"></param>
+		/// <param name="targetType"></param>
+		/// <param name="typeConverter"></param>
+		/// <param name="typeDescriptorContext"></param>
+		/// <param name="convertFrom"></param>
+		/// <param name="outValue">converted value</param>
+		/// <returns>true if success</returns>
+		private static bool TryConvert(object value, Type targetType, TypeConverter typeConverter, ITypeDescriptorContext typeDescriptorContext, bool convertFrom, out object outValue)
+		{
+			Type valueType = value.GetType();
+			var stringValue = value as string;
+			outValue = null;
+            if (convertFrom)
+			{
+				if (stringValue != null && (bool)typeConverter?.CanConvertFrom(typeof(string)))
+				{
+					try
+					{
+						outValue = typeConverter.ConvertFromInvariantString(typeDescriptorContext, stringValue);
+						return true;
+					}
+					catch
+					{
+						// Ignore, can't convert the value, this should actually not happen much
+					}
+				}
+				else if ((bool)typeConverter?.CanConvertFrom(valueType))
+				{
+					try
+					{
+						outValue = typeConverter.ConvertFrom(typeDescriptorContext, CultureInfo.CurrentCulture, value);
+						return true;
+					}
+					catch
+					{
+						// Ignore, can't convert the value, this should actually not happen much
+					}
+				}
+			}
+			else
+			{
+				if ((bool)typeConverter?.CanConvertTo(typeof(string)))
+				{
+					try
+					{
+						outValue = typeConverter.ConvertToInvariantString(typeDescriptorContext, value);
+						return true;
+					}
+					catch
+					{
+						// Ignore, can't convert the value, this should actually not happen much
+					}
+				}
+				else if ((bool)typeConverter?.CanConvertTo(targetType))
+				{
+					try
+					{
+						outValue = typeConverter.ConvertTo(typeDescriptorContext, CultureInfo.CurrentCulture, value, targetType);
+						return true;
+					}
+					catch
+					{
+						// Ignore, can't convert the value, this should actually not happen much
+					}
+				}
+			}
+			return false;
+		}
+
+		/// <summary>
 		/// Convert or Cast the value TO targetType
 		/// </summary>
 		/// <param name="targetType">target type</param>
@@ -153,63 +225,18 @@ namespace Dapplo.Config.Support
 				return value;
 			}
 
-			if (typeConverter == null)
+			if (typeConverter != null)
 			{
-				typeConverter = GetConverter(targetType);
-			}
+				object returnValue;
+				if (TryConvert(value, targetType, typeConverter, typeDescriptorContext, convertFrom, out returnValue))
+				{
+					return returnValue;
+                }
+            }
 			var stringValue = value as string;
-			if (convertFrom)
-			{
-				if (stringValue != null && (bool)typeConverter?.CanConvertFrom(typeof(string)))
-				{
-					try
-					{
-						return typeConverter.ConvertFromInvariantString(typeDescriptorContext, stringValue);
-					}
-					catch
-					{
-						// Ignore, can't convert the value, this should actually not happen much
-					}
-				}
-				else  if ((bool)typeConverter?.CanConvertFrom(valueType))
-				{
-					try
-					{
-						return typeConverter.ConvertFrom(typeDescriptorContext, CultureInfo.CurrentCulture, value);
-					}
-					catch
-					{
-						// Ignore, can't convert the value, this should actually not happen much
-					}
-				}
-			}
-			else
-			{
-				if (stringValue != null && (bool)typeConverter?.CanConvertTo(targetType))
-				{
-					try
-					{
-						return typeConverter.ConvertToInvariantString(typeDescriptorContext, stringValue);
-					}
-					catch
-					{
-						// Ignore, can't convert the value, this should actually not happen much
-					}
-				}
-				else if ((bool)typeConverter?.CanConvertTo(targetType))
-				{
-					try
-					{
-						return typeConverter.ConvertFrom(typeDescriptorContext, CultureInfo.CurrentCulture, value);
-					}
-					catch
-					{
-						// Ignore, can't convert the value, this should actually not happen much
-					}
-				}
-			}
+
 			// Collection -> string
-			if (targetType == typeof(string) && typeof(IEnumerable).IsAssignableFrom(valueType))
+			if (targetType == typeof(string) && valueType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(valueType))
 			{
 				var result = string.Join(",", ((IEnumerable)value).Cast<object>().ToArray());
                 return result;
@@ -265,6 +292,19 @@ namespace Dapplo.Config.Support
 					}
 				}
             }
+			if (typeConverter == null)
+			{
+				typeConverter = GetConverter(convertFrom ? targetType : valueType);
+				if (typeConverter != null)
+				{
+					object returnValue;
+					if (TryConvert(value, targetType, typeConverter, typeDescriptorContext, convertFrom, out returnValue))
+					{
+						return returnValue;
+					}
+				}
+            }
+
 			try
 			{
 				return Convert.ChangeType(value, targetType);
