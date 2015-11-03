@@ -151,6 +151,7 @@ namespace Dapplo.Config.Ini
 		/// <param name="token"></param>
 		public static async Task WriteAsync(Stream stream, Encoding encoding, IDictionary<string, IDictionary<string, string>> sections, IDictionary<string, IDictionary<string, string>> sectionsComments = null, CancellationToken token = default(CancellationToken))
 		{
+			bool isFirstLine = true;
 			var writer = new StreamWriter(stream, Encoding.UTF8);
 
 			Exception exception = null;
@@ -162,12 +163,18 @@ namespace Dapplo.Config.Ini
 					{
 						break;
 					}
-					await writer.WriteLineAsync().ConfigureAwait(false);
+
 					IDictionary<string, string> properties = sections[sectionKey];
 					if (properties.Count == 0)
 					{
 						continue;
 					}
+					if (!isFirstLine)
+					{
+						await writer.WriteLineAsync().ConfigureAwait(false);
+					}
+					isFirstLine = false;
+
 					IDictionary<string, string> comments = null;
 					if (sectionsComments != null)
 					{

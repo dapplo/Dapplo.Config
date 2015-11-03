@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using Dapplo.Config.Ini;
 using Dapplo.Config.Test.ConfigTests.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Dapplo.HttpExtensions;
 
 namespace Dapplo.Config.Test.ConfigTests
 {
@@ -31,7 +32,7 @@ namespace Dapplo.Config.Test.ConfigTests
 	public class HttpExtensionSettingsTest
 	{
 		[TestMethod]
-		public async Task TestDefaultReadWrite()
+		public async Task TestHttpExtensionsDefaultReadWrite()
 		{
 			var iniConfig = new IniConfig("Dapplo", "dapplo.httpextensions");
 			using (var testMemoryStream = new MemoryStream())
@@ -43,6 +44,9 @@ namespace Dapplo.Config.Test.ConfigTests
 			using (var writeStream = new MemoryStream())
 			{
 				await iniConfig.WriteToStreamAsync(writeStream).ConfigureAwait(false);
+				writeStream.Seek(0, SeekOrigin.Begin);
+				await iniConfig.ReadFromStreamAsync(writeStream).ConfigureAwait(false);
+				HttpClientFactory.CreateHttpClient(httpConfiguration);
 			}
 		}
 	}

@@ -22,6 +22,7 @@
 using System.ComponentModel;
 using Dapplo.Config.Ini;
 using Dapplo.HttpExtensions;
+using Dapplo.Config.Proxy;
 
 namespace Dapplo.Config.Test.ConfigTests.Interfaces
 {
@@ -30,7 +31,7 @@ namespace Dapplo.Config.Test.ConfigTests.Interfaces
 	/// </summary>
 	[IniSection("Http")]
 	[Description("Test Configuration")]
-	public interface IHttpConfiguration : IHttpSettings, IIniSection
+	public interface IHttpConfiguration : IHttpSettings, IIniSection<IHttpConfiguration>, INotifyPropertyChanged, ITagging<IHttpConfiguration>
 	{
 
 	}
