@@ -70,8 +70,6 @@ namespace Dapplo.Config.Ini
 			Stream
 		}
 
-		private readonly IDictionary<Type, Type> _converters = new Dictionary<Type, Type>();
-
 		/// <summary>
 		/// Assign your own error handler to get all the write errors
 		/// </summary>
@@ -302,17 +300,6 @@ namespace Dapplo.Config.Ini
 			{
 				return _iniSections.Values;
 			}
-		}
-
-		/// <summary>
-		/// Set the default converter for the specified type
-		/// </summary>
-		/// <param name="type"></param>
-		/// <param name="typeConverter"></param>
-		public IniConfig SetDefaultConverter(Type type, Type typeConverter)
-		{
-			_converters.SafelyAddOrOverwrite(type, typeConverter);
-			return this;
 		}
 
 		/// <summary>
@@ -737,8 +724,8 @@ namespace Dapplo.Config.Ini
 					// Ignore any exceptions
 				}
 
-				// Check if a converter is specified
-				var converter = GetConverter(iniValue);
+				// Get specified converter
+				var converter = iniValue.Converter;
 
 				// Special case, for idictionary derrivated types
 				if (iniValue.ValueType.IsGenericType && iniValue.ValueType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
@@ -776,7 +763,7 @@ namespace Dapplo.Config.Ini
 					string writingValue;
 					if (converter != null)
 					{
-						writingValue = converter.ConvertToInvariantString(context, iniValue.Value);
+						writingValue = TypeExtensions.ConvertOrCastValueToType<string>(iniValue.Value, converter);
 					}
 					else
 					{
@@ -790,31 +777,6 @@ namespace Dapplo.Config.Ini
 					WriteErrorHandler(iniSection, iniValue, ex);
 				}
 			}
-		}
-
-		/// <summary>
-		/// Get the TypeConverter for the IniValue, this does a bit more than just calling the Converter property
-		/// </summary>
-		/// <param name="iniValue">IniValue</param>
-		/// <returns>TypeConverter</returns>
-		public TypeConverter GetConverter(IniValue iniValue)
-		{
-			// Check if a converter is specified
-			var converter = iniValue.Converter;
-			// If not, use the default converter for the property type
-			if (converter == null)
-			{
-				Type converterType;
-				if (_converters.TryGetValue(iniValue.ValueType, out converterType))
-				{
-					converter = (TypeConverter)Activator.CreateInstance(converterType);
-				}
-				else
-				{
-					converter = TypeDescriptor.GetConverter(iniValue.ValueType);
-				}
-			}
-			return converter;
 		}
 
 		/// <summary>
@@ -956,55 +918,23 @@ namespace Dapplo.Config.Ini
 				{
 					continue;
 				}
-				var stringType = typeof(string);
-				var destinationType = iniValue.ValueType;
-				if (iniValue.Converter != null && iniValue.Converter.CanConvertFrom(stringType))
-				{
-					try
-					{
-						iniValue.Value = iniValue.Converter.ConvertFromInvariantString(stringValue);
-					}
-					catch (Exception ex)
-					{
-						ReadErrorHandler(iniSection, iniValue, ex);
-					}
-					continue;
-				}
 
-				// use default converter
-				Type converterType;
-				if (_converters.TryGetValue(iniValue.ValueType, out converterType))
+				// convert
+				try
 				{
-					var converter = (TypeConverter)Activator.CreateInstance(converterType);
-					try
+					object convertedValue = iniValue.ValueType.ConvertOrCastValueToType(stringValue, iniValue.Converter);
+					if (convertedValue != null)
 					{
-						iniValue.Value = converter.ConvertFromInvariantString(stringValue);
-					}
-					catch (Exception ex)
-					{
-						ReadErrorHandler(iniSection, iniValue, ex);
-					}
-					continue;
-				}
-
-				if (destinationType != stringType)
-				{
-					var converter = TypeDescriptor.GetConverter(destinationType);
-					if (converter.CanConvertFrom(stringType))
-					{
-						try
-						{
-							iniValue.Value = converter.ConvertFromInvariantString(stringValue);
-						}
-						catch (Exception ex)
-						{
-							ReadErrorHandler(iniSection, iniValue, ex);
-						}
+						iniValue.Value = convertedValue;
 						continue;
-					}
+                    }
+					// just set it and hope it can be cast
+					iniValue.Value = stringValue;
 				}
-				// just set it and hope it can be cast
-				iniValue.Value = stringValue;
+				catch (Exception ex)
+				{
+					ReadErrorHandler(iniSection, iniValue, ex);
+				}
 			}
 		}
 

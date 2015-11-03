@@ -171,6 +171,7 @@ namespace Dapplo.Config.Test.ConfigTests
 			var iniConfig = await InitializeAsync();
 			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 
+			iniTest.WindowCornerCutShape.Add(100);
 			iniTest.DictionaryOfLists.Add("firstValue", new List<int>() { 10, 20 });
 			// Change some values
 			iniTest.Name = Name;
@@ -210,7 +211,7 @@ namespace Dapplo.Config.Test.ConfigTests
 				await iniConfig.ReadFromStreamAsync(writeStream).ConfigureAwait(false);
 				//await iniConfig.ReloadAsync(false).ConfigureAwait(false);
                 Assert.IsTrue(iniTest.SomeValues.ContainsKey("One"));
-
+				Assert.IsTrue(iniTest.WindowCornerCutShape.Contains(100));
 				// check if the dictionary of lists also has all values again
 				Assert.IsTrue(iniTest.DictionaryOfLists.ContainsKey("firstValue"));
 				Assert.IsTrue(iniTest.DictionaryOfLists["firstValue"].Count == 2);

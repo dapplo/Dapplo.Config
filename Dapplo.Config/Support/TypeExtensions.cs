@@ -24,6 +24,7 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 
 namespace Dapplo.Config.Support
 {
@@ -32,6 +33,8 @@ namespace Dapplo.Config.Support
 	/// </summary>
 	public static class TypeExtensions
 	{
+		private static readonly IDictionary<Type, Type> _converters = new Dictionary<Type, Type>();
+
 		// A map for converting interfaces to types
 		private static readonly IDictionary<Type, Type> TypeMap = new Dictionary<Type, Type>
 			{
@@ -43,6 +46,17 @@ namespace Dapplo.Config.Support
 				{ typeof(IReadOnlyDictionary<,>), typeof(Dictionary<,>) }
 				
 			};
+
+
+		/// <summary>
+		/// Add the default converter for the specified type
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="typeConverter"></param>
+		public static void AddDefaultConverter(Type type, Type typeConverter)
+		{
+			_converters.SafelyAddOrOverwrite(type, typeConverter);
+		}
 
 		/// <summary>
 		/// Create an instance of the supplied type
@@ -85,15 +99,36 @@ namespace Dapplo.Config.Support
 		}
 
 		/// <summary>
+		/// Get the TypeConverter for the Type
+		/// </summary>
+		/// <param name="valueType">Type</param>
+		/// <returns>TypeConverter</returns>
+		public static TypeConverter GetConverter(this Type valueType)
+		{
+			TypeConverter converter = null;
+			Type converterType;
+			if (_converters.TryGetValue(valueType, out converterType))
+			{
+				converter = (TypeConverter)Activator.CreateInstance(converterType);
+			}
+			else
+			{
+				converter = TypeDescriptor.GetConverter(valueType);
+			}
+			return converter;
+		}
+
+		/// <summary>
 		/// Generic version of the same method with Type parameter, 
 		/// </summary>
 		/// <typeparam name="T">target type</typeparam>
 		/// <param name="value"></param>
-		/// <param name="typeConverter"></param>
+		/// <param name="typeConverter">A TypeConverter can be passed for special cases</param>
+		/// <param name="typeDescriptorContext">A TypeDescriptorContext can be passed for special cases</param>
 		/// <returns>T</returns>
-		public static T ConvertOrCastValueToType<T>(object value, TypeConverter typeConverter = null)
+		public static T ConvertOrCastValueToType<T>(object value, TypeConverter typeConverter = null, TypeDescriptorContext typeDescriptorContext = null)
 		{
-			return (T)ConvertOrCastValueToType(typeof(T), value, typeConverter);
+			return (T)ConvertOrCastValueToType(typeof(T), value, typeConverter, typeDescriptorContext);
 		}
 
 		/// <summary>
@@ -101,9 +136,10 @@ namespace Dapplo.Config.Support
 		/// </summary>
 		/// <param name="targetType">target type</param>
 		/// <param name="value">value to convert</param>
-		/// <param name="typeConverter">A type converter can be passed for special cases</param>
+		/// <param name="typeConverter">A TypeConverter can be passed for special cases</param>
+		/// <param name="typeDescriptorContext">A TypeDescriptorContext can be passed for special cases</param>
 		/// <returns>object as targetType, or null if this wasn't possible</returns>
-		public static object ConvertOrCastValueToType(this Type targetType, object value, TypeConverter typeConverter = null)
+		public static object ConvertOrCastValueToType(this Type targetType, object value, TypeConverter typeConverter = null, TypeDescriptorContext typeDescriptorContext = null)
 		{
 			if (value == null)
 			{
@@ -117,18 +153,18 @@ namespace Dapplo.Config.Support
 
 			if (typeConverter == null)
 			{
-				typeConverter = TypeDescriptor.GetConverter(targetType);
+				typeConverter = GetConverter(targetType);
 			}
 			var stringValue = value as string;
 			if (stringValue != null && (bool)typeConverter?.CanConvertFrom(typeof(string)))
 			{
-				return typeConverter.ConvertFromInvariantString(stringValue);
+				return typeConverter.ConvertFromInvariantString(typeDescriptorContext, stringValue);
 			}
 			if ((bool)typeConverter?.CanConvertFrom(valueType))
 			{
 				try
 				{
-					return typeConverter.ConvertFrom(value);
+					return typeConverter.ConvertFrom(typeDescriptorContext, CultureInfo.CurrentCulture, value);
 				}
 				catch
 				{
