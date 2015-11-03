@@ -126,27 +126,29 @@ namespace Dapplo.Config.Support
 		/// <param name="typeConverter">A TypeConverter can be passed for special cases</param>
 		/// <param name="typeDescriptorContext">A TypeDescriptorContext can be passed for special cases</param>
 		/// <returns>T</returns>
-		public static T ConvertOrCastValueToType<T>(object value, TypeConverter typeConverter = null, TypeDescriptorContext typeDescriptorContext = null)
+		public static T ConvertOrCastValueToType<T>(object value, TypeConverter typeConverter = null, ITypeDescriptorContext typeDescriptorContext = null, bool convertFrom = true)
 		{
-			return (T)ConvertOrCastValueToType(typeof(T), value, typeConverter, typeDescriptorContext);
+			return (T)ConvertOrCastValueToType(typeof(T), value, typeConverter, typeDescriptorContext, convertFrom);
 		}
 
 		/// <summary>
-		/// Convert or Cast the value so it matches the targetType
+		/// Convert or Cast the value TO targetType
 		/// </summary>
 		/// <param name="targetType">target type</param>
 		/// <param name="value">value to convert</param>
 		/// <param name="typeConverter">A TypeConverter can be passed for special cases</param>
 		/// <param name="typeDescriptorContext">A TypeDescriptorContext can be passed for special cases</param>
+		/// <param name="convertFrom">True: the TypeConverter is called with convertFrom, false the TypeConverter is called with convertTo</param>
 		/// <returns>object as targetType, or null if this wasn't possible</returns>
-		public static object ConvertOrCastValueToType(this Type targetType, object value, TypeConverter typeConverter = null, TypeDescriptorContext typeDescriptorContext = null)
+		public static object ConvertOrCastValueToType(this Type targetType, object value, TypeConverter typeConverter = null, ITypeDescriptorContext typeDescriptorContext = null, bool convertFrom = true)
 		{
 			if (value == null)
 			{
 				return null;
 			}
 			var valueType = value.GetType();
-			if (targetType == valueType || targetType.IsAssignableFrom(valueType))
+			// Only return unconverted when types are assignable but no converter is specified
+			if (typeConverter == null && (targetType == valueType || targetType.IsAssignableFrom(valueType)))
 			{
 				return value;
 			}
@@ -156,19 +158,54 @@ namespace Dapplo.Config.Support
 				typeConverter = GetConverter(targetType);
 			}
 			var stringValue = value as string;
-			if (stringValue != null && (bool)typeConverter?.CanConvertFrom(typeof(string)))
+			if (convertFrom)
 			{
-				return typeConverter.ConvertFromInvariantString(typeDescriptorContext, stringValue);
-			}
-			if ((bool)typeConverter?.CanConvertFrom(valueType))
-			{
-				try
+				if (stringValue != null && (bool)typeConverter?.CanConvertFrom(typeof(string)))
 				{
-					return typeConverter.ConvertFrom(typeDescriptorContext, CultureInfo.CurrentCulture, value);
+					try
+					{
+						return typeConverter.ConvertFromInvariantString(typeDescriptorContext, stringValue);
+					}
+					catch
+					{
+						// Ignore, can't convert the value, this should actually not happen much
+					}
 				}
-				catch
+				else  if ((bool)typeConverter?.CanConvertFrom(valueType))
 				{
-					// Ignore, can't convert the value, this should actually not happen much
+					try
+					{
+						return typeConverter.ConvertFrom(typeDescriptorContext, CultureInfo.CurrentCulture, value);
+					}
+					catch
+					{
+						// Ignore, can't convert the value, this should actually not happen much
+					}
+				}
+			}
+			else
+			{
+				if (stringValue != null && (bool)typeConverter?.CanConvertTo(targetType))
+				{
+					try
+					{
+						return typeConverter.ConvertToInvariantString(typeDescriptorContext, stringValue);
+					}
+					catch
+					{
+						// Ignore, can't convert the value, this should actually not happen much
+					}
+				}
+				else if ((bool)typeConverter?.CanConvertTo(targetType))
+				{
+					try
+					{
+						return typeConverter.ConvertFrom(typeDescriptorContext, CultureInfo.CurrentCulture, value);
+					}
+					catch
+					{
+						// Ignore, can't convert the value, this should actually not happen much
+					}
 				}
 			}
 			// Collection -> string
@@ -237,7 +274,7 @@ namespace Dapplo.Config.Support
 				// Ignore, can't convert the value
 			}
 
-			return null;
+			return targetType.CreateInstance();
 		}
 	}
 }

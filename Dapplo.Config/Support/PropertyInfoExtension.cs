@@ -59,8 +59,9 @@ namespace Dapplo.Config.Support {
 		/// Retrieve the TypeConverter from the TypeConverterAttribute for the supplied PropertyInfo
 		/// </summary>
 		/// <param name="propertyInfo">PropertyInfo</param>
+		/// <param name="createIfNothingSpecified">true if this should always create a converter</param>
 		/// <returns>TypeConverter</returns>
-		public static TypeConverter GetTypeConverter(this PropertyInfo propertyInfo) {
+		public static TypeConverter GetTypeConverter(this PropertyInfo propertyInfo, bool createIfNothingSpecified = false) {
 			var typeConverterAttribute = propertyInfo.GetCustomAttribute<TypeConverterAttribute>(true);
 			if (!string.IsNullOrEmpty(typeConverterAttribute?.ConverterTypeName)) {
 				var typeConverterType = Type.GetType(typeConverterAttribute.ConverterTypeName);
@@ -69,7 +70,7 @@ namespace Dapplo.Config.Support {
 				}
 			}
 
-			return TypeDescriptor.GetConverter(propertyInfo.PropertyType);
+			return createIfNothingSpecified ? propertyInfo.PropertyType.GetConverter() : null;
 		}
 
 		/// <summary>

@@ -20,7 +20,7 @@
  */
 
 using System;
-using System.Collections.Generic;
+using Dapplo.Config.Support;
 using System.ComponentModel;
 using Dapplo.Config.Converters;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -31,46 +31,22 @@ namespace Dapplo.Config.Test.ConverterTests
 	public class TypeConverterTest
 	{
 		[TestMethod]
-		public void TestGenericListConverterString()
+		public void TestStringEncryptionTypeConverter()
 		{
-			var stringListConverter = (TypeConverter) Activator.CreateInstance(typeof (StringToGenericListConverter<string>));
-			Assert.IsTrue(stringListConverter.CanConvertFrom(typeof (string)));
-			Assert.IsTrue(stringListConverter.CanConvertTo(typeof (string)));
-			Assert.IsFalse(stringListConverter.CanConvertTo(typeof (List<string>)));
+			StringEncryptionTypeConverter.RgbIv = "fjr84hF49gp3911fFFg";
+			StringEncryptionTypeConverter.RgbKey = "ljew3lJfrS0rlddlfeelOekfekcvbAwE";
+			var stringEncryptionTypeConverter = (TypeConverter) Activator.CreateInstance(typeof (StringEncryptionTypeConverter));
+			Assert.IsTrue(stringEncryptionTypeConverter.CanConvertFrom(typeof (string)));
+			Assert.IsTrue(stringEncryptionTypeConverter.CanConvertTo(typeof (string)));
+			Assert.IsFalse(stringEncryptionTypeConverter.CanConvertTo(typeof (int)));
+			var encrypted = stringEncryptionTypeConverter.ConvertToString("Robin");
+			var decryped = stringEncryptionTypeConverter.ConvertFromString(encrypted);
+			
+			Assert.AreEqual("Robin", decryped);
 
-			var intListConverter = (TypeConverter) Activator.CreateInstance(typeof (StringToGenericListConverter<int>));
-			Assert.IsTrue(intListConverter.CanConvertFrom(typeof (string)));
-			Assert.IsTrue(intListConverter.CanConvertTo(typeof (string)));
-
-			IList<string> myTestStringList = new List<string>();
-			myTestStringList.Add("hello");
-			myTestStringList.Add("goodbye");
-			myTestStringList.Add("adieu");
-
-			var myTestStringWithStrings = string.Join(",", myTestStringList);
-
-			var stringList = (List<string>) stringListConverter.ConvertFromInvariantString(myTestStringWithStrings);
-			Assert.IsNotNull(stringList);
-			Assert.AreEqual(myTestStringList.Count, stringList.Count);
-			for (int i = 0; i < myTestStringList.Count; i++)
-			{
-				Assert.AreEqual(myTestStringList[i], stringList[i]);
-			}
-
-			IList<int> myTestIntList = new List<int>();
-			myTestIntList.Add(10);
-			myTestIntList.Add(20);
-			myTestIntList.Add(30);
-
-			var myTestStringWithInts = string.Join(",", myTestIntList);
-
-			var intList = (List<int>) intListConverter.ConvertFromInvariantString(myTestStringWithInts);
-			Assert.IsNotNull(intList);
-			Assert.AreEqual(myTestIntList.Count, intList.Count);
-			for (int i = 0; i < myTestIntList.Count; i++)
-			{
-				Assert.AreEqual(myTestIntList[i], intList[i]);
-			}
+			var encrypted1 = typeof(string).ConvertOrCastValueToType("Robin", stringEncryptionTypeConverter, convertFrom: false);
+			var decryped2 = typeof(string).ConvertOrCastValueToType(encrypted1, stringEncryptionTypeConverter, convertFrom: true);
+			Assert.AreEqual("Robin", decryped2);
 		}
 	}
 }

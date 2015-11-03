@@ -62,8 +62,6 @@
     <Compile Include="Ini\IniConfigExportProvider.cs" />
     <Compile Include="Ini\IniPropertyBehaviorAttribute.cs" />
     <Compile Include="Converters\StringEncryptionTypeConverter.cs" />
-    <Compile Include="Converters\GenericDictionaryConverter.cs" />
-    <Compile Include="Converters\StringToGenericListConverter.cs" />
     <Compile Include="Ini\IIniSection.cs" />
     <Compile Include="Ini\IniFile.cs" />
     <Compile Include="Ini\IniRest.cs" />

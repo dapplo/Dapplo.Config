@@ -38,7 +38,7 @@ namespace Dapplo.Config.Test.ProxyTests.Interfaces
 			set;
 		}
 
-		[DefaultValue("10,20,30"), TypeConverter(typeof (StringToGenericListConverter<int>))]
+		[DefaultValue("10,20,30")]
 		IList<int> Ages
 		{
 			get;

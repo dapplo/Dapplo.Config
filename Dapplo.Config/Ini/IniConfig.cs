@@ -715,7 +715,7 @@ namespace Dapplo.Config.Ini
 				ITypeDescriptorContext context = null;
 				try
 				{
-					var propertyDescription = TypeDescriptor.GetProperties(iniSection.GetType()).Find(iniValue.PropertyName, false);
+					var propertyDescription = TypeDescriptor.GetProperties(iniSection.GetType()).Find(iniValue.PropertyName, true);
 					context = new TypeDescriptorContext(iniSection, propertyDescription);
 				}
 				// ReSharper disable once EmptyGeneralCatchClause
@@ -730,7 +730,7 @@ namespace Dapplo.Config.Ini
 				// Special case, for idictionary derrivated types
 				if (iniValue.ValueType.IsGenericType && iniValue.ValueType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
 				{
-					var subSection = TypeExtensions.ConvertOrCastValueToType<IDictionary<string, string>>(iniValue.Value, converter);
+					var subSection = TypeExtensions.ConvertOrCastValueToType<IDictionary<string, string>>(iniValue.Value, converter, context, false);
 					if (subSection != null)
 					{
 						try
@@ -760,15 +760,7 @@ namespace Dapplo.Config.Ini
 				try
 				{
 					// Convert the value to a string
-					string writingValue;
-					if (converter != null)
-					{
-						writingValue = TypeExtensions.ConvertOrCastValueToType<string>(iniValue.Value, converter);
-					}
-					else
-					{
-						writingValue = iniValue.Value as string;
-					}
+					string writingValue = TypeExtensions.ConvertOrCastValueToType<string>(iniValue.Value, converter, context, false);
 					// And write the value with the IniPropertyName (which does NOT have to be the property name) to the file
 					sectionProperties.Add(iniValue.IniPropertyName, writingValue);
 				}
@@ -893,13 +885,25 @@ namespace Dapplo.Config.Ini
 
 			foreach (var iniValue in iniValues)
 			{
+				ITypeDescriptorContext context = null;
+				try
+				{
+					var propertyDescription = TypeDescriptor.GetProperties(iniSection.GetType()).Find(iniValue.PropertyName, true);
+					context = new TypeDescriptorContext(iniSection, propertyDescription);
+				}
+				// ReSharper disable once EmptyGeneralCatchClause
+				catch
+				{
+					// Ignore any exceptions
+				}
+
 				// Test if there is a separate section for this inivalue, this is used for Dictionaries
 				IDictionary<string, string> value;
 				if (iniSections.TryGetValue($"{sectionName}-{iniValue.IniPropertyName}", out value))
 				{
 					try
 					{
-						iniValue.Value = iniValue.ValueType.ConvertOrCastValueToType(value, iniValue.Converter);
+						iniValue.Value = iniValue.ValueType.ConvertOrCastValueToType(value, iniValue.Converter, context, true);
 						continue;
 					}
 					catch (Exception ex)
@@ -922,14 +926,7 @@ namespace Dapplo.Config.Ini
 				// convert
 				try
 				{
-					object convertedValue = iniValue.ValueType.ConvertOrCastValueToType(stringValue, iniValue.Converter);
-					if (convertedValue != null)
-					{
-						iniValue.Value = convertedValue;
-						continue;
-                    }
-					// just set it and hope it can be cast
-					iniValue.Value = stringValue;
+					iniValue.Value = iniValue.ValueType.ConvertOrCastValueToType(stringValue, iniValue.Converter, context, true);
 				}
 				catch (Exception ex)
 				{
