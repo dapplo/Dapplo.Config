@@ -88,7 +88,7 @@ namespace Dapplo.Config.Support
 			}
 
 			// If it's not an enum, check if it's an interface or doesn't have a default constructor
-			if (!typeForInstance.IsEnum && (typeForInstance.IsInterface || typeForInstance.GetConstructor(Type.EmptyTypes) == null))
+			if (!typeForInstance.IsValueType && !typeForInstance.IsEnum && (typeForInstance.IsInterface || typeForInstance.GetConstructor(Type.EmptyTypes) == null))
 			{
 				// Nope, we can't create it
 				return null;
@@ -216,13 +216,7 @@ namespace Dapplo.Config.Support
 		{
 			if (value == null)
 			{
-				return null;
-			}
-			var valueType = value.GetType();
-			// Only return unconverted when types are assignable but no converter is specified
-			if (typeConverter == null && (targetType == valueType || targetType.IsAssignableFrom(valueType)))
-			{
-				return value;
+				return targetType.CreateInstance();
 			}
 
 			if (typeConverter != null)
@@ -233,8 +227,19 @@ namespace Dapplo.Config.Support
 					return returnValue;
                 }
             }
-			var stringValue = value as string;
 
+			var valueType = value.GetType();
+			// Only return unconverted when types are assignable but no converter is specified
+			if (targetType == valueType || targetType.IsAssignableFrom(valueType))
+			{
+				return value;
+			}
+
+			var stringValue = value as string;
+			if (stringValue != null && stringValue.Length ==0)
+			{
+				return targetType.CreateInstance();
+			}
 			// Collection -> string
 			if (targetType == typeof(string) && valueType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(valueType))
 			{

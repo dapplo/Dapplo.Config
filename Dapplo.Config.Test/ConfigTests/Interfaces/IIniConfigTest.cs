@@ -54,6 +54,12 @@ namespace Dapplo.Config.Test.ConfigTests.Interfaces
 			set;
 		}
 
+		[DefaultValue("")]
+		Size MySize
+		{
+			get;
+			set;
+		}
 
 		[Description("Name of the person")]
 		string Name
