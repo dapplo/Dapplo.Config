@@ -21,20 +21,34 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition.Primitives;
 
 namespace Dapplo.Config.Support
 {
 	public interface IServiceLocator
 	{
 		/// <summary>
-		/// Export an object, without using Attribute
+		/// Export an object
 		/// </summary>
-		void Export<T>(T obj);
+		/// <typeparam name="T">Type to export</typeparam>
+		/// <param name="obj">object to add</param>
+		/// <returns>ComposablePart, this can be used to remove the export later</returns>
+		ComposablePart Export<T>(T obj);
 
 		/// <summary>
-		/// Export an object, without using Attribute
+		/// Export an object
 		/// </summary>
-		void Export<T>(string contractName, T obj);
+		/// <typeparam name="T">Type to export</typeparam>
+		/// <param name="contractName">contractName under which the object of Type T is registered</param>
+		/// <param name="obj">object to add</param>
+		/// <returns>ComposablePart, this can be used to remove the export later</returns>
+		ComposablePart Export<T>(string contractName, T obj);
+
+		/// <summary>
+		/// Release an export which was previously added with the Export method
+		/// </summary>
+		/// <param name="part">ComposablePart from Export call</param>
+		void Release(ComposablePart part);
 
 		/// <summary>
 		/// Fill all the imports in the object isntance
