@@ -59,7 +59,6 @@
     <Compile Include="Proxy\Implementation\DefaultValueExtension.cs" />
     <Compile Include="Proxy\Implementation\WriteProtectExtension.cs" />
     <Compile Include="Proxy\Implementation\TransactionExtension.cs" />
-    <Compile Include="Ini\IniConfigExportProvider.cs" />
     <Compile Include="Ini\IniPropertyBehaviorAttribute.cs" />
     <Compile Include="Converters\StringEncryptionTypeConverter.cs" />
     <Compile Include="Ini\IIniSection.cs" />
@@ -74,7 +73,6 @@
     <Compile Include="Proxy\Implementation\NotifyPropertyChangedExtension.cs" />
     <Compile Include="Language\ILanguage.cs" />
     <Compile Include="Language\Implementation\LanguageExtension.cs" />
-    <Compile Include="Language\LanguageExportProvider.cs" />
     <Compile Include="Language\LanguageAttribute.cs" />
     <Compile Include="Language\LanguageLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -82,7 +80,6 @@
     <Compile Include="ProxyBuilder.cs" />
     <Compile Include="Support\DictionaryExtensions.cs" />
     <Compile Include="Support\FileLocations.cs" />
-    <Compile Include="Support\IServiceLocator.cs" />
     <Compile Include="Support\LanguageExtensions.cs" />
     <Compile Include="Support\MethodCallExtensions.cs" />
     <Compile Include="Support\NonStrictLookup.cs" />
