@@ -25,6 +25,11 @@ using System.ComponentModel.Composition.Primitives;
 
 namespace Dapplo.Config.Support
 {
+	/// <summary>
+	/// This interface is what the Dapplo.Addon CompositionBootstrapper (ApplicationBootstrapper) implements.
+	/// The Bootstrapper will automatically export itself as IServiceLocator, so framework code can use imports to get basic servicelocator support.
+	/// This IServiceLocator should only be used for cases where a simple import/export can't work.
+	/// </summary>
 	public interface IServiceLocator
 	{
 		/// <summary>
@@ -32,8 +37,9 @@ namespace Dapplo.Config.Support
 		/// </summary>
 		/// <typeparam name="T">Type to export</typeparam>
 		/// <param name="obj">object to add</param>
+		/// <param name="metadata">Metadata for the export</param>
 		/// <returns>ComposablePart, this can be used to remove the export later</returns>
-		ComposablePart Export<T>(T obj);
+		ComposablePart Export<T>(T obj, IDictionary<string, object> metadata = null);
 
 		/// <summary>
 		/// Export an object
@@ -41,8 +47,9 @@ namespace Dapplo.Config.Support
 		/// <typeparam name="T">Type to export</typeparam>
 		/// <param name="contractName">contractName under which the object of Type T is registered</param>
 		/// <param name="obj">object to add</param>
+		/// <param name="metadata">Metadata for the export</param>
 		/// <returns>ComposablePart, this can be used to remove the export later</returns>
-		ComposablePart Export<T>(string contractName, T obj);
+		ComposablePart Export<T>(string contractName, T obj, IDictionary<string, object> metadata = null);
 
 		/// <summary>
 		/// Release an export which was previously added with the Export method
@@ -67,7 +74,7 @@ namespace Dapplo.Config.Support
 		/// Simple "service-locater" with meta-data
 		/// </summary>
 		/// <typeparam name="T">Type to locate</typeparam>
-		/// <typeparam name="TMetaData">Type for the meta-data</typeparam>
+		/// <typeparam name="TMetaData">interface-type for the meta-data</typeparam>
 		/// <returns>Lazy T,TMetaData</returns>
 		Lazy<T, TMetaData> GetExport<T, TMetaData>();
 
@@ -82,7 +89,7 @@ namespace Dapplo.Config.Support
 		/// Simple "service-locater" to get multiple exports with meta-data
 		/// </summary>
 		/// <typeparam name="T">Type to locate</typeparam>
-		/// <typeparam name="TMetaData">Type for the meta-data</typeparam>
+		/// <typeparam name="TMetaData">interface-type for the meta-data</typeparam>
 		/// <returns>IEnumerable of Lazy T,TMetaData</returns>
 		IEnumerable<Lazy<T, TMetaData>> GetExports<T, TMetaData>();
 	}
