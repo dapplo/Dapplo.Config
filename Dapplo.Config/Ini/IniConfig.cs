@@ -247,10 +247,17 @@ namespace Dapplo.Config.Ini
 				return;
 			}
 
+			// If the ini-location directory is not yet created, we can't watch as this would cause an exception
+			var watchPath = Path.GetDirectoryName(IniLocation);
+			if (!Directory.Exists(watchPath))
+			{
+				return;
+			}
+
 			// Configure file change watching
 			_configFileWatcher = new FileSystemWatcher
 			{
-				Path = Path.GetDirectoryName(IniLocation),
+				Path = watchPath,
 				IncludeSubdirectories = false,
 				NotifyFilter = NotifyFilters.LastWrite,
 				Filter = Path.GetFileName(IniLocation),
