@@ -1,6 +1,6 @@
 ﻿/*
  * dapplo - building blocks for desktop applications
- * Copyright (C) 2015 Robin Krom
+ * Copyright (C) 2015-2016 Dapplo
  * 
  * For more information see: http://dapplo.net/
  * dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -56,7 +56,7 @@ namespace Dapplo.Config.Test.ConfigTests
 		private async Task<IniConfig> InitializeAsync()
 		{
 			var iniConfig = Create();
-			await ConfigureMemoryStreamAsync();
+			//await ConfigureMemoryStreamAsync();
 			return iniConfig;
 		}
 
@@ -201,6 +201,7 @@ namespace Dapplo.Config.Test.ConfigTests
 			long ticks = DateTimeOffset.Now.UtcTicks;
 			iniTest.Age = ticks;
             var heightBefore = ++iniTest.Height;
+			await iniConfig.WriteAsync().ConfigureAwait(false);
 			using (var writeStream = new MemoryStream())
 			{
 				await iniConfig.WriteToStreamAsync(writeStream).ConfigureAwait(false);
