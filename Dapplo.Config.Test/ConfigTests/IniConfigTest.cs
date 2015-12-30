@@ -56,7 +56,7 @@ namespace Dapplo.Config.Test.ConfigTests
 		private async Task<IniConfig> InitializeAsync()
 		{
 			var iniConfig = Create();
-			//await ConfigureMemoryStreamAsync();
+			await ConfigureMemoryStreamAsync();
 			return iniConfig;
 		}
 
