@@ -22,7 +22,6 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
-using System.Net;
 using System.Text.RegularExpressions;
 
 namespace Dapplo.Config.Ini
@@ -81,15 +80,15 @@ namespace Dapplo.Config.Ini
 			segments.RemoveAt(0);
 			if (segments.Count == 1)
 			{
-				restCommand.Target = WebUtility.UrlDecode(segments[0]);
+				restCommand.Target = Uri.UnescapeDataString(segments[0]);
             }
 			else 
 			{
 				while(segments.Count > 1)
 				{
-					var key = WebUtility.UrlDecode(segments[0]);
+					var key = Uri.UnescapeDataString(segments[0]);
 					segments.RemoveAt(0);
-					var value = segments.Count >= 1 ? WebUtility.UrlDecode(segments[0]) : null;
+					var value = segments.Count >= 1 ? Uri.UnescapeDataString(segments[0]) : null;
 					if (value != null)
 					{
 						segments.RemoveAt(0);
@@ -103,7 +102,7 @@ namespace Dapplo.Config.Ini
 				foreach (var item in restUri.Query.Substring(1).Split('&'))
 				{
 					var splitItem = item.Split('=');
-					restCommand.Values.Add(WebUtility.UrlDecode(splitItem[0]), splitItem.Length > 1 ? WebUtility.UrlDecode(splitItem[1]) : null);
+					restCommand.Values.Add(Uri.UnescapeDataString(splitItem[0]), splitItem.Length > 1 ? Uri.UnescapeDataString(splitItem[1]) : null);
 				}
 
 			}

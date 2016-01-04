@@ -27,7 +27,6 @@ using Dapplo.Config.Converters;
 using Dapplo.Config.Ini;
 using Dapplo.Config.Test.ConfigTests.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Diagnostics;
 using System.Drawing;
 
 namespace Dapplo.Config.Test.ConfigTests

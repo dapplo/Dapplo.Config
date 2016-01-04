@@ -74,7 +74,7 @@ namespace Dapplo.Config.Ini
 
 			// Do not dispose the reader, this will close the supplied stream and that is not our job!
 			var reader = new StreamReader(stream, encoding);
-			Dictionary<string, string> nameValues = new Dictionary<string, string>();
+			var nameValues = new Dictionary<string, string>();
 			while (!reader.EndOfStream && !token.IsCancellationRequested)
 			{
 				string line = await reader.ReadLineAsync().ConfigureAwait(false);

@@ -104,16 +104,16 @@ namespace Dapplo.Config.Test.ConfigTests
 
 			// Test add to a dictionary
 			var addDictionaryValueUri = new Uri("dummy:///IniConfig/add/Dapplo/dapplo/Test/SomeValues?Highlight=10&Stop=20");
-			var addDictionaryValueResult = IniRest.ProcessRestUri(addDictionaryValueUri);
+			IniRest.ProcessRestUri(addDictionaryValueUri);
 			Assert.IsTrue(iniTest.SomeValues.ContainsKey("Highlight"));
 			Assert.IsTrue(iniTest.SomeValues.ContainsKey("Stop"));
 			Debug.WriteLine($"Highlight = {iniTest.SomeValues["Highlight"]}");
 			// Re-add, this should overwrite previous values
-			var addValueResult2 = IniRest.ProcessRestUri(addDictionaryValueUri);
+			IniRest.ProcessRestUri(addDictionaryValueUri);
 
 			// Test adding to a list
 			var addListValueUri = new Uri("dummy:///IniConfig/add/Dapplo/dapplo/Test/WindowCornerCutShape?20");
-			var addistValueResult = IniRest.ProcessRestUri(addListValueUri);
+			IniRest.ProcessRestUri(addListValueUri);
 			Assert.IsTrue(iniTest.WindowCornerCutShape.Contains(20));
 
 			// Test remove from dictionary
