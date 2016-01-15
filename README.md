@@ -9,6 +9,7 @@ This can be found on NuGet!
 As it was build for [Greenshot](https://github.com/greenshot/greenshot), the main focus was on having .ini suport.
 It was also very important that Greenshot plug-ins are able to store their information into the same file, and keep the complexity for the developer as little as possible.
 
+
 # Ini-files
 
 ## Quick start:
@@ -102,7 +103,7 @@ Currently the following is available but can be extended:
 * IHasChanges: this will add a possibility to detect if you changed a value since the start or a reset.
 * IDescription: this will add method to get the value of a DescriptionAttribute of a property.
 
-# Weak-types access
+## Weak-types access
 
 You can also access the values in our .ini without going through the interfaces, this could be something you want to do when you want to have a settings UI (I will build one soon).
 
@@ -112,8 +113,26 @@ If the ICoreConfiguration interface had a IniSectionAttribute to specify the sec
 ```
 iniConfig["Core"]["MyProperty"].Value = "a new value for MyProperty";
 ```
-There are also enumerating possiblities.
+There are also enumerating possiblities, to foreach over all IIniSections and their properties.
+
+
+# Language (text resources)
+
+Additionally to .ini support, the framework was extended with functionality for translations.
+This was also written for Greenshot, and is already very usuable. Documentation will follow.
+The functionality is in the LanguageLoader, and is very similar to the IniConfig.
+
+
+# Registry access
+
+This is work in progress, but the same idea as having an .NET interface map to a .ini, I also added a mapping into the registry.
+More to come...
+
+
+# Managed Extension Framework (MEF) Support
+
+There is another Dapplo repository (Dapplo.Addons](https://github.com/dapplo/Dapplo.Addons) which makes it possible to import IIniSection interfaces into your MEF controlled classes. The idea of that project is making it easy to add extensions to your application. In this case MEF can really help...
 
 
 Notice:
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+**This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.**
