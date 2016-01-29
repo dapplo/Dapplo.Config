@@ -788,7 +788,7 @@ namespace Dapplo.Config.Ini
 		{
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
-				await ReloadInternalAsync(reset, token);
+				await ReloadInternalAsync(reset, token).ConfigureAwait(false);
 			}
 		}
 
