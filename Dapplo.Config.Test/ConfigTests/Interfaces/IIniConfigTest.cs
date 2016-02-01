@@ -25,6 +25,7 @@ using System.Drawing;
 using System.Runtime.Serialization;
 using Dapplo.Config.Converters;
 using Dapplo.Config.Ini;
+using System;
 
 namespace Dapplo.Config.Test.ConfigTests.Interfaces
 {
@@ -41,6 +42,13 @@ namespace Dapplo.Config.Test.ConfigTests.Interfaces
 	[Description("Test Configuration")]
 	public interface IIniConfigTest : IIniConfigSubInterfaceTest, IIniSection
 	{
+		[Description("The URIs for a test")]
+		IDictionary<string, Uri> ListOfUris
+		{
+			get;
+			set;
+		}
+
 		[Description("Test property for enums"), DefaultValue(IniConfigTestEnum.Value2)]
         IniConfigTestEnum TestWithEnum
 		{

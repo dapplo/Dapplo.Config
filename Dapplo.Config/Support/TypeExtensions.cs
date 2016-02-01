@@ -286,11 +286,11 @@ namespace Dapplo.Config.Support
 						{
 							try
 							{
-								addMethod.Invoke(instance, new[] { valueType1.ConvertOrCastValueToType(key), valueType2.ConvertOrCastValueToType(dictionary[key]) });
+								addMethod.Invoke(instance, new[] { valueType1.ConvertOrCastValueToType(key, convertFrom: convertFrom), valueType2.ConvertOrCastValueToType(dictionary[key], convertFrom: convertFrom) });
 							}
 							catch
 							{
-								// Ignore
+								// TODO: Write some kind of logging
 							}
                         }
 						return instance;
