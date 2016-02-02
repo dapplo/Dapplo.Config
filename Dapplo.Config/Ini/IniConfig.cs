@@ -131,13 +131,7 @@ namespace Dapplo.Config.Ini
 		/// Static helper to retrieve the first IniConfig, the result when multiple IniConfigs are used is undefined!
 		/// </summary>
 		/// <returns>IniConfig or null if none</returns>
-		public static IniConfig Current
-		{
-			get
-			{
-				return ConfigStore.FirstOrDefault().Value;
-			}
-		}
+		public static IniConfig Current => ConfigStore.FirstOrDefault().Value;
 
 		/// <summary>
 		/// Setup the management of an .ini file location

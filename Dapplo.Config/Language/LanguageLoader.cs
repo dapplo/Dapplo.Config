@@ -63,14 +63,8 @@ namespace Dapplo.Config.Language
 		/// <summary>
 		/// Static helper to retrieve the first LanguageLoader that was created
 		/// </summary>
-		/// <returns>LanguageLoader</returns>
-		public static LanguageLoader Current
-		{
-			get
-			{
-				return LoaderStore.First().Value;
-			}
-		}
+		/// <returns>LanguageLoader or null</returns>
+		public static LanguageLoader Current => LoaderStore.FirstOrDefault().Value;
 
 		/// <summary>
 		/// Delete the Language objects for the specified application, mostly used in tests

@@ -76,21 +76,21 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 			{
 				path = path.Remove(0, 1);
 			}
-			RegistryHive hive = _registryAttribute.Hive;
+			var hive = _registryAttribute.Hive;
 			if (registryPropertyAttribute.HasHive)
 			{
 				hive = registryPropertyAttribute.Hive;
 			}
 
-			RegistryView view = _registryAttribute.View;
+			var view = _registryAttribute.View;
 			if (registryPropertyAttribute.HasView)
 			{
 				view = registryPropertyAttribute.View;
 			}
 
-			using (RegistryKey baseKey = RegistryKey.OpenBaseKey(hive, view))
+			using (var baseKey = RegistryKey.OpenBaseKey(hive, view))
 			{
-				using (RegistryKey key = baseKey.OpenSubKey(path))
+				using (var key = baseKey.OpenSubKey(path))
 				{
 					try
 					{
