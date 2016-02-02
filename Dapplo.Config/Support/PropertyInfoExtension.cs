@@ -20,6 +20,7 @@
  */
 
 using Dapplo.Config.Ini;
+using Dapplo.LogFacade;
 using System;
 using System.ComponentModel;
 using System.Reflection;
@@ -27,6 +28,7 @@ using System.Runtime.Serialization;
 
 namespace Dapplo.Config.Support {
 	public static class PropertyInfoExtension {
+		private static readonly LogSource Log = new LogSource();
 		/// <summary>
 		/// Create a default for the property.
 		/// This can come from the DefaultValueFor from the DefaultValueAttribute
@@ -47,9 +49,9 @@ namespace Dapplo.Config.Support {
 			try {
 				return propertyInfo.PropertyType.CreateInstance();
 			}
-				// ReSharper disable once EmptyGeneralCatchClause
-			catch {
+			catch (Exception ex) {
 				// Ignore creating the default type, this might happen if there is no default constructor.
+				Log.Warn().WriteLine(ex.Message);
 			}
 
 			return null;

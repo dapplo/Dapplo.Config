@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Dapplo.Config.Proxy.Implementation;
+using Dapplo.LogFacade;
 
 namespace Dapplo.Config.WindowsRegistry.Implementation
 {
@@ -35,6 +36,7 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 	[Extension(typeof (IRegistry))]
 	internal class RegistryExtension<T> : AbstractPropertyProxyExtension<T>
 	{
+		private static readonly LogSource Log = new LogSource();
 		private readonly RegistryAttribute _registryAttribute;
 
 		public RegistryExtension(IPropertyProxy<T> proxy) : base(proxy)
@@ -132,8 +134,9 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 							Proxy.Set(propertyInfo.Name, key.GetValue(registryPropertyAttribute.Value));
 						}
 					}
-					catch
+					catch (Exception ex)
 					{
+						Log.Warn().WriteLine(ex.Message);
 						if (!registryPropertyAttribute.IgnoreErrors)
 						{
 							throw;

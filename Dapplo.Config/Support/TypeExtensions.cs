@@ -25,6 +25,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using Dapplo.LogFacade;
 
 namespace Dapplo.Config.Support
 {
@@ -33,6 +34,7 @@ namespace Dapplo.Config.Support
 	/// </summary>
 	public static class TypeExtensions
 	{
+		private static readonly LogSource Log = new LogSource();
 		private static readonly IDictionary<Type, Type> _converters = new Dictionary<Type, Type>();
 
 		// A map for converting interfaces to types
@@ -155,9 +157,10 @@ namespace Dapplo.Config.Support
 						outValue = typeConverter.ConvertFromInvariantString(typeDescriptorContext, stringValue);
 						return true;
 					}
-					catch
+					catch (Exception ex)
 					{
 						// Ignore, can't convert the value, this should actually not happen much
+						Log.Warn().WriteLine(ex.Message);
 					}
 				}
 				else if ((bool)typeConverter?.CanConvertFrom(valueType))
@@ -167,9 +170,10 @@ namespace Dapplo.Config.Support
 						outValue = typeConverter.ConvertFrom(typeDescriptorContext, CultureInfo.CurrentCulture, value);
 						return true;
 					}
-					catch
+					catch (Exception ex)
 					{
 						// Ignore, can't convert the value, this should actually not happen much
+						Log.Warn().WriteLine(ex.Message);
 					}
 				}
 			}
@@ -182,9 +186,10 @@ namespace Dapplo.Config.Support
 						outValue = typeConverter.ConvertToInvariantString(typeDescriptorContext, value);
 						return true;
 					}
-					catch
+					catch (Exception ex)
 					{
 						// Ignore, can't convert the value, this should actually not happen much
+						Log.Warn().WriteLine(ex.Message);
 					}
 				}
 				else if ((bool)typeConverter?.CanConvertTo(targetType))
@@ -194,9 +199,10 @@ namespace Dapplo.Config.Support
 						outValue = typeConverter.ConvertTo(typeDescriptorContext, CultureInfo.CurrentCulture, value, targetType);
 						return true;
 					}
-					catch
+					catch (Exception ex)
 					{
 						// Ignore, can't convert the value, this should actually not happen much
+						Log.Warn().WriteLine(ex.Message);
 					}
 				}
 			}
@@ -269,9 +275,10 @@ namespace Dapplo.Config.Support
 							{
 								addMethod.Invoke(instance, new[] { genericType.ConvertOrCastValueToType(item) });
 							}
-							catch
+							catch (Exception ex)
 							{
 								// Ignore
+								Log.Warn().WriteLine(ex.Message);
 							}
 						}
 						return instance;
@@ -286,13 +293,14 @@ namespace Dapplo.Config.Support
 						{
 							try
 							{
-								addMethod.Invoke(instance, new[] { valueType1.ConvertOrCastValueToType(key), valueType2.ConvertOrCastValueToType(dictionary[key]) });
+								addMethod.Invoke(instance, new[] { valueType1.ConvertOrCastValueToType(key, convertFrom: convertFrom), valueType2.ConvertOrCastValueToType(dictionary[key], convertFrom: convertFrom) });
 							}
-							catch
+							catch (Exception ex)
 							{
 								// Ignore
+								Log.Warn().WriteLine(ex.Message);
 							}
-                        }
+						}
 						return instance;
 					}
 				}
@@ -314,9 +322,10 @@ namespace Dapplo.Config.Support
 			{
 				return Convert.ChangeType(value, targetType);
 			}
-			catch
+			catch (Exception ex)
 			{
 				// Ignore, can't convert the value
+				Log.Warn().WriteLine(ex.Message);
 			}
 
 			return targetType.CreateInstance();

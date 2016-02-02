@@ -19,6 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Dapplo.LogFacade;
 using System;
 using System.ComponentModel;
 using System.Linq;
@@ -28,6 +29,7 @@ namespace Dapplo.Config.Ini
 {
 	public static class IniRest
 	{
+		private static readonly LogSource Log = new LogSource();
 		/// <summary>
 		/// Process an Rest URI, this can be used to read or write values via e.g. a HttpListener
 		/// format:
@@ -50,6 +52,8 @@ namespace Dapplo.Config.Ini
 		/// <returns>IniRestCommand with all details and the result</returns>
 		public static IniRestCommand ProcessRestUri(Uri restUri)
 		{
+			Log.Debug().WriteLine("Processing REST uri: {0}", restUri);
+
 			var restCommand = new IniRestCommand();
 
 			var removeSlash = new Regex(@"\/$");
@@ -64,7 +68,9 @@ namespace Dapplo.Config.Ini
 			IniRestCommands command;
 			if (!Enum.TryParse(segments[0], true, out command))
 			{
-				throw new ArgumentException($"{segments[0]} is not a valid command: get/set/reset/add/remove");
+				var message = $"{segments[0]} is not a valid command: get/set/reset/add/remove";
+				Log.Error().WriteLine(message);
+				throw new ArgumentException(message);
 			}
 			restCommand.Command = command;
 
@@ -81,10 +87,10 @@ namespace Dapplo.Config.Ini
 			if (segments.Count == 1)
 			{
 				restCommand.Target = Uri.UnescapeDataString(segments[0]);
-            }
-			else 
+			}
+			else
 			{
-				while(segments.Count > 1)
+				while (segments.Count > 1)
 				{
 					var key = Uri.UnescapeDataString(segments[0]);
 					segments.RemoveAt(0);
@@ -114,7 +120,8 @@ namespace Dapplo.Config.Ini
 		/// Process the supplied IniRestCommand
 		/// </summary>
 		/// <param name="restCommand">IniRestCommand to process</param>
-		public static void ProcessRestCommand(IniRestCommand restCommand) {
+		public static void ProcessRestCommand(IniRestCommand restCommand)
+		{
 
 			var iniConfig = IniConfig.Get(restCommand.Application, restCommand.File);
 			var iniSection = iniConfig[restCommand.Section];
@@ -123,7 +130,9 @@ namespace Dapplo.Config.Ini
 			{
 				if (restCommand.Target == null && restCommand.Values.Count == 0)
 				{
-					throw new ArgumentException("add/remove needs a target");
+					var message = "add/remove needs a target";
+					Log.Error().WriteLine(message);
+					throw new ArgumentException(message);
 				}
 				var iniValue = iniSection[restCommand.Target];
 				restCommand.Results.Add(iniValue);
@@ -137,7 +146,7 @@ namespace Dapplo.Config.Ini
 
 						// Only for IDictionary
 						TypeConverter valueConverter = null;
-                        if (genericArguments.Length == 2)
+						if (genericArguments.Length == 2)
 						{
 							valueConverter = TypeDescriptor.GetConverter(genericArguments[1]);
 						}
@@ -175,7 +184,7 @@ namespace Dapplo.Config.Ini
 			}
 
 
-			foreach (var key in restCommand.Target != null ? new [] { restCommand.Target } : restCommand.Values.Keys)
+			foreach (var key in restCommand.Target != null ? new[] { restCommand.Target } : restCommand.Values.Keys)
 			{
 				var iniValue = iniSection[key];
 				if (iniValue == null)

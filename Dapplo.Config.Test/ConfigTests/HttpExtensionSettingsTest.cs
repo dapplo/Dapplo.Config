@@ -19,12 +19,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.IO;
-using System.Threading.Tasks;
 using Dapplo.Config.Ini;
 using Dapplo.Config.Test.ConfigTests.Interfaces;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Dapplo.HttpExtensions;
+using Dapplo.HttpExtensions.Factory;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace Dapplo.Config.Test.ConfigTests
 {
@@ -46,7 +47,9 @@ namespace Dapplo.Config.Test.ConfigTests
 				await iniConfig.WriteToStreamAsync(writeStream).ConfigureAwait(false);
 				writeStream.Seek(0, SeekOrigin.Begin);
 				await iniConfig.ReadFromStreamAsync(writeStream).ConfigureAwait(false);
-				HttpClientFactory.CreateHttpClient(httpConfiguration);
+				var behaviour = new HttpBehaviour();
+				behaviour.HttpSettings = httpConfiguration;
+				HttpClientFactory.Create(behaviour);
 			}
 		}
 	}
