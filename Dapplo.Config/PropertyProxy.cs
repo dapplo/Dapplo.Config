@@ -27,6 +27,7 @@ using System.Runtime.Remoting.Proxies;
 using Dapplo.Config.Support;
 using System.Linq.Expressions;
 using System.Linq;
+using Dapplo.LogFacade;
 
 namespace Dapplo.Config
 {
@@ -36,6 +37,7 @@ namespace Dapplo.Config
 	/// <typeparam name="T"></typeparam>
 	internal sealed class PropertyProxy<T> : RealProxy, IPropertyProxy<T>
 	{
+		private static readonly LogSource Log = new LogSource();
 		private readonly List<IPropertyProxyExtension> _extensions = new List<IPropertyProxyExtension>();
 		private readonly List<Getter> _getters = new List<Getter>();
 		private readonly IDictionary<string, List<Action<MethodCallInfo>>> _methodMap = new Dictionary<string, List<Action<MethodCallInfo>>>();
@@ -88,6 +90,7 @@ namespace Dapplo.Config
 					}
 					catch (Exception ex)
 					{
+						Log.Warn().WriteLine(ex.Message);
 						_initializationErrors.SafelyAddOrOverwrite(propertyInfo.Name, ex);
 					}
 				}

@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Dapplo.Config.Test.ConverterTests
 {
@@ -33,6 +34,13 @@ namespace Dapplo.Config.Test.ConverterTests
 
 			var uriDictionary = typeof(Dictionary<string, Uri>).ConvertOrCastValueToType(stringDictionary) as IDictionary<string, Uri>;
 			Assert.AreEqual(testValues["value1"].AbsoluteUri, uriDictionary["value1"].AbsoluteUri);
+		}
+
+		[TestMethod]
+		public void TestConvertOrCastValueToType_Enum()
+		{
+			var val1 = typeof(TestEnum).ConvertOrCastValueToType("VAL_NOT");
+			Assert.IsNotNull(val1);
 		}
 	}
 }

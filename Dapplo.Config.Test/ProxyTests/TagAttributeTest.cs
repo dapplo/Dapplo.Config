@@ -20,6 +20,8 @@
  */
 
 using Dapplo.Config.Test.ProxyTests.Interfaces;
+using Dapplo.LogFacade;
+using Dapplo.LogFacade.Loggers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Dapplo.Config.Test.ProxyTests
@@ -42,6 +44,7 @@ namespace Dapplo.Config.Test.ProxyTests
 		[TestInitialize]
 		public void Initialize()
 		{
+			LogSettings.Logger = new TraceLogger { Level = LogLevel.Info };
 			_propertyProxy = ProxyBuilder.CreateProxy<ITagAttributeTest>();
 		}
 

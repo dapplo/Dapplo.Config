@@ -20,11 +20,10 @@
  */
 
 using Dapplo.Config.Support;
+using Dapplo.LogFacade;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -33,12 +32,13 @@ using System.Threading.Tasks;
 
 namespace Dapplo.Config.Ini
 {
-	
+
 	/// <summary>
 	/// The IniConfig is used to bind IIniSection proxy objects to an ini file.
 	/// </summary>
 	public class IniConfig
 	{
+		private static readonly LogSource Log = new LogSource();
 		private readonly string _fileName;
 		private readonly string _applicationName;
 		private const string Defaults = "-defaults";
@@ -184,9 +184,9 @@ namespace Dapplo.Config.Ini
 						{
 							await WriteAsync();
                         }
-						catch
+						catch (Exception ex)
 						{
-							// ignored
+							Log.Warn().WriteLine(ex.Message);
 						}
 					}
 				};
@@ -273,9 +273,9 @@ namespace Dapplo.Config.Ini
 					_configFileWatcher.EnableRaisingEvents = false;
 					await ReloadAsync();
 				}
-				catch
+				catch (Exception ex)
 				{
-					// Ignore
+					Log.Warn().WriteLine(ex.Message);
 				}
 				finally
 				{
@@ -725,10 +725,9 @@ namespace Dapplo.Config.Ini
 					var propertyDescription = TypeDescriptor.GetProperties(iniSection.GetType()).Find(iniValue.PropertyName, true);
 					context = new TypeDescriptorContext(iniSection, propertyDescription);
 				}
-				// ReSharper disable once EmptyGeneralCatchClause
-				catch
+				catch (Exception ex)
 				{
-					// Ignore any exceptions
+					Log.Warn().WriteLine(ex.Message);
 				}
 
 				// Get specified converter
@@ -758,6 +757,7 @@ namespace Dapplo.Config.Ini
 						}
 						catch (Exception ex)
 						{
+							Log.Warn().WriteLine(ex.Message);
 							WriteErrorHandler(iniSection, iniValue, ex);
 						}
 						continue;
@@ -773,6 +773,7 @@ namespace Dapplo.Config.Ini
 				}
 				catch (Exception ex)
 				{
+					Log.Warn().WriteLine(ex.Message);
 					WriteErrorHandler(iniSection, iniValue, ex);
 				}
 			}
@@ -898,10 +899,9 @@ namespace Dapplo.Config.Ini
 					var propertyDescription = TypeDescriptor.GetProperties(iniSection.GetType()).Find(iniValue.PropertyName, true);
 					context = new TypeDescriptorContext(iniSection, propertyDescription);
 				}
-				// ReSharper disable once EmptyGeneralCatchClause
-				catch
+				catch (Exception ex)
 				{
-					// Ignore any exceptions
+					Log.Warn().WriteLine(ex.Message);
 				}
 
 				// Test if there is a separate section for this inivalue, this is used for Dictionaries
@@ -915,6 +915,7 @@ namespace Dapplo.Config.Ini
 					}
 					catch (Exception ex)
 					{
+						Log.Warn().WriteLine(ex.Message);
 						ReadErrorHandler(iniSection, iniValue, ex);
 					}
 				}
@@ -937,6 +938,7 @@ namespace Dapplo.Config.Ini
 				}
 				catch (Exception ex)
 				{
+					Log.Warn().WriteLine(ex.Message);
 					ReadErrorHandler(iniSection, iniValue, ex);
 				}
 			}

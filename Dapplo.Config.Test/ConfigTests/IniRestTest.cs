@@ -28,12 +28,15 @@ using Dapplo.Config.Converters;
 using Dapplo.Config.Ini;
 using Dapplo.Config.Test.ConfigTests.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Dapplo.LogFacade;
+using Dapplo.LogFacade.Loggers;
 
 namespace Dapplo.Config.Test.ConfigTests
 {
 	[TestClass]
 	public class IniRestTest
 	{
+		private static readonly LogSource Log = new LogSource();
 		private const string Name = "Dapplo";
 
 		[TestCleanup]
@@ -46,6 +49,7 @@ namespace Dapplo.Config.Test.ConfigTests
 		[ClassInitialize]
 		public static void InitializeClass(TestContext textContext)
 		{
+			LogSettings.Logger = new TraceLogger { Level = LogLevel.Info };
 			StringEncryptionTypeConverter.RgbIv = "fjr84hF49gp3911fFFg";
 			StringEncryptionTypeConverter.RgbKey = "ljew3lJfrS0rlddlfeelOekfekcvbAwE";
 		}
@@ -107,7 +111,7 @@ namespace Dapplo.Config.Test.ConfigTests
 			IniRest.ProcessRestUri(addDictionaryValueUri);
 			Assert.IsTrue(iniTest.SomeValues.ContainsKey("Highlight"));
 			Assert.IsTrue(iniTest.SomeValues.ContainsKey("Stop"));
-			Debug.WriteLine($"Highlight = {iniTest.SomeValues["Highlight"]}");
+			Log.Info().WriteLine($"Highlight = {iniTest.SomeValues["Highlight"]}");
 			// Re-add, this should overwrite previous values
 			IniRest.ProcessRestUri(addDictionaryValueUri);
 

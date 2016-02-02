@@ -19,6 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Dapplo.LogFacade;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -33,6 +34,7 @@ namespace Dapplo.Config.Ini
 	/// </summary>
 	public static class IniFile
 	{
+		private static readonly LogSource Log = new LogSource();
 		private const string SectionStart = "[";
 		private const string SectionEnd = "]";
 		private const string Comment = ";";
@@ -210,6 +212,7 @@ namespace Dapplo.Config.Ini
 			}
 			catch (Exception ex)
 			{
+				Log.Warn().WriteLine(ex.Message);
 				// Store Exception so it can be thrown later
 				exception = ex;
 			}

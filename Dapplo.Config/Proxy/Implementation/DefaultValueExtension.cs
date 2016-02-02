@@ -23,6 +23,7 @@ using System;
 using System.ComponentModel;
 using System.Reflection;
 using Dapplo.Config.Support;
+using Dapplo.LogFacade;
 
 namespace Dapplo.Config.Proxy.Implementation
 {
@@ -33,6 +34,7 @@ namespace Dapplo.Config.Proxy.Implementation
 	[Extension(typeof(IDefaultValue))]
 	internal class DefaultValueExtension<T> : AbstractPropertyProxyExtension<T>
 	{
+		private static readonly LogSource Log = new LogSource();
 		public DefaultValueExtension(IPropertyProxy<T> proxy) : base(proxy)
 		{
 			CheckType(typeof(IDefaultValue));
@@ -126,6 +128,7 @@ namespace Dapplo.Config.Proxy.Implementation
 			}
 			catch (Exception ex)
 			{
+				Log.Warn().WriteLine(ex.Message);
 				// Store the exception so it can be used
 				exception = ex;
 			}
@@ -143,10 +146,10 @@ namespace Dapplo.Config.Proxy.Implementation
 					Proxy.Set(propertyInfo.Name, defaultValue);
 					return;
 				}
-				// ReSharper disable once EmptyGeneralCatchClause
-				catch
+				catch(Exception ex)
 				{
 					// Ignore creating the default type, this might happen if there is no default constructor.
+					Log.Warn().WriteLine(ex.Message);
 				}
 			}
 			if (Proxy.Properties.ContainsKey(propertyInfo.Name))

@@ -19,6 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Dapplo.LogFacade;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -34,6 +35,7 @@ namespace Dapplo.Config
 	/// </summary>
 	public static class ProxyBuilder
 	{
+		private static readonly LogSource Log = new LogSource();
 		private static readonly List<Type> ExtensionTypes = new List<Type>();
 		private static readonly IDictionary<Type, IPropertyProxy> Cache = new ConcurrentDictionary<Type, IPropertyProxy>();
 
@@ -181,6 +183,8 @@ namespace Dapplo.Config
 			try {
 				genericType.GetMethod("Init", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(proxy, null);
 			} catch (TargetInvocationException ex) {
+				// Ignore creating the default type, this might happen if there is no default constructor.
+				Log.Warn().WriteLine(ex.Message);
 				throw ex.InnerException;
 			}
 			return proxy;

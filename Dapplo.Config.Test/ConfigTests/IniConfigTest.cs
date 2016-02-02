@@ -86,6 +86,7 @@ namespace Dapplo.Config.Test.ConfigTests
 				{
 					x.SomeValues.Add("dapplo", 2015);
 				}
+		
 			});
 			await ConfigureMemoryStreamAsync();
 
@@ -99,6 +100,7 @@ namespace Dapplo.Config.Test.ConfigTests
 		{
 			var iniConfig = await InitializeAsync();
 			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
+
 			Assert.IsTrue(iniTest.Height == 185);
 			iniTest.Height++;
 			Assert.IsTrue(iniTest.Height == 186);
