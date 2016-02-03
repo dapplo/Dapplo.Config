@@ -75,6 +75,7 @@
     <Compile Include="ConfigTests\IniRestTest.cs" />
     <Compile Include="ConfigTests\ConvertTest.cs" />
     <Compile Include="ConfigTests\Interfaces\IIniConfigWrongEnumTest.cs" />
+    <Compile Include="BeforeAllTests.cs" />
     <Compile Include="ConverterTests\TestEnum.cs" />
     <Compile Include="ConverterTests\TypeExtensionsTests.cs" />
     <Compile Include="ProxyTests\ObjectTest.cs" />

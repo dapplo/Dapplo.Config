@@ -19,11 +19,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System;
 using Dapplo.Config.Test.ProxyTests.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Dapplo.LogFacade;
-using Dapplo.LogFacade.Loggers;
+using System;
 
 namespace Dapplo.Config.Test.ProxyTests
 {
@@ -38,7 +36,6 @@ namespace Dapplo.Config.Test.ProxyTests
 		[TestInitialize]
 		public void Initialize()
 		{
-			LogSettings.Logger = new TraceLogger { Level = LogLevel.Info };
 			_propertyProxy = ProxyBuilder.CreateProxy<IDefaultValueTest>();
 		}
 

@@ -33,8 +33,6 @@ namespace Dapplo.Config.Test.ConverterTests
 		[TestMethod]
 		public void TestStringEncryptionTypeConverter()
 		{
-			StringEncryptionTypeConverter.RgbIv = "fjr84hF49gp3911fFFg";
-			StringEncryptionTypeConverter.RgbKey = "ljew3lJfrS0rlddlfeelOekfekcvbAwE";
 			var stringEncryptionTypeConverter = (TypeConverter) Activator.CreateInstance(typeof (StringEncryptionTypeConverter));
 			Assert.IsTrue(stringEncryptionTypeConverter.CanConvertFrom(typeof (string)));
 			Assert.IsTrue(stringEncryptionTypeConverter.CanConvertTo(typeof (string)));

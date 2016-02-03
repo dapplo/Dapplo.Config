@@ -19,17 +19,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Dapplo.Config.Ini;
+using Dapplo.Config.Test.ConfigTests.Interfaces;
+using Dapplo.LogFacade;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Dapplo.Config.Converters;
-using Dapplo.Config.Ini;
-using Dapplo.Config.Test.ConfigTests.Interfaces;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Dapplo.LogFacade;
-using Dapplo.LogFacade.Loggers;
 
 namespace Dapplo.Config.Test.ConfigTests
 {
@@ -44,14 +41,6 @@ namespace Dapplo.Config.Test.ConfigTests
 		{
 			// Remove the IniConfig drom the IniConfig-store
 			IniConfig.Delete("Dapplo", "dapplo");
-		}
-
-		[ClassInitialize]
-		public static void InitializeClass(TestContext textContext)
-		{
-			LogSettings.Logger = new TraceLogger { Level = LogLevel.Info };
-			StringEncryptionTypeConverter.RgbIv = "fjr84hF49gp3911fFFg";
-			StringEncryptionTypeConverter.RgbKey = "ljew3lJfrS0rlddlfeelOekfekcvbAwE";
 		}
 
 		private async Task<IniConfig> InitializeAsync()

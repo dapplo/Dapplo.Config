@@ -19,29 +19,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Dapplo.Config.Test.ProxyTests.Interfaces;
+using Dapplo.Config.Converters;
+using Dapplo.LogFacade;
+using Dapplo.LogFacade.Loggers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Dapplo.Config.Test.ProxyTests
+namespace Dapplo.Config.Test
 {
+	/// <summary>
+	/// This initializes the logger and some other stuff for all tests
+	/// </summary>
 	[TestClass]
-	public class ObjectTest
+	public class BeforeAllTests
 	{
-		private IPropertyProxy<IBassicAssignTest> _propertyProxy;
-
-		[TestInitialize]
-		public void Initialize()
+		[AssemblyInitialize]
+		public static void Configure(TestContext context)
 		{
-			_propertyProxy = ProxyBuilder.CreateProxy<IBassicAssignTest>();
-		}
-
-		[TestMethod]
-		public void TestObject()
-		{
-			var properties = _propertyProxy.PropertyObject;
-			Assert.AreNotEqual(0, properties.GetHashCode());
-			Assert.IsNotNull(properties.GetType());
-			Assert.AreEqual(properties, _propertyProxy);
+			LogSettings.Logger = new TraceLogger { Level = LogLevel.Verbose };
+			StringEncryptionTypeConverter.RgbIv = "fjr84hF49gp3911fFFg";
+			StringEncryptionTypeConverter.RgbKey = "ljew3lJfrS0rlddlfeelOekfekcvbAwE";
 		}
 	}
 }

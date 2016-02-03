@@ -21,13 +21,11 @@
 
 using Dapplo.Config.Language;
 using Dapplo.Config.Support;
+using Dapplo.Config.Test.LanguageTests.Interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Threading.Tasks;
 using System.Linq;
-using Dapplo.Config.Test.LanguageTests.Interfaces;
-using Dapplo.LogFacade;
-using Dapplo.LogFacade.Loggers;
+using System.Threading.Tasks;
 
 namespace Dapplo.Config.Test.LanguageTests
 {
@@ -43,7 +41,6 @@ namespace Dapplo.Config.Test.LanguageTests
 		[TestInitialize]
 		public void Initialize()
 		{
-			LogSettings.Logger = new TraceLogger { Level = LogLevel.Info };
 			_languageLoader = new LanguageLoader("Dapplo");
 			_languageLoader.CorrectMissingTranslations();
 		}
