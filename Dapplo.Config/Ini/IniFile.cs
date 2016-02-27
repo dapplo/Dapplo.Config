@@ -53,14 +53,16 @@ namespace Dapplo.Config.Ini
 		/// <returns>dictionary of sections - dictionaries with the properties</returns>
 		public static async Task<IDictionary<string, IDictionary<string, string>>> ReadAsync(string path, Encoding encoding, CancellationToken token = default(CancellationToken))
 		{
-			if (File.Exists(path))
+			if (!File.Exists(path))
 			{
-				using (var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 1024))
-				{
-					return await ReadAsync(fileStream, encoding, token).ConfigureAwait(false);
-				}
+				Log.Verbose().WriteLine("Ini file {0} not found.", path);
+				return null;
 			}
-			return null;
+			Log.Verbose().WriteLine("Reading ini file from {0}", path);
+			using (var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 1024))
+			{
+				return await ReadAsync(fileStream, encoding, token).ConfigureAwait(false);
+			}
 		}
 
 		/// <summary>
@@ -137,6 +139,7 @@ namespace Dapplo.Config.Ini
 		/// <param name="token">CancellationToken</param>
 		public static async Task WriteAsync(string path, Encoding encoding, IDictionary<string, IDictionary<string, string>> sections, IDictionary<string, IDictionary<string, string>> sectionComments = null, CancellationToken token = default(CancellationToken))
 		{
+			Log.Verbose().WriteLine("Writing ini values to {0}", path);
 			using (var fileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write, 1024))
 			{
 				await WriteAsync(fileStream, encoding, sections, sectionComments, token).ConfigureAwait(false);
@@ -166,7 +169,7 @@ namespace Dapplo.Config.Ini
 						break;
 					}
 
-					IDictionary<string, string> properties = sections[sectionKey];
+					var properties = sections[sectionKey];
 					if (properties.Count == 0)
 					{
 						continue;

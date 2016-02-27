@@ -150,6 +150,7 @@ namespace Dapplo.Config.Ini
 			// Look for the ini file, this is only done 1 time.
 			IniLocation = CreateFileLocation(false, "", _fixedDirectory);
 
+			Log.Verbose().WriteLine("Created IniConfig for application {0}, filename is {1}", applicationName, fileName);
 			// Configure the auto save
 			if (autoSaveInterval > 0)
 			{
@@ -243,7 +244,7 @@ namespace Dapplo.Config.Ini
 
 			// If the ini-location directory is not yet created, we can't watch as this would cause an exception
 			var watchPath = Path.GetDirectoryName(IniLocation);
-			if (!Directory.Exists(watchPath))
+			if (watchPath == null || !Directory.Exists(watchPath))
 			{
 				return;
 			}
@@ -601,6 +602,7 @@ namespace Dapplo.Config.Ini
 				// disable the File-Watcher so we don't get events from ourselves
 				EnableFileWatcher(false);
 
+				Log.Debug().WriteLine("Saving to {0}", IniLocation);
 				// Create the file as a stream
 				using (var stream = new FileStream(IniLocation, FileMode.Create, FileAccess.Write))
 				{

@@ -32,6 +32,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Dapplo.LogFacade;
 
 namespace Dapplo.Config.Language
 {
@@ -41,6 +42,7 @@ namespace Dapplo.Config.Language
 	/// </summary>
 	public class LanguageLoader
 	{
+		private static readonly LogSource Log = new LogSource();
 		private static readonly IDictionary<string, LanguageLoader> LoaderStore = new NonStrictLookup<LanguageLoader>();
 		private readonly IDictionary<Type, IPropertyProxy> _languageTypeConfigs = new Dictionary<Type, IPropertyProxy>();
 		private readonly IDictionary<string, ILanguage> _languageConfigs = new NonStrictLookup<ILanguage>();
@@ -91,6 +93,7 @@ namespace Dapplo.Config.Language
 			{
 				throw new InvalidOperationException($"{applicationName} was already created!");
 			}
+			Log.Verbose().WriteLine("Created language loader for {0}, using default language {1}", applicationName, defaultLanguage);
 			CurrentLanguage = defaultLanguage;
 			_filePattern = new Regex(filePatern, RegexOptions.Compiled);
 			_applicationName = applicationName;
@@ -174,6 +177,7 @@ namespace Dapplo.Config.Language
 			{
 				return;
 			}
+			Log.Verbose().WriteLine("Changing language to {0}", ietf);
 			if (AvailableLanguages.ContainsKey(ietf))
 			{
 				CurrentLanguage = ietf;
@@ -212,10 +216,20 @@ namespace Dapplo.Config.Language
 				}
 			}
 
+			if (Log.IsDebugEnabled())
+			{
+				Log.Debug().WriteLine("Scanning directories: {0}", string.Join(",", directories));
+			}
+
 			Files = FileLocations.Scan(directories, _filePattern)
 				.GroupBy(x => x.Item2.Groups["IETF"].Value)
 				.ToDictionary(group => group.Key, group => group.Select(x => x.Item1)
 				.ToList());
+
+			if (Log.IsDebugEnabled())
+			{
+				Log.Debug().WriteLine("Detected language ietfs: {0}", string.Join(",", Files.Keys));
+			}
 
 			var allCultures = CultureInfo.GetCultures(CultureTypes.AllCultures)
 				.ToLookup(e => e.IetfLanguageTag, StringComparer.OrdinalIgnoreCase).ToDictionary(x=>x.Key, x=> x.First());
@@ -225,6 +239,14 @@ namespace Dapplo.Config.Language
 			AvailableLanguages = (from ietf in Files.Keys
 								  where allCultures.ContainsKey(ietf)
 								  select ietf).Distinct().ToDictionary(ietf => ietf, ietf => allCultures[ietf].NativeName);
+
+			if (Log.IsDebugEnabled())
+			{
+				foreach (var availableLanguage in AvailableLanguages)
+				{
+					Log.Debug().WriteLine("Found language: {0}", availableLanguage.Value);
+				}
+			}
 		}
 
 		/// <summary>
@@ -265,6 +287,7 @@ namespace Dapplo.Config.Language
 			{
 				throw new ArgumentException("type is not a ILanguage");
 			}
+			Log.Verbose().WriteLine("Registering {0}", type.FullName);
 			var propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
 			var languageObject = (ILanguage)propertyProxy.PropertyObject;
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
@@ -298,6 +321,7 @@ namespace Dapplo.Config.Language
 			{
 				throw new ArgumentException("type is not a ILanguage");
 			}
+			Log.Verbose().WriteLine("Registering {0}", type.FullName);
 			var propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
 			var languageObject = (ILanguage)propertyProxy.PropertyObject;
 			if (!_languageTypeConfigs.ContainsKey(type))
@@ -477,7 +501,6 @@ namespace Dapplo.Config.Language
 			foreach (var key in sectionTranslations.Keys)
 			{
 				propertyProxy.Properties.SafelyAddOrOverwrite(key, sectionTranslations[key]);
-
 			}
 		}
 	}

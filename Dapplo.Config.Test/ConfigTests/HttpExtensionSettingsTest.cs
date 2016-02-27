@@ -47,9 +47,12 @@ namespace Dapplo.Config.Test.ConfigTests
 				await iniConfig.WriteToStreamAsync(writeStream).ConfigureAwait(false);
 				writeStream.Seek(0, SeekOrigin.Begin);
 				await iniConfig.ReadFromStreamAsync(writeStream).ConfigureAwait(false);
-				var behaviour = new HttpBehaviour();
-				behaviour.HttpSettings = httpConfiguration;
-				HttpClientFactory.Create(behaviour);
+				var behaviour = new HttpBehaviour
+				{
+					HttpSettings = httpConfiguration
+				};
+				behaviour.MakeCurrent();
+				HttpClientFactory.Create();
 			}
 		}
 	}
