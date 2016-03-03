@@ -1,45 +1,62 @@
 ﻿/*
- * dapplo - building blocks for desktop applications
- * Copyright (C) 2015-2016 Dapplo
- * 
- * For more information see: http://dapplo.net/
- * dapplo repositories are hosted on GitHub: https://github.com/dapplo
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 1 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+	Dapplo - building blocks for desktop applications
+	Copyright (C) 2015-2016 Dapplo
+
+	For more information see: http://dapplo.net/
+	Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+
+	This file is part of Dapplo.Config
+
+	Dapplo.Config is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Lesser General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Dapplo.Config is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Lesser General Public License for more details.
+
+	You should have Config a copy of the GNU Lesser General Public License
+	along with Dapplo.HttpExtensions. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
  */
 
+using Dapplo.Config.Converters;
 using Dapplo.Config.Ini;
 using Dapplo.Config.Test.ConfigTests.Interfaces;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Dapplo.LogFacade;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Dapplo.Config.Test.ConfigTests
 {
-	[TestClass]
-	public class IniConfigTest
+	public class IniConfigTest : IDisposable
 	{
 		private const string Name = "Dapplo";
 		private const string FirstName = "Robin";
 		private const string TestValueForNonSerialized = "Hello!";
 
-		[TestCleanup]
-		public void Cleanup()
+		public IniConfigTest(ITestOutputHelper testOutputHelper)
 		{
+			XUnitLogger.RegisterLogger(testOutputHelper, LogLevel.Verbose);
+			StringEncryptionTypeConverter.RgbIv = "fjr84hF49gp3911fFFg";
+			StringEncryptionTypeConverter.RgbKey = "ljew3lJfrS0rlddlfeelOekfekcvbAwE";
+		}
+
+		public void Dispose()
+		{
+			// Make sure we cleanup any created ini file, as it will influence other tests
+			var location = IniConfig.Current.IniLocation;
+			if (location != null && File.Exists(location))
+			{
+				File.Delete(location);
+			}
+
 			// Remove the IniConfig drom the IniConfig-store
 			IniConfig.Delete("Dapplo", "dapplo");
 		}
@@ -68,7 +85,7 @@ namespace Dapplo.Config.Test.ConfigTests
 		/// This method tests that the initialization of the ini works.
 		/// Including the after load
 		/// </summary>
-		[TestMethod]
+		[Fact]
 		public async Task TestIniAfterLoad()
 		{
 			var iniConfig = Create();
@@ -83,91 +100,91 @@ namespace Dapplo.Config.Test.ConfigTests
 			await ConfigureMemoryStreamAsync();
 
 			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
-			Assert.IsTrue(iniTest.SomeValues.ContainsKey("dapplo"));
-			Assert.IsTrue(iniTest.SomeValues["dapplo"] == 2015);
+			Assert.True(iniTest.SomeValues.ContainsKey("dapplo"));
+			Assert.True(iniTest.SomeValues["dapplo"] == 2015);
 		}
 
-		[TestMethod]
+		[Fact]
 		public async Task TestIniGeneral()
 		{
 			var iniConfig = await InitializeAsync();
 			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 
-			Assert.IsTrue(iniTest.Height == 185);
+			Assert.Equal(iniTest.Height, 185u);
 			iniTest.Height++;
-			Assert.IsTrue(iniTest.Height == 186);
+			Assert.Equal(iniTest.Height, 186u);
 			iniTest.Height = 185;
-			Assert.IsTrue(iniTest.Height == 185);
-			Assert.IsTrue(iniTest.PropertySize.Width == 16);
-			Assert.IsTrue(iniTest.PropertyArea.Width == 100);
-			Assert.IsTrue(iniTest.WindowCornerCutShape.Count > 0);
-			Assert.AreEqual("It works!", iniTest.SubValuewithDefault);
-			Assert.AreEqual(IniConfigTestEnum.Value2, iniTest.TestWithEnum);
+			Assert.Equal(iniTest.Height, 185u);
+			Assert.Equal(iniTest.PropertySize.Width, 16);
+			Assert.Equal(iniTest.PropertyArea.Width, 100);
+			Assert.True(iniTest.WindowCornerCutShape.Count > 0);
+			Assert.Equal("It works!", iniTest.SubValuewithDefault);
+			Assert.Equal(IniConfigTestEnum.Value2, iniTest.TestWithEnum);
 			iniTest.RestoreToDefault("TestWithEnum");
-            Assert.AreEqual(IniConfigTestEnum.Value2, iniTest.TestWithEnum);
-			Assert.AreEqual(IniConfigTestEnum.Value2, iniTest.TestWithEnumSubValue);
+            Assert.Equal(IniConfigTestEnum.Value2, iniTest.TestWithEnum);
+			Assert.Equal(IniConfigTestEnum.Value2, iniTest.TestWithEnumSubValue);
 		}
 
-		[TestMethod]
+		[Fact]
 		public async Task TestIniIndexAccess()
 		{
 			var iniConfig = await InitializeAsync();
 			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 			// Test ini value retrieval, by checking the Type and return value
 			var iniValue = iniTest["WindowCornerCutShape"];
-			Assert.IsTrue(iniValue.ValueType == typeof(IList<int>));
-			Assert.IsTrue(((IList<int>)iniValue.Value).Count > 0);
+			Assert.True(iniValue.ValueType == typeof(IList<int>));
+			Assert.True(((IList<int>)iniValue.Value).Count > 0);
 		}
 
-		[TestMethod]
+		[Fact]
 		public async Task TestIniSectionTryGet()
 		{
 			var iniConfig = await InitializeAsync();
 			await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 			// Test try get
 			IIniSection section;
-			Assert.IsTrue(iniConfig.TryGet("Test", out section));
+			Assert.True(iniConfig.TryGet("Test", out section));
 			IniValue tryGetValue;
-			Assert.IsTrue(section.TryGetIniValue("WindowCornerCutShape", out tryGetValue));
-			Assert.IsTrue(((IList<int>)tryGetValue.Value).Count > 0);
-			Assert.IsFalse(section.TryGetIniValue("DoesNotExist", out tryGetValue));
+			Assert.True(section.TryGetIniValue("WindowCornerCutShape", out tryGetValue));
+			Assert.True(((IList<int>)tryGetValue.Value).Count > 0);
+			Assert.False(section.TryGetIniValue("DoesNotExist", out tryGetValue));
 		}
 
-		[TestMethod]
+		[Fact]
 		public async Task TestIniConfigIndexConvertion()
 		{
 			var iniConfig = await InitializeAsync();
 			await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 			// Test indexers
-			Assert.IsTrue(iniConfig.SectionNames.Contains("Test"));
+			Assert.True(iniConfig.SectionNames.Contains("Test"));
 			var iniTest = (IIniConfigTest)iniConfig["Test"];
 
 			// Set value with wrong type (but valid value)
 			iniConfig["Test"]["Height"].Value = "100";
 
-			Assert.AreEqual((uint)100, iniTest.Height);
+			Assert.Equal((uint)100, iniTest.Height);
         }
 
-		[TestMethod]
+		[Fact]
 		public async Task TestIniWrongEnumDefault()
 		{
 			var iniConfig = await InitializeAsync();
 			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigWrongEnumTest>().ConfigureAwait(false);
-			Assert.AreEqual(IniConfigTestEnum.Value1, iniTest.TestWithFalseEnum);
+			Assert.Equal(IniConfigTestEnum.Value1, iniTest.TestWithFalseEnum);
 		}
 
-		[TestMethod]
+		[Fact]
 		public async Task TestIniConfigIndex()
 		{
 			var iniConfig = await InitializeAsync();
 			await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 			// Test indexers
-			Assert.IsTrue(iniConfig.SectionNames.Contains("Test"));
+			Assert.True(iniConfig.SectionNames.Contains("Test"));
 			var iniTest = iniConfig["Test"];
-			Assert.AreEqual("It works!", iniTest["SubValuewithDefault"].Value);
+			Assert.Equal("It works!", iniTest["SubValuewithDefault"].Value);
 		}
 
-		[TestMethod]
+		[Fact]
 		public async Task TestIniWriteRead()
 		{
 			var iniConfig = await InitializeAsync();
@@ -179,7 +196,7 @@ namespace Dapplo.Config.Test.ConfigTests
 			iniTest.Name = Name;
 			iniTest.FirstName = FirstName;
 
-			Assert.AreEqual(Size.Empty, iniTest.MySize);
+			Assert.Equal(Size.Empty, iniTest.MySize);
 			// This value should not be written to the file
 			iniTest.NotWritten = "Whatever";
 
@@ -194,7 +211,7 @@ namespace Dapplo.Config.Test.ConfigTests
 			long ticks = DateTimeOffset.Now.UtcTicks;
 			iniTest.Age = ticks;
             var heightBefore = ++iniTest.Height;
-			await iniConfig.WriteAsync().ConfigureAwait(false);
+
 			using (var writeStream = new MemoryStream())
 			{
 				await iniConfig.WriteToStreamAsync(writeStream).ConfigureAwait(false);
@@ -214,26 +231,26 @@ namespace Dapplo.Config.Test.ConfigTests
 				writeStream.Seek(0, SeekOrigin.Begin);
 				await iniConfig.ReadFromStreamAsync(writeStream).ConfigureAwait(false);
 				//await iniConfig.ReloadAsync(false).ConfigureAwait(false);
-                Assert.IsTrue(iniTest.SomeValues.ContainsKey("One"));
-				Assert.IsTrue(iniTest.WindowCornerCutShape.Contains(100));
+                Assert.True(iniTest.SomeValues.ContainsKey("One"));
+				Assert.True(iniTest.WindowCornerCutShape.Contains(100));
 				// check if the dictionary of lists also has all values again
-				Assert.IsTrue(iniTest.DictionaryOfLists.ContainsKey("firstValue"));
-				Assert.IsTrue(iniTest.DictionaryOfLists["firstValue"].Count == 2);
+				Assert.True(iniTest.DictionaryOfLists.ContainsKey("firstValue"));
+				Assert.True(iniTest.DictionaryOfLists["firstValue"].Count == 2);
 
 				// Rest of simple tests
-				Assert.AreEqual(Name, iniTest.Name);
-				Assert.AreEqual(FirstName, iniTest.FirstName);
-				Assert.AreEqual(ticks, iniTest.Age);
-				Assert.AreEqual(TestValueForNonSerialized, iniTest.NotWritten);
-				Assert.AreEqual(IniConfigTestEnum.Value1, iniTest.TestWithEnum);
-				Assert.AreEqual(IniConfigTestEnum.Value1, iniTest.TestWithEnumSubValue);
-				Assert.AreEqual(heightBefore, iniTest.Height);
-				Assert.IsTrue(iniTest.TestEnums.Contains(IniConfigTestEnum.Value2));
+				Assert.Equal(Name, iniTest.Name);
+				Assert.Equal(FirstName, iniTest.FirstName);
+				Assert.Equal(ticks, iniTest.Age);
+				Assert.Equal(TestValueForNonSerialized, iniTest.NotWritten);
+				Assert.Equal(IniConfigTestEnum.Value1, iniTest.TestWithEnum);
+				Assert.Equal(IniConfigTestEnum.Value1, iniTest.TestWithEnumSubValue);
+				Assert.Equal(heightBefore, iniTest.Height);
+				Assert.True(iniTest.TestEnums.Contains(IniConfigTestEnum.Value2));
 			}
 
 			// Check second get, should have same value
 			var iniTest2 = iniConfig.Get<IIniConfigTest>();
-			Assert.AreEqual(TestValueForNonSerialized, iniTest2.NotWritten);
+			Assert.Equal(TestValueForNonSerialized, iniTest2.NotWritten);
 		}
 	}
 }

@@ -1,26 +1,29 @@
 ﻿/*
- * dapplo - building blocks for desktop applications
- * Copyright (C) 2015-2016 Dapplo
- * 
- * For more information see: http://dapplo.net/
- * dapplo repositories are hosted on GitHub: https://github.com/dapplo
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 1 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+	Dapplo - building blocks for desktop applications
+	Copyright (C) 2015-2016 Dapplo
+
+	For more information see: http://dapplo.net/
+	Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+
+	This file is part of Dapplo.Config
+
+	Dapplo.Config is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Lesser General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Dapplo.Config is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Lesser General Public License for more details.
+
+	You should have Config a copy of the GNU Lesser General Public License
+	along with Dapplo.HttpExtensions. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
  */
 
 using Dapplo.Config.Ini;
 using Dapplo.Config.Support;
+using Dapplo.LogFacade;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -32,7 +35,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Dapplo.LogFacade;
 
 namespace Dapplo.Config.Language
 {
@@ -43,11 +45,11 @@ namespace Dapplo.Config.Language
 	public class LanguageLoader
 	{
 		private static readonly LogSource Log = new LogSource();
-		private static readonly IDictionary<string, LanguageLoader> LoaderStore = new NonStrictLookup<LanguageLoader>();
+		private static readonly IDictionary<string, LanguageLoader> LoaderStore = new Dictionary<string, LanguageLoader>(AbcComparer.Instance);
 		private readonly IDictionary<Type, IPropertyProxy> _languageTypeConfigs = new Dictionary<Type, IPropertyProxy>();
-		private readonly IDictionary<string, ILanguage> _languageConfigs = new NonStrictLookup<ILanguage>();
+		private readonly IDictionary<string, ILanguage> _languageConfigs = new Dictionary<string, ILanguage>(AbcComparer.Instance);
 		private readonly AsyncLock _asyncLock = new AsyncLock();
-		private readonly IDictionary<string, IDictionary<string, string>> _allTranslations = new NonStrictLookup<IDictionary<string, string>>();
+		private readonly IDictionary<string, IDictionary<string, string>> _allTranslations = new Dictionary<string, IDictionary<string, string>>(AbcComparer.Instance);
 		private readonly string _applicationName;
 		private readonly Regex _filePattern;
 		private bool _initialReadDone;
@@ -74,6 +76,16 @@ namespace Dapplo.Config.Language
 		/// <param name="applicationName"></param>
 		public static void Delete(string applicationName)
 		{
+			Log.Debug().WriteLine("Removing {0}", applicationName);
+			LanguageLoader languageLoader;
+			if (LoaderStore.TryGetValue(applicationName, out languageLoader))
+			{
+				foreach (var properyProxyType in languageLoader._languageTypeConfigs.Keys)
+				{
+					ProxyBuilder.DeleteProxy(properyProxyType);
+				}
+			}
+
 			LoaderStore.Remove(applicationName);
 		}
 
@@ -93,11 +105,11 @@ namespace Dapplo.Config.Language
 			{
 				throw new InvalidOperationException($"{applicationName} was already created!");
 			}
-			Log.Verbose().WriteLine("Created language loader for {0}, using default language {1}", applicationName, defaultLanguage);
 			CurrentLanguage = defaultLanguage;
 			_filePattern = new Regex(filePatern, RegexOptions.Compiled);
 			_applicationName = applicationName;
 			ScanFiles(checkStartupDirectory, checkAppDataDirectory, specifiedDirectories);
+			Log.Debug().WriteLine("Adding {0}", applicationName);
 			LoaderStore.SafelyAddOrOverwrite(applicationName, this);
 		}
 
@@ -108,12 +120,19 @@ namespace Dapplo.Config.Language
 		/// </summary>
 		public void CorrectMissingTranslations()
 		{
+			if (Files == null || Files.Count == 0)
+			{
+				return;
+			}
 			var baseIetf = (from ietf in Files.Keys
 					select new
 					{
 						ietf, Files[ietf].Count
-					}).OrderByDescending(x => x.Count).First().ietf;
-
+					}).OrderByDescending(x => x.Count).FirstOrDefault()?.ietf;
+			if (baseIetf == null)
+			{
+				return;
+			}
 			var baseFileList = Files[baseIetf];
 			foreach (var ietf in Files.Keys)
 			{
@@ -183,6 +202,10 @@ namespace Dapplo.Config.Language
 				CurrentLanguage = ietf;
 				await ReloadAsync(token).ConfigureAwait(false);
 			}
+			else
+			{
+				Log.Warn().WriteLine("Language {0} was not available.", ietf);
+			}
 		}
 
 
@@ -239,13 +262,9 @@ namespace Dapplo.Config.Language
 			AvailableLanguages = (from ietf in Files.Keys
 								  where allCultures.ContainsKey(ietf)
 								  select ietf).Distinct().ToDictionary(ietf => ietf, ietf => allCultures[ietf].NativeName);
-
-			if (Log.IsDebugEnabled())
+			if (Log.IsVerboseEnabled())
 			{
-				foreach (var availableLanguage in AvailableLanguages)
-				{
-					Log.Debug().WriteLine("Found language: {0}", availableLanguage.Value);
-				}
+				Log.Verbose().WriteLine("Languages found: {0}", string.Join(",", AvailableLanguages.Keys));
 			}
 		}
 
@@ -287,13 +306,17 @@ namespace Dapplo.Config.Language
 			{
 				throw new ArgumentException("type is not a ILanguage");
 			}
-			Log.Verbose().WriteLine("Registering {0}", type.FullName);
-			var propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
-			var languageObject = (ILanguage)propertyProxy.PropertyObject;
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
-				if (!_languageTypeConfigs.ContainsKey(type))
+				IPropertyProxy propertyProxy;
+				if (_languageTypeConfigs.TryGetValue(type, out propertyProxy))
 				{
+					return (ILanguage)propertyProxy.PropertyObject;
+				}
+				else
+				{
+					propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
+					var languageObject = (ILanguage)propertyProxy.PropertyObject;
 					_languageTypeConfigs.Add(type, propertyProxy);
 					_languageConfigs.Add(GetPrefix(propertyProxy), languageObject);
 					if (!_initialReadDone)
@@ -304,10 +327,9 @@ namespace Dapplo.Config.Language
 					{
 						FillLanguageConfig(propertyProxy);
 					}
+					return languageObject;
 				}
 			}
-
-			return languageObject;
 		}
 
 		/// <summary>

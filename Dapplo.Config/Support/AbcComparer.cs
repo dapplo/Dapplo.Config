@@ -21,28 +21,50 @@
 	along with Dapplo.HttpExtensions. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
  */
 
-using System.Linq.Expressions;
+using System;
 
-namespace Dapplo.Config.Support {
-	public static class MethodCallExtensions
+namespace Dapplo.Config.Support
+{
+	/// <summary>
+	/// A StringComparer which ignores everything which is not a letter
+	/// </summary>
+	public class AbcComparer : StringComparer
 	{
-		/// <summary>
-		/// Get the property name from the argument "index" of the MethodCallInfo
-		/// If the argument is a string, it will be returned.
-		/// If the arugment is a LambdaExpression, the member name will be retrieved
-		/// </summary>
-		/// <param name="methodCallInfo">MethodCallInfo</param>
-		/// <param name="index">Index of the argument</param>
-		/// <returns>Property name</returns>
-		public static string PropertyNameOf(this MethodCallInfo methodCallInfo, int index)
+		public static readonly AbcComparer Instance = new AbcComparer();
+
+		public override int Compare(string x, string y)
 		{
-			string propertyName = methodCallInfo.Arguments[index] as string;
-			if (propertyName == null)
+			if (x == null && y != null)
 			{
-				LambdaExpression propertyExpression = (LambdaExpression)methodCallInfo.Arguments[index];
-				propertyName = propertyExpression.GetMemberName();
+				return -1;
 			}
-			return propertyName;
+
+			if (x != null && y == null)
+			{
+				return 1;
+			}
+
+			return x.Cleanup().CompareTo(y.Cleanup());
+		}
+
+		public override bool Equals(string x, string y)
+		{
+			if (x == null && y != null)
+			{
+				return false;
+			}
+
+			if (x != null && y == null)
+			{
+				return false;
+			}
+
+			return x.Cleanup().Equals(y.Cleanup());
+		}
+
+		public override int GetHashCode(string obj)
+		{
+			return obj.Cleanup().GetHashCode();
 		}
 	}
 }

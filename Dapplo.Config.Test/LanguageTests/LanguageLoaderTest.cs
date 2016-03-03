@@ -1,123 +1,123 @@
 ﻿/*
- * dapplo - building blocks for desktop applications
- * Copyright (C) 2015-2016 Dapplo
- * 
- * For more information see: http://dapplo.net/
- * dapplo repositories are hosted on GitHub: https://github.com/dapplo
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 1 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+	Dapplo - building blocks for desktop applications
+	Copyright (C) 2015-2016 Dapplo
+
+	For more information see: http://dapplo.net/
+	Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+
+	This file is part of Dapplo.Config
+
+	Dapplo.Config is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Lesser General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Dapplo.Config is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Lesser General Public License for more details.
+
+	You should have Config a copy of the GNU Lesser General Public License
+	along with Dapplo.HttpExtensions. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
  */
 
 using Dapplo.Config.Language;
 using Dapplo.Config.Support;
 using Dapplo.Config.Test.LanguageTests.Interfaces;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Dapplo.LogFacade;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Dapplo.Config.Test.LanguageTests
 {
 	/// <summary>
 	/// This test class tests the transactional capabilities of the proxy
 	/// </summary>
-	[TestClass]
-	public class LanguageLoaderTest
+	public class LanguageLoaderTest : IDisposable
 	{
 		public const string Ok = "Ok";
 		private LanguageLoader _languageLoader;
 
-		[TestInitialize]
-		public void Initialize()
+		public LanguageLoaderTest(ITestOutputHelper testOutputHelper)
 		{
+			XUnitLogger.RegisterLogger(testOutputHelper, LogLevel.Verbose);
 			_languageLoader = new LanguageLoader("Dapplo");
 			_languageLoader.CorrectMissingTranslations();
 		}
 
-
-		[TestCleanup]
-		public void Cleanup()
+		public void Dispose()
 		{
 			LanguageLoader.Delete("Dapplo");
 		}
 
-		[TestMethod]
-		[ExpectedException(typeof(NotSupportedException))]
+		[Fact]
 		public async Task TestIllegalInterface()
 		{
-			await _languageLoader.RegisterAndGetAsync<ILanguageLoaderFailTest>();
+			var ex = await Assert.ThrowsAsync<NotSupportedException>(async () => await _languageLoader.RegisterAndGetAsync<ILanguageLoaderFailTest>());
 		}
 
-		[TestMethod]
+		[Fact]
 		public async Task TestModules()
 		{
 			// Make sure that the module (for testing) is available, we count all file-path which end with the filename 
 			var count = _languageLoader.Files["en-US"].Count(file => file.EndsWith("language_mymodule-en-US.ini"));
-			Assert.IsTrue(count > 0);
+			Assert.True(count > 0);
 
 			var languageMyModule = await _languageLoader.RegisterAndGetAsync<ILanguageLoaderMyModuleTest>();
-			Assert.AreEqual("Some value", languageMyModule.ModuleSettings);
+			Assert.Equal("Some value", languageMyModule.ModuleSettings);
 		}
 
-		[TestMethod]
+		[Fact]
 		public async Task TestIndexer()
 		{
 			var language = await _languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
 			await _languageLoader.ChangeLanguage("nl-NL");
-			Assert.AreEqual("Afbreken", language["TestValue"]);
+			Assert.Equal("Afbreken", language["TestValue"]);
 			// Test using the raw property name with the indexer
-			Assert.AreEqual("Afbreken", _languageLoader["test"]["test_value"]);
-			Assert.AreEqual("cool", _languageLoader["test"]["dapplo"]);
-			Assert.IsTrue(_languageLoader["test"].Keys().Contains("dapplo"));
+			Assert.Equal("Afbreken", _languageLoader["test"]["test_value"]);
+			Assert.Equal("cool", _languageLoader["test"]["dapplo"]);
+			Assert.True(_languageLoader["test"].Keys().Contains("dapplo"));
 		}
 
-		[TestMethod]
+		[Fact]
 		public async Task TestTranslations()
 		{
 			var language = await _languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
-			Assert.IsTrue(_languageLoader.AvailableLanguages.ContainsKey("nl-NL"));
-			Assert.IsTrue(_languageLoader.AvailableLanguages.ContainsKey("en-US"));
-			Assert.IsTrue(_languageLoader.AvailableLanguages.ContainsKey("de-DE"));
-			Assert.IsTrue(_languageLoader.AvailableLanguages.ContainsKey("sr-Cyrl-RS"));
-			Assert.AreEqual("Nederlands (Nederland)", _languageLoader.AvailableLanguages["nl-NL"]);
+			Assert.True(_languageLoader.AvailableLanguages.ContainsKey("nl-NL"));
+			Assert.True(_languageLoader.AvailableLanguages.ContainsKey("en-US"));
+			Assert.True(_languageLoader.AvailableLanguages.ContainsKey("de-DE"));
+			Assert.True(_languageLoader.AvailableLanguages.ContainsKey("sr-Cyrl-RS"));
+			Assert.Equal("Nederlands (Nederland)", _languageLoader.AvailableLanguages["nl-NL"]);
 			await _languageLoader.ChangeLanguage("en-US");
-			Assert.AreEqual(Ok, language.Ok);
-			Assert.AreEqual("Cancel", language.TestValue);
-			Assert.AreEqual("BlubEN", language.OnlyenUs);
-			Assert.AreNotEqual("BlubNL", language.OnlynlNl);
-			Assert.AreNotEqual("BlubDE", language.OnlydeDe);
+			Assert.Equal(Ok, language.Ok);
+			Assert.Equal("Cancel", language.TestValue);
+			Assert.Equal("BlubEN", language.OnlyenUs);
+			Assert.NotEqual("BlubNL", language.OnlynlNl);
+			Assert.NotEqual("BlubDE", language.OnlydeDe);
 			await _languageLoader.ChangeLanguage("nl-NL");
-			Assert.AreEqual("Afbreken", language.TestValue);
-			Assert.AreNotEqual("BlubEN", language.OnlyenUs);
-			Assert.AreNotEqual("BlubDE", language.OnlydeDe);
-			Assert.AreEqual("BlubNL", language.OnlynlNl);
+			Assert.Equal("Afbreken", language.TestValue);
+			Assert.NotEqual("BlubEN", language.OnlyenUs);
+			Assert.NotEqual("BlubDE", language.OnlydeDe);
+			Assert.Equal("BlubNL", language.OnlynlNl);
 			await _languageLoader.ChangeLanguage("de-DE");
-			Assert.AreEqual("BlubDE", language.OnlydeDe);
+			Assert.Equal("BlubDE", language.OnlydeDe);
 		}
 
-		[TestMethod]
+		[Fact]
 		public async Task TestExtension()
 		{
 			ILanguageLoaderTest test = null;
 			// ReSharper disable once ExpressionIsAlwaysNull
 			// This is actually what we want to test, extension method can work on null values :)
 			var ok = test.DefaultTranslation(x => x.Ok);
-			Assert.AreEqual("Ok", ok);
+			Assert.Equal("Ok", ok);
 
 			test = await _languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
 			ok = test.TranslationOrDefault(x => x.Ok);
-			Assert.AreEqual("Ok", ok);
+			Assert.Equal("Ok", ok);
 		}
 	}
 }

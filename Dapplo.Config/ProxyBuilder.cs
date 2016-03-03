@@ -1,22 +1,24 @@
 ﻿/*
- * dapplo - building blocks for desktop applications
- * Copyright (C) 2015-2016 Dapplo
- * 
- * For more information see: http://dapplo.net/
- * dapplo repositories are hosted on GitHub: https://github.com/dapplo
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 1 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+	Dapplo - building blocks for desktop applications
+	Copyright (C) 2015-2016 Dapplo
+
+	For more information see: http://dapplo.net/
+	Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+
+	This file is part of Dapplo.Config
+
+	Dapplo.Config is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Lesser General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Dapplo.Config is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Lesser General Public License for more details.
+
+	You should have Config a copy of the GNU Lesser General Public License
+	along with Dapplo.HttpExtensions. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
  */
 
 using Dapplo.LogFacade;
@@ -43,8 +45,8 @@ namespace Dapplo.Config
 		{
 			IEnumerable<Type> types =
 				from assembly in AppDomain.CurrentDomain.GetAssemblies()
-				where !assembly.FullName.StartsWith("System") && !assembly.FullName.StartsWith("mscorlib") && !assembly.FullName.StartsWith("Microsoft")
-					from someType in assembly.GetTypes()
+				where !assembly.FullName.StartsWith("System") && !assembly.FullName.StartsWith("mscorlib") && !assembly.FullName.StartsWith("Microsoft") && !assembly.FullName.StartsWith("xunit")
+				from someType in assembly.GetTypes()
 					where someType.GetCustomAttributes(typeof (ExtensionAttribute), true).Length > 0
 					select someType;
 			ExtensionTypes.AddRange(types);
@@ -69,6 +71,7 @@ namespace Dapplo.Config
 		{
 			lock (Cache)
 			{
+				Log.Debug().WriteLine("Removing proxyType {0} from cache.", proxyType.FullName);
 				Cache.Remove(proxyType);
 			}
 		}
@@ -114,17 +117,18 @@ namespace Dapplo.Config
         /// <summary>
         /// This can be used for Caching the Proxy generation, if there is only one proxy instance needed you want to call this!
         /// </summary>
-        /// <param name="type">Type to create </param>
+        /// <param name="proxyType">Type to create </param>
         /// <returns>proxy</returns>
-        public static IPropertyProxy GetOrCreateProxy(Type type)
+        public static IPropertyProxy GetOrCreateProxy(Type proxyType)
         {
             IPropertyProxy proxy;
             lock (Cache)
             {
-                if (!Cache.TryGetValue(type, out proxy))
+                if (!Cache.TryGetValue(proxyType, out proxy))
                 {
-                    proxy = CreateProxy(type);
-                    Cache.Add(type, proxy);
+                    proxy = CreateProxy(proxyType);
+					Log.Debug().WriteLine("Adding proxy {0} to cache.", proxyType.FullName);
+					Cache.Add(proxyType, proxy);
                 }
             }
             return proxy;
@@ -145,13 +149,14 @@ namespace Dapplo.Config
 		///     This method creates a proxy for the given type.
 		///     If the type implements certain interfaces, that are known, the matching proxy extensions are automatically added.
 		/// </summary>
-		/// <param name="type">Type to create </param>
+		/// <param name="proxyType">Type to create </param>
 		/// <returns>proxy</returns>
-		public static IPropertyProxy CreateProxy(Type type)
+		public static IPropertyProxy CreateProxy(Type proxyType)
 		{
-			var genericType = typeof (PropertyProxy<>).MakeGenericType(type);
+			Log.Debug().WriteLine("Creating proxy {0}", proxyType.FullName);
+			var genericType = typeof (PropertyProxy<>).MakeGenericType(proxyType);
 			var proxy = (IPropertyProxy) Activator.CreateInstance(genericType, null);
-			Type[] interfaces = type.GetInterfaces();
+			Type[] interfaces = proxyType.GetInterfaces();
 			var addExtensionMethodInfo = genericType.GetMethod("AddExtension", BindingFlags.NonPublic | BindingFlags.Instance);
 			foreach (Type extensionType in ExtensionTypes)
 			{
@@ -168,7 +173,7 @@ namespace Dapplo.Config
 					}
 					else if (implementing.IsGenericType && implementing.IsGenericTypeDefinition)
 					{
-						Type genericExtensionType = implementing.MakeGenericType(type);
+						Type genericExtensionType = implementing.MakeGenericType(proxyType);
 						if (interfaces.Contains(genericExtensionType))
 						{
 							addExtensionMethodInfo.Invoke(proxy, new object[]
