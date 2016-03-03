@@ -74,7 +74,7 @@ namespace Dapplo.Config.Test.ConfigTests
 		private IniConfig Create()
 		{
 			IniConfig.Delete("Dapplo", "dapplo");
-			return new IniConfig("Dapplo", "dapplo");
+			return new IniConfig("Dapplo", "dapplo", saveOnExit: false);
 		}
 
 		[Fact]

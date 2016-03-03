@@ -42,7 +42,7 @@ namespace Dapplo.Config.Test.ConfigTests
 		[Fact]
 		public async Task TestHttpExtensionsDefaultReadWrite()
 		{
-			var iniConfig = new IniConfig("Dapplo", "dapplo.httpextensions");
+			var iniConfig = new IniConfig("Dapplo", "dapplo.httpextensions", saveOnExit: false);
 			using (var testMemoryStream = new MemoryStream())
 			{
 				await IniConfig.Current.ReadFromStreamAsync(testMemoryStream).ConfigureAwait(false);

@@ -148,7 +148,8 @@ namespace Dapplo.Config.Ini
 		/// <param name="fixedDirectory">Specify a path if you don't want to use the default loading</param>
 		/// <param name="autoSaveInterval">0 to disable or the amount of milliseconds that pending changes are written</param>
 		/// <param name="watchFileChanges">True to enable file system watching</param>
-		public IniConfig(string applicationName, string fileName, string fixedDirectory = null, uint autoSaveInterval = 1000, bool watchFileChanges = true)
+		/// <param name="saveOnExit">True to enable file system watching</param>
+		public IniConfig(string applicationName, string fileName, string fixedDirectory = null, uint autoSaveInterval = 1000, bool watchFileChanges = true, bool saveOnExit = true)
 		{
 			_applicationName = applicationName;
 			_fileName = fileName;
@@ -215,14 +216,17 @@ namespace Dapplo.Config.Ini
 			// Used for lookups
 			ConfigStore.Add($"{applicationName}.{fileName}", this);
 			Log.Debug().WriteLine("Added IniConfig {0}.{1}", applicationName, fileName);
-			// Make sure the configuration is save when the domain is exited
-			AppDomain.CurrentDomain.ProcessExit += (sender, eventArgs) => Task.Run(async () => {
-				// But only if there was reading from a file
-				if (_initialRead == ReadFrom.File)
-				{
-					await WriteAsync();
-				}
-			}).Wait();
+			if (saveOnExit)
+			{
+				// Make sure the configuration is save when the domain is exited
+				AppDomain.CurrentDomain.ProcessExit += (sender, eventArgs) => Task.Run(async () => {
+					// But only if there was reading from a file
+					if (_initialRead == ReadFrom.File)
+					{
+						await WriteAsync();
+					}
+				}).Wait();
+			}
 		}
 
 		/// <summary>
