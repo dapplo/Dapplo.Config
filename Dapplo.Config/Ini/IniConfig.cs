@@ -277,7 +277,7 @@ namespace Dapplo.Config.Ini
 				{
 					// Disable events before
 					_configFileWatcher.EnableRaisingEvents = false;
-					await ReloadAsync();
+					await ReloadAsync(false);
 				}
 				catch (Exception ex)
 				{
@@ -793,6 +793,8 @@ namespace Dapplo.Config.Ini
 		/// Otherwise only the properties in the files will overwrite your settings.
 		/// Usually this should not directly be called, unless you know that the file was changed by an external process.
 		/// </summary>
+		/// <param name="reset">true: ALL setting are lost</param>
+		/// <param name="token">CancellationToken</param>
 		public async Task ReloadAsync(bool reset = true, CancellationToken token = default(CancellationToken))
 		{
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
@@ -807,6 +809,8 @@ namespace Dapplo.Config.Ini
 		/// Otherwise only the properties in the files will overwrite your settings.
 		/// Usually this should not directly be called, unless you know that the file was changed by an external process.
 		/// </summary>
+		/// <param name="reset">true: ALL setting are lost</param>
+		/// <param name="token">CancellationToken</param>
 		private async Task ReloadInternalAsync(bool reset = true, CancellationToken token = default(CancellationToken))
 		{
 			if (reset)
