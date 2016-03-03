@@ -1,12 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
-        <id>Dapplo.Config</id>
+        <id>$id$</id>
         <version>$version$</version>
-        <title>Dapplo.Config</title>
-        <authors>Robin Krom</authors>
-        <owners>dapplo</owners>
-        <licenseUrl>https://en.wikipedia.org/wiki/GNU_General_Public_License</licenseUrl>
+        <authors>$author$</authors>
+        <licenseUrl>http://www.gnu.org/licenses/lgpl-3.0.en.html</licenseUrl>
         <projectUrl>http://www.dapplo.net/blocks/Dapplo.Config.html</projectUrl>
         <iconUrl>http://www.dapplo.net/favicon.ico</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -15,8 +13,9 @@
         <language>en-us</language>
 		<copyright>Dapplo</copyright>
 		<tags>config ini language translations</tags>
-		<dependencies>
-			<dependency id="Dapplo.LogFacade" version="0.1.3" />
-		</dependencies>
     </metadata>
+	<files>
+		<file src="bin\release\$id$.pdb" target="lib\net46" />
+		<file src="bin\release\$id$.dll" target="lib\net46" />
+	</files>
 </package>
