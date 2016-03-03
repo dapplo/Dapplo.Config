@@ -6,12 +6,12 @@ using Xunit;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Dapplo.Config.T")]
+[assembly: AssemblyTitle("Dapplo.Config.Test")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("ING-DiBa AG")]
-[assembly: AssemblyProduct("Dapplo.Config.T")]
-[assembly: AssemblyCopyright("Copyright © ING-DiBa AG 2016")]
+[assembly: AssemblyCompany("Dapplo")]
+[assembly: AssemblyProduct("Dapplo.Config.Test")]
+[assembly: AssemblyCopyright("Copyright © Dapplo 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
