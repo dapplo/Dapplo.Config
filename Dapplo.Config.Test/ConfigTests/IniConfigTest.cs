@@ -1,37 +1,39 @@
-﻿/*
-	Dapplo - building blocks for desktop applications
-	Copyright (C) 2015-2016 Dapplo
+﻿//  Dapplo - building blocks for desktop applications
+//  Copyright (C) 2015-2016 Dapplo
+// 
+//  For more information see: http://dapplo.net/
+//  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+// 
+//  This file is part of Dapplo.Config
+// 
+//  Dapplo.Config is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU Lesser General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+// 
+//  Dapplo.Config is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU Lesser General Public License for more details.
+// 
+//  You should have Config a copy of the GNU Lesser General Public License
+//  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-	For more information see: http://dapplo.net/
-	Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+#region using
 
-	This file is part of Dapplo.Config
-
-	Dapplo.Config is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Lesser General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	Dapplo.Config is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Lesser General Public License for more details.
-
-	You should have Config a copy of the GNU Lesser General Public License
-	along with Dapplo.HttpExtensions. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
- */
-
-using Dapplo.Config.Converters;
-using Dapplo.Config.Ini;
-using Dapplo.Config.Test.ConfigTests.Interfaces;
-using Dapplo.LogFacade;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
+using Dapplo.Config.Converters;
+using Dapplo.Config.Ini;
+using Dapplo.Config.Test.ConfigTests.Interfaces;
+using Dapplo.LogFacade;
 using Xunit;
 using Xunit.Abstractions;
+
+#endregion
 
 namespace Dapplo.Config.Test.ConfigTests
 {
@@ -61,13 +63,6 @@ namespace Dapplo.Config.Test.ConfigTests
 			IniConfig.Delete("Dapplo", "dapplo");
 		}
 
-		private async Task<IniConfig> InitializeAsync()
-		{
-			var iniConfig = Create();
-			await ConfigureMemoryStreamAsync();
-			return iniConfig;
-		}
-
 		private async Task ConfigureMemoryStreamAsync()
 		{
 			using (var testMemoryStream = new MemoryStream())
@@ -81,9 +76,16 @@ namespace Dapplo.Config.Test.ConfigTests
 			return new IniConfig("Dapplo", "dapplo", saveOnExit: false);
 		}
 
+		private async Task<IniConfig> InitializeAsync()
+		{
+			var iniConfig = Create();
+			await ConfigureMemoryStreamAsync();
+			return iniConfig;
+		}
+
 		/// <summary>
-		/// This method tests that the initialization of the ini works.
-		/// Including the after load
+		///     This method tests that the initialization of the ini works.
+		///     Including the after load
 		/// </summary>
 		[Fact]
 		public async Task TestIniAfterLoad()
@@ -95,13 +97,38 @@ namespace Dapplo.Config.Test.ConfigTests
 				{
 					x.SomeValues.Add("dapplo", 2015);
 				}
-		
 			});
 			await ConfigureMemoryStreamAsync();
 
 			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 			Assert.True(iniTest.SomeValues.ContainsKey("dapplo"));
 			Assert.True(iniTest.SomeValues["dapplo"] == 2015);
+		}
+
+		[Fact]
+		public async Task TestIniConfigIndex()
+		{
+			var iniConfig = await InitializeAsync();
+			await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
+			// Test indexers
+			Assert.True(iniConfig.SectionNames.Contains("Test"));
+			var iniTest = iniConfig["Test"];
+			Assert.Equal("It works!", iniTest["SubValuewithDefault"].Value);
+		}
+
+		[Fact]
+		public async Task TestIniConfigIndexConvertion()
+		{
+			var iniConfig = await InitializeAsync();
+			await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
+			// Test indexers
+			Assert.True(iniConfig.SectionNames.Contains("Test"));
+			var iniTest = (IIniConfigTest) iniConfig["Test"];
+
+			// Set value with wrong type (but valid value)
+			iniConfig["Test"]["Height"].Value = "100";
+
+			Assert.Equal((uint) 100, iniTest.Height);
 		}
 
 		[Fact]
@@ -121,7 +148,7 @@ namespace Dapplo.Config.Test.ConfigTests
 			Assert.Equal("It works!", iniTest.SubValuewithDefault);
 			Assert.Equal(IniConfigTestEnum.Value2, iniTest.TestWithEnum);
 			iniTest.RestoreToDefault("TestWithEnum");
-            Assert.Equal(IniConfigTestEnum.Value2, iniTest.TestWithEnum);
+			Assert.Equal(IniConfigTestEnum.Value2, iniTest.TestWithEnum);
 			Assert.Equal(IniConfigTestEnum.Value2, iniTest.TestWithEnumSubValue);
 		}
 
@@ -132,8 +159,8 @@ namespace Dapplo.Config.Test.ConfigTests
 			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 			// Test ini value retrieval, by checking the Type and return value
 			var iniValue = iniTest["WindowCornerCutShape"];
-			Assert.True(iniValue.ValueType == typeof(IList<int>));
-			Assert.True(((IList<int>)iniValue.Value).Count > 0);
+			Assert.True(iniValue.ValueType == typeof (IList<int>));
+			Assert.True(((IList<int>) iniValue.Value).Count > 0);
 		}
 
 		[Fact]
@@ -146,42 +173,8 @@ namespace Dapplo.Config.Test.ConfigTests
 			Assert.True(iniConfig.TryGet("Test", out section));
 			IniValue tryGetValue;
 			Assert.True(section.TryGetIniValue("WindowCornerCutShape", out tryGetValue));
-			Assert.True(((IList<int>)tryGetValue.Value).Count > 0);
+			Assert.True(((IList<int>) tryGetValue.Value).Count > 0);
 			Assert.False(section.TryGetIniValue("DoesNotExist", out tryGetValue));
-		}
-
-		[Fact]
-		public async Task TestIniConfigIndexConvertion()
-		{
-			var iniConfig = await InitializeAsync();
-			await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
-			// Test indexers
-			Assert.True(iniConfig.SectionNames.Contains("Test"));
-			var iniTest = (IIniConfigTest)iniConfig["Test"];
-
-			// Set value with wrong type (but valid value)
-			iniConfig["Test"]["Height"].Value = "100";
-
-			Assert.Equal((uint)100, iniTest.Height);
-        }
-
-		[Fact]
-		public async Task TestIniWrongEnumDefault()
-		{
-			var iniConfig = await InitializeAsync();
-			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigWrongEnumTest>().ConfigureAwait(false);
-			Assert.Equal(IniConfigTestEnum.Value1, iniTest.TestWithFalseEnum);
-		}
-
-		[Fact]
-		public async Task TestIniConfigIndex()
-		{
-			var iniConfig = await InitializeAsync();
-			await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
-			// Test indexers
-			Assert.True(iniConfig.SectionNames.Contains("Test"));
-			var iniTest = iniConfig["Test"];
-			Assert.Equal("It works!", iniTest["SubValuewithDefault"].Value);
 		}
 
 		[Fact]
@@ -191,7 +184,7 @@ namespace Dapplo.Config.Test.ConfigTests
 			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 
 			iniTest.WindowCornerCutShape.Add(100);
-			iniTest.DictionaryOfLists.Add("firstValue", new List<int>() { 10, 20 });
+			iniTest.DictionaryOfLists.Add("firstValue", new List<int> {10, 20});
 			// Change some values
 			iniTest.Name = Name;
 			iniTest.FirstName = FirstName;
@@ -208,9 +201,9 @@ namespace Dapplo.Config.Test.ConfigTests
 			iniTest.TestWithEnumSubValue = IniConfigTestEnum.Value1;
 
 			// Some "random" value that needs to be there again after reading.
-			long ticks = DateTimeOffset.Now.UtcTicks;
+			var ticks = DateTimeOffset.Now.UtcTicks;
 			iniTest.Age = ticks;
-            var heightBefore = ++iniTest.Height;
+			var heightBefore = ++iniTest.Height;
 
 			using (var writeStream = new MemoryStream())
 			{
@@ -225,13 +218,13 @@ namespace Dapplo.Config.Test.ConfigTests
 				iniTest.Age = 2;
 
 				// Make sure we change the value, to see if it's overwritten
-                iniTest.Height++;
+				iniTest.Height++;
 
 				// Test reading
 				writeStream.Seek(0, SeekOrigin.Begin);
 				await iniConfig.ReadFromStreamAsync(writeStream).ConfigureAwait(false);
 				//await iniConfig.ReloadAsync(false).ConfigureAwait(false);
-                Assert.True(iniTest.SomeValues.ContainsKey("One"));
+				Assert.True(iniTest.SomeValues.ContainsKey("One"));
 				Assert.True(iniTest.WindowCornerCutShape.Contains(100));
 				// check if the dictionary of lists also has all values again
 				Assert.True(iniTest.DictionaryOfLists.ContainsKey("firstValue"));
@@ -251,6 +244,14 @@ namespace Dapplo.Config.Test.ConfigTests
 			// Check second get, should have same value
 			var iniTest2 = iniConfig.Get<IIniConfigTest>();
 			Assert.Equal(TestValueForNonSerialized, iniTest2.NotWritten);
+		}
+
+		[Fact]
+		public async Task TestIniWrongEnumDefault()
+		{
+			var iniConfig = await InitializeAsync();
+			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigWrongEnumTest>().ConfigureAwait(false);
+			Assert.Equal(IniConfigTestEnum.Value1, iniTest.TestWithFalseEnum);
 		}
 	}
 }

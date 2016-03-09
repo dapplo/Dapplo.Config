@@ -1,35 +1,38 @@
-﻿/*
-	Dapplo - building blocks for desktop applications
-	Copyright (C) 2015-2016 Dapplo
+﻿//  Dapplo - building blocks for desktop applications
+//  Copyright (C) 2015-2016 Dapplo
+// 
+//  For more information see: http://dapplo.net/
+//  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+// 
+//  This file is part of Dapplo.Config
+// 
+//  Dapplo.Config is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU Lesser General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+// 
+//  Dapplo.Config is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU Lesser General Public License for more details.
+// 
+//  You should have Config a copy of the GNU Lesser General Public License
+//  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-	For more information see: http://dapplo.net/
-	Dapplo repositories are hosted on GitHub: https://github.com/dapplo
-
-	This file is part of Dapplo.Config
-
-	Dapplo.Config is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Lesser General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	Dapplo.Config is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Lesser General Public License for more details.
-
-	You should have Config a copy of the GNU Lesser General Public License
-	along with Dapplo.HttpExtensions. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
- */
+#region using
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.Remoting.Messaging;
 using System.Runtime.Remoting.Proxies;
+using Dapplo.Config.Interceptor;
 using Dapplo.Config.Support;
-using System.Linq.Expressions;
-using System.Linq;
 using Dapplo.LogFacade;
+
+#endregion
 
 namespace Dapplo.Config
 {
@@ -44,15 +47,18 @@ namespace Dapplo.Config
 		private readonly List<Getter> _getters = new List<Getter>();
 		private readonly IDictionary<string, List<Action<MethodCallInfo>>> _methodMap = new Dictionary<string, List<Action<MethodCallInfo>>>();
 		private readonly IDictionary<string, object> _properties = new Dictionary<string, object>(AbcComparer.Instance);
-		private readonly IDictionary<string, Type> _propertyTypes = new Dictionary<string, Type>(AbcComparer.Instance);
-		private readonly IDictionary<string, Exception> _initializationErrors = new Dictionary<string, Exception>(AbcComparer.Instance);
 		private readonly List<Setter> _setters = new List<Setter>();
 
 		// Cache the GetTransparentProxy value, as it makes more sense
 		private readonly T _transparentProxy;
 
 		/// <summary>
-		/// Constructor
+		///     Cache the AllPropertyInfos
+		/// </summary>
+		private IDictionary<string, PropertyInfo> _allPropertyInfos;
+
+		/// <summary>
+		///     Constructor
 		/// </summary>
 		public PropertyProxy() : base(typeof (T))
 		{
@@ -71,45 +77,9 @@ namespace Dapplo.Config
 		}
 
 		/// <summary>
-		/// Initialize, make sure every property is processed by the extensions
+		///     Get the Type for a property
 		/// </summary>
-		internal void Init()
-		{
-			// Init in the right order
-			var extensions = (from sortedExtension in _extensions
-				orderby sortedExtension.InitOrder ascending
-				select sortedExtension).ToList();
-
-			foreach (PropertyInfo propertyInfo in AllPropertyInfos.Values)
-			{
-				_propertyTypes[propertyInfo.Name] = propertyInfo.PropertyType;
-
-				foreach (var extension in extensions)
-				{
-					try
-					{
-						extension.InitProperty(propertyInfo);
-					}
-					catch (Exception ex)
-					{
-						Log.Warn().WriteLine(ex.Message);
-						_initializationErrors.SafelyAddOrOverwrite(propertyInfo.Name, ex);
-					}
-				}
-			}
-
-			// Call all AfterInitialization, this allows us to ignore errors
-			foreach (var extension in extensions)
-			{
-				extension.AfterInitialization();
-			}
-
-			// Throw if an exception was left over
-			if (_initializationErrors.Count > 0)
-			{
-				throw _initializationErrors.Values.First();
-            }
-		}
+		public IDictionary<string, Type> PropertyTypes { get; } = new Dictionary<string, Type>(AbcComparer.Instance);
 
 		/// <summary>
 		///     Register a method for the proxy
@@ -136,7 +106,8 @@ namespace Dapplo.Config
 		{
 			_setters.Add(new Setter
 			{
-				Order = order, SetterAction = setterAction
+				Order = order,
+				SetterAction = setterAction
 			});
 			_setters.Sort();
 		}
@@ -150,81 +121,36 @@ namespace Dapplo.Config
 		{
 			_getters.Add(new Getter
 			{
-				Order = order, GetterAction = getterAction
+				Order = order,
+				GetterAction = getterAction
 			});
 			_getters.Sort();
 		}
 
 		/// <summary>
-		/// This is an implementation of the GetType which returns the interface
-		/// </summary>
-		/// <param name="methodCallInfo">IMethodCallMessage</param>
-		private void HandleGetType(MethodCallInfo methodCallInfo)
-		{
-			methodCallInfo.ReturnValue = typeof (T);
-		}
-
-		/// <summary>
-		/// This is an implementation of the GetHashCode which returns the GetHashCode of this
-		/// </summary>
-		/// <param name="methodCallInfo">IMethodCallMessage</param>
-		private void HandleGetHashCode(MethodCallInfo methodCallInfo)
-		{
-			methodCallInfo.ReturnValue = GetHashCode();
-		}
-
-		/// <summary>
-		/// This is an implementation of the Equals which returns the Equals for this
-		/// </summary>
-		/// <param name="methodCallInfo">IMethodCallMessage</param>
-		private void HandleEquals(MethodCallInfo methodCallInfo)
-		{
-			methodCallInfo.ReturnValue = Equals(methodCallInfo.Arguments[0]);
-		}
-
-		/// <summary>
-		/// Add an extension to the proxy, these extensions contain logic which enhances the proxy
-		/// </summary>
-		/// <param name="extensionType">Type for the extension</param>
-		internal void AddExtension(Type extensionType)
-		{
-			var extension = (IPropertyProxyExtension) Activator.CreateInstance(extensionType.MakeGenericType(typeof (T)), this);
-			_extensions.Add(extension);
-		}
-
-		/// <summary>
-		/// Get the property object which this Proxy maintains
-		/// Without using the generic type
+		///     Get the property object which this Proxy maintains
+		///     Without using the generic type
 		/// </summary>
 		public object UntypedPropertyObject
 		{
-			get
-			{
-				return _transparentProxy;
-			}
+			get { return _transparentProxy; }
 		}
 
 		/// <summary>
-		/// Return the Type of the PropertyObject
+		///     Return the Type of the PropertyObject
 		/// </summary>
 		public Type PropertyObjectType
 		{
-			get
-			{
-				return typeof (T);
-			}
+			get { return typeof (T); }
 		}
 
 		/// <summary>
-		/// Cache the AllPropertyInfos
+		///     Simple getter for all properties on the type, including derrived interfaces
 		/// </summary>
-		private IDictionary<string, PropertyInfo> _allPropertyInfos;
-
-		/// <summary>
-		/// Simple getter for all properties on the type, including derrived interfaces
-		/// </summary>
-		public IDictionary<string, PropertyInfo> AllPropertyInfos {
-			get {
+		public IDictionary<string, PropertyInfo> AllPropertyInfos
+		{
+			get
+			{
 				if (_allPropertyInfos == null)
 				{
 					// Exclude properties from this assembly
@@ -238,14 +164,14 @@ namespace Dapplo.Config
 					// Now, create an IEnumerable for all the property info of all the properties in the interfaces that the
 					// "user" code introduced in the type. (e.g skip all types & properties from this assembly)
 					var allPropertyInfos = from interfaceType in interfacesToCheck
-										where interfaceType.Assembly != thisAssembly
-										from propertyInfo in interfaceType.GetProperties()
-										select propertyInfo;
+						where interfaceType.Assembly != thisAssembly
+						from propertyInfo in interfaceType.GetProperties()
+						select propertyInfo;
 					_allPropertyInfos = new Dictionary<string, PropertyInfo>(AbcComparer.Instance);
 					foreach (var propertyInfo in allPropertyInfos)
 					{
 						_allPropertyInfos.Add(propertyInfo.Name, propertyInfo);
-                    }
+					}
 				}
 
 				return _allPropertyInfos;
@@ -253,52 +179,37 @@ namespace Dapplo.Config
 		}
 
 		/// <summary>
-		/// If an exception is catched during the initialization, it can be found here
+		///     If an exception is catched during the initialization, it can be found here
 		/// </summary>
-		public IDictionary<string, Exception> InitializationErrors
-		{
-			get
-			{
-				return _initializationErrors;
-            }
-		}
+		public IDictionary<string, Exception> InitializationErrors { get; } = new Dictionary<string, Exception>(AbcComparer.Instance);
 
 		/// <summary>
-		/// Get the property object which this Proxy maintains
+		///     Get the property object which this Proxy maintains
 		/// </summary>
 		object IPropertyProxy.PropertyObject
 		{
-			get
-			{
-				return _transparentProxy;
-			}
+			get { return _transparentProxy; }
 		}
 
 		/// <summary>
-		/// Get the property object which this Proxy maintains
+		///     Get the property object which this Proxy maintains
 		/// </summary>
 		T IPropertyProxy<T>.PropertyObject
 		{
-			get
-			{
-				return _transparentProxy;
-			}
+			get { return _transparentProxy; }
 		}
 
 		/// <summary>
-		/// Get the raw property values of the property object
-		/// Can be used to modify the directly, or for load/save
-		/// Assignment to this will copy all the supplied properties.
+		///     Get the raw property values of the property object
+		///     Can be used to modify the directly, or for load/save
+		///     Assignment to this will copy all the supplied properties.
 		/// </summary>
 		public IDictionary<string, object> Properties
 		{
-			get
-			{
-				return _properties;
-			}
+			get { return _properties; }
 			set
 			{
-				foreach (string key in value.Keys)
+				foreach (var key in value.Keys)
 				{
 					_properties.SafelyAddOrOverwrite(key, value[key]);
 				}
@@ -306,27 +217,67 @@ namespace Dapplo.Config
 		}
 
 		/// <summary>
-		/// Get the Type for a property
+		///     Pretend the get on the property object was called
+		///     This will invoke the normal get, going through all the registered getters
 		/// </summary>
-		public IDictionary<string, Type> PropertyTypes
+		/// <param name="propertyName">propertyName</param>
+		/// <returns>GetInfo</returns>
+		public GetInfo Get(string propertyName)
 		{
-			get
+			var getInfo = new GetInfo
 			{
-				return _propertyTypes;
+				PropertyName = propertyName,
+				CanContinue = true
+			};
+			foreach (var getter in _getters)
+			{
+				getter.GetterAction(getInfo);
+				if (!getInfo.CanContinue || getInfo.Error != null)
+				{
+					break;
+				}
 			}
+			return getInfo;
 		}
 
 		/// <summary>
-		///     A default implementation of the set logic
+		///     Pretend the set on the property object was called
+		///     This will invoke the normal set, going through all the registered setters
 		/// </summary>
-		/// <param name="setInfo"></param>
-		private void DefaultSet(SetInfo setInfo)
+		/// <param name="propertyName">propertyName</param>
+		/// <param name="newValue">object value to set</param>
+		/// <returns>SetInfo</returns>
+		public SetInfo Set(string propertyName, object newValue)
 		{
-			var propertyType = _propertyTypes[setInfo.PropertyName];
+			object oldValue;
+			var hasOldValue = _properties.TryGetValue(propertyName, out oldValue);
+			var setInfo = new SetInfo
+			{
+				NewValue = newValue,
+				PropertyName = propertyName,
+				HasOldValue = hasOldValue,
+				CanContinue = true,
+				OldValue = oldValue
+			};
+			foreach (var setter in _setters)
+			{
+				setter.SetterAction(setInfo);
+				if (!setInfo.CanContinue || setInfo.Error != null)
+				{
+					break;
+				}
+			}
+			return setInfo;
+		}
 
-			var newValue = propertyType.ConvertOrCastValueToType(setInfo.NewValue);
-			// Add the value to the dictionary
-			_properties.SafelyAddOrOverwrite(setInfo.PropertyName, newValue);
+		/// <summary>
+		///     Add an extension to the proxy, these extensions contain logic which enhances the proxy
+		/// </summary>
+		/// <param name="extensionType">Type for the extension</param>
+		internal void AddExtension(Type extensionType)
+		{
+			var extension = (IPropertyProxyExtension) Activator.CreateInstance(extensionType.MakeGenericType(typeof (T)), this);
+			_extensions.Add(extension);
 		}
 
 		/// <summary>
@@ -341,7 +292,7 @@ namespace Dapplo.Config
 				getInfo.HasValue = false;
 				return;
 			}
-            if (_properties.TryGetValue(getInfo.PropertyName, out value))
+			if (_properties.TryGetValue(getInfo.PropertyName, out value))
 			{
 				getInfo.Value = value;
 				getInfo.HasValue = true;
@@ -349,9 +300,105 @@ namespace Dapplo.Config
 			else
 			{
 				// Make sure we return the right default value, when passed by-ref there needs to be a value
-				Type propType = _propertyTypes[getInfo.PropertyName];
+				var propType = PropertyTypes[getInfo.PropertyName];
 				getInfo.Value = propType.CreateInstance();
 				getInfo.HasValue = false;
+			}
+		}
+
+		/// <summary>
+		///     A default implementation of the set logic
+		/// </summary>
+		/// <param name="setInfo"></param>
+		private void DefaultSet(SetInfo setInfo)
+		{
+			var propertyType = PropertyTypes[setInfo.PropertyName];
+
+			var newValue = propertyType.ConvertOrCastValueToType(setInfo.NewValue);
+			// Add the value to the dictionary
+			_properties.SafelyAddOrOverwrite(setInfo.PropertyName, newValue);
+		}
+
+		/// <summary>
+		///     Get the description attribute for a property
+		/// </summary>
+		/// <typeparam name="TProp"></typeparam>
+		/// <param name="propertyExpression"></param>
+		/// <returns>description</returns>
+		public string Description<TProp>(Expression<Func<T, TProp>> propertyExpression)
+		{
+			var propertyName = propertyExpression.GetMemberName();
+
+			var proxiedType = typeof (T);
+			var propertyInfo = proxiedType.GetProperty(propertyName);
+			return propertyInfo.GetDescription();
+		}
+
+		/// <summary>
+		///     This is an implementation of the Equals which returns the Equals for this
+		/// </summary>
+		/// <param name="methodCallInfo">IMethodCallMessage</param>
+		private void HandleEquals(MethodCallInfo methodCallInfo)
+		{
+			methodCallInfo.ReturnValue = Equals(methodCallInfo.Arguments[0]);
+		}
+
+		/// <summary>
+		///     This is an implementation of the GetHashCode which returns the GetHashCode of this
+		/// </summary>
+		/// <param name="methodCallInfo">IMethodCallMessage</param>
+		private void HandleGetHashCode(MethodCallInfo methodCallInfo)
+		{
+			methodCallInfo.ReturnValue = GetHashCode();
+		}
+
+		/// <summary>
+		///     This is an implementation of the GetType which returns the interface
+		/// </summary>
+		/// <param name="methodCallInfo">IMethodCallMessage</param>
+		private void HandleGetType(MethodCallInfo methodCallInfo)
+		{
+			methodCallInfo.ReturnValue = typeof (T);
+		}
+
+		/// <summary>
+		///     Initialize, make sure every property is processed by the extensions
+		/// </summary>
+		internal void Init()
+		{
+			// Init in the right order
+			var extensions = (from sortedExtension in _extensions
+				orderby sortedExtension.InitOrder ascending
+				select sortedExtension).ToList();
+
+			foreach (var propertyInfo in AllPropertyInfos.Values)
+			{
+				PropertyTypes[propertyInfo.Name] = propertyInfo.PropertyType;
+
+				foreach (var extension in extensions)
+				{
+					try
+					{
+						extension.InitProperty(propertyInfo);
+					}
+					catch (Exception ex)
+					{
+						Log.Warn().WriteLine(ex.Message);
+						InitializationErrors.SafelyAddOrOverwrite(propertyInfo.Name, ex);
+					}
+				}
+			}
+
+			// Call all AfterInitialization, this allows us to ignore errors
+			foreach (var extension in extensions)
+			{
+				extension.AfterInitialization();
+			}
+
+			// Throw if an exception was left over
+			if (InitializationErrors.Count > 0)
+			{
+				throw InitializationErrors.Values.First();
 			}
 		}
 
@@ -369,9 +416,9 @@ namespace Dapplo.Config
 				return new ReturnMessage(null, null, 0, null, null);
 			}
 			// Get the parameters
-			object[] parameters = methodCallMessage.InArgs;
+			var parameters = methodCallMessage.InArgs;
 			// Get the method name
-			string methodName = methodCallMessage.MethodName;
+			var methodName = methodCallMessage.MethodName;
 
 			// First check the methods, so we can override all other access by specifying a method
 			List<Action<MethodCallInfo>> actions;
@@ -379,7 +426,8 @@ namespace Dapplo.Config
 			{
 				var methodCallInfo = new MethodCallInfo
 				{
-					MethodName = methodName, Arguments = parameters
+					MethodName = methodName,
+					Arguments = parameters
 				};
 				foreach (var action in actions)
 				{
@@ -403,7 +451,7 @@ namespace Dapplo.Config
 				{
 					return new ReturnMessage(getInfo.Error, methodCallMessage);
 				}
-                return new ReturnMessage(getInfo.Value, null, 0, null, methodCallMessage);
+				return new ReturnMessage(getInfo.Value, null, 0, null, methodCallMessage);
 			}
 			if (methodName.StartsWith("set_"))
 			{
@@ -417,70 +465,6 @@ namespace Dapplo.Config
 			}
 
 			return new ReturnMessage(new NotImplementedException("No implementation for " + methodName), methodCallMessage);
-		}
-
-		/// <summary>
-		/// Pretend the get on the property object was called
-		/// This will invoke the normal get, going through all the registered getters
-		/// </summary>
-		/// <param name="propertyName">propertyName</param>
-		/// <returns>GetInfo</returns>
-		public GetInfo Get(string propertyName)
-		{
-			var getInfo = new GetInfo
-			{
-				PropertyName = propertyName, CanContinue = true
-			};
-			foreach (Getter getter in _getters)
-			{
-				getter.GetterAction(getInfo);
-				if (!getInfo.CanContinue || getInfo.Error != null)
-				{
-					break;
-				}
-			}
-			return getInfo;
-		}
-
-		/// <summary>
-		/// Pretend the set on the property object was called
-		/// This will invoke the normal set, going through all the registered setters
-		/// </summary>
-		/// <param name="propertyName">propertyName</param>
-		/// <param name="newValue">object value to set</param>
-		/// <returns>SetInfo</returns>
-		public SetInfo Set(string propertyName, object newValue)
-		{
-			object oldValue;
-			bool hasOldValue = _properties.TryGetValue(propertyName, out oldValue);
-			var setInfo = new SetInfo
-			{
-				NewValue = newValue, PropertyName = propertyName, HasOldValue = hasOldValue, CanContinue = true, OldValue = oldValue
-			};
-			foreach (Setter setter in _setters)
-			{
-				setter.SetterAction(setInfo);
-				if (!setInfo.CanContinue || setInfo.Error != null)
-				{
-					break;
-				}
-			}
-			return setInfo;
-		}
-
-		/// <summary>
-		/// Get the description attribute for a property
-		/// </summary>
-		/// <typeparam name="TProp"></typeparam>
-		/// <param name="propertyExpression"></param>
-		/// <returns>description</returns>
-		public string Description<TProp>(Expression<Func<T, TProp>> propertyExpression)
-		{
-			string propertyName = propertyExpression.GetMemberName();
-
-			Type proxiedType = typeof (T);
-			PropertyInfo propertyInfo = proxiedType.GetProperty(propertyName);
-			return propertyInfo.GetDescription();
 		}
 	}
 }

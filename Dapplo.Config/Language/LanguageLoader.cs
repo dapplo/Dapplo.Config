@@ -1,29 +1,26 @@
-﻿/*
-	Dapplo - building blocks for desktop applications
-	Copyright (C) 2015-2016 Dapplo
+﻿//  Dapplo - building blocks for desktop applications
+//  Copyright (C) 2015-2016 Dapplo
+// 
+//  For more information see: http://dapplo.net/
+//  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+// 
+//  This file is part of Dapplo.Config
+// 
+//  Dapplo.Config is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU Lesser General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+// 
+//  Dapplo.Config is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU Lesser General Public License for more details.
+// 
+//  You should have Config a copy of the GNU Lesser General Public License
+//  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-	For more information see: http://dapplo.net/
-	Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+#region using
 
-	This file is part of Dapplo.Config
-
-	Dapplo.Config is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Lesser General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	Dapplo.Config is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Lesser General Public License for more details.
-
-	You should have Config a copy of the GNU Lesser General Public License
-	along with Dapplo.HttpExtensions. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
- */
-
-using Dapplo.Config.Ini;
-using Dapplo.Config.Support;
-using Dapplo.LogFacade;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -35,63 +32,33 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Dapplo.Config.Ini;
+using Dapplo.Config.Support;
+using Dapplo.LogFacade;
+
+#endregion
 
 namespace Dapplo.Config.Language
 {
 	/// <summary>
-	/// The language loader should be used to fill ILanguage proxy interfaces.
-	/// It is possible to specify the directory locations, in order, where files with certain patterns should be located.
+	///     The language loader should be used to fill ILanguage proxy interfaces.
+	///     It is possible to specify the directory locations, in order, where files with certain patterns should be located.
 	/// </summary>
 	public class LanguageLoader
 	{
 		private static readonly LogSource Log = new LogSource();
 		private static readonly IDictionary<string, LanguageLoader> LoaderStore = new Dictionary<string, LanguageLoader>(AbcComparer.Instance);
-		private readonly IDictionary<Type, IPropertyProxy> _languageTypeConfigs = new Dictionary<Type, IPropertyProxy>();
-		private readonly IDictionary<string, ILanguage> _languageConfigs = new Dictionary<string, ILanguage>(AbcComparer.Instance);
-		private readonly AsyncLock _asyncLock = new AsyncLock();
 		private readonly IDictionary<string, IDictionary<string, string>> _allTranslations = new Dictionary<string, IDictionary<string, string>>(AbcComparer.Instance);
 		private readonly string _applicationName;
+		private readonly AsyncLock _asyncLock = new AsyncLock();
 		private readonly Regex _filePattern;
+		private readonly IDictionary<string, ILanguage> _languageConfigs = new Dictionary<string, ILanguage>(AbcComparer.Instance);
+		private readonly IDictionary<Type, IPropertyProxy> _languageTypeConfigs = new Dictionary<Type, IPropertyProxy>();
 		private bool _initialReadDone;
 
 		/// <summary>
-		/// Static helper to retrieve the LanguageLoader that was created with the supplied parameters
-		/// </summary>
-		/// <param name="applicationName"></param>
-		/// <returns>LanguageLoader</returns>
-		public static LanguageLoader Get(string applicationName)
-		{
-			return LoaderStore[applicationName];
-		}
-
-		/// <summary>
-		/// Static helper to retrieve the first LanguageLoader that was created
-		/// </summary>
-		/// <returns>LanguageLoader or null</returns>
-		public static LanguageLoader Current => LoaderStore.FirstOrDefault().Value;
-
-		/// <summary>
-		/// Delete the Language objects for the specified application, mostly used in tests
-		/// </summary>
-		/// <param name="applicationName"></param>
-		public static void Delete(string applicationName)
-		{
-			Log.Debug().WriteLine("Removing {0}", applicationName);
-			LanguageLoader languageLoader;
-			if (LoaderStore.TryGetValue(applicationName, out languageLoader))
-			{
-				foreach (var properyProxyType in languageLoader._languageTypeConfigs.Keys)
-				{
-					ProxyBuilder.DeleteProxy(properyProxyType);
-				}
-			}
-
-			LoaderStore.Remove(applicationName);
-		}
-
-		/// <summary>
-		/// Create a LanguageLoader, this is your container for all the ILanguage implementing interfaces.
-		/// You can supply a default language right away.
+		///     Create a LanguageLoader, this is your container for all the ILanguage implementing interfaces.
+		///     You can supply a default language right away.
 		/// </summary>
 		/// <param name="applicationName"></param>
 		/// <param name="defaultLanguage"></param>
@@ -99,7 +66,9 @@ namespace Dapplo.Config.Language
 		/// <param name="checkStartupDirectory"></param>
 		/// <param name="checkAppDataDirectory"></param>
 		/// <param name="specifiedDirectories"></param>
-		public LanguageLoader(string applicationName, string defaultLanguage = "en-US", string filePatern = @"language(_(?<module>[a-zA-Z0-9]*))?-(?<IETF>[a-zA-Z]{2}(-[a-zA-Z]+)?-[a-zA-Z]+)\.(ini|xml)", bool checkStartupDirectory = true, bool checkAppDataDirectory = true, ICollection<string> specifiedDirectories = null)
+		public LanguageLoader(string applicationName, string defaultLanguage = "en-US",
+			string filePatern = @"language(_(?<module>[a-zA-Z0-9]*))?-(?<IETF>[a-zA-Z]{2}(-[a-zA-Z]+)?-[a-zA-Z]+)\.(ini|xml)", bool checkStartupDirectory = true,
+			bool checkAppDataDirectory = true, ICollection<string> specifiedDirectories = null)
 		{
 			if (LoaderStore.ContainsKey(applicationName))
 			{
@@ -114,78 +83,40 @@ namespace Dapplo.Config.Language
 		}
 
 		/// <summary>
-		/// Call this to make sure that all languages have translations.
-		/// This will walk through the files of the supplied language (or the one with the most translations)
-		/// and copy the "missing" files to the others. By doing this, all non translated components should be in this language.
+		///     All languages that were found in the files during the scan.
 		/// </summary>
-		public void CorrectMissingTranslations()
-		{
-			if (Files == null || Files.Count == 0)
-			{
-				return;
-			}
-			var baseIetf = (from ietf in Files.Keys
-					select new
-					{
-						ietf, Files[ietf].Count
-					}).OrderByDescending(x => x.Count).FirstOrDefault()?.ietf;
-			if (baseIetf == null)
-			{
-				return;
-			}
-			var baseFileList = Files[baseIetf];
-			foreach (var ietf in Files.Keys)
-			{
-				if (ietf == baseIetf)
-				{
-					continue;
-				}
-				var comparingFiles = Files[ietf].Select(Path.GetFileNameWithoutExtension).ToList();
-				// Even if the count matches, there could be different files
-				foreach (var file in baseFileList)
-				{
-					var possibleTargetFile = Path.GetFileNameWithoutExtension(file.Replace(baseIetf, ietf));
+		public IDictionary<string, string> AvailableLanguages { get; private set; }
 
-					if (!comparingFiles.Contains(possibleTargetFile))
-					{
-						// Add missing translation
-						Files[ietf].Add(file);
-                    }
-				}
-            }
+		/// <summary>
+		///     Static helper to retrieve the first LanguageLoader that was created
+		/// </summary>
+		/// <returns>LanguageLoader or null</returns>
+		public static LanguageLoader Current => LoaderStore.FirstOrDefault().Value;
+
+		/// <summary>
+		///     Get the IETF of the current language.
+		///     For the name of the language, use the AvailableLanguages with this value as the key.
+		/// </summary>
+		public string CurrentLanguage { get; private set; }
+
+		/// <summary>
+		///     The files, ordered to the IETF, that were found during the scan
+		/// </summary>
+		public IDictionary<string, List<string>> Files { get; private set; }
+
+		/// <summary>
+		///     Get the specified ILanguage type
+		/// </summary>
+		/// <param name="prefix">ILanguage prefix to look for</param>
+		/// <returns>ILanguage</returns>
+		public ILanguage this[string prefix]
+		{
+			get { return _languageConfigs[prefix]; }
 		}
 
 		/// <summary>
-		/// Get the IETF of the current language.
-		/// For the name of the language, use the AvailableLanguages with this value as the key.
-		/// </summary>
-		public string CurrentLanguage
-		{
-			get;
-			private set;
-		}
-
-		/// <summary>
-		/// All languages that were found in the files during the scan. 
-		/// </summary>
-		public IDictionary<string, string> AvailableLanguages
-		{
-			get;
-			private set;
-		}
-
-		/// <summary>
-		/// The files, ordered to the IETF, that were found during the scan
-		/// </summary>
-		public IDictionary<string, List<string>> Files
-		{
-			get;
-			private set;
-		}
-
-		/// <summary>
-		/// Change the language, this will only do something if the language actually changed.
-		/// All files are reloaded. 
+		///     Change the language, this will only do something if the language actually changed.
+		///     All files are reloaded.
 		/// </summary>
 		/// <param name="ietf">The iso code for the language to use</param>
 		/// <param name="token">CancellationToken for the loading</param>
@@ -208,78 +139,222 @@ namespace Dapplo.Config.Language
 			}
 		}
 
-
 		/// <summary>
-		/// Helper to create the location of a file
+		///     Call this to make sure that all languages have translations.
+		///     This will walk through the files of the supplied language (or the one with the most translations)
+		///     and copy the "missing" files to the others. By doing this, all non translated components should be in this
+		///     language.
 		/// </summary>
-		/// <param name="checkStartupDirectory"></param>
-		/// <param name="checkAppDataDirectory"></param>
-		/// <param name="specifiedDirectories">Specify your own directory</param>
-		private void ScanFiles(bool checkStartupDirectory, bool checkAppDataDirectory = true, ICollection<string> specifiedDirectories = null)
+		public void CorrectMissingTranslations()
 		{
-			var directories = new List<string>();
-			if (specifiedDirectories != null)
+			if (Files == null || Files.Count == 0)
 			{
-				directories.AddRange(specifiedDirectories);
+				return;
 			}
-			if (checkStartupDirectory)
-			{
-				var startupDirectory = FileLocations.StartupDirectory;
-				if (startupDirectory != null)
+			var baseIetf = (from ietf in Files.Keys
+				select new
 				{
-					directories.Add(Path.Combine(startupDirectory, "languages"));
-				}
-			}
-			if (checkAppDataDirectory)
+					ietf,
+					Files[ietf].Count
+				}).OrderByDescending(x => x.Count).FirstOrDefault()?.ietf;
+			if (baseIetf == null)
 			{
-				var appDataDirectory = FileLocations.RoamingAppDataDirectory(_applicationName);
-				if (appDataDirectory != null)
+				return;
+			}
+			var baseFileList = Files[baseIetf];
+			foreach (var ietf in Files.Keys)
+			{
+				if (ietf == baseIetf)
 				{
-					directories.Add(Path.Combine(appDataDirectory, "languages"));
+					continue;
 				}
-			}
+				var comparingFiles = Files[ietf].Select(Path.GetFileNameWithoutExtension).ToList();
+				// Even if the count matches, there could be different files
+				foreach (var file in baseFileList)
+				{
+					var possibleTargetFile = Path.GetFileNameWithoutExtension(file.Replace(baseIetf, ietf));
 
-			if (Log.IsDebugEnabled())
-			{
-				Log.Debug().WriteLine("Scanning directories: {0}", string.Join(",", directories));
-			}
-
-			Files = FileLocations.Scan(directories, _filePattern)
-				.GroupBy(x => x.Item2.Groups["IETF"].Value)
-				.ToDictionary(group => group.Key, group => group.Select(x => x.Item1)
-				.ToList());
-
-			if (Log.IsDebugEnabled())
-			{
-				Log.Debug().WriteLine("Detected language ietfs: {0}", string.Join(",", Files.Keys));
-			}
-
-			var allCultures = CultureInfo.GetCultures(CultureTypes.AllCultures)
-				.ToLookup(e => e.IetfLanguageTag, StringComparer.OrdinalIgnoreCase).ToDictionary(x=>x.Key, x=> x.First());
-
-			//TODO: Create custom culture for all not available, see: https://msdn.microsoft.com/en-us/library/ms172469(v=vs.90).aspx
-
-			AvailableLanguages = (from ietf in Files.Keys
-								  where allCultures.ContainsKey(ietf)
-								  select ietf).Distinct().ToDictionary(ietf => ietf, ietf => allCultures[ietf].NativeName);
-			if (Log.IsVerboseEnabled())
-			{
-				Log.Verbose().WriteLine("Languages found: {0}", string.Join(",", AvailableLanguages.Keys));
+					if (!comparingFiles.Contains(possibleTargetFile))
+					{
+						// Add missing translation
+						Files[ietf].Add(file);
+					}
+				}
 			}
 		}
 
 		/// <summary>
-		/// Register a Property Interface to this ini config, this method will return the property object 
+		///     Delete the Language objects for the specified application, mostly used in tests
+		/// </summary>
+		/// <param name="applicationName"></param>
+		public static void Delete(string applicationName)
+		{
+			Log.Debug().WriteLine("Removing {0}", applicationName);
+			LanguageLoader languageLoader;
+			if (LoaderStore.TryGetValue(applicationName, out languageLoader))
+			{
+				foreach (var properyProxyType in languageLoader._languageTypeConfigs.Keys)
+				{
+					ProxyBuilder.DeleteProxy(properyProxyType);
+				}
+			}
+
+			LoaderStore.Remove(applicationName);
+		}
+
+		/// <summary>
+		///     Fill the backing properties of the supplied proxy-object.
+		///     Match the ini-file properties with the name of the property.
+		/// </summary>
+		/// <param name="propertyProxy"></param>
+		private void FillLanguageConfig(IPropertyProxy propertyProxy)
+		{
+			var prefix = GetPrefix(propertyProxy);
+			var propertyObject = (ILanguage) propertyProxy.PropertyObject;
+			IDictionary<string, string> sectionTranslations;
+			if (!_allTranslations.TryGetValue(prefix, out sectionTranslations))
+			{
+				// No values, reset all
+				foreach (var propertyInfo in propertyProxy.AllPropertyInfos.Values)
+				{
+					propertyObject.RestoreToDefault(propertyInfo.Name);
+				}
+				return;
+			}
+
+			foreach (var propertyInfo in propertyProxy.AllPropertyInfos.Values)
+			{
+				var key = propertyInfo.Name;
+				string translation;
+				if (sectionTranslations.TryGetValue(key, out translation))
+				{
+					propertyProxy.Set(key, translation);
+					sectionTranslations.Remove(key);
+				}
+				else
+				{
+					propertyObject.RestoreToDefault(key);
+				}
+			}
+
+			// Add all unprocessed values
+			foreach (var key in sectionTranslations.Keys)
+			{
+				propertyProxy.Properties.SafelyAddOrOverwrite(key, sectionTranslations[key]);
+			}
+		}
+
+		/// <summary>
+		///     Static helper to retrieve the LanguageLoader that was created with the supplied parameters
+		/// </summary>
+		/// <param name="applicationName"></param>
+		/// <returns>LanguageLoader</returns>
+		public static LanguageLoader Get(string applicationName)
+		{
+			return LoaderStore[applicationName];
+		}
+
+		/// <summary>
+		///     Get the specified ILanguage type
+		/// </summary>
+		/// <typeparam name="T">ILanguage</typeparam>
+		/// <returns>T</returns>
+		public T Get<T>() where T : ILanguage
+		{
+			return (T) Get(typeof (T));
+		}
+
+		/// <summary>
+		///     Get the specified ILanguage type
+		/// </summary>
+		/// <param name="type">ILanguage to look for</param>
+		/// <returns>ILanguage</returns>
+		public ILanguage Get(Type type)
+		{
+			if (!typeof (ILanguage).IsAssignableFrom(type))
+			{
+				throw new ArgumentException("type is not a ILanguage");
+			}
+			if (!_initialReadDone)
+			{
+				throw new InvalidOperationException("Please load before retrieving the language");
+			}
+			return (ILanguage) ProxyBuilder.GetProxy(type).PropertyObject;
+		}
+
+		/// <summary>
+		///     Retrieve the language prefix from the IPropertyProxy
+		/// </summary>
+		/// <param name="propertyProxy"></param>
+		/// <returns>string</returns>
+		private string GetPrefix(IPropertyProxy propertyProxy)
+		{
+			var prefix = "";
+			var languageAttribute = propertyProxy.PropertyObjectType.GetCustomAttribute<LanguageAttribute>();
+			if (languageAttribute != null)
+			{
+				prefix = languageAttribute.Prefix;
+			}
+			return prefix;
+		}
+
+		/// <summary>
+		///     Read the resources from the specified file
+		/// </summary>
+		/// <param name="languageFile"></param>
+		/// <returns>name - values sorted to module</returns>
+		private IDictionary<string, IDictionary<string, string>> ReadXmlResources(string languageFile)
+		{
+			var xElement = XDocument.Load(languageFile).Root;
+			if (xElement == null)
+			{
+				return null;
+			}
+			return (from resourcesElement in xElement.Elements("resources")
+				where resourcesElement.Attribute("prefix") != null
+				from resourceElement in resourcesElement.Elements("resource")
+				group resourceElement by resourcesElement.Attribute("prefix").Value
+				into resourceElementGroup
+				select resourceElementGroup).ToDictionary(group => @group.Key,
+					group => (IDictionary<string, string>) @group.ToDictionary(x => x.Attribute("name").Value, x => x.Value.Trim()));
+		}
+
+		/// <summary>
+		///     Register a Property Interface to this language loader, this method will return the filled property object
+		/// </summary>
+		/// <param name="type">Type to register, this must extend ILanguage</param>
+		/// <returns>instance of type</returns>
+		public ILanguage RegisterAndGet(Type type)
+		{
+			if (!typeof (ILanguage).IsAssignableFrom(type))
+			{
+				throw new ArgumentException("type is not a ILanguage");
+			}
+			Log.Verbose().WriteLine("Registering {0}", type.FullName);
+			var propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
+			var languageObject = (ILanguage) propertyProxy.PropertyObject;
+			if (!_languageTypeConfigs.ContainsKey(type))
+			{
+				_languageTypeConfigs.Add(type, propertyProxy);
+				_languageConfigs.Add(GetPrefix(propertyProxy), languageObject);
+				FillLanguageConfig(propertyProxy);
+			}
+
+			return languageObject;
+		}
+
+		/// <summary>
+		///     Register a Property Interface to this ini config, this method will return the property object
 		/// </summary>
 		/// <typeparam name="T">Your property interface, which extends IIniSection</typeparam>
 		/// <returns>instance of type T</returns>
 		public async Task<T> RegisterAndGetAsync<T>(CancellationToken token = default(CancellationToken)) where T : ILanguage
 		{
-			return (T)await RegisterAndGetAsync(typeof(T), token).ConfigureAwait(false);
+			return (T) await RegisterAndGetAsync(typeof (T), token).ConfigureAwait(false);
 		}
 
 		/// <summary>
-		/// Register the supplied types
+		///     Register the supplied types
 		/// </summary>
 		/// <param name="types">Types to register, these must extend ILanguage</param>
 		/// <param name="token"></param>
@@ -295,14 +370,14 @@ namespace Dapplo.Config.Language
 		}
 
 		/// <summary>
-		/// Register a Property Interface to this language loader, this method will return the filled property object 
+		///     Register a Property Interface to this language loader, this method will return the filled property object
 		/// </summary>
 		/// <param name="type">Type to register, this must extend ILanguage</param>
 		/// <param name="token"></param>
 		/// <returns>instance of type</returns>
 		public async Task<ILanguage> RegisterAndGetAsync(Type type, CancellationToken token = default(CancellationToken))
 		{
-			if (!typeof(ILanguage).IsAssignableFrom(type))
+			if (!typeof (ILanguage).IsAssignableFrom(type))
 			{
 				throw new ArgumentException("type is not a ILanguage");
 			}
@@ -311,94 +386,26 @@ namespace Dapplo.Config.Language
 				IPropertyProxy propertyProxy;
 				if (_languageTypeConfigs.TryGetValue(type, out propertyProxy))
 				{
-					return (ILanguage)propertyProxy.PropertyObject;
+					return (ILanguage) propertyProxy.PropertyObject;
+				}
+				propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
+				var languageObject = (ILanguage) propertyProxy.PropertyObject;
+				_languageTypeConfigs.Add(type, propertyProxy);
+				_languageConfigs.Add(GetPrefix(propertyProxy), languageObject);
+				if (!_initialReadDone)
+				{
+					await ReloadAsync(token).ConfigureAwait(false);
 				}
 				else
 				{
-					propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
-					var languageObject = (ILanguage)propertyProxy.PropertyObject;
-					_languageTypeConfigs.Add(type, propertyProxy);
-					_languageConfigs.Add(GetPrefix(propertyProxy), languageObject);
-					if (!_initialReadDone)
-					{
-						await ReloadAsync(token).ConfigureAwait(false);
-					}
-					else
-					{
-						FillLanguageConfig(propertyProxy);
-					}
-					return languageObject;
+					FillLanguageConfig(propertyProxy);
 				}
+				return languageObject;
 			}
 		}
 
 		/// <summary>
-		/// Register a Property Interface to this language loader, this method will return the filled property object 
-		/// </summary>
-		/// <param name="type">Type to register, this must extend ILanguage</param>
-		/// <returns>instance of type</returns>
-		public ILanguage RegisterAndGet(Type type)
-		{
-			if (!typeof(ILanguage).IsAssignableFrom(type))
-			{
-				throw new ArgumentException("type is not a ILanguage");
-			}
-			Log.Verbose().WriteLine("Registering {0}", type.FullName);
-			var propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
-			var languageObject = (ILanguage)propertyProxy.PropertyObject;
-			if (!_languageTypeConfigs.ContainsKey(type))
-			{
-				_languageTypeConfigs.Add(type, propertyProxy);
-				_languageConfigs.Add(GetPrefix(propertyProxy), languageObject);
-				FillLanguageConfig(propertyProxy);
-			}
-
-			return languageObject;
-		}
-
-		/// <summary>
-		/// Get the specified ILanguage type
-		/// </summary>
-		/// <typeparam name="T">ILanguage</typeparam>
-		/// <returns>T</returns>
-		public T Get<T>() where T : ILanguage
-		{
-			return (T)Get(typeof(T));
-		}
-
-		/// <summary>
-		/// Get the specified ILanguage type
-		/// </summary>
-		/// <param name="type">ILanguage to look for</param>
-		/// <returns>ILanguage</returns>
-		public ILanguage Get(Type type)
-		{
-			if (!typeof(ILanguage).IsAssignableFrom(type))
-			{
-				throw new ArgumentException("type is not a ILanguage");
-			}
-			if (!_initialReadDone)
-			{
-				throw new InvalidOperationException("Please load before retrieving the language");
-			}
-			return (ILanguage)ProxyBuilder.GetProxy(type).PropertyObject;
-		}
-
-		/// <summary>
-		/// Get the specified ILanguage type
-		/// </summary>
-		/// <param name="prefix">ILanguage prefix to look for</param>
-		/// <returns>ILanguage</returns>
-		public ILanguage this[string prefix]
-		{
-			get
-			{
-				return _languageConfigs[prefix];
-			}
-		}
-
-		/// <summary>
-		/// This is reloading all the .ini files, and will refill the language objects.
+		///     This is reloading all the .ini files, and will refill the language objects.
 		/// </summary>
 		public async Task ReloadAsync(CancellationToken token = default(CancellationToken))
 		{
@@ -449,80 +456,63 @@ namespace Dapplo.Config.Language
 			}
 		}
 
-		/// <summary>
-		/// Read the resources from the specified file
-		/// </summary>
-		/// <param name="languageFile"></param>
-		/// <returns>name - values sorted to module</returns>
-		private IDictionary<string, IDictionary<string, string>> ReadXmlResources(string languageFile)
-		{
-			var xElement = XDocument.Load(languageFile).Root;
-			if (xElement == null)
-			{
-				return null;
-			}
-			return (from resourcesElement in xElement.Elements("resources")
-					where resourcesElement.Attribute("prefix") != null
-					from resourceElement in resourcesElement.Elements("resource")
-					group resourceElement by resourcesElement.Attribute("prefix").Value into resourceElementGroup
-					select resourceElementGroup).ToDictionary(group => @group.Key, group => (IDictionary<string, string>)@group.ToDictionary(x => x.Attribute("name").Value, x => x.Value.Trim()));
-		}
 
 		/// <summary>
-		/// Retrieve the language prefix from the IPropertyProxy
+		///     Helper to create the location of a file
 		/// </summary>
-		/// <param name="propertyProxy"></param>
-		/// <returns>string</returns>
-		private string GetPrefix(IPropertyProxy propertyProxy)
+		/// <param name="checkStartupDirectory"></param>
+		/// <param name="checkAppDataDirectory"></param>
+		/// <param name="specifiedDirectories">Specify your own directory</param>
+		private void ScanFiles(bool checkStartupDirectory, bool checkAppDataDirectory = true, ICollection<string> specifiedDirectories = null)
 		{
-			string prefix = "";
-			var languageAttribute = propertyProxy.PropertyObjectType.GetCustomAttribute<LanguageAttribute>();
-			if (languageAttribute != null)
+			var directories = new List<string>();
+			if (specifiedDirectories != null)
 			{
-				prefix = languageAttribute.Prefix;
+				directories.AddRange(specifiedDirectories);
 			}
-			return prefix;
-		}
-
-		/// <summary>
-		/// Fill the backing properties of the supplied proxy-object.
-		/// Match the ini-file properties with the name of the property.
-		/// </summary>
-		/// <param name="propertyProxy"></param>
-		private void FillLanguageConfig(IPropertyProxy propertyProxy)
-		{
-			var prefix = GetPrefix(propertyProxy);
-			var propertyObject = (ILanguage)propertyProxy.PropertyObject;
-			IDictionary<string, string> sectionTranslations;
-			if (!_allTranslations.TryGetValue(prefix, out sectionTranslations))
+			if (checkStartupDirectory)
 			{
-				// No values, reset all
-				foreach (var propertyInfo in propertyProxy.AllPropertyInfos.Values)
+				var startupDirectory = FileLocations.StartupDirectory;
+				if (startupDirectory != null)
 				{
-					propertyObject.RestoreToDefault(propertyInfo.Name);
-                }
-				return;
-			}
-
-			foreach (var propertyInfo in propertyProxy.AllPropertyInfos.Values)
-			{
-				var key = propertyInfo.Name;
-                string translation;
-				if (sectionTranslations.TryGetValue(key, out translation))
-				{
-					propertyProxy.Set(key, translation);
-					sectionTranslations.Remove(key);
+					directories.Add(Path.Combine(startupDirectory, "languages"));
 				}
-				else
+			}
+			if (checkAppDataDirectory)
+			{
+				var appDataDirectory = FileLocations.RoamingAppDataDirectory(_applicationName);
+				if (appDataDirectory != null)
 				{
-					propertyObject.RestoreToDefault(key);
+					directories.Add(Path.Combine(appDataDirectory, "languages"));
 				}
 			}
 
-			// Add all unprocessed values
-			foreach (var key in sectionTranslations.Keys)
+			if (Log.IsDebugEnabled())
 			{
-				propertyProxy.Properties.SafelyAddOrOverwrite(key, sectionTranslations[key]);
+				Log.Debug().WriteLine("Scanning directories: {0}", string.Join(",", directories));
+			}
+
+			Files = FileLocations.Scan(directories, _filePattern)
+				.GroupBy(x => x.Item2.Groups["IETF"].Value)
+				.ToDictionary(group => group.Key, group => group.Select(x => x.Item1)
+					.ToList());
+
+			if (Log.IsDebugEnabled())
+			{
+				Log.Debug().WriteLine("Detected language ietfs: {0}", string.Join(",", Files.Keys));
+			}
+
+			var allCultures = CultureInfo.GetCultures(CultureTypes.AllCultures)
+				.ToLookup(e => e.IetfLanguageTag, StringComparer.OrdinalIgnoreCase).ToDictionary(x => x.Key, x => x.First());
+
+			//TODO: Create custom culture for all not available, see: https://msdn.microsoft.com/en-us/library/ms172469(v=vs.90).aspx
+
+			AvailableLanguages = (from ietf in Files.Keys
+				where allCultures.ContainsKey(ietf)
+				select ietf).Distinct().ToDictionary(ietf => ietf, ietf => allCultures[ietf].NativeName);
+			if (Log.IsVerboseEnabled())
+			{
+				Log.Verbose().WriteLine("Languages found: {0}", string.Join(",", AvailableLanguages.Keys));
 			}
 		}
 	}

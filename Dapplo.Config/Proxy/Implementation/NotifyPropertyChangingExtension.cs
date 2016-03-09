@@ -1,28 +1,30 @@
-﻿/*
-	Dapplo - building blocks for desktop applications
-	Copyright (C) 2015-2016 Dapplo
+﻿//  Dapplo - building blocks for desktop applications
+//  Copyright (C) 2015-2016 Dapplo
+// 
+//  For more information see: http://dapplo.net/
+//  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+// 
+//  This file is part of Dapplo.Config
+// 
+//  Dapplo.Config is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU Lesser General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+// 
+//  Dapplo.Config is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU Lesser General Public License for more details.
+// 
+//  You should have Config a copy of the GNU Lesser General Public License
+//  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-	For more information see: http://dapplo.net/
-	Dapplo repositories are hosted on GitHub: https://github.com/dapplo
-
-	This file is part of Dapplo.Config
-
-	Dapplo.Config is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Lesser General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	Dapplo.Config is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Lesser General Public License for more details.
-
-	You should have Config a copy of the GNU Lesser General Public License
-	along with Dapplo.HttpExtensions. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
- */
+#region using
 
 using System.ComponentModel;
-using Dapplo.Config.Support;
+using Dapplo.Config.Interceptor;
+
+#endregion
 
 namespace Dapplo.Config.Proxy.Implementation
 {
@@ -37,9 +39,6 @@ namespace Dapplo.Config.Proxy.Implementation
 		// Reference to the property object, which is supplied in the PropertyChanging event
 		private readonly T _propertyObject;
 
-		// The "backing" event
-		private event PropertyChangingEventHandler PropertyChanging;
-
 		public NotifyPropertyChangingExtension(IPropertyProxy<T> proxy) : base(proxy)
 		{
 			CheckType(typeof (INotifyPropertyChanging));
@@ -49,6 +48,16 @@ namespace Dapplo.Config.Proxy.Implementation
 			proxy.RegisterMethod("remove_PropertyChanging", RemovePropertyChanging);
 			// Register the NotifyPropertyChangingSetter as a last setter, it will call the NotifyPropertyChanging event
 			proxy.RegisterSetter((int) CallOrder.Middle - 1, NotifyPropertyChangingSetter);
+		}
+
+		/// <summary>
+		///     This is the logic which is called when the PropertyChanging event is registered.
+		/// </summary>
+		/// <param name="methodCallInfo">MethodCallInfo</param>
+		private void AddPropertyChanging(MethodCallInfo methodCallInfo)
+		{
+			// Add the parameters which should contain the event handler
+			PropertyChanging += (PropertyChangingEventHandler) methodCallInfo.Arguments[0];
 		}
 
 		/// <summary>
@@ -76,15 +85,8 @@ namespace Dapplo.Config.Proxy.Implementation
 			}
 		}
 
-		/// <summary>
-		///     This is the logic which is called when the PropertyChanging event is registered.
-		/// </summary>
-		/// <param name="methodCallInfo">MethodCallInfo</param>
-		private void AddPropertyChanging(MethodCallInfo methodCallInfo)
-		{
-			// Add the parameters which should contain the event handler
-			PropertyChanging += (PropertyChangingEventHandler) methodCallInfo.Arguments[0];
-		}
+		// The "backing" event
+		private event PropertyChangingEventHandler PropertyChanging;
 
 		/// <summary>
 		///     This is the logic which is called when the PropertyChanging event is unregistered.

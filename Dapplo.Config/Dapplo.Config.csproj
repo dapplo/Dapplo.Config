@@ -46,6 +46,8 @@
   <ItemGroup>
     <Compile Include="DapploConfig.cs" />
     <Compile Include="ExtensionAttribute.cs" />
+    <Compile Include="IIntercepted.cs" />
+    <Compile Include="IInterceptor.cs" />
     <Compile Include="Ini\IniRestCommand.cs" />
     <Compile Include="Proxy\IDescription.cs" />
     <Compile Include="Proxy\IDefaultValue.cs" />
@@ -81,9 +83,10 @@
     <Compile Include="PropertyProxy.cs" />
     <Compile Include="ProxyBuilder.cs" />
     <Compile Include="Support\DictionaryExtensions.cs" />
+    <Compile Include="Interceptor\InterceptorFactory.cs" />
     <Compile Include="Support\FileLocations.cs" />
     <Compile Include="Support\LanguageExtensions.cs" />
-    <Compile Include="Support\MethodCallExtensions.cs" />
+    <Compile Include="Interceptor\MethodCallExtensions.cs" />
     <Compile Include="Support\PropertyInfoExtension.cs" />
     <Compile Include="Support\StringExtensions.cs" />
     <Compile Include="Support\AbcComparer.cs" />
@@ -93,20 +96,21 @@
     <Compile Include="WindowsRegistry\RegistryAttribute.cs" />
     <Compile Include="WindowsRegistry\RegistryPropertyAttribute.cs" />
     <Compile Include="WindowsRegistry\IRegistryConfig.cs" />
-    <Compile Include="Support\GetInfo.cs" />
-    <Compile Include="Support\GetSetInfo.cs" />
-    <Compile Include="Support\Getter.cs" />
-    <Compile Include="Support\GetterSetter.cs" />
-    <Compile Include="Support\MethodCallInfo.cs" />
+    <Compile Include="Interceptor\GetInfo.cs" />
+    <Compile Include="Interceptor\GetSetInfo.cs" />
+    <Compile Include="Interceptor\Getter.cs" />
+    <Compile Include="Interceptor\GetterSetter.cs" />
+    <Compile Include="Interceptor\MethodCallInfo.cs" />
     <Compile Include="Support\ExpressionExtensions.cs" />
-    <Compile Include="Support\SetInfo.cs" />
-    <Compile Include="Support\Setter.cs" />
+    <Compile Include="Interceptor\SetInfo.cs" />
+    <Compile Include="Interceptor\Setter.cs" />
     <Compile Include="Support\AsyncLock.cs" />
     <Compile Include="Support\TypeDescriptorContext.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

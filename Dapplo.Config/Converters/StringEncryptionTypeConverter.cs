@@ -1,86 +1,46 @@
-﻿/*
-	Dapplo - building blocks for desktop applications
-	Copyright (C) 2015-2016 Dapplo
+﻿//  Dapplo - building blocks for desktop applications
+//  Copyright (C) 2015-2016 Dapplo
+// 
+//  For more information see: http://dapplo.net/
+//  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+// 
+//  This file is part of Dapplo.Config
+// 
+//  Dapplo.Config is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU Lesser General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+// 
+//  Dapplo.Config is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU Lesser General Public License for more details.
+// 
+//  You should have Config a copy of the GNU Lesser General Public License
+//  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-	For more information see: http://dapplo.net/
-	Dapplo repositories are hosted on GitHub: https://github.com/dapplo
-
-	This file is part of Dapplo.Config
-
-	Dapplo.Config is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Lesser General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	Dapplo.Config is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Lesser General Public License for more details.
-
-	You should have Config a copy of the GNU Lesser General Public License
-	along with Dapplo.HttpExtensions. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
- */
+#region using
 
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
+#endregion
+
 namespace Dapplo.Config.Converters
 {
 	/// <summary>
-	/// This converter makes it possible to store values in an ini file, somewhat secure.
-	/// Please make sure to initialize the RgbKey/RgbIv before it is used.
+	///     This converter makes it possible to store values in an ini file, somewhat secure.
+	///     Please make sure to initialize the RgbKey/RgbIv before it is used.
 	/// </summary>
 	public class StringEncryptionTypeConverter : TypeConverter
 	{
 		/// <summary>
-		/// The secret key to use for the symmetric algorithm.
-		/// </summary>
-		public static string RgbKey
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// The initialization vector to use for the symmetric algorithm.
-		/// </summary>
-		public static string RgbIv
-		{
-			get;
-			set;
-		}
-
-		/// <summary>
-		/// The algorithm to use for the encrypt/decrypt, default is Rijndael
-		/// </summary>
-		public static string Algorithm
-		{
-			get;
-			set;
-		} = "Rijndael";
-
-		private static IList<int> ValidKeySizes()
-		{
-			IList<int> validSizes = new List<int>();
-			using (SymmetricAlgorithm symmetricAlgorithm = SymmetricAlgorithm.Create(Algorithm))
-			{
-				foreach (var keySize in symmetricAlgorithm.LegalKeySizes)
-				{
-					for (int valueSize = keySize.MinSize; valueSize <= keySize.MaxSize; valueSize += keySize.SkipSize)
-					{
-						validSizes.Add(valueSize);
-					}
-				}
-			}
-			return validSizes;
-		}
-
-		/// <summary>
-		/// The constructor validates all settings
+		///     The constructor validates all settings
 		/// </summary>
 		public StringEncryptionTypeConverter()
 		{
@@ -93,27 +53,27 @@ namespace Dapplo.Config.Converters
 			if (!validKeySizes.Contains(currentKeySize))
 			{
 				var keySizes = string.Join(",", validKeySizes);
-                throw new InvalidOperationException($"Bit-Length of StringEncryptionTypeConverter.RgbKey {currentKeySize} is invalid, valid bit sizes are: {keySizes}");
+				throw new InvalidOperationException($"Bit-Length of StringEncryptionTypeConverter.RgbKey {currentKeySize} is invalid, valid bit sizes are: {keySizes}");
 			}
 		}
 
 		/// <summary>
-		/// Can we convert to? As we create a string, the destinationType needs to be string
+		///     The algorithm to use for the encrypt/decrypt, default is Rijndael
 		/// </summary>
-		/// <param name="context"></param>
-		/// <param name="destinationType"></param>
-		/// <returns></returns>
-		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
-		{
-			if (destinationType == typeof (string))
-			{
-				return true;
-			}
-			return base.CanConvertTo(context, destinationType);
-		}
+		public static string Algorithm { get; set; } = "Rijndael";
 
 		/// <summary>
-		/// Can we convert from? As we decrypt from a string, the sourceType needs to be string
+		///     The initialization vector to use for the symmetric algorithm.
+		/// </summary>
+		public static string RgbIv { get; set; }
+
+		/// <summary>
+		///     The secret key to use for the symmetric algorithm.
+		/// </summary>
+		public static string RgbKey { get; set; }
+
+		/// <summary>
+		///     Can we convert from? As we decrypt from a string, the sourceType needs to be string
 		/// </summary>
 		/// <param name="context"></param>
 		/// <param name="sourceType"></param>
@@ -128,18 +88,67 @@ namespace Dapplo.Config.Converters
 		}
 
 		/// <summary>
-		/// To encrypt call this
+		///     Can we convert to? As we create a string, the destinationType needs to be string
+		/// </summary>
+		/// <param name="context"></param>
+		/// <param name="destinationType"></param>
+		/// <returns></returns>
+		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+		{
+			if (destinationType == typeof (string))
+			{
+				return true;
+			}
+			return base.CanConvertTo(context, destinationType);
+		}
+
+		/// <summary>
+		///     To decrypt call this
+		/// </summary>
+		/// <param name="context"></param>
+		/// <param name="culture"></param>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+		{
+			if (value == null)
+			{
+				return null;
+			}
+			var valueString = value as string;
+			if (!string.IsNullOrWhiteSpace(valueString))
+			{
+				// Try to decrypt, ignore FormatException
+				try
+				{
+					return Decrypt(valueString);
+				}
+				catch (FormatException)
+				{
+					return valueString;
+				}
+			}
+			if (valueString != null)
+			{
+				return valueString;
+			}
+
+			return base.ConvertFrom(context, culture, value);
+		}
+
+		/// <summary>
+		///     To encrypt call this
 		/// </summary>
 		/// <param name="context"></param>
 		/// <param name="culture"></param>
 		/// <param name="value"></param>
 		/// <param name="destinationType"></param>
 		/// <returns></returns>
-		public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
 		{
 			if (destinationType == typeof (string))
 			{
-				string plaintext = (string) value;
+				var plaintext = (string) value;
 				if (string.IsNullOrEmpty(plaintext))
 				{
 					return null;
@@ -151,54 +160,50 @@ namespace Dapplo.Config.Converters
 		}
 
 		/// <summary>
-		/// To decrypt call this
+		///     A simply decryption, can be used to store passwords
 		/// </summary>
-		/// <param name="context"></param>
-		/// <param name="culture"></param>
-		/// <param name="value"></param>
-		/// <returns></returns>
-		public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+		/// <param name="encryptedText">a base64 encoded encrypted string</param>
+		/// <returns>Decrypeted text</returns>
+		private static string Decrypt(string encryptedText)
 		{
-			if (value == null)
+			string returnValue;
+			var encryptedTextBytes = Convert.FromBase64String(encryptedText);
+
+			using (var symmetricAlgorithm = SymmetricAlgorithm.Create(Algorithm))
 			{
-				return null;
-			}
-			string valueString = value as string;
-			if (!string.IsNullOrWhiteSpace(valueString))
-			{
-				// Try to decrypt, ignore FormatException
-				try
+				using (var memoryStream = new MemoryStream())
 				{
-					return Decrypt(valueString);
-				} catch (FormatException)
-				{
-					return valueString;
-                }
-			}
-			if (valueString != null)
-			{
-				return valueString;
+					var rgbIv = Encoding.ASCII.GetBytes(RgbIv);
+					var key = Encoding.ASCII.GetBytes(RgbKey);
+
+					var cryptoStream = new CryptoStream(memoryStream, symmetricAlgorithm.CreateDecryptor(key, rgbIv), CryptoStreamMode.Write);
+
+					cryptoStream.Write(encryptedTextBytes, 0, encryptedTextBytes.Length);
+					cryptoStream.Flush();
+					cryptoStream.Close();
+					returnValue = Encoding.ASCII.GetString(memoryStream.ToArray());
+				}
 			}
 
-			return base.ConvertFrom(context, culture, value);
+			return returnValue;
 		}
 
 		/// <summary>
-		/// A simply encryption, can be used to store passwords
+		///     A simply encryption, can be used to store passwords
 		/// </summary>
 		/// <param name="clearText">the string to call upon</param>
 		/// <returns>an encryped string in base64 form</returns>
 		private static string Encrypt(string clearText)
 		{
 			string returnValue;
-			byte[] clearTextBytes = Encoding.ASCII.GetBytes(clearText);
-			using (SymmetricAlgorithm symmetricAlgorithm = SymmetricAlgorithm.Create(Algorithm))
+			var clearTextBytes = Encoding.ASCII.GetBytes(clearText);
+			using (var symmetricAlgorithm = SymmetricAlgorithm.Create(Algorithm))
 			{
-				using (MemoryStream memoryStream = new MemoryStream())
+				using (var memoryStream = new MemoryStream())
 				{
-					byte[] rgbIv = Encoding.ASCII.GetBytes(RgbIv);
-					byte[] key = Encoding.ASCII.GetBytes(RgbKey);
-					CryptoStream cryptoStream = new CryptoStream(memoryStream, symmetricAlgorithm.CreateEncryptor(key, rgbIv), CryptoStreamMode.Write);
+					var rgbIv = Encoding.ASCII.GetBytes(RgbIv);
+					var key = Encoding.ASCII.GetBytes(RgbKey);
+					var cryptoStream = new CryptoStream(memoryStream, symmetricAlgorithm.CreateEncryptor(key, rgbIv), CryptoStreamMode.Write);
 
 					cryptoStream.Write(clearTextBytes, 0, clearTextBytes.Length);
 					cryptoStream.Flush();
@@ -209,33 +214,20 @@ namespace Dapplo.Config.Converters
 			return returnValue;
 		}
 
-		/// <summary>
-		/// A simply decryption, can be used to store passwords
-		/// </summary>
-		/// <param name="encryptedText">a base64 encoded encrypted string</param>
-		/// <returns>Decrypeted text</returns>
-		private static string Decrypt(string encryptedText)
+		private static IList<int> ValidKeySizes()
 		{
-			string returnValue;
-			byte[] encryptedTextBytes = Convert.FromBase64String(encryptedText);
-
-			using (SymmetricAlgorithm symmetricAlgorithm = SymmetricAlgorithm.Create(Algorithm))
+			IList<int> validSizes = new List<int>();
+			using (var symmetricAlgorithm = SymmetricAlgorithm.Create(Algorithm))
 			{
-				using (MemoryStream memoryStream = new MemoryStream())
+				foreach (var keySize in symmetricAlgorithm.LegalKeySizes)
 				{
-					byte[] rgbIv = Encoding.ASCII.GetBytes(RgbIv);
-					byte[] key = Encoding.ASCII.GetBytes(RgbKey);
-
-					CryptoStream cryptoStream = new CryptoStream(memoryStream, symmetricAlgorithm.CreateDecryptor(key, rgbIv), CryptoStreamMode.Write);
-
-					cryptoStream.Write(encryptedTextBytes, 0, encryptedTextBytes.Length);
-					cryptoStream.Flush();
-					cryptoStream.Close();
-					returnValue = Encoding.ASCII.GetString(memoryStream.ToArray());
+					for (var valueSize = keySize.MinSize; valueSize <= keySize.MaxSize; valueSize += keySize.SkipSize)
+					{
+						validSizes.Add(valueSize);
+					}
 				}
 			}
-
-			return returnValue;
+			return validSizes;
 		}
 	}
 }

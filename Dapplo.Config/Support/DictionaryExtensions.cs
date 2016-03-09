@@ -1,55 +1,65 @@
-﻿/*
-	Dapplo - building blocks for desktop applications
-	Copyright (C) 2015-2016 Dapplo
+﻿//  Dapplo - building blocks for desktop applications
+//  Copyright (C) 2015-2016 Dapplo
+// 
+//  For more information see: http://dapplo.net/
+//  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+// 
+//  This file is part of Dapplo.Config
+// 
+//  Dapplo.Config is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU Lesser General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+// 
+//  Dapplo.Config is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU Lesser General Public License for more details.
+// 
+//  You should have Config a copy of the GNU Lesser General Public License
+//  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-	For more information see: http://dapplo.net/
-	Dapplo repositories are hosted on GitHub: https://github.com/dapplo
-
-	This file is part of Dapplo.Config
-
-	Dapplo.Config is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Lesser General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	Dapplo.Config is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Lesser General Public License for more details.
-
-	You should have Config a copy of the GNU Lesser General Public License
-	along with Dapplo.HttpExtensions. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
- */
+#region using
 
 using System.Collections.Generic;
 
-namespace Dapplo.Config.Support {
-	public static class DictionaryExtensions {
+#endregion
+
+namespace Dapplo.Config.Support
+{
+	public static class DictionaryExtensions
+	{
 		/// <summary>
-		/// Safely retrieve a value from the dictionary, by using a key
+		///     Safely retrieve a value from the dictionary, by using a key
 		/// </summary>
 		/// <param name="dictionary"></param>
 		/// <param name="key"></param>
 		/// <returns>object</returns>
-		public static object SafeGet(this IDictionary<string, object> dictionary, string key) {
+		public static object SafeGet(this IDictionary<string, object> dictionary, string key)
+		{
 			object value;
-			if (dictionary.TryGetValue(key, out value)) {
+			if (dictionary.TryGetValue(key, out value))
+			{
 				return value;
 			}
 			return null;
 		}
 
 		/// <summary>
-		/// Safely add or overwrite a value in the dictionary, supply the key & value
+		///     Safely add or overwrite a value in the dictionary, supply the key & value
 		/// </summary>
 		/// <param name="dictionary"></param>
 		/// <param name="key">string key</param>
 		/// <param name="newValue">object</param>
 		/// <returns>dictionary for fluent API calls</returns>
-		public static IDictionary<T1, T2> SafelyAddOrOverwrite<T1, T2>(this IDictionary<T1, T2> dictionary, T1 key, T2 newValue) {
-			if (dictionary.ContainsKey(key)) {
+		public static IDictionary<T1, T2> SafelyAddOrOverwrite<T1, T2>(this IDictionary<T1, T2> dictionary, T1 key, T2 newValue)
+		{
+			if (dictionary.ContainsKey(key))
+			{
 				dictionary[key] = newValue;
-			} else {
+			}
+			else
+			{
 				dictionary.Add(key, newValue);
 			}
 			return dictionary;

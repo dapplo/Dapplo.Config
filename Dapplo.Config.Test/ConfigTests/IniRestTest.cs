@@ -1,43 +1,46 @@
-﻿/*
-	Dapplo - building blocks for desktop applications
-	Copyright (C) 2015-2016 Dapplo
+﻿//  Dapplo - building blocks for desktop applications
+//  Copyright (C) 2015-2016 Dapplo
+// 
+//  For more information see: http://dapplo.net/
+//  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+// 
+//  This file is part of Dapplo.Config
+// 
+//  Dapplo.Config is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU Lesser General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+// 
+//  Dapplo.Config is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU Lesser General Public License for more details.
+// 
+//  You should have Config a copy of the GNU Lesser General Public License
+//  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-	For more information see: http://dapplo.net/
-	Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+#region using
 
-	This file is part of Dapplo.Config
-
-	Dapplo.Config is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Lesser General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	Dapplo.Config is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Lesser General Public License for more details.
-
-	You should have Config a copy of the GNU Lesser General Public License
-	along with Dapplo.HttpExtensions. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
- */
-
-using Dapplo.Config.Converters;
-using Dapplo.Config.Ini;
-using Dapplo.Config.Test.ConfigTests.Interfaces;
-using Dapplo.LogFacade;
 using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Dapplo.Config.Converters;
+using Dapplo.Config.Ini;
+using Dapplo.Config.Test.ConfigTests.Interfaces;
+using Dapplo.LogFacade;
 using Xunit;
 using Xunit.Abstractions;
+
+#endregion
 
 namespace Dapplo.Config.Test.ConfigTests
 {
 	public class IniRestTest : IDisposable
 	{
-		private static readonly LogSource Log = new LogSource();
 		private const string Name = "Dapplo";
+		private static readonly LogSource Log = new LogSource();
+
 		public IniRestTest(ITestOutputHelper testOutputHelper)
 		{
 			XUnitLogger.RegisterLogger(testOutputHelper, LogLevel.Verbose);
@@ -52,13 +55,6 @@ namespace Dapplo.Config.Test.ConfigTests
 			IniConfig.Delete("Dapplo", "dapplo");
 		}
 
-		private async Task<IniConfig> InitializeAsync()
-		{
-			var iniConfig = Create();
-			await ConfigureMemoryStreamAsync();
-			return iniConfig;
-		}
-
 		private async Task ConfigureMemoryStreamAsync()
 		{
 			using (var testMemoryStream = new MemoryStream())
@@ -68,13 +64,20 @@ namespace Dapplo.Config.Test.ConfigTests
 		}
 
 		/// <summary>
-		/// Create an ini-config, but delete it first
+		///     Create an ini-config, but delete it first
 		/// </summary>
 		/// <returns></returns>
 		private IniConfig Create()
 		{
 			IniConfig.Delete("Dapplo", "dapplo");
 			return new IniConfig("Dapplo", "dapplo", saveOnExit: false);
+		}
+
+		private async Task<IniConfig> InitializeAsync()
+		{
+			var iniConfig = Create();
+			await ConfigureMemoryStreamAsync();
+			return iniConfig;
 		}
 
 		[Fact]
@@ -96,7 +99,7 @@ namespace Dapplo.Config.Test.ConfigTests
 			var iniRestCommand = IniRest.ProcessRestUri(readRobinKromUri);
 
 			Assert.True(iniRestCommand.Results.Count(x => x.PropertyName == "Name") == 1);
-			Assert.Equal("RobinKrom", iniRestCommand.Results.First(x=> x.PropertyName == "Name").Value);
+			Assert.Equal("RobinKrom", iniRestCommand.Results.First(x => x.PropertyName == "Name").Value);
 
 			// Test set multiple
 			var changeValuesUri = new Uri("dummy:///IniConfig/set/Dapplo/dapplo/Test?Name=JimBean&FirstName=50");
@@ -127,7 +130,7 @@ namespace Dapplo.Config.Test.ConfigTests
 			// Test remove from list
 			var removeCutShapeUri = new Uri("dummy:///IniConfig/remove/Dapplo/dapplo/Test/WindowCornerCutShape?5&1");
 			IniRest.ProcessRestUri(removeCutShapeUri);
-            Assert.True(listToTest.First() != 5);
-        }
+			Assert.True(listToTest.First() != 5);
+		}
 	}
 }

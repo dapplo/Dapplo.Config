@@ -1,57 +1,93 @@
-﻿/*
-	Dapplo - building blocks for desktop applications
-	Copyright (C) 2015-2016 Dapplo
+﻿//  Dapplo - building blocks for desktop applications
+//  Copyright (C) 2015-2016 Dapplo
+// 
+//  For more information see: http://dapplo.net/
+//  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+// 
+//  This file is part of Dapplo.Config
+// 
+//  Dapplo.Config is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU Lesser General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+// 
+//  Dapplo.Config is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU Lesser General Public License for more details.
+// 
+//  You should have Config a copy of the GNU Lesser General Public License
+//  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-	For more information see: http://dapplo.net/
-	Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+#region using
 
-	This file is part of Dapplo.Config
-
-	Dapplo.Config is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Lesser General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	Dapplo.Config is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Lesser General Public License for more details.
-
-	You should have Config a copy of the GNU Lesser General Public License
-	along with Dapplo.HttpExtensions. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
- */
-
-using Dapplo.Config.Ini;
-using Dapplo.LogFacade;
 using System;
 using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.Serialization;
+using Dapplo.Config.Ini;
+using Dapplo.LogFacade;
 
-namespace Dapplo.Config.Support {
-	public static class PropertyInfoExtension {
+#endregion
+
+namespace Dapplo.Config.Support
+{
+	public static class PropertyInfoExtension
+	{
 		private static readonly LogSource Log = new LogSource();
+
 		/// <summary>
-		/// Create a default for the property.
-		/// This can come from the DefaultValueFor from the DefaultValueAttribute
-		/// Or it can be something like an empty collection
+		///     Retrieve the Category from the CategoryAttribute for the supplied PropertyInfo
+		/// </summary>
+		/// <param name="propertyInfo">PropertyInfo</param>
+		/// <returns>Category</returns>
+		public static string GetCategory(this PropertyInfo propertyInfo)
+		{
+			var categoryAttribute = propertyInfo.GetCustomAttribute<CategoryAttribute>(true);
+			return categoryAttribute?.Category;
+		}
+
+		/// <summary>
+		///     Retrieve the Name from the DataMemberAttribute for the supplied PropertyInfo
+		/// </summary>
+		/// <param name="propertyInfo">PropertyInfo</param>
+		/// <returns>Name</returns>
+		public static string GetDataMemberName(this PropertyInfo propertyInfo)
+		{
+			var dataMemberAttribute = propertyInfo.GetCustomAttribute<DataMemberAttribute>(true);
+			if (!string.IsNullOrEmpty(dataMemberAttribute?.Name))
+			{
+				return dataMemberAttribute.Name;
+			}
+			return null;
+		}
+
+		/// <summary>
+		///     Create a default for the property.
+		///     This can come from the DefaultValueFor from the DefaultValueAttribute
+		///     Or it can be something like an empty collection
 		/// </summary>
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>object with a default value</returns>
-		public static object GetDefaultValue(this PropertyInfo propertyInfo) {
+		public static object GetDefaultValue(this PropertyInfo propertyInfo)
+		{
 			var defaultValueAttribute = propertyInfo.GetCustomAttribute<DefaultValueAttribute>(true);
-			if (defaultValueAttribute != null) {
+			if (defaultValueAttribute != null)
+			{
 				return defaultValueAttribute.Value;
 			}
-			if (propertyInfo.PropertyType.IsValueType) {
+			if (propertyInfo.PropertyType.IsValueType)
+			{
 				// msdn information: If this PropertyInfo object is a value type and value is null, then the property will be set to the default value for that type.
 				return null;
 			}
 
-			try {
+			try
+			{
 				return propertyInfo.PropertyType.CreateInstance();
 			}
-			catch (Exception ex) {
+			catch (Exception ex)
+			{
 				// Ignore creating the default type, this might happen if there is no default constructor.
 				Log.Warn().WriteLine(ex.Message);
 			}
@@ -60,87 +96,72 @@ namespace Dapplo.Config.Support {
 		}
 
 		/// <summary>
-		/// Retrieve the TypeConverter from the TypeConverterAttribute for the supplied PropertyInfo
-		/// </summary>
-		/// <param name="propertyInfo">PropertyInfo</param>
-		/// <param name="createIfNothingSpecified">true if this should always create a converter</param>
-		/// <returns>TypeConverter</returns>
-		public static TypeConverter GetTypeConverter(this PropertyInfo propertyInfo, bool createIfNothingSpecified = false) {
-			var typeConverterAttribute = propertyInfo.GetCustomAttribute<TypeConverterAttribute>(true);
-			if (!string.IsNullOrEmpty(typeConverterAttribute?.ConverterTypeName)) {
-				var typeConverterType = Type.GetType(typeConverterAttribute.ConverterTypeName);
-				if (typeConverterType != null) {
-					return (TypeConverter)Activator.CreateInstance(typeConverterType);
-				}
-			}
-
-			return createIfNothingSpecified ? propertyInfo.PropertyType.GetConverter() : null;
-		}
-
-		/// <summary>
-		/// Retrieve the Description from the DescriptionAttribute for the supplied PropertyInfo
+		///     Retrieve the Description from the DescriptionAttribute for the supplied PropertyInfo
 		/// </summary>
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>Description</returns>
-		public static string GetDescription(this PropertyInfo propertyInfo) {
+		public static string GetDescription(this PropertyInfo propertyInfo)
+		{
 			var descriptionAttribute = propertyInfo.GetCustomAttribute<DescriptionAttribute>(true);
 			return descriptionAttribute?.Description;
 		}
 
 		/// <summary>
-		/// Retrieve the Name from the DataMemberAttribute for the supplied PropertyInfo
-		/// </summary>
-		/// <param name="propertyInfo">PropertyInfo</param>
-		/// <returns>Name</returns>
-		public static string GetDataMemberName(this PropertyInfo propertyInfo) {
-			var dataMemberAttribute = propertyInfo.GetCustomAttribute<DataMemberAttribute>(true);
-			if (!string.IsNullOrEmpty(dataMemberAttribute?.Name)) {
-				return dataMemberAttribute.Name;
-			}
-			return null;
-		}
-
-		/// <summary>
-		/// Retrieve the EmitDefaultValue from the DataMemberAttribute for the supplied PropertyInfo
+		///     Retrieve the EmitDefaultValue from the DataMemberAttribute for the supplied PropertyInfo
 		/// </summary>
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>EmitDefaultValue</returns>
-		public static bool GetEmitDefaultValue(this PropertyInfo propertyInfo) {
+		public static bool GetEmitDefaultValue(this PropertyInfo propertyInfo)
+		{
 			var dataMemberAttribute = propertyInfo.GetCustomAttribute<DataMemberAttribute>(true);
-			if (dataMemberAttribute != null) {
+			if (dataMemberAttribute != null)
+			{
 				return dataMemberAttribute.EmitDefaultValue;
 			}
 			return false;
 		}
 
 		/// <summary>
-		/// Check if the property is non serialized (annotated with the NonSerializedAttribute)
+		///     Check if the property is non serialized (annotated with the NonSerializedAttribute)
 		/// </summary>
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>true if the NonSerialized attribute is set on the property</returns>
-		public static IniPropertyBehaviorAttribute GetIniPropertyBehavior(this PropertyInfo propertyInfo) {
+		public static IniPropertyBehaviorAttribute GetIniPropertyBehavior(this PropertyInfo propertyInfo)
+		{
 			var iniPropertyBehaviorAttribute = propertyInfo.GetCustomAttribute<IniPropertyBehaviorAttribute>(true) ?? new IniPropertyBehaviorAttribute();
 			return iniPropertyBehaviorAttribute;
 		}
 
 		/// <summary>
-		/// Retrieve the IsReadOnly from the ReadOnlyAttribute for the supplied PropertyInfo
+		///     Retrieve the IsReadOnly from the ReadOnlyAttribute for the supplied PropertyInfo
 		/// </summary>
 		/// <param name="propertyInfo">PropertyInfo</param>
 		/// <returns>IsReadOnly</returns>
-		public static bool GetReadOnly(this PropertyInfo propertyInfo) {
+		public static bool GetReadOnly(this PropertyInfo propertyInfo)
+		{
 			var readOnlyAttribute = propertyInfo.GetCustomAttribute<ReadOnlyAttribute>(true);
 			return readOnlyAttribute != null && readOnlyAttribute.IsReadOnly;
 		}
 
 		/// <summary>
-		/// Retrieve the Category from the CategoryAttribute for the supplied PropertyInfo
+		///     Retrieve the TypeConverter from the TypeConverterAttribute for the supplied PropertyInfo
 		/// </summary>
 		/// <param name="propertyInfo">PropertyInfo</param>
-		/// <returns>Category</returns>
-		public static string GetCategory(this PropertyInfo propertyInfo) {
-			var categoryAttribute = propertyInfo.GetCustomAttribute<CategoryAttribute>(true);
-			return categoryAttribute?.Category;
+		/// <param name="createIfNothingSpecified">true if this should always create a converter</param>
+		/// <returns>TypeConverter</returns>
+		public static TypeConverter GetTypeConverter(this PropertyInfo propertyInfo, bool createIfNothingSpecified = false)
+		{
+			var typeConverterAttribute = propertyInfo.GetCustomAttribute<TypeConverterAttribute>(true);
+			if (!string.IsNullOrEmpty(typeConverterAttribute?.ConverterTypeName))
+			{
+				var typeConverterType = Type.GetType(typeConverterAttribute.ConverterTypeName);
+				if (typeConverterType != null)
+				{
+					return (TypeConverter) Activator.CreateInstance(typeConverterType);
+				}
+			}
+
+			return createIfNothingSpecified ? propertyInfo.PropertyType.GetConverter() : null;
 		}
 	}
 }

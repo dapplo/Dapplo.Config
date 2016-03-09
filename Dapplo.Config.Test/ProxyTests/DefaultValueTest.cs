@@ -1,40 +1,41 @@
-﻿/*
-	Dapplo - building blocks for desktop applications
-	Copyright (C) 2015-2016 Dapplo
+﻿//  Dapplo - building blocks for desktop applications
+//  Copyright (C) 2015-2016 Dapplo
+// 
+//  For more information see: http://dapplo.net/
+//  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+// 
+//  This file is part of Dapplo.Config
+// 
+//  Dapplo.Config is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU Lesser General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+// 
+//  Dapplo.Config is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU Lesser General Public License for more details.
+// 
+//  You should have Config a copy of the GNU Lesser General Public License
+//  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-	For more information see: http://dapplo.net/
-	Dapplo repositories are hosted on GitHub: https://github.com/dapplo
-
-	This file is part of Dapplo.Config
-
-	Dapplo.Config is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Lesser General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	Dapplo.Config is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Lesser General Public License for more details.
-
-	You should have Config a copy of the GNU Lesser General Public License
-	along with Dapplo.HttpExtensions. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
- */
+#region using
 
 using Dapplo.Config.Test.ProxyTests.Interfaces;
 using Dapplo.LogFacade;
-using System;
 using Xunit;
 using Xunit.Abstractions;
+
+#endregion
 
 namespace Dapplo.Config.Test.ProxyTests
 {
 	/// <summary>
-	/// Test case to show how the default value works
+	///     Test case to show how the default value works
 	/// </summary>
 	public class DefaultValueTest
 	{
-		private IPropertyProxy<IDefaultValueTest> _propertyProxy;
+		private readonly IPropertyProxy<IDefaultValueTest> _propertyProxy;
 
 		public DefaultValueTest(ITestOutputHelper testOutputHelper)
 		{
@@ -45,7 +46,7 @@ namespace Dapplo.Config.Test.ProxyTests
 		[Fact]
 		public void TestDefaultValue()
 		{
-			IDefaultValueTest properties = _propertyProxy.PropertyObject;
+			var properties = _propertyProxy.PropertyObject;
 			Assert.Equal(properties.Age, 21);
 			Assert.Equal(3, properties.Ages.Count);
 		}
@@ -53,8 +54,8 @@ namespace Dapplo.Config.Test.ProxyTests
 		[Fact]
 		public void TestDefaultValueAtrribute()
 		{
-			IDefaultValueTest properties = _propertyProxy.PropertyObject;
-			object defaultValue = properties.DefaultValueFor(x => x.Age);
+			var properties = _propertyProxy.PropertyObject;
+			var defaultValue = properties.DefaultValueFor(x => x.Age);
 			Assert.Equal(defaultValue, 21);
 			defaultValue = properties.DefaultValueFor("Age");
 			Assert.Equal(defaultValue, 21);

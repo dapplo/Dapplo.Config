@@ -1,32 +1,34 @@
-﻿/*
-	Dapplo - building blocks for desktop applications
-	Copyright (C) 2015-2016 Dapplo
+﻿//  Dapplo - building blocks for desktop applications
+//  Copyright (C) 2015-2016 Dapplo
+// 
+//  For more information see: http://dapplo.net/
+//  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+// 
+//  This file is part of Dapplo.Config
+// 
+//  Dapplo.Config is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU Lesser General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+// 
+//  Dapplo.Config is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU Lesser General Public License for more details.
+// 
+//  You should have Config a copy of the GNU Lesser General Public License
+//  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-	For more information see: http://dapplo.net/
-	Dapplo repositories are hosted on GitHub: https://github.com/dapplo
-
-	This file is part of Dapplo.Config
-
-	Dapplo.Config is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Lesser General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	Dapplo.Config is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Lesser General Public License for more details.
-
-	You should have Config a copy of the GNU Lesser General Public License
-	along with Dapplo.HttpExtensions. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
- */
+#region using
 
 using System.Collections.Generic;
+
+#endregion
 
 namespace Dapplo.Config.Ini
 {
 	/// <summary>
-	/// The supported commands for the ini-REST api
+	///     The supported commands for the ini-REST api
 	/// </summary>
 	public enum IniRestCommands
 	{
@@ -38,71 +40,43 @@ namespace Dapplo.Config.Ini
 	}
 
 	/// <summary>
-	/// This is a container for the IniRest, it has all the needed information to process
+	///     This is a container for the IniRest, it has all the needed information to process
 	/// </summary>
 	public class IniRestCommand
 	{
 		/// <summary>
-		/// The command to process
+		///     The application for this rest command
 		/// </summary>
-		public IniRestCommands Command
-		{
-			get;
-			set;
-		}
+		public string Application { get; set; }
 
 		/// <summary>
-		/// The application for this rest command
+		///     The command to process
 		/// </summary>
-		public string Application
-		{
-			get;
-			set;
-		}
+		public IniRestCommands Command { get; set; }
 
 		/// <summary>
-		/// The ini file for this rest command
+		///     The ini file for this rest command
 		/// </summary>
-		public string File
-		{
-			get;
-			set;
-		}
+		public string File { get; set; }
 
 		/// <summary>
-		/// The ini-section for this rest command
+		///     The IniValues that were specified for the get/set/reset or add/remove
 		/// </summary>
-		public string Section
-		{
-			get;
-			set;
-		}
+		public IList<IniValue> Results { get; set; } = new List<IniValue>();
 
 		/// <summary>
-		/// For add / remove we NEED a target, for set/reset it's possible to specify one
+		///     The ini-section for this rest command
 		/// </summary>
-		public string Target
-		{
-			get;
-			set;
-		}
+		public string Section { get; set; }
 
 		/// <summary>
-		/// These values are only keys when get, reset or remove, key/values when set or add
+		///     For add / remove we NEED a target, for set/reset it's possible to specify one
 		/// </summary>
-		public IDictionary<string, string> Values
-		{
-			get;
-			set;
-		} = new Dictionary<string, string>();
+		public string Target { get; set; }
 
 		/// <summary>
-		/// The IniValues that were specified for the get/set/reset or add/remove
+		///     These values are only keys when get, reset or remove, key/values when set or add
 		/// </summary>
-		public IList<IniValue> Results
-		{
-			get;
-			set;
-		} = new List<IniValue>();
+		public IDictionary<string, string> Values { get; set; } = new Dictionary<string, string>();
 	}
 }

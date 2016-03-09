@@ -1,39 +1,42 @@
-﻿/*
-	Dapplo - building blocks for desktop applications
-	Copyright (C) 2015-2016 Dapplo
+﻿//  Dapplo - building blocks for desktop applications
+//  Copyright (C) 2015-2016 Dapplo
+// 
+//  For more information see: http://dapplo.net/
+//  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+// 
+//  This file is part of Dapplo.Config
+// 
+//  Dapplo.Config is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU Lesser General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+// 
+//  Dapplo.Config is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU Lesser General Public License for more details.
+// 
+//  You should have Config a copy of the GNU Lesser General Public License
+//  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-	For more information see: http://dapplo.net/
-	Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+#region using
 
-	This file is part of Dapplo.Config
-
-	Dapplo.Config is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Lesser General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	Dapplo.Config is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Lesser General Public License for more details.
-
-	You should have Config a copy of the GNU Lesser General Public License
-	along with Dapplo.HttpExtensions. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
- */
-
-using Dapplo.Config.Support;
-using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Dapplo.Config.Interceptor;
 using Dapplo.Config.Proxy.Implementation;
+using Dapplo.Config.Support;
 using Dapplo.LogFacade;
+using Microsoft.Win32;
+
+#endregion
 
 namespace Dapplo.Config.WindowsRegistry.Implementation
 {
 	/// <summary>
-	/// Extend the PropertyProxy with Registry functionality
+	///     Extend the PropertyProxy with Registry functionality
 	/// </summary>
 	[Extension(typeof (IRegistry))]
 	internal class RegistryExtension<T> : AbstractPropertyProxyExtension<T>
@@ -49,25 +52,22 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 		}
 
 		/// <summary>
-		/// Make sure this extension is initialized last
+		///     Make sure this extension is initialized last
 		/// </summary>
 		public override int InitOrder
 		{
-			get
-			{
-				return int.MaxValue;
-			}
+			get { return int.MaxValue; }
 		}
 
 		/// <summary>
-		/// Process the property, in our case read the registry
+		///     Process the property, in our case read the registry
 		/// </summary>
 		/// <param name="propertyInfo"></param>
 		public override void InitProperty(PropertyInfo propertyInfo)
 		{
 			var registryPropertyAttribute = propertyInfo.GetCustomAttribute<RegistryPropertyAttribute>();
 
-			string path = registryPropertyAttribute.Path;
+			var path = registryPropertyAttribute.Path;
 			if (_registryAttribute.Path != null)
 			{
 				path = Path.Combine(_registryAttribute.Path, path);
@@ -117,9 +117,9 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 							{
 								values = (IDictionary<string, object>) getInfo.Value;
 							}
-							foreach (string valueName in key.GetValueNames())
+							foreach (var valueName in key.GetValueNames())
 							{
-								object value = key.GetValue(valueName);
+								var value = key.GetValue(valueName);
 								if (!values.ContainsKey(valueName))
 								{
 									values.Add(valueName, value);
@@ -149,16 +149,16 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 		}
 
 		/// <summary>
-		/// Supply the path to the property
+		///     Supply the path to the property
 		/// </summary>
 		private void PathFor(MethodCallInfo methodCallInfo)
 		{
-			PropertyInfo propertyInfo = typeof (T).GetProperty(methodCallInfo.PropertyNameOf(0));
+			var propertyInfo = typeof (T).GetProperty(methodCallInfo.PropertyNameOf(0));
 			methodCallInfo.ReturnValue = PathFor(propertyInfo);
 		}
 
 		/// <summary>
-		/// Hrlp
+		///     Hrlp
 		/// </summary>
 		/// <param name="propertyInfo"></param>
 		/// <returns></returns>
@@ -166,7 +166,7 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 		{
 			var registryPropertyAttribute = propertyInfo.GetCustomAttribute<RegistryPropertyAttribute>();
 
-			string path = registryPropertyAttribute.Path;
+			var path = registryPropertyAttribute.Path;
 			if (_registryAttribute.Path != null)
 			{
 				path = Path.Combine(_registryAttribute.Path, path);

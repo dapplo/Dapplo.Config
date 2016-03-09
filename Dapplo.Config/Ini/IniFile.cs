@@ -1,45 +1,47 @@
-﻿/*
-	Dapplo - building blocks for desktop applications
-	Copyright (C) 2015-2016 Dapplo
+﻿//  Dapplo - building blocks for desktop applications
+//  Copyright (C) 2015-2016 Dapplo
+// 
+//  For more information see: http://dapplo.net/
+//  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+// 
+//  This file is part of Dapplo.Config
+// 
+//  Dapplo.Config is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU Lesser General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+// 
+//  Dapplo.Config is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU Lesser General Public License for more details.
+// 
+//  You should have Config a copy of the GNU Lesser General Public License
+//  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-	For more information see: http://dapplo.net/
-	Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+#region using
 
-	This file is part of Dapplo.Config
-
-	Dapplo.Config is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Lesser General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	Dapplo.Config is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Lesser General Public License for more details.
-
-	You should have Config a copy of the GNU Lesser General Public License
-	along with Dapplo.HttpExtensions. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
- */
-
-using Dapplo.LogFacade;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Dapplo.LogFacade;
+
+#endregion
 
 namespace Dapplo.Config.Ini
 {
 	/// <summary>
-	/// Functionality to read/write a .ini file
+	///     Functionality to read/write a .ini file
 	/// </summary>
 	public static class IniFile
 	{
-		private static readonly LogSource Log = new LogSource();
 		private const string SectionStart = "[";
 		private const string SectionEnd = "]";
 		private const string Comment = ";";
+		private static readonly LogSource Log = new LogSource();
 
 		private static readonly char[] Assignment =
 		{
@@ -47,13 +49,14 @@ namespace Dapplo.Config.Ini
 		};
 
 		/// <summary>
-		/// Read an ini file to a Dictionary, each key is a iniSection and the value is a Dictionary with name and values.
+		///     Read an ini file to a Dictionary, each key is a iniSection and the value is a Dictionary with name and values.
 		/// </summary>
 		/// <param name="path">Path to file</param>
 		/// <param name="encoding">Encoding</param>
 		/// <param name="token">CancellationToken</param>
 		/// <returns>dictionary of sections - dictionaries with the properties</returns>
-		public static async Task<IDictionary<string, IDictionary<string, string>>> ReadAsync(string path, Encoding encoding, CancellationToken token = default(CancellationToken))
+		public static async Task<IDictionary<string, IDictionary<string, string>>> ReadAsync(string path, Encoding encoding,
+			CancellationToken token = default(CancellationToken))
 		{
 			if (!File.Exists(path))
 			{
@@ -68,7 +71,8 @@ namespace Dapplo.Config.Ini
 		}
 
 		/// <summary>
-		/// Read an stream of an Ini-file to a Dictionary, each key is a iniSection and the value is a Dictionary with name and values.
+		///     Read an stream of an Ini-file to a Dictionary, each key is a iniSection and the value is a Dictionary with name and
+		///     values.
 		/// </summary>
 		/// <param name="stream">Stream e.g. fileStream with the ini content</param>
 		/// <param name="encoding">Encoding</param>
@@ -83,25 +87,25 @@ namespace Dapplo.Config.Ini
 			var nameValues = new Dictionary<string, string>();
 			while (!reader.EndOfStream && !token.IsCancellationRequested)
 			{
-				string line = await reader.ReadLineAsync().ConfigureAwait(false);
+				var line = await reader.ReadLineAsync().ConfigureAwait(false);
 				if (line != null)
 				{
-					string cleanLine = line.Trim();
+					var cleanLine = line.Trim();
 					if (cleanLine.Length == 0 || cleanLine.StartsWith(Comment))
 					{
 						continue;
 					}
 					if (cleanLine.StartsWith(SectionStart))
 					{
-						string section = line.Replace(SectionStart, "").Replace(SectionEnd, "").Trim();
+						var section = line.Replace(SectionStart, "").Replace(SectionEnd, "").Trim();
 						nameValues = new Dictionary<string, string>();
 						ini.Add(section, nameValues);
 					}
 					else
 					{
-						string[] keyvalueSplitter = line.Split(Assignment, 2);
-						string name = keyvalueSplitter[0];
-						string inivalue = keyvalueSplitter.Length > 1 ? keyvalueSplitter[1] : null;
+						var keyvalueSplitter = line.Split(Assignment, 2);
+						var name = keyvalueSplitter[0];
+						var inivalue = keyvalueSplitter.Length > 1 ? keyvalueSplitter[1] : null;
 						inivalue = ReadEscape(inivalue);
 						if (nameValues.ContainsKey(name))
 						{
@@ -118,7 +122,7 @@ namespace Dapplo.Config.Ini
 		}
 
 		/// <summary>
-		/// change escaped newlines to newlines, and any other conversions that might be needed
+		///     change escaped newlines to newlines, and any other conversions that might be needed
 		/// </summary>
 		/// <param name="iniValue">encoded string value</param>
 		/// <returns>string</returns>
@@ -132,14 +136,15 @@ namespace Dapplo.Config.Ini
 		}
 
 		/// <summary>
-		/// Read an ini file to a Dictionary, each key is a iniSection and the value is a Dictionary with name and values.
+		///     Read an ini file to a Dictionary, each key is a iniSection and the value is a Dictionary with name and values.
 		/// </summary>
 		/// <param name="path">Path to file</param>
 		/// <param name="encoding">Encoding</param>
 		/// <param name="sections">A dictionary with dictionaries with values for every section</param>
 		/// <param name="sectionComments">A dictionary with the optional comments for the file</param>
 		/// <param name="token">CancellationToken</param>
-		public static async Task WriteAsync(string path, Encoding encoding, IDictionary<string, IDictionary<string, string>> sections, IDictionary<string, IDictionary<string, string>> sectionComments = null, CancellationToken token = default(CancellationToken))
+		public static async Task WriteAsync(string path, Encoding encoding, IDictionary<string, IDictionary<string, string>> sections,
+			IDictionary<string, IDictionary<string, string>> sectionComments = null, CancellationToken token = default(CancellationToken))
 		{
 			Log.Verbose().WriteLine("Writing ini values to {0}", path);
 			using (var fileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write, 1024))
@@ -149,16 +154,17 @@ namespace Dapplo.Config.Ini
 		}
 
 		/// <summary>
-		/// Write the supplied properties to the stream
+		///     Write the supplied properties to the stream
 		/// </summary>
 		/// <param name="stream"></param>
 		/// <param name="encoding"></param>
 		/// <param name="sections"></param>
 		/// <param name="sectionsComments">Optional</param>
 		/// <param name="token"></param>
-		public static async Task WriteAsync(Stream stream, Encoding encoding, IDictionary<string, IDictionary<string, string>> sections, IDictionary<string, IDictionary<string, string>> sectionsComments = null, CancellationToken token = default(CancellationToken))
+		public static async Task WriteAsync(Stream stream, Encoding encoding, IDictionary<string, IDictionary<string, string>> sections,
+			IDictionary<string, IDictionary<string, string>> sectionsComments = null, CancellationToken token = default(CancellationToken))
 		{
-			bool isFirstLine = true;
+			var isFirstLine = true;
 			var writer = new StreamWriter(stream, Encoding.UTF8);
 
 			Exception exception = null;
@@ -232,7 +238,7 @@ namespace Dapplo.Config.Ini
 		}
 
 		/// <summary>
-		/// change newlines to escaped newlines, and any other conversions that might be needed
+		///     change newlines to escaped newlines, and any other conversions that might be needed
 		/// </summary>
 		/// <param name="iniValue">string</param>
 		/// <returns>encoded string value</returns>
