@@ -175,6 +175,7 @@ namespace Dapplo.Config.Test.ConfigTests
 			IIniSection section;
 			Assert.True(iniConfig.TryGet("Test", out section));
 			IniValue tryGetValue;
+			// TODO: The generated code doesn't support out parameters
 			Assert.True(section.TryGetIniValue("WindowCornerCutShape", out tryGetValue));
 			Assert.True(((IList<int>) tryGetValue.Value).Count > 0);
 			Assert.False(section.TryGetIniValue("DoesNotExist", out tryGetValue));

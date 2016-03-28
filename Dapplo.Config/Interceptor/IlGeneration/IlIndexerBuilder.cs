@@ -32,8 +32,6 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 	/// </summary>
 	internal static class IlIndexerBuilder
 	{
-		private static readonly LogSource Log = new LogSource();
-
 		private static readonly MethodInfo InterceptorInvoke = typeof(IInterceptor).GetMethod("Invoke");
 		private static readonly MethodAttributes IndexerMethodAttributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.Virtual | MethodAttributes.Final;
 
@@ -107,15 +105,14 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 				throw new ArgumentNullException(nameof(interceptorField));
 			}
 
-			// TODO: unfinished method!!!
-
 			var methodName = "set_" + propertyInfo.Name;
 			var parameterTypes = new[] { propertyInfo.GetIndexParameters().First().ParameterType };
 			var getterBuilder = typeBuilder.DefineMethod(methodName, IndexerMethodAttributes, propertyInfo.PropertyType, parameterTypes);
 			var ilGetter = getterBuilder.GetILGenerator();
 			var local = ilGetter.DeclareLocal(typeof(object[]));
 
-			var arraySize = 1;
+			// Index and the value makes 2
+			var arraySize = 2;
 			ilGetter.Emit(OpCodes.Ldc_I4, arraySize);
 			ilGetter.Emit(OpCodes.Newarr, typeof(object));
 			ilGetter.Emit(OpCodes.Stloc, local);
@@ -135,19 +132,8 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 			ilGetter.Emit(OpCodes.Ldloc, local);
 
 			ilGetter.Emit(OpCodes.Callvirt, InterceptorInvoke);
-			if (propertyInfo.PropertyType == typeof(void))
-			{
-				ilGetter.Emit(OpCodes.Pop);
-			}
-			else if (propertyInfo.PropertyType.IsValueType)
-			{
-				ilGetter.Emit(OpCodes.Unbox_Any, propertyInfo.PropertyType);
-			}
-			else
-			{
-				// Cast the return value
-				ilGetter.Emit(OpCodes.Castclass, propertyInfo.PropertyType);
-			}
+			// as the interceptor always returns something, and we have a set, remove the value from the stack
+			ilGetter.Emit(OpCodes.Pop);
 			ilGetter.Emit(OpCodes.Ret);
 			return getterBuilder;
 		}

@@ -271,10 +271,14 @@ namespace Dapplo.Config.Language
 		private string GetPrefix(ILanguage language)
 		{
 			var prefix = "";
-			var languageAttribute = language.GetType().GetCustomAttribute<LanguageAttribute>();
-			if (languageAttribute != null)
+			foreach (var languageType in language.GetType().GetInterfaces())
 			{
-				prefix = languageAttribute.Prefix;
+				var languageAttribute = languageType.GetCustomAttribute<LanguageAttribute>();
+				if (languageAttribute != null)
+				{
+					prefix = languageAttribute.Prefix;
+					break;
+				}
 			}
 			return prefix;
 		}

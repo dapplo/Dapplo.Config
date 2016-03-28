@@ -275,7 +275,7 @@ namespace Dapplo.Config.Interceptor.Implementation
 				{
 					throw methodCallInfo.Error;
 				}
-				// Note: the methodCallInfo will fix an issue here, the ReturnMessage outArgs also has the return value!!
+				// TODO: make out parameters possible
 				return methodCallInfo.ReturnValue;
 			}
 			throw new NotImplementedException();
