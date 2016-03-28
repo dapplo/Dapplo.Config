@@ -24,7 +24,8 @@
 using System;
 using System.Reflection;
 using Dapplo.Config.Interceptor;
-using Dapplo.Config.Proxy.Implementation;
+using Dapplo.Config.Interceptor.Extensions;
+using Dapplo.Config.Interceptor.Implementation;
 using Dapplo.Config.Support;
 
 #endregion
@@ -35,13 +36,13 @@ namespace Dapplo.Config.Language.Implementation
 	///     Extend the PropertyProxy with Ini functionality
 	/// </summary>
 	[Extension(typeof (ILanguage))]
-	internal class LanguageExtension<T> : AbstractPropertyProxyExtension<T>
+	internal class LanguageExtension<T> : AbstractInterceptorExtension<T>
 	{
-		public LanguageExtension(IPropertyProxy<T> proxy) : base(proxy)
+		public override void Initialize()
 		{
 			CheckType(typeof (ILanguage));
-			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<ILanguage, object>(x => x[null]), GetTranslation);
-			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<ILanguage, object>(x => x.Keys()), GetKeys);
+			Interceptor.RegisterMethod(ExpressionExtensions.GetMemberName<ILanguage, object>(x => x[null]), GetTranslation);
+			Interceptor.RegisterMethod(ExpressionExtensions.GetMemberName<ILanguage, object>(x => x.Keys()), GetKeys);
 		}
 
 		/// <summary>
@@ -49,7 +50,7 @@ namespace Dapplo.Config.Language.Implementation
 		/// </summary>
 		private void GetKeys(MethodCallInfo methodCallInfo)
 		{
-			methodCallInfo.ReturnValue = Proxy.Properties.Keys;
+			methodCallInfo.ReturnValue = Interceptor.Properties.Keys;
 		}
 
 		/// <summary>
@@ -58,9 +59,9 @@ namespace Dapplo.Config.Language.Implementation
 		private void GetTranslation(MethodCallInfo methodCallInfo)
 		{
 			var key = methodCallInfo.PropertyNameOf(0);
-			if (Proxy.Properties.ContainsKey(key))
+			if (Interceptor.Properties.ContainsKey(key))
 			{
-				methodCallInfo.ReturnValue = Proxy.Properties[key] as string;
+				methodCallInfo.ReturnValue = Interceptor.Properties[key] as string;
 			}
 		}
 

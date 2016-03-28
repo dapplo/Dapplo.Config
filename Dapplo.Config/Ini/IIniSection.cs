@@ -24,7 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using Dapplo.Config.Proxy;
+using Dapplo.Config.Interfaces;
 
 #endregion
 

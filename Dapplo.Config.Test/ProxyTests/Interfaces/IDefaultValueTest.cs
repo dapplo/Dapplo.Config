@@ -23,7 +23,8 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
-using Dapplo.Config.Proxy;
+using Dapplo.Config.Interceptor;
+using Dapplo.Config.Interfaces;
 
 #endregion
 

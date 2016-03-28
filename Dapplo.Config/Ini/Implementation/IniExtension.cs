@@ -27,7 +27,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using Dapplo.Config.Interceptor;
-using Dapplo.Config.Proxy.Implementation;
+using Dapplo.Config.Interceptor.Extensions;
+using Dapplo.Config.Interceptor.Implementation;
 using Dapplo.Config.Support;
 
 #endregion
@@ -38,24 +39,24 @@ namespace Dapplo.Config.Ini.Implementation
 	///     Extend the PropertyProxy with Ini functionality
 	/// </summary>
 	[Extension(typeof (IIniSection))]
-	internal class IniExtension<T> : AbstractPropertyProxyExtension<T>
+	internal class IniExtension<T> : AbstractInterceptorExtension<T>
 	{
 		private readonly IniSectionAttribute _iniSectionAttribute = typeof (T).GetCustomAttribute<IniSectionAttribute>();
 		private IReadOnlyDictionary<string, IniValue> _iniValues;
 
-		public IniExtension(IPropertyProxy<T> proxy) : base(proxy)
+		public override void Initialize()
 		{
 			CheckType(typeof (IIniSection));
 
 			//_proxy.RegisterMethod(ConfigUtils.GetMemberName<IIniSection>(x => x.IniValueFor<T>(y => default(T))), IniValueFor);
-			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IIniSection, object>(x => x.GetIniValues()), GetIniValues);
-			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IIniSection, object>(x => x.GetIniValue(null)), GetIniValue);
-			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IIniSection, object>(x => x[null]), GetIniValue);
+			Interceptor.RegisterMethod(ExpressionExtensions.GetMemberName<IIniSection, object>(x => x.GetIniValues()), GetIniValues);
+			Interceptor.RegisterMethod(ExpressionExtensions.GetMemberName<IIniSection, object>(x => x.GetIniValue(null)), GetIniValue);
+			Interceptor.RegisterMethod(ExpressionExtensions.GetMemberName<IIniSection, object>(x => x[null]), GetIniValue);
 
 			IniValue dummy;
-			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IIniSection, object>(x => x.TryGetIniValue(null, out dummy)), TryGetIniValue);
-			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IIniSection, object>(x => x.GetSectionName()), GetSectionName);
-			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IIniSection, object>(x => x.GetSectionDescription()), GetDescription);
+			Interceptor.RegisterMethod(ExpressionExtensions.GetMemberName<IIniSection, object>(x => x.TryGetIniValue(null, out dummy)), TryGetIniValue);
+			Interceptor.RegisterMethod(ExpressionExtensions.GetMemberName<IIniSection, object>(x => x.GetSectionName()), GetSectionName);
+			Interceptor.RegisterMethod(ExpressionExtensions.GetMemberName<IIniSection, object>(x => x.GetSectionDescription()), GetDescription);
 		}
 
 		/// <summary>
@@ -68,7 +69,7 @@ namespace Dapplo.Config.Ini.Implementation
 			var iniValues = new Dictionary<string, IniValue>(AbcComparer.Instance);
 			_iniValues = new ReadOnlyDictionary<string, IniValue>(iniValues);
 
-			var generatedIniValues = from propertyInfo in Proxy.AllPropertyInfos.Values
+			var generatedIniValues = from propertyInfo in Interceptor.AllPropertyInfos.Values
 				select GenerateIniValue(propertyInfo);
 
 			foreach (var iniValue in generatedIniValues)
@@ -76,17 +77,17 @@ namespace Dapplo.Config.Ini.Implementation
 				iniValues.Add(iniValue.PropertyName, iniValue);
 			}
 
-			foreach (var propertyName in Proxy.InitializationErrors.Keys.ToList())
+			foreach (var propertyName in Interceptor.InitializationErrors.Keys.ToList())
 			{
 				IniValue currentValue;
 				if (_iniValues.TryGetValue(propertyName, out currentValue))
 				{
 					if (currentValue.Behavior.IgnoreErrors)
 					{
-						Proxy.InitializationErrors.Remove(propertyName);
+						Interceptor.InitializationErrors.Remove(propertyName);
 						continue;
 					}
-					throw Proxy.InitializationErrors[propertyName];
+					throw Interceptor.InitializationErrors[propertyName];
 				}
 			}
 		}
@@ -98,7 +99,7 @@ namespace Dapplo.Config.Ini.Implementation
 		/// <returns>IniValue</returns>
 		private IniValue GenerateIniValue(PropertyInfo propertyInfo)
 		{
-			var newIniValue = new IniValue(Proxy)
+			var newIniValue = new IniValue(Interceptor)
 			{
 				PropertyName = propertyInfo.Name,
 				ValueType = propertyInfo.PropertyType,

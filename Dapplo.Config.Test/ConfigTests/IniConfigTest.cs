@@ -126,8 +126,10 @@ namespace Dapplo.Config.Test.ConfigTests
 			Assert.True(iniConfig.SectionNames.Contains("Test"));
 			var iniTest = (IIniConfigTest) iniConfig["Test"];
 
+			var iniSection = iniConfig["Test"];
+
 			// Set value with wrong type (but valid value)
-			iniConfig["Test"]["Height"].Value = "100";
+			iniSection["Height"].Value = "100";
 
 			Assert.Equal((uint) 100, iniTest.Height);
 		}

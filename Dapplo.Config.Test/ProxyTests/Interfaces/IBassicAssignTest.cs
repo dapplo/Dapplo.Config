@@ -22,6 +22,7 @@
 #region using
 
 using System.ComponentModel;
+using Dapplo.Config.Interceptor;
 
 #endregion
 
@@ -30,7 +31,7 @@ namespace Dapplo.Config.Test.ProxyTests.Interfaces
 	/// <summary>
 	///     This is the interface under test
 	/// </summary>
-	internal interface IBassicAssignTest
+	public interface IBassicAssignTest
 	{
 		[Description("Name of the person")]
 		string Name { get; set; }

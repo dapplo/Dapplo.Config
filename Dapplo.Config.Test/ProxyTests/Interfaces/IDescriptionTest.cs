@@ -22,7 +22,8 @@
 #region using
 
 using System.ComponentModel;
-using Dapplo.Config.Proxy;
+using Dapplo.Config.Interceptor;
+using Dapplo.Config.Interfaces;
 
 #endregion
 
@@ -31,7 +32,7 @@ namespace Dapplo.Config.Test.ProxyTests.Interfaces
 	/// <summary>
 	///     This is the interface under test
 	/// </summary>
-	internal interface IDescriptionTest : IDescription<IDescriptionTest>
+	public interface IDescriptionTest : IDescription<IDescriptionTest>
 	{
 		[Description(DescriptionTest.TestDescription)]
 		string Name { get; set; }

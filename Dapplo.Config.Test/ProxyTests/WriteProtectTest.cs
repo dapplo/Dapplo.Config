@@ -22,6 +22,7 @@
 #region using
 
 using System;
+using Dapplo.Config.Interceptor;
 using Dapplo.Config.Test.ProxyTests.Interfaces;
 using Dapplo.LogFacade;
 using Xunit;
@@ -37,48 +38,45 @@ namespace Dapplo.Config.Test.ProxyTests
 	public class WriteProtectTest
 	{
 		private const string TestValue1 = "VALUE1";
-		private readonly IPropertyProxy<IWriteProtectTest> _propertyProxy;
+		private readonly IWriteProtectTest _writeProtectTest;
 
 		public WriteProtectTest(ITestOutputHelper testOutputHelper)
 		{
 			XUnitLogger.RegisterLogger(testOutputHelper, LogLevel.Verbose);
-			_propertyProxy = ProxyBuilder.CreateProxy<IWriteProtectTest>();
+			_writeProtectTest = InterceptorFactory.New<IWriteProtectTest>();
 		}
 
 		[Fact]
 		public void TestAccessViolation()
 		{
-			var properties = _propertyProxy.PropertyObject;
-			properties.WriteProtect(x => x.Name);
-			Assert.True(properties.IsWriteProtected(x => x.Name));
+			_writeProtectTest.WriteProtect(x => x.Name);
+			Assert.True(_writeProtectTest.IsWriteProtected(x => x.Name));
 
-			var ex = Assert.Throws<AccessViolationException>(() => properties.Name = TestValue1);
+			Assert.Throws<AccessViolationException>(() => _writeProtectTest.Name = TestValue1);
 		}
 
 		[Fact]
 		public void TestDisableWriteProtect()
 		{
-			var properties = _propertyProxy.PropertyObject;
-			properties.StartWriteProtecting();
-			properties.Age = 30;
-			Assert.True(properties.IsWriteProtected(x => x.Age));
-			properties.StopWriteProtecting();
-			Assert.True(properties.IsWriteProtected(x => x.Age));
-			properties.DisableWriteProtect(x => x.Age);
-			Assert.False(properties.IsWriteProtected(x => x.Age));
+			_writeProtectTest.StartWriteProtecting();
+			_writeProtectTest.Age = 30;
+			Assert.True(_writeProtectTest.IsWriteProtected(x => x.Age));
+			_writeProtectTest.StopWriteProtecting();
+			Assert.True(_writeProtectTest.IsWriteProtected(x => x.Age));
+			_writeProtectTest.DisableWriteProtect(x => x.Age);
+			Assert.False(_writeProtectTest.IsWriteProtected(x => x.Age));
 		}
 
 		[Fact]
 		public void TestWriteProtect()
 		{
-			var properties = _propertyProxy.PropertyObject;
-			properties.StartWriteProtecting();
-			properties.Age = 30;
-			Assert.True(properties.IsWriteProtected(x => x.Age));
-			properties.StopWriteProtecting();
-			Assert.True(properties.IsWriteProtected(x => x.Age));
-			properties.Name = TestValue1;
-			Assert.False(properties.IsWriteProtected(x => x.Name));
+			_writeProtectTest.StartWriteProtecting();
+			_writeProtectTest.Age = 30;
+			Assert.True(_writeProtectTest.IsWriteProtected(x => x.Age));
+			_writeProtectTest.StopWriteProtecting();
+			Assert.True(_writeProtectTest.IsWriteProtected(x => x.Age));
+			_writeProtectTest.Name = TestValue1;
+			Assert.False(_writeProtectTest.IsWriteProtected(x => x.Name));
 		}
 	}
 }

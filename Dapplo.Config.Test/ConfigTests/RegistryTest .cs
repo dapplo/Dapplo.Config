@@ -21,6 +21,7 @@
 
 #region using
 
+using Dapplo.Config.Interceptor;
 using Dapplo.Config.Test.ConfigTests.Interfaces;
 using Dapplo.LogFacade;
 using Xunit;
@@ -43,7 +44,7 @@ namespace Dapplo.Config.Test.ConfigTests
 		[Fact]
 		public void TestRegistryRead()
 		{
-			var registryTest = ProxyBuilder.GetOrCreateProxy<IRegistryTest>().PropertyObject;
+			var registryTest = InterceptorFactory.New<IRegistryTest>();
 
 			// assume that the product name is set
 			Assert.NotNull(registryTest.ProductName);

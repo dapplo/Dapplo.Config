@@ -32,6 +32,8 @@ using System.Threading.Tasks;
 using Dapplo.Config.Support;
 using Dapplo.LogFacade;
 using Timer = System.Timers.Timer;
+using System.Reflection;
+using Dapplo.Config.Interceptor;
 
 #endregion
 
@@ -184,9 +186,8 @@ namespace Dapplo.Config.Ini
 				{
 					throw new InvalidOperationException("Please load before retrieving the ini-sections");
 				}
-				var propertyProxy = ProxyBuilder.GetProxy(type);
-				var iniSection = (IIniSection) propertyProxy.PropertyObject;
-				return iniSection;
+				var iniSectionAttribute = type.GetCustomAttribute<IniSectionAttribute>();
+				return _iniSections[iniSectionAttribute.Name];
 			}
 		}
 
@@ -414,10 +415,6 @@ namespace Dapplo.Config.Ini
 			IniConfig iniConfig;
 			if (ConfigStore.TryGetValue(identifier, out iniConfig))
 			{
-				foreach (var section in iniConfig.Sections)
-				{
-					ProxyBuilder.DeleteProxy(section.GetType());
-				}
 				ConfigStore.Remove(identifier);
 			}
 			else
@@ -520,6 +517,7 @@ namespace Dapplo.Config.Ini
 
 			// After loadd
 			Action<IIniSection> afterLoadAction;
+			// TODO: The IniSection type is not longer the interface type...
 			if (_afterLoadActions.TryGetValue(iniSection.GetType(), out afterLoadAction))
 			{
 				afterLoadAction(iniSection);
@@ -673,35 +671,25 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		/// <typeparam name="T">Type to register, this must extend IIniSection</typeparam>
 		/// <returns>instance of T</returns>
-		public T RegisterAndGet<T>()
+		public T RegisterAndGet<T>() where T : IIniSection
 		{
-			return (T) RegisterAndGet(typeof (T));
-		}
+			var type = typeof (T);
+			var iniSectionAttribute = type.GetCustomAttribute<IniSectionAttribute>();
+			IIniSection iniSection;
 
-		/// <summary>
-		///     Register a Property Interface to this ini config, this method will return the property object
-		/// </summary>
-		/// <param name="type">Type to register, this must extend IIniSection</param>
-		/// <returns>instance of type</returns>
-		public IIniSection RegisterAndGet(Type type)
-		{
-			if (!typeof (IIniSection).IsAssignableFrom(type))
+			if (_iniSections.TryGetValue(iniSectionAttribute.Name, out iniSection))
 			{
-				throw new ArgumentException("type is not a IIniSection");
+				return (T)iniSection;
 			}
-			var propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
-			var iniSection = (IIniSection) propertyProxy.PropertyObject;
+
+			iniSection = InterceptorFactory.New<T>();
+
 			var sectionName = iniSection.GetSectionName();
-
-			if (_iniSections.ContainsKey(sectionName))
-			{
-				return iniSection;
-			}
 			// Add before loading, so it will be handled automatically
 			_iniSections.Add(sectionName, iniSection);
 			FillSection(iniSection);
 
-			return iniSection;
+			return (T)iniSection;
 		}
 
 		/// <summary>
@@ -711,49 +699,19 @@ namespace Dapplo.Config.Ini
 		/// <returns>instance of type T</returns>
 		public async Task<T> RegisterAndGetAsync<T>(CancellationToken token = default(CancellationToken)) where T : IIniSection
 		{
-			return (T) await RegisterAndGetAsync(typeof (T), token).ConfigureAwait(false);
-		}
-
-		/// <summary>
-		///     Register the supplied types
-		/// </summary>
-		/// <param name="types">Types to register, these must extend IIniSection</param>
-		/// <param name="token"></param>
-		/// <returns>List with instances for the supplied types</returns>
-		public async Task<IList<IIniSection>> RegisterAndGetAsync(IEnumerable<Type> types, CancellationToken token = default(CancellationToken))
-		{
-			IList<IIniSection> sections = new List<IIniSection>();
-			foreach (var type in types)
-			{
-				sections.Add(await RegisterAndGetAsync(type, token).ConfigureAwait(false));
-			}
-			return sections;
-		}
-
-		/// <summary>
-		///     Register a Property Interface to this ini config, this method will return the property object
-		/// </summary>
-		/// <param name="type">Type to register, this must extend IIniSection</param>
-		/// <param name="token"></param>
-		/// <returns>instance of type</returns>
-		public async Task<IIniSection> RegisterAndGetAsync(Type type, CancellationToken token = default(CancellationToken))
-		{
-			if (!typeof (IIniSection).IsAssignableFrom(type))
-			{
-				throw new ArgumentException("type is not a IIniSection");
-			}
-			var propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
-			var iniSection = (IIniSection) propertyProxy.PropertyObject;
-			var sectionName = iniSection.GetSectionName();
+			var type = typeof(T);
+			var iniSectionAttribute = type.GetCustomAttribute<IniSectionAttribute>();
+			IIniSection iniSection;
 
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
-				if (_iniSections.ContainsKey(sectionName))
+				if (!_iniSections.TryGetValue(iniSectionAttribute.Name, out iniSection))
 				{
-					return iniSection;
+					iniSection = InterceptorFactory.New<T>();
+					var sectionName = iniSection.GetSectionName();
+					_iniSections.Add(sectionName, iniSection);
 				}
-				// Add before loading, so it will be handled automatically
-				_iniSections.Add(sectionName, iniSection);
+
 				if (_initialRead == ReadFrom.Nothing)
 				{
 					await ReloadInternalAsync(false, token).ConfigureAwait(false);
@@ -763,8 +721,7 @@ namespace Dapplo.Config.Ini
 					FillSection(iniSection);
 				}
 			}
-
-			return iniSection;
+			return (T)iniSection;
 		}
 
 		/// <summary>
