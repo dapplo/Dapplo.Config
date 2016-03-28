@@ -51,9 +51,9 @@ namespace Dapplo.Config.Ini
 		private static readonly IDictionary<string, IniConfig> ConfigStore = new Dictionary<string, IniConfig>();
 		private readonly IDictionary<Type, Action<IIniSection>> _afterLoadActions = new Dictionary<Type, Action<IIniSection>>();
 		private readonly IDictionary<Type, Action<IIniSection>> _afterSaveActions = new Dictionary<Type, Action<IIniSection>>();
+		private readonly IDictionary<Type, Action<IIniSection>> _beforeSaveActions = new Dictionary<Type, Action<IIniSection>>();
 		private readonly string _applicationName;
 		private readonly AsyncLock _asyncLock = new AsyncLock();
-		private readonly IDictionary<Type, Action<IIniSection>> _beforeSaveActions = new Dictionary<Type, Action<IIniSection>>();
 		private readonly string _fileName;
 		private readonly string _fixedDirectory;
 		private readonly IDictionary<string, IIniSection> _iniSections = new SortedDictionary<string, IIniSection>();
@@ -515,13 +515,17 @@ namespace Dapplo.Config.Ini
 				iniSection.StopWriteProtecting();
 			}
 
-			// After loadd
-			Action<IIniSection> afterLoadAction;
-			// TODO: The IniSection type is not longer the interface type...
-			if (_afterLoadActions.TryGetValue(iniSection.GetType(), out afterLoadAction))
+			// After load
+			foreach (var interfaceType in iniSection.GetType().GetInterfaces())
 			{
-				afterLoadAction(iniSection);
+				Action<IIniSection> afterLoadAction;
+				if (_afterLoadActions.TryGetValue(interfaceType, out afterLoadAction))
+				{
+					afterLoadAction(iniSection);
+					break;
+				}
 			}
+
 			iniSection.ResetHasChanges();
 			if (_saveTimer != null)
 			{
@@ -873,10 +877,14 @@ namespace Dapplo.Config.Ini
 			// Loop over the "registered" sections
 			foreach (var iniSection in _iniSections.Values.ToList())
 			{
-				Action<IIniSection> beforeSaveAction;
-				if (_beforeSaveActions.TryGetValue(iniSection.GetType(), out beforeSaveAction))
+				// set the values before save
+				foreach (var interfaceType in iniSection.GetType().GetInterfaces())
 				{
-					beforeSaveAction(iniSection);
+					Action<IIniSection> beforeSaveAction;
+					if (_beforeSaveActions.TryGetValue(interfaceType, out beforeSaveAction))
+					{
+						beforeSaveAction(iniSection);
+					}
 				}
 				try
 				{
@@ -884,11 +892,14 @@ namespace Dapplo.Config.Ini
 				}
 				finally
 				{
-					// Eventually set the values back
-					Action<IIniSection> afterSaveAction;
-					if (_beforeSaveActions.TryGetValue(iniSection.GetType(), out afterSaveAction))
+					// Eventually set the values back, after save
+					foreach (var interfaceType in iniSection.GetType().GetInterfaces())
 					{
-						afterSaveAction(iniSection);
+						Action<IIniSection> afterSaveAction;
+						if (_afterLoadActions.TryGetValue(interfaceType, out afterSaveAction))
+						{
+							afterSaveAction(iniSection);
+						}
 					}
 				}
 			}
