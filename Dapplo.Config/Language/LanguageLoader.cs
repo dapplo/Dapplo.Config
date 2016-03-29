@@ -26,22 +26,24 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Dapplo.Config.Ini;
+using Dapplo.Config.Interceptor;
 using Dapplo.Config.Support;
 using Dapplo.LogFacade;
+using Dapplo.Config.Language.Implementation;
+using Dapplo.Config.Interfaces;
 
 #endregion
 
 namespace Dapplo.Config.Language
 {
 	/// <summary>
-	///     The language loader should be used to fill ILanguage proxy interfaces.
+	///     The language loader should be used to fill ILanguage interfaces.
 	///     It is possible to specify the directory locations, in order, where files with certain patterns should be located.
 	/// </summary>
 	public class LanguageLoader
@@ -53,8 +55,14 @@ namespace Dapplo.Config.Language
 		private readonly AsyncLock _asyncLock = new AsyncLock();
 		private readonly Regex _filePattern;
 		private readonly IDictionary<string, ILanguage> _languageConfigs = new Dictionary<string, ILanguage>(AbcComparer.Instance);
-		private readonly IDictionary<Type, IPropertyProxy> _languageTypeConfigs = new Dictionary<Type, IPropertyProxy>();
+		private readonly IDictionary<Type, ILanguage> _languageTypeConfigs = new Dictionary<Type, ILanguage>();
 		private bool _initialReadDone;
+
+		static LanguageLoader()
+		{
+			InterceptorFactory.DefineBaseTypeForInterface(typeof(ILanguage), typeof(Language<>));
+			InterceptorFactory.DefineDefaultInterfaces(typeof(ILanguage), new[] { typeof(IDefaultValue), typeof(IHasChanges) });
+		}
 
 		/// <summary>
 		///     Create a LanguageLoader, this is your container for all the ILanguage implementing interfaces.
@@ -190,57 +198,54 @@ namespace Dapplo.Config.Language
 		public static void Delete(string applicationName)
 		{
 			Log.Debug().WriteLine("Removing {0}", applicationName);
-			LanguageLoader languageLoader;
-			if (LoaderStore.TryGetValue(applicationName, out languageLoader))
-			{
-				foreach (var properyProxyType in languageLoader._languageTypeConfigs.Keys)
-				{
-					ProxyBuilder.DeleteProxy(properyProxyType);
-				}
-			}
-
 			LoaderStore.Remove(applicationName);
 		}
 
 		/// <summary>
-		///     Fill the backing properties of the supplied proxy-object.
+		///     Fill the backing properties of the supplied object.
 		///     Match the ini-file properties with the name of the property.
 		/// </summary>
-		/// <param name="propertyProxy"></param>
-		private void FillLanguageConfig(IPropertyProxy propertyProxy)
+		/// <param name="language"></param>
+		private void FillLanguageConfig(ILanguage language)
 		{
-			var prefix = GetPrefix(propertyProxy);
-			var propertyObject = (ILanguage) propertyProxy.PropertyObject;
+			var prefix = language.PrefixName();
 			IDictionary<string, string> sectionTranslations;
+			// ReSharper disable once SuspiciousTypeConversion.Global
+			var defaultValueInterface = language as IDefaultValue;
+			var interceptor = language as IExtensibleInterceptor;
+			if (interceptor == null || defaultValueInterface == null)
+			{
+				throw new NullReferenceException("Should not happen.");
+			}
 			if (!_allTranslations.TryGetValue(prefix, out sectionTranslations))
 			{
-				// No values, reset all
-				foreach (var propertyInfo in propertyProxy.AllPropertyInfos.Values)
+				// No values, reset all (only available via the PropertyTypes dictionary
+				foreach (var key in interceptor.PropertyTypes.Keys)
 				{
-					propertyObject.RestoreToDefault(propertyInfo.Name);
+					defaultValueInterface.RestoreToDefault(key);
 				}
 				return;
 			}
 
-			foreach (var propertyInfo in propertyProxy.AllPropertyInfos.Values)
+			// Use PropertyTypes.Keys to get ALL possible properties.
+			foreach (var key in interceptor.PropertyTypes.Keys.ToList())
 			{
-				var key = propertyInfo.Name;
 				string translation;
 				if (sectionTranslations.TryGetValue(key, out translation))
 				{
-					propertyProxy.Set(key, translation);
+					interceptor.Set(key, translation);
 					sectionTranslations.Remove(key);
 				}
 				else
 				{
-					propertyObject.RestoreToDefault(key);
+					defaultValueInterface.RestoreToDefault(key);
 				}
 			}
 
 			// Add all unprocessed values
 			foreach (var key in sectionTranslations.Keys)
 			{
-				propertyProxy.Properties.SafelyAddOrOverwrite(key, sectionTranslations[key]);
+				interceptor.Properties.SafelyAddOrOverwrite(key, sectionTranslations[key]);
 			}
 		}
 
@@ -261,17 +266,7 @@ namespace Dapplo.Config.Language
 		/// <returns>T</returns>
 		public T Get<T>() where T : ILanguage
 		{
-			return (T) Get(typeof (T));
-		}
-
-		/// <summary>
-		///     Get the specified ILanguage type
-		/// </summary>
-		/// <param name="type">ILanguage to look for</param>
-		/// <returns>ILanguage</returns>
-		public ILanguage Get(Type type)
-		{
-			if (!typeof (ILanguage).IsAssignableFrom(type))
+			if (!typeof(ILanguage).IsAssignableFrom(typeof(T)))
 			{
 				throw new ArgumentException("type is not a ILanguage");
 			}
@@ -279,23 +274,7 @@ namespace Dapplo.Config.Language
 			{
 				throw new InvalidOperationException("Please load before retrieving the language");
 			}
-			return (ILanguage) ProxyBuilder.GetProxy(type).PropertyObject;
-		}
-
-		/// <summary>
-		///     Retrieve the language prefix from the IPropertyProxy
-		/// </summary>
-		/// <param name="propertyProxy"></param>
-		/// <returns>string</returns>
-		private string GetPrefix(IPropertyProxy propertyProxy)
-		{
-			var prefix = "";
-			var languageAttribute = propertyProxy.PropertyObjectType.GetCustomAttribute<LanguageAttribute>();
-			if (languageAttribute != null)
-			{
-				prefix = languageAttribute.Prefix;
-			}
-			return prefix;
+			return InterceptorFactory.New<T>();
 		}
 
 		/// <summary>
@@ -322,25 +301,21 @@ namespace Dapplo.Config.Language
 		/// <summary>
 		///     Register a Property Interface to this language loader, this method will return the filled property object
 		/// </summary>
-		/// <param name="type">Type to register, this must extend ILanguage</param>
-		/// <returns>instance of type</returns>
-		public ILanguage RegisterAndGet(Type type)
+		/// <typeparam name="T">The language interface to register</typeparam>
+		/// <returns>instance of T</returns>
+		public T RegisterAndGet<T>() where T : ILanguage
 		{
-			if (!typeof (ILanguage).IsAssignableFrom(type))
-			{
-				throw new ArgumentException("type is not a ILanguage");
-			}
+			var type = typeof (T);
 			Log.Verbose().WriteLine("Registering {0}", type.FullName);
-			var propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
-			var languageObject = (ILanguage) propertyProxy.PropertyObject;
-			if (!_languageTypeConfigs.ContainsKey(type))
+			var language = InterceptorFactory.New<T>();
+			if (!_languageTypeConfigs.ContainsKey(typeof(T)))
 			{
-				_languageTypeConfigs.Add(type, propertyProxy);
-				_languageConfigs.Add(GetPrefix(propertyProxy), languageObject);
-				FillLanguageConfig(propertyProxy);
+				_languageTypeConfigs.Add(type, language);
+				_languageConfigs.Add(language.PrefixName(), language);
+				FillLanguageConfig(language);
 			}
 
-			return languageObject;
+			return language;
 		}
 
 		/// <summary>
@@ -350,57 +325,25 @@ namespace Dapplo.Config.Language
 		/// <returns>instance of type T</returns>
 		public async Task<T> RegisterAndGetAsync<T>(CancellationToken token = default(CancellationToken)) where T : ILanguage
 		{
-			return (T) await RegisterAndGetAsync(typeof (T), token).ConfigureAwait(false);
-		}
-
-		/// <summary>
-		///     Register the supplied types
-		/// </summary>
-		/// <param name="types">Types to register, these must extend ILanguage</param>
-		/// <param name="token"></param>
-		/// <returns>List with instances for the supplied types</returns>
-		public async Task<IList<ILanguage>> RegisterAndGetAsync(IEnumerable<Type> types, CancellationToken token = default(CancellationToken))
-		{
-			IList<ILanguage> languageTypes = new List<ILanguage>();
-			foreach (var type in types)
-			{
-				languageTypes.Add(await RegisterAndGetAsync(type, token).ConfigureAwait(false));
-			}
-			return languageTypes;
-		}
-
-		/// <summary>
-		///     Register a Property Interface to this language loader, this method will return the filled property object
-		/// </summary>
-		/// <param name="type">Type to register, this must extend ILanguage</param>
-		/// <param name="token"></param>
-		/// <returns>instance of type</returns>
-		public async Task<ILanguage> RegisterAndGetAsync(Type type, CancellationToken token = default(CancellationToken))
-		{
-			if (!typeof (ILanguage).IsAssignableFrom(type))
-			{
-				throw new ArgumentException("type is not a ILanguage");
-			}
+			var type = typeof (T);
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
-				IPropertyProxy propertyProxy;
-				if (_languageTypeConfigs.TryGetValue(type, out propertyProxy))
+				ILanguage language;
+				if (!_languageTypeConfigs.TryGetValue(type, out language))
 				{
-					return (ILanguage) propertyProxy.PropertyObject;
+					language = InterceptorFactory.New<T>();
+					_languageTypeConfigs.Add(type, language);
+					_languageConfigs.Add(language.PrefixName(), language);
+					if (!_initialReadDone)
+					{
+						await ReloadAsync(token).ConfigureAwait(false);
+					}
+					else
+					{
+						FillLanguageConfig(language);
+					}
 				}
-				propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
-				var languageObject = (ILanguage) propertyProxy.PropertyObject;
-				_languageTypeConfigs.Add(type, propertyProxy);
-				_languageConfigs.Add(GetPrefix(propertyProxy), languageObject);
-				if (!_initialReadDone)
-				{
-					await ReloadAsync(token).ConfigureAwait(false);
-				}
-				else
-				{
-					FillLanguageConfig(propertyProxy);
-				}
-				return languageObject;
+				return (T)language;
 			}
 		}
 
@@ -450,9 +393,9 @@ namespace Dapplo.Config.Language
 			_initialReadDone = true;
 
 			// Reset the sections that have already been registered
-			foreach (var proxy in _languageTypeConfigs.Values)
+			foreach (var language in _languageTypeConfigs.Values)
 			{
-				FillLanguageConfig(proxy);
+				FillLanguageConfig(language);
 			}
 		}
 

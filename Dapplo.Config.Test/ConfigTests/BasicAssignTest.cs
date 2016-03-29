@@ -21,6 +21,7 @@
 
 #region using
 
+using Dapplo.Config.Interceptor;
 using Dapplo.Config.Test.ProxyTests.Interfaces;
 using Dapplo.LogFacade;
 using Xunit;
@@ -32,21 +33,20 @@ namespace Dapplo.Config.Test.ConfigTests
 {
 	public class BassicAssignTest
 	{
-		private readonly IPropertyProxy<IBassicAssignTest> _propertyProxy;
+		private readonly IBassicAssignTest _bassicAssignTest;
 
 		public BassicAssignTest(ITestOutputHelper testOutputHelper)
 		{
 			XUnitLogger.RegisterLogger(testOutputHelper, LogLevel.Verbose);
-			_propertyProxy = ProxyBuilder.CreateProxy<IBassicAssignTest>();
+			_bassicAssignTest = InterceptorFactory.New<IBassicAssignTest>();
 		}
 
 		[Fact]
 		public void TestAssign()
 		{
-			var properties = _propertyProxy.PropertyObject;
 			const string testValue = "Robin";
-			properties.Name = testValue;
-			Assert.Equal(testValue, properties.Name);
+			_bassicAssignTest.Name = testValue;
+			Assert.Equal(testValue, _bassicAssignTest.Name);
 		}
 	}
 }

@@ -21,6 +21,7 @@
 
 #region using
 
+using Dapplo.Config.Interceptor;
 using Dapplo.Config.Test.ProxyTests.Interfaces;
 using Dapplo.LogFacade;
 using Xunit;
@@ -35,29 +36,27 @@ namespace Dapplo.Config.Test.ProxyTests
 	/// </summary>
 	public class DefaultValueTest
 	{
-		private readonly IPropertyProxy<IDefaultValueTest> _propertyProxy;
+		private readonly IDefaultValueTest _defaultValueTest;
 
 		public DefaultValueTest(ITestOutputHelper testOutputHelper)
 		{
 			XUnitLogger.RegisterLogger(testOutputHelper, LogLevel.Verbose);
-			_propertyProxy = ProxyBuilder.CreateProxy<IDefaultValueTest>();
+			_defaultValueTest = InterceptorFactory.New<IDefaultValueTest>();
 		}
 
 		[Fact]
 		public void TestDefaultValue()
 		{
-			var properties = _propertyProxy.PropertyObject;
-			Assert.Equal(properties.Age, 21);
-			Assert.Equal(3, properties.Ages.Count);
+			Assert.Equal(_defaultValueTest.Age, 21);
+			Assert.Equal(3, _defaultValueTest.Ages.Count);
 		}
 
 		[Fact]
 		public void TestDefaultValueAtrribute()
 		{
-			var properties = _propertyProxy.PropertyObject;
-			var defaultValue = properties.DefaultValueFor(x => x.Age);
+			var defaultValue = _defaultValueTest.DefaultValueFor(x => x.Age);
 			Assert.Equal(defaultValue, 21);
-			defaultValue = properties.DefaultValueFor("Age");
+			defaultValue = _defaultValueTest.DefaultValueFor("Age");
 			Assert.Equal(defaultValue, 21);
 		}
 
@@ -67,7 +66,7 @@ namespace Dapplo.Config.Test.ProxyTests
 			// Used to be:
 			//var ex = Assert.Throws<InvalidCastException>(() => ProxyBuilder.CreateProxy<IDefaultValueWithErrorTest>());
 			// Now it should run without error
-			ProxyBuilder.CreateProxy<IDefaultValueWithErrorTest>();
+			InterceptorFactory.New<IDefaultValueWithErrorTest>();
 		}
 	}
 }

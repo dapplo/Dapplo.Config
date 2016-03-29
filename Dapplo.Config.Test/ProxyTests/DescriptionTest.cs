@@ -21,6 +21,7 @@
 
 #region using
 
+using Dapplo.Config.Interceptor;
 using Dapplo.Config.Test.ProxyTests.Interfaces;
 using Dapplo.LogFacade;
 using Xunit;
@@ -33,20 +34,20 @@ namespace Dapplo.Config.Test.ProxyTests
 	public class DescriptionTest
 	{
 		public const string TestDescription = "Name of the person";
-		private readonly IPropertyProxy<IDescriptionTest> _propertyProxy;
+		private readonly IDescriptionTest _descriptionTest;
 
 		public DescriptionTest(ITestOutputHelper testOutputHelper)
 		{
 			XUnitLogger.RegisterLogger(testOutputHelper, LogLevel.Verbose);
-			_propertyProxy = ProxyBuilder.CreateProxy<IDescriptionTest>();
+			_descriptionTest = InterceptorFactory.New<IDescriptionTest>();
 		}
 
 		[Fact]
 		public void TestDescriptionAttribute()
 		{
-			var description = _propertyProxy.PropertyObject.DescriptionFor(x => x.Name);
+			var description = _descriptionTest.DescriptionFor(x => x.Name);
 			Assert.Equal(description, TestDescription);
-			description = _propertyProxy.PropertyObject.DescriptionFor("Name");
+			description = _descriptionTest.DescriptionFor("Name");
 			Assert.Equal(description, TestDescription);
 		}
 	}

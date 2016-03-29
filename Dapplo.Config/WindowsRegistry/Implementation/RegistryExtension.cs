@@ -26,7 +26,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Dapplo.Config.Interceptor;
-using Dapplo.Config.Proxy.Implementation;
+using Dapplo.Config.Interceptor.Extensions;
+using Dapplo.Config.Interceptor.Implementation;
 using Dapplo.Config.Support;
 using Dapplo.LogFacade;
 using Microsoft.Win32;
@@ -39,16 +40,15 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 	///     Extend the PropertyProxy with Registry functionality
 	/// </summary>
 	[Extension(typeof (IRegistry))]
-	internal class RegistryExtension<T> : AbstractPropertyProxyExtension<T>
+	internal class RegistryExtension<T> : AbstractInterceptorExtension
 	{
 		private static readonly LogSource Log = new LogSource();
-		private readonly RegistryAttribute _registryAttribute;
+		private RegistryAttribute _registryAttribute;
 
-		public RegistryExtension(IPropertyProxy<T> proxy) : base(proxy)
+		public override void Initialize()
 		{
-			CheckType(typeof (IRegistry));
 			_registryAttribute = typeof (T).GetCustomAttribute<RegistryAttribute>() ?? new RegistryAttribute();
-			Proxy.RegisterMethod(ExpressionExtensions.GetMemberName<IRegistry, object>(x => x.PathFor("")), PathFor);
+			Interceptor.RegisterMethod(ExpressionExtensions.GetMemberName<IRegistry, object>(x => x.PathFor("")), PathFor);
 		}
 
 		/// <summary>
@@ -106,12 +106,12 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 						{
 							// Read all values, assume IDictionary<string, object>
 							IDictionary<string, object> values;
-							var getInfo = Proxy.Get(propertyInfo.Name);
+							var getInfo = Interceptor.Get(propertyInfo.Name);
 							if (!getInfo.HasValue)
 							{
 								// No value yet, create a new default
 								values = new SortedDictionary<string, object>();
-								Proxy.Set(propertyInfo.Name, values);
+								Interceptor.Set(propertyInfo.Name, values);
 							}
 							else
 							{
@@ -133,7 +133,7 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 						else
 						{
 							// Read a specific value
-							Proxy.Set(propertyInfo.Name, key.GetValue(registryPropertyAttribute.Value));
+							Interceptor.Set(propertyInfo.Name, key.GetValue(registryPropertyAttribute.Value));
 						}
 					}
 					catch (Exception ex)

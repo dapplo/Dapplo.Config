@@ -46,7 +46,7 @@ namespace Dapplo.Config.Support
 				return 1;
 			}
 
-			return x.Cleanup().CompareTo(y.Cleanup());
+			return string.Compare(x.Cleanup(), y.Cleanup(), StringComparison.Ordinal);
 		}
 
 		public override bool Equals(string x, string y)

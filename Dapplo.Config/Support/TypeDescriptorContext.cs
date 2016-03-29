@@ -40,15 +40,9 @@ namespace Dapplo.Config.Support
 			_property = property;
 		}
 
-		IContainer ITypeDescriptorContext.Container
-		{
-			get { return null; }
-		}
+		IContainer ITypeDescriptorContext.Container => null;
 
-		object ITypeDescriptorContext.Instance
-		{
-			get { return _component; }
-		}
+		object ITypeDescriptorContext.Instance => _component;
 
 		void ITypeDescriptorContext.OnComponentChanged()
 		{
@@ -59,10 +53,7 @@ namespace Dapplo.Config.Support
 			return true;
 		}
 
-		PropertyDescriptor ITypeDescriptorContext.PropertyDescriptor
-		{
-			get { return _property; }
-		}
+		PropertyDescriptor ITypeDescriptorContext.PropertyDescriptor => _property;
 
 		object IServiceProvider.GetService(Type serviceType)
 		{

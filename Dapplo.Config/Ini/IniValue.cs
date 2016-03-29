@@ -23,6 +23,7 @@
 
 using System;
 using System.ComponentModel;
+using Dapplo.Config.Interceptor;
 
 #endregion
 
@@ -33,11 +34,11 @@ namespace Dapplo.Config.Ini
 	/// </summary>
 	public class IniValue
 	{
-		private readonly IPropertyProxy _proxy;
+		private readonly IExtensibleInterceptor _interceptor;
 
-		public IniValue(IPropertyProxy proxy)
+		public IniValue(IExtensibleInterceptor interceptor)
 		{
-			_proxy = proxy;
+			_interceptor = interceptor;
 		}
 
 		public IniPropertyBehaviorAttribute Behavior { get; set; }
@@ -72,7 +73,7 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		public bool HasValue
 		{
-			get { return _proxy.Properties.ContainsKey(PropertyName); }
+			get { return _interceptor.Properties.ContainsKey(PropertyName); }
 		}
 
 		/// <summary>
@@ -100,12 +101,12 @@ namespace Dapplo.Config.Ini
 				}
 
 				// Don't write if there is no value
-				if (!_proxy.Properties.ContainsKey(PropertyName))
+				if (!_interceptor.Properties.ContainsKey(PropertyName))
 				{
 					return false;
 				}
 
-				var value = _proxy.Properties[PropertyName];
+				var value = _interceptor.Properties[PropertyName];
 
 				// Check if our value is default
 				var isDefault = Equals(value, DefaultValue);
@@ -123,8 +124,8 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		public object Value
 		{
-			get { return _proxy.Get(PropertyName).Value; }
-			set { _proxy.Set(PropertyName, value); }
+			get { return _interceptor.Get(PropertyName).Value; }
+			set { _interceptor.Set(PropertyName, value); }
 		}
 
 		/// <summary>
@@ -134,7 +135,7 @@ namespace Dapplo.Config.Ini
 
 		public void ResetToDefault()
 		{
-			_proxy.Set(PropertyName, DefaultValue);
+			_interceptor.Set(PropertyName, DefaultValue);
 		}
 	}
 }

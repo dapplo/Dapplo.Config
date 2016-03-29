@@ -35,7 +35,6 @@ namespace Dapplo.Config.Support
 	public static class StringExtensions
 	{
 		private static readonly Regex CleanupRegex = new Regex(@"[^a-z0-9]+", RegexOptions.Compiled);
-		private static readonly Regex CsvSplitRegex = new Regex("\"?\\s*,\\s*\"?", RegexOptions.Compiled);
 
 		/// <summary>
 		///     Helper method for converting a string to a non strict value.
@@ -82,8 +81,9 @@ namespace Dapplo.Config.Support
 		/// </summary>
 		/// <param name="input">string with comma separated values</param>
 		/// <param name="delimiter">string with delimiters, default is ,</param>
+		/// <param name="trimWhiteSpace"></param>
 		/// <returns>IEnumerable with value</returns>
-		public static IEnumerable<string> SplitCSV(this string input, string delimiter = ",", bool trimWhiteSpace = true)
+		public static IEnumerable<string> SplitCsv(this string input, string delimiter = ",", bool trimWhiteSpace = true)
 		{
 			using (var parser = new TextFieldParser(new StringReader(input))
 			{
@@ -96,9 +96,13 @@ namespace Dapplo.Config.Support
 			{
 				while (!parser.EndOfData)
 				{
-					foreach (var field in parser.ReadFields())
+					var readFields = parser.ReadFields();
+					if (readFields != null)
 					{
-						yield return field;
+						foreach (var field in readFields)
+						{
+							yield return field;
+						}
 					}
 				}
 			}
@@ -112,7 +116,7 @@ namespace Dapplo.Config.Support
 		public static IDictionary<string, string> SplitDictionary(this string input)
 		{
 			return (from valuePair in
-				(from pair in input.SplitCSV()
+				(from pair in input.SplitCsv()
 					select pair.Split('='))
 				where valuePair.Length == 2
 				select valuePair

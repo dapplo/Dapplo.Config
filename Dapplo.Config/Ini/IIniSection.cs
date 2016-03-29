@@ -24,7 +24,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using Dapplo.Config.Proxy;
 
 #endregion
 
@@ -33,7 +32,7 @@ namespace Dapplo.Config.Ini
 	/// <summary>
 	///     By making your property proxy interface extend this, you will be able to write the property to an ini file
 	/// </summary>
-	public interface IIniSection : IDefaultValue, IWriteProtectProperties, IHasChanges
+	public interface IIniSection
 	{
 		/// <summary>
 		///     Get the IniValue for a property, this is quicker and uses less memory than to iterate over the GetIniValues result
@@ -70,15 +69,15 @@ namespace Dapplo.Config.Ini
 		///     result
 		/// </summary>
 		/// <param name="propertyName">Name of the property</param>
-		/// <param name="iniValue">out IniValue</param>
+		/// <param name="value">out IniValue</param>
 		/// <returns>bool with true if found</returns>
-		bool TryGetIniValue(string propertyName, out IniValue iniValue);
+		bool TryGetIniValue(string propertyName, out IniValue value);
 	}
 
 	/// <summary>
 	///     Generic version of IIniSection
 	/// </summary>
-	public interface IIniSection<T> : IIniSection, IDefaultValue<T>, IWriteProtectProperties<T>
+	public interface IIniSection<T> : IIniSection
 	{
 		/// <summary>
 		///     Get the IniValue for a property, this is quicker and uses less memory than to iterate over the GetIniValues result
@@ -94,8 +93,8 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		/// <typeparam name="TProp">Your interface</typeparam>
 		/// <param name="propertyExpression">expression for the property name</param>
-		/// <param name="iniValue">out IniValue</param>
+		/// <param name="value">out IniValue</param>
 		/// <returns>bool with true if found</returns>
-		bool TryGetIniValue<TProp>(Expression<Func<T, TProp>> propertyExpression, out IniValue iniValue);
+		bool TryGetIniValue<TProp>(Expression<Func<T, TProp>> propertyExpression, out IniValue value);
 	}
 }

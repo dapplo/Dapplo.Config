@@ -28,6 +28,7 @@ using System.Drawing;
 using System.Runtime.Serialization;
 using Dapplo.Config.Converters;
 using Dapplo.Config.Ini;
+using Dapplo.Config.Interfaces;
 
 #endregion
 
@@ -44,7 +45,7 @@ namespace Dapplo.Config.Test.ConfigTests.Interfaces
 	/// </summary>
 	[IniSection("Test")]
 	[Description("Test Configuration")]
-	public interface IIniConfigTest : IIniConfigSubInterfaceTest, IIniSection
+	public interface IIniConfigTest : IIniConfigSubInterfaceTest, IIniSection, IDefaultValue, IHasChanges
 	{
 		[DefaultValue(21), DataMember(EmitDefaultValue = true)]
 		long Age { get; set; }

@@ -68,7 +68,6 @@ namespace Dapplo.Config.Support
 			{
 				if (disposing)
 				{
-					// TODO: dispose managed state (managed objects).
 					_semaphoreSlim.Dispose();
 				}
 

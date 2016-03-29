@@ -54,10 +54,7 @@ namespace Dapplo.Config.Ini
 		/// <summary>
 		///     Specifies if the IgnoreErrors was specified or is default
 		/// </summary>
-		public bool IsIgnoreErrorsSet
-		{
-			get { return _ignoreErrors.HasValue; }
-		}
+		public bool IsIgnoreErrorsSet => _ignoreErrors.HasValue;
 
 		/// <summary>
 		///     Default is true, set read to false to skip reading.

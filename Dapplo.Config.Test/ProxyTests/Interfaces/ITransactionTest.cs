@@ -21,7 +21,8 @@
 
 #region using
 
-using Dapplo.Config.Proxy;
+using Dapplo.Config.Interceptor;
+using Dapplo.Config.Interfaces;
 
 #endregion
 

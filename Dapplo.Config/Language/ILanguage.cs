@@ -22,7 +22,8 @@
 #region using
 
 using System.Collections.Generic;
-using Dapplo.Config.Proxy;
+using Dapplo.Config.Interceptor;
+using Dapplo.Config.Interfaces;
 
 #endregion
 
@@ -35,8 +36,14 @@ namespace Dapplo.Config.Language
 	///     This extends IDefaultValue, as this it is very common to start with default translations.
 	///     These defaults, usually en-US, can be set with the DefaultValueAttribute
 	/// </summary>
-	public interface ILanguage : IDefaultValue
+	public interface ILanguage
 	{
+		/// <summary>
+		/// Get the prefix / module name of this ILanguage
+		/// </summary>
+		/// <returns></returns>
+		string PrefixName();
+
 		/// <summary>
 		///     Get the translation for a key
 		/// </summary>

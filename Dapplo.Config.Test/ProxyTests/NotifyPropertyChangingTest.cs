@@ -22,6 +22,7 @@
 #region using
 
 using System.ComponentModel;
+using Dapplo.Config.Interceptor;
 using Dapplo.Config.Test.ProxyTests.Interfaces;
 using Dapplo.LogFacade;
 using Xunit;
@@ -36,36 +37,35 @@ namespace Dapplo.Config.Test.ProxyTests
 		private const string NoChange = "NOCHANGE";
 		private const string TestValue1 = "VALUE1";
 		private const string TestValue2 = "VALUE2";
-		private readonly IPropertyProxy<INotifyPropertyChangingTest> _propertyProxy;
+		private readonly INotifyPropertyChangingTest _notifyPropertyChangingTest;
 
 		public NotifyPropertyChangingTest(ITestOutputHelper testOutputHelper)
 		{
 			XUnitLogger.RegisterLogger(testOutputHelper, LogLevel.Verbose);
-			_propertyProxy = ProxyBuilder.CreateProxy<INotifyPropertyChangingTest>();
+			_notifyPropertyChangingTest = InterceptorFactory.New<INotifyPropertyChangingTest>();
 		}
 
 		[Fact]
 		public void TestNotifyPropertyChanging()
 		{
-			var properties = _propertyProxy.PropertyObject;
 			string changingPropertyName = null;
 
 			var propChanging = new PropertyChangingEventHandler((sender, eventArgs) => { changingPropertyName = eventArgs.PropertyName; });
 
 			// Test event handler
-			properties.PropertyChanging += propChanging;
-			properties.Name = TestValue1;
+			_notifyPropertyChangingTest.PropertyChanging += propChanging;
+			_notifyPropertyChangingTest.Name = TestValue1;
 			Assert.Equal("Name", changingPropertyName);
 
 			// Ensure that if the value is the same, we don't get an event
 			changingPropertyName = NoChange;
-			properties.Name = TestValue1;
+			_notifyPropertyChangingTest.Name = TestValue1;
 			Assert.Equal(NoChange, changingPropertyName);
 
 			// Test if event handler is unregistered
-			properties.PropertyChanging -= propChanging;
+			_notifyPropertyChangingTest.PropertyChanging -= propChanging;
 			changingPropertyName = NoChange;
-			properties.Name = TestValue2;
+			_notifyPropertyChangingTest.Name = TestValue2;
 			Assert.Equal(NoChange, changingPropertyName);
 		}
 	}

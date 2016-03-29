@@ -23,7 +23,8 @@
 
 using System.ComponentModel;
 using Dapplo.Config.Ini;
-using Dapplo.Config.Proxy;
+using Dapplo.Config.Interceptor;
+using Dapplo.Config.Interfaces;
 using Dapplo.HttpExtensions;
 
 #endregion

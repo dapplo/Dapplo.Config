@@ -21,6 +21,7 @@
 
 #region using
 
+using Dapplo.Config.Interceptor;
 using Dapplo.Config.Test.ProxyTests.Interfaces;
 using Dapplo.LogFacade;
 using Xunit;
@@ -35,18 +36,19 @@ namespace Dapplo.Config.Test.ProxyTests
 	/// </summary>
 	public class TransactionTest
 	{
-		private readonly IPropertyProxy<ITransactionTest> _propertyProxy;
+		private readonly ITransactionTest _transactionTest;
 
 		public TransactionTest(ITestOutputHelper testOutputHelper)
 		{
 			XUnitLogger.RegisterLogger(testOutputHelper, LogLevel.Verbose);
-			_propertyProxy = ProxyBuilder.CreateProxy<ITransactionTest>();
+
+			_transactionTest = InterceptorFactory.New<ITransactionTest>();
 		}
 
 		[Fact]
 		public void TestTransactionCommit()
 		{
-			var properties = _propertyProxy.PropertyObject;
+			var properties = _transactionTest;
 			properties.Age = 30;
 			properties.StartTransaction();
 			Assert.Equal(30, properties.Age);
@@ -61,7 +63,7 @@ namespace Dapplo.Config.Test.ProxyTests
 		[Fact]
 		public void TestTransactionRollback()
 		{
-			var properties = _propertyProxy.PropertyObject;
+			var properties = _transactionTest;
 			properties.Age = 30;
 			properties.StartTransaction();
 			Assert.Equal(properties.Age, 30);

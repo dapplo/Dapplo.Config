@@ -32,6 +32,10 @@ using System.Threading.Tasks;
 using Dapplo.Config.Support;
 using Dapplo.LogFacade;
 using Timer = System.Timers.Timer;
+using System.Reflection;
+using Dapplo.Config.Interceptor;
+using Dapplo.Config.Interfaces;
+using Dapplo.Config.Ini.Implementation;
 
 #endregion
 
@@ -49,9 +53,9 @@ namespace Dapplo.Config.Ini
 		private static readonly IDictionary<string, IniConfig> ConfigStore = new Dictionary<string, IniConfig>();
 		private readonly IDictionary<Type, Action<IIniSection>> _afterLoadActions = new Dictionary<Type, Action<IIniSection>>();
 		private readonly IDictionary<Type, Action<IIniSection>> _afterSaveActions = new Dictionary<Type, Action<IIniSection>>();
+		private readonly IDictionary<Type, Action<IIniSection>> _beforeSaveActions = new Dictionary<Type, Action<IIniSection>>();
 		private readonly string _applicationName;
 		private readonly AsyncLock _asyncLock = new AsyncLock();
-		private readonly IDictionary<Type, Action<IIniSection>> _beforeSaveActions = new Dictionary<Type, Action<IIniSection>>();
 		private readonly string _fileName;
 		private readonly string _fixedDirectory;
 		private readonly IDictionary<string, IIniSection> _iniSections = new SortedDictionary<string, IIniSection>();
@@ -62,6 +66,13 @@ namespace Dapplo.Config.Ini
 		private IDictionary<string, IDictionary<string, string>> _ini = new SortedDictionary<string, IDictionary<string, string>>();
 		private ReadFrom _initialRead = ReadFrom.Nothing;
 		private readonly Timer _saveTimer;
+
+		static IniConfig()
+		{
+			InterceptorFactory.DefineBaseTypeForInterface(typeof(IIniSection), typeof(IniSection<>));
+			// Make sure every IIniSection gets IDefaultValue and IHasChanges
+			InterceptorFactory.DefineDefaultInterfaces(typeof(IIniSection), new[] { typeof(IDefaultValue), typeof(IHasChanges) });
+		}
 
 		/// <summary>
 		///     Setup the management of an .ini file location
@@ -101,10 +112,11 @@ namespace Dapplo.Config.Ini
 					var needsSave = false;
 					foreach (var iniSection in _iniSections.Values)
 					{
-						if (iniSection.HasChanges())
+						var hasChangesInterface = iniSection as IHasChanges;
+						if (hasChangesInterface?.HasChanges() == true)
 						{
 							needsSave = true;
-							iniSection.ResetHasChanges();
+							hasChangesInterface.ResetHasChanges();
 						}
 					}
 					if (needsSave)
@@ -184,9 +196,8 @@ namespace Dapplo.Config.Ini
 				{
 					throw new InvalidOperationException("Please load before retrieving the ini-sections");
 				}
-				var propertyProxy = ProxyBuilder.GetProxy(type);
-				var iniSection = (IIniSection) propertyProxy.PropertyObject;
-				return iniSection;
+				var iniSectionAttribute = type.GetCustomAttribute<IniSectionAttribute>();
+				return _iniSections[iniSectionAttribute.Name];
 			}
 		}
 
@@ -414,10 +425,6 @@ namespace Dapplo.Config.Ini
 			IniConfig iniConfig;
 			if (ConfigStore.TryGetValue(identifier, out iniConfig))
 			{
-				foreach (var section in iniConfig.Sections)
-				{
-					ProxyBuilder.DeleteProxy(section.GetType());
-				}
 				ConfigStore.Remove(identifier);
 			}
 			else
@@ -498,8 +505,13 @@ namespace Dapplo.Config.Ini
 			{
 				_saveTimer.Enabled = false;
 			}
+			// ReSharper disable once SuspiciousTypeConversion.Global
+			var writeProtectedPropertiesInterface = iniSection as IWriteProtectProperties;
+			var hasChangesInterface = iniSection as IHasChanges;
+			var interceptor = iniSection as IExtensibleInterceptor;
+
 			// Make sure there is no write protection
-			iniSection.RemoveWriteProtection();
+			writeProtectedPropertiesInterface?.RemoveWriteProtection();
 			// Defaults:
 			if (_defaults != null)
 			{
@@ -513,18 +525,19 @@ namespace Dapplo.Config.Ini
 			// Constants:
 			if (_constants != null)
 			{
-				iniSection.StartWriteProtecting();
+				writeProtectedPropertiesInterface?.StartWriteProtecting();
 				FillSection(_constants, iniSection);
-				iniSection.StopWriteProtecting();
+				writeProtectedPropertiesInterface?.StopWriteProtecting();
 			}
 
-			// After loadd
+			// After load
 			Action<IIniSection> afterLoadAction;
-			if (_afterLoadActions.TryGetValue(iniSection.GetType(), out afterLoadAction))
+			if (interceptor != null && _afterLoadActions.TryGetValue(interceptor.InterceptedType, out afterLoadAction))
 			{
 				afterLoadAction(iniSection);
 			}
-			iniSection.ResetHasChanges();
+
+			hasChangesInterface?.ResetHasChanges();
 			if (_saveTimer != null)
 			{
 				_saveTimer.Enabled = true;
@@ -673,35 +686,25 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		/// <typeparam name="T">Type to register, this must extend IIniSection</typeparam>
 		/// <returns>instance of T</returns>
-		public T RegisterAndGet<T>()
+		public T RegisterAndGet<T>() where T : IIniSection
 		{
-			return (T) RegisterAndGet(typeof (T));
-		}
+			var type = typeof (T);
+			var iniSectionAttribute = type.GetCustomAttribute<IniSectionAttribute>();
+			IIniSection iniSection;
 
-		/// <summary>
-		///     Register a Property Interface to this ini config, this method will return the property object
-		/// </summary>
-		/// <param name="type">Type to register, this must extend IIniSection</param>
-		/// <returns>instance of type</returns>
-		public IIniSection RegisterAndGet(Type type)
-		{
-			if (!typeof (IIniSection).IsAssignableFrom(type))
+			if (_iniSections.TryGetValue(iniSectionAttribute.Name, out iniSection))
 			{
-				throw new ArgumentException("type is not a IIniSection");
+				return (T)iniSection;
 			}
-			var propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
-			var iniSection = (IIniSection) propertyProxy.PropertyObject;
+
+			iniSection = InterceptorFactory.New<T>();
+
 			var sectionName = iniSection.GetSectionName();
-
-			if (_iniSections.ContainsKey(sectionName))
-			{
-				return iniSection;
-			}
 			// Add before loading, so it will be handled automatically
 			_iniSections.Add(sectionName, iniSection);
 			FillSection(iniSection);
 
-			return iniSection;
+			return (T)iniSection;
 		}
 
 		/// <summary>
@@ -711,49 +714,19 @@ namespace Dapplo.Config.Ini
 		/// <returns>instance of type T</returns>
 		public async Task<T> RegisterAndGetAsync<T>(CancellationToken token = default(CancellationToken)) where T : IIniSection
 		{
-			return (T) await RegisterAndGetAsync(typeof (T), token).ConfigureAwait(false);
-		}
-
-		/// <summary>
-		///     Register the supplied types
-		/// </summary>
-		/// <param name="types">Types to register, these must extend IIniSection</param>
-		/// <param name="token"></param>
-		/// <returns>List with instances for the supplied types</returns>
-		public async Task<IList<IIniSection>> RegisterAndGetAsync(IEnumerable<Type> types, CancellationToken token = default(CancellationToken))
-		{
-			IList<IIniSection> sections = new List<IIniSection>();
-			foreach (var type in types)
-			{
-				sections.Add(await RegisterAndGetAsync(type, token).ConfigureAwait(false));
-			}
-			return sections;
-		}
-
-		/// <summary>
-		///     Register a Property Interface to this ini config, this method will return the property object
-		/// </summary>
-		/// <param name="type">Type to register, this must extend IIniSection</param>
-		/// <param name="token"></param>
-		/// <returns>instance of type</returns>
-		public async Task<IIniSection> RegisterAndGetAsync(Type type, CancellationToken token = default(CancellationToken))
-		{
-			if (!typeof (IIniSection).IsAssignableFrom(type))
-			{
-				throw new ArgumentException("type is not a IIniSection");
-			}
-			var propertyProxy = ProxyBuilder.GetOrCreateProxy(type);
-			var iniSection = (IIniSection) propertyProxy.PropertyObject;
-			var sectionName = iniSection.GetSectionName();
+			var type = typeof(T);
+			var iniSectionAttribute = type.GetCustomAttribute<IniSectionAttribute>();
+			IIniSection iniSection;
 
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
-				if (_iniSections.ContainsKey(sectionName))
+				if (!_iniSections.TryGetValue(iniSectionAttribute.Name, out iniSection))
 				{
-					return iniSection;
+					iniSection = InterceptorFactory.New<T>();
+					var sectionName = iniSection.GetSectionName();
+					_iniSections.Add(sectionName, iniSection);
 				}
-				// Add before loading, so it will be handled automatically
-				_iniSections.Add(sectionName, iniSection);
+
 				if (_initialRead == ReadFrom.Nothing)
 				{
 					await ReloadInternalAsync(false, token).ConfigureAwait(false);
@@ -763,8 +736,7 @@ namespace Dapplo.Config.Ini
 					FillSection(iniSection);
 				}
 			}
-
-			return iniSection;
+			return (T)iniSection;
 		}
 
 		/// <summary>
@@ -826,22 +798,27 @@ namespace Dapplo.Config.Ini
 
 		/// <summary>
 		///     Reset all the values, in all the registered ini sections, to their defaults
-		///     This is for internal usage, so no lock
+		///     Important, this only works for types that extend IDefaultValue
 		/// </summary>
 		public void ResetInternal()
 		{
 			foreach (var iniSection in _iniSections.Values)
 			{
-				foreach (var propertyName in iniSection.GetIniValues().Keys)
+				var defaultValueInterface = iniSection as IDefaultValue;
+				if (defaultValueInterface != null)
 				{
-					// TODO: Do we need to skip read/write protected values here?
-					iniSection.RestoreToDefault(propertyName);
-				}
-				// Call the after load action
-				Action<IIniSection> afterLoadAction;
-				if (_afterLoadActions.TryGetValue(iniSection.GetType(), out afterLoadAction))
-				{
-					afterLoadAction(iniSection);
+					foreach (var propertyName in iniSection.GetIniValues().Keys)
+					{
+						// TODO: Do we need to skip read/write protected values here?
+						defaultValueInterface.RestoreToDefault(propertyName);
+					}
+					var intercepted = iniSection as IExtensibleInterceptor;
+					// Call the after load action
+					Action<IIniSection> afterLoadAction;
+					if (intercepted != null && _afterLoadActions.TryGetValue(intercepted.InterceptedType, out afterLoadAction))
+					{
+						afterLoadAction(iniSection);
+					}
 				}
 			}
 		}
@@ -916,8 +893,10 @@ namespace Dapplo.Config.Ini
 			// Loop over the "registered" sections
 			foreach (var iniSection in _iniSections.Values.ToList())
 			{
+				var intercepted = iniSection as IExtensibleInterceptor;
+				// set the values before save
 				Action<IIniSection> beforeSaveAction;
-				if (_beforeSaveActions.TryGetValue(iniSection.GetType(), out beforeSaveAction))
+				if (intercepted != null && _beforeSaveActions.TryGetValue(intercepted.InterceptedType, out beforeSaveAction))
 				{
 					beforeSaveAction(iniSection);
 				}
@@ -927,9 +906,9 @@ namespace Dapplo.Config.Ini
 				}
 				finally
 				{
-					// Eventually set the values back
+					// Eventually set the values back, after save
 					Action<IIniSection> afterSaveAction;
-					if (_beforeSaveActions.TryGetValue(iniSection.GetType(), out afterSaveAction))
+					if (intercepted != null && _afterLoadActions.TryGetValue(intercepted.InterceptedType, out afterSaveAction))
 					{
 						afterSaveAction(iniSection);
 					}

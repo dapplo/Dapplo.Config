@@ -21,6 +21,7 @@
 
 #region using
 
+using Dapplo.Config.Interceptor;
 using Dapplo.Config.Test.ProxyTests.Interfaces;
 using Dapplo.LogFacade;
 using Xunit;
@@ -42,37 +43,36 @@ namespace Dapplo.Config.Test.ProxyTests
 	/// </summary>
 	public class TagAttributeTest
 	{
-		private readonly IPropertyProxy<ITagAttributeTest> _propertyProxy;
+		private readonly ITagAttributeTest _tagAttributeTest;
 
 		public TagAttributeTest(ITestOutputHelper testOutputHelper)
 		{
 			XUnitLogger.RegisterLogger(testOutputHelper, LogLevel.Verbose);
-			_propertyProxy = ProxyBuilder.CreateProxy<ITagAttributeTest>();
+			_tagAttributeTest = InterceptorFactory.New<ITagAttributeTest>();
 		}
 
 		[Fact]
 		public void TestTagging()
 		{
-			var properties = _propertyProxy.PropertyObject;
-			Assert.False(properties.IsTaggedWith(x => x.Name, "Expert"));
-			Assert.False(properties.IsTaggedWith("Name", "Expert"));
+			Assert.False(_tagAttributeTest.IsTaggedWith(x => x.Name, "Expert"));
+			Assert.False(_tagAttributeTest.IsTaggedWith("Name", "Expert"));
 
-			Assert.True(properties.IsTaggedWith(x => x.Age, "Expert"));
-			Assert.True(properties.IsTaggedWith("Age", "Expert"));
+			Assert.True(_tagAttributeTest.IsTaggedWith(x => x.Age, "Expert"));
+			Assert.True(_tagAttributeTest.IsTaggedWith("Age", "Expert"));
 
-			Assert.False(properties.IsTaggedWith(x => x.Age, "Expert2"));
-			Assert.False(properties.IsTaggedWith("Age", "Expert2"));
+			Assert.False(_tagAttributeTest.IsTaggedWith(x => x.Age, "Expert2"));
+			Assert.False(_tagAttributeTest.IsTaggedWith("Age", "Expert2"));
 
-			Assert.True(properties.IsTaggedWith(x => x.FirstName, TestTags.Tag2));
-			Assert.True(properties.IsTaggedWith("FirstName", TestTags.Tag2));
+			Assert.True(_tagAttributeTest.IsTaggedWith(x => x.FirstName, TestTags.Tag2));
+			Assert.True(_tagAttributeTest.IsTaggedWith("FirstName", TestTags.Tag2));
 
-			Assert.True(properties.IsTaggedWith(x => x.FirstName, TestTags.Tag1));
-			Assert.True(properties.IsTaggedWith("FirstName", TestTags.Tag1));
+			Assert.True(_tagAttributeTest.IsTaggedWith(x => x.FirstName, TestTags.Tag1));
+			Assert.True(_tagAttributeTest.IsTaggedWith("FirstName", TestTags.Tag1));
 			// Test if we can access the value of a tag
-			Assert.Equal("Robin", properties.GetTagValue("FirstName", TestTags.Tag1));
+			Assert.Equal("Robin", _tagAttributeTest.GetTagValue("FirstName", TestTags.Tag1));
 
-			Assert.False(properties.IsTaggedWith(x => x.FirstName, TestTags.Expert));
-			Assert.False(properties.IsTaggedWith("FirstName", TestTags.Expert));
+			Assert.False(_tagAttributeTest.IsTaggedWith(x => x.FirstName, TestTags.Expert));
+			Assert.False(_tagAttributeTest.IsTaggedWith("FirstName", TestTags.Expert));
 		}
 	}
 }
