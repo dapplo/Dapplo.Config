@@ -28,19 +28,14 @@ using System.Reflection;
 namespace Dapplo.Config.Interceptor
 {
 	/// <summary>
-	///     Extensions need to extend this interface.
+	///     Extensions for the IExtensibleInterceptor need to extend this interface.
 	/// </summary>
 	public interface IInterceptorExtension
 	{
 		/// <summary>
-		/// Type which is intercepted
-		/// </summary>
-		IIntercepted Intercepted { get; set; }
-
-		/// <summary>
 		/// Type which intercepts
 		/// </summary>
-		IInterceptor Interceptor { get; set; }
+		IExtensibleInterceptor Interceptor { get; set; }
 
 		/// <summary>
 		/// Initialize the extension, this should register the methods/get/set

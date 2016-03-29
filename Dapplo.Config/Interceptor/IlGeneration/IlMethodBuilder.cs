@@ -35,7 +35,7 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 		private static readonly LogSource Log = new LogSource();
 
 		private static readonly MethodAttributes MethodAttributes = MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.Final;
-		private static readonly MethodInfo InterceptorInvoke = typeof(IInterceptor).GetMethod("Invoke");
+		private static readonly MethodInfo InterceptorInvoke = typeof(IExtensibleInterceptor).GetMethod("Invoke");
 
 		/// <summary>
 		///     Create the method invoke
@@ -43,7 +43,7 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 		/// <param name="typeBuilder"></param>
 		/// <param name="methodInfo"></param>
 		/// <param name="interceptorField"></param>
-		internal static void BuildMethod(TypeBuilder typeBuilder, MethodInfo methodInfo, FieldInfo interceptorField)
+		internal static void BuildMethod(TypeBuilder typeBuilder, MethodInfo methodInfo)
 		{
 			var parameterTypes = (
 				from parameterInfo in methodInfo.GetParameters()
@@ -62,7 +62,7 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 				methodBuilder.MakeGenericMethod(genericArguments);
 			}
 
-			GenerateIlMethod(methodBuilder, methodInfo, interceptorField);
+			GenerateIlMethod(methodBuilder, methodInfo);
 		}
 
 		/// <summary>
@@ -79,7 +79,7 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 			return genericArgumentNames;
 		}
 
-		private static void GenerateIlMethod(MethodBuilder methodBuilder, MethodInfo methodInfo, FieldInfo interceptorField)
+		private static void GenerateIlMethod(MethodBuilder methodBuilder, MethodInfo methodInfo)
 		{
 
 			var ilMethod = methodBuilder.GetILGenerator();
@@ -100,8 +100,6 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 
 			// Load the instance of the class (this) on the stack
 			ilMethod.Emit(OpCodes.Ldarg_0);
-			// Get the interceptor value of this._interceptor
-			ilMethod.Emit(OpCodes.Ldfld, interceptorField);
 			ilMethod.Emit(OpCodes.Ldstr, methodInfo.Name);
 			ilMethod.Emit(OpCodes.Ldloc, local);
 

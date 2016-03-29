@@ -41,8 +41,6 @@ namespace Dapplo.Config.Interceptor.Extensions
 		/// </summary>
 		public override void Initialize()
 		{
-			CheckType(typeof (IDescription));
-
 			// this registers one method and the overloading is handled in the GetDescription
 			Interceptor.RegisterMethod(ExpressionExtensions.GetMemberName<IDescription>(x => x.DescriptionFor("")), GetDescription);
 		}

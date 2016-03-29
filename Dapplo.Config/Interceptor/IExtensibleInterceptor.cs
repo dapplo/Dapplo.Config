@@ -25,16 +25,64 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Dapplo.Config.Interceptor.Implementation;
+using System.Linq.Expressions;
 
 #endregion
 
 namespace Dapplo.Config.Interceptor
 {
 	/// <summary>
-	///     To intercept interface calls, implement this and set your class to the IIntercepted
+	/// This is the interface for the interceptor
+	/// The meaning of this interface is to make clear what the interceptor has:
+	/// Extensions can register get/set/invokes
+	/// It is called by a generated (or manually implemented) implementation of an interface, this implementation calls the Get/Set/Invoke
+	/// Properties of the "interface" have a backingstore implemented via the special property "Properties" and some other helping properties.
 	/// </summary>
-	public interface IInterceptor
+	public interface IExtensibleInterceptor
 	{
+		Type InterceptedType
+		{
+			get;
+		}
+
+		/// <summary>
+		/// This is needed as a reflection cache
+		/// </summary>
+		IReadOnlyDictionary<string, Type> PropertyTypes
+		{
+			get;
+		}
+
+		/// <summary>
+		/// All the properties with their value
+		/// </summary>
+		IDictionary<string, object> Properties
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Errors which occur during initialization are stored here
+		/// </summary>
+		IDictionary<string, Exception> InitializationErrors
+		{
+			get;
+		}
+
+		/// <summary>
+		/// Initialize the interceptor
+		/// </summary>
+		void Init();
+
+		/// <summary>
+		/// Add extension to the interceptor
+		/// </summary>
+		/// <param name="extensionType"></param>
+		void AddExtension(Type extensionType);
+
+		string Description(string propertyName);
+
 		/// <summary>
 		/// Get method, this will go through the extensions in the specified order and give the result
 		/// </summary>
@@ -56,14 +104,8 @@ namespace Dapplo.Config.Interceptor
 		/// <returns></returns>
 		object Invoke(string methodName, params object[] parameters);
 
-
 		void RegisterMethod(string methodname, Action<MethodCallInfo> methodAction);
 		void RegisterSetter(int order, Action<SetInfo> setterAction);
 		void RegisterGetter(int order, Action<GetInfo> getterAction);
-		IDictionary<string, object> Properties { get; set; }
-
-		IDictionary<string, PropertyInfo> AllPropertyInfos { get; }
-
-		IDictionary<string, Exception> InitializationErrors { get; }
 	}
 }

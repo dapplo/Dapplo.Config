@@ -41,10 +41,12 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 		/// <summary>
 		///     Creates an implementation as Type for a given interface, which can be intercepted
 		/// </summary>
-		/// <param name="assemblyNameString"></param>
-		/// <param name="interfaceType"></param>
+		/// <param name="assemblyNameString">Name of the assembly to add the type to</param>
+		/// <param name="typeName">Name of the type to generate</param>
+		/// <param name="implementingInterfaces">Interfaces to implement</param>
+		/// <param name="baseType">Type as base</param>
 		/// <returns>Type</returns>
-		internal static Type CreateType(string assemblyNameString, Type interfaceType)
+		internal static Type CreateType(string assemblyNameString, string typeName, Type[] implementingInterfaces, Type baseType)
 		{
 			string dllName = $"{assemblyNameString}.dll";
 			var assemblyName = new AssemblyName(assemblyNameString);
@@ -52,37 +54,18 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 			var assemblyBuilder = appDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave, AppDomain.CurrentDomain.BaseDirectory);
 			var moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name, dllName, false);
 
-			string indexerName = null;
-
-			// GetInterfaces doesn't return the type itself, so we need to add it.
-			var implementingInterfaces = interfaceType.GetInterfaces().Concat(new[] {interfaceType, typeof (IIntercepted)}).Distinct().ToArray();
 			// Create the type, and let it implement our interface
-			var typeBuilder = moduleBuilder.DefineType(interfaceType.Name + "Impl",
+			var typeBuilder = moduleBuilder.DefineType(typeName,
 				TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.Sealed,
-				typeof (object), implementingInterfaces);
+				baseType, implementingInterfaces);
 
-			foreach (var implementingInterface in implementingInterfaces)
-			{
-				var defaultMemberAttribute = implementingInterface.GetCustomAttributes<DefaultMemberAttribute>().FirstOrDefault();
-				if (defaultMemberAttribute != null)
-				{
-					var memberParams = new[] {typeof (string)};
-					var constructor = typeof (DefaultMemberAttribute).GetConstructor(memberParams);
-					if (constructor != null)
-					{
-						indexerName = defaultMemberAttribute.MemberName;
-						var customAttributeBuilder = new CustomAttributeBuilder(constructor, new object[] {indexerName});
-						typeBuilder.SetCustomAttribute(customAttributeBuilder);
-					}
-				}
-			}
-
-			// Add the interceptor property
-			var interceptorField = IlGetSetBuilder.BuildProperty(typeBuilder, "Interceptor", typeof (IInterceptor));
+			// Make a collection of already implemented properties
+			var baseProperties = baseType.GetRuntimeProperties().Select(x=> x.Name);
 
 			var propertyInfos =
 				from iface in implementingInterfaces
 				from propertyInfo in iface.GetProperties()
+				where !baseProperties.Contains(propertyInfo.Name)
 				select propertyInfo;
 
 			foreach (var propertyInfo in propertyInfos)
@@ -99,12 +82,16 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 				}
 
 				// Create get and/or set
-				IlGetSetBuilder.BuildGetSet(typeBuilder, propertyInfo, propertyInfo.Name == indexerName, interceptorField);
+				IlGetSetBuilder.BuildGetSet(typeBuilder, propertyInfo);
 			}
+
+			// Make a collection of already implemented method
+			var baseMethods = baseType.GetRuntimeMethods().Select(x => x.Name);
 
 			var methodInfos =
 				from iface in implementingInterfaces
 				from methodInfo in iface.GetMethods()
+				where !baseMethods.Contains(methodInfo.Name)
 				select methodInfo;
 
 			foreach (var methodInfo in methodInfos)
@@ -114,7 +101,7 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 					Log.Debug().WriteLine("Skipping method {0}", methodInfo.Name);
 					continue;
 				}
-				IlMethodBuilder.BuildMethod(typeBuilder, methodInfo, interceptorField);
+				IlMethodBuilder.BuildMethod(typeBuilder, methodInfo);
 				Log.Debug().WriteLine("Created method {0}", methodInfo.Name);
 			}
 

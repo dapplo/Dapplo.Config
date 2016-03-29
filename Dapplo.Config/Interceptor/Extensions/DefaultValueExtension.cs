@@ -46,8 +46,6 @@ namespace Dapplo.Config.Interceptor.Extensions
 		/// </summary>
 		public override void Initialize()
 		{
-			CheckType(typeof (IDefaultValue));
-
 			// this registers one method and the overloading is handled in the GetDefaultValue
 			Interceptor.RegisterMethod(ExpressionExtensions.GetMemberName<IDefaultValue>(x => x.DefaultValueFor("")), GetDefaultValue);
 			Interceptor.RegisterMethod(ExpressionExtensions.GetMemberName<IDefaultValue>(x => x.RestoreToDefault("")), RestoreToDefault);

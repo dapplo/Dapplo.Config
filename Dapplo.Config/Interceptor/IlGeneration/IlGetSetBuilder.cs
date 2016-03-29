@@ -36,8 +36,8 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 		private static readonly LogSource Log = new LogSource();
 
 		private static readonly MethodInfo GetValue = typeof(GetInfo).GetProperty("Value").GetGetMethod();
-		private static readonly MethodInfo InterceptorGet = typeof(IInterceptor).GetMethod("Get");
-		private static readonly MethodInfo InterceptorSet = typeof(IInterceptor).GetMethod("Set");
+		private static readonly MethodInfo InterceptorGet = typeof(IExtensibleInterceptor).GetMethod("Get");
+		private static readonly MethodInfo InterceptorSet = typeof(IExtensibleInterceptor).GetMethod("Set");
 		private static readonly MethodAttributes SetGetMethodAttributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName |
 																		MethodAttributes.Virtual | MethodAttributes.Final;
 
@@ -77,56 +77,29 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 		/// </summary>
 		/// <param name="typeBuilder"></param>
 		/// <param name="propertyInfo"></param>
-		/// <param name="isIndexer"></param>
 		/// <param name="interceptorField"></param>
-		internal static void BuildGetSet(TypeBuilder typeBuilder, PropertyInfo propertyInfo, bool isIndexer, FieldInfo interceptorField)
+		internal static void BuildGetSet(TypeBuilder typeBuilder, PropertyInfo propertyInfo)
 		{
 			// Special logic to allow indexer
 			var callingConventions = CallingConventions.Any;
 			var propertyAttributes = PropertyAttributes.HasDefault;
 			Type[] parameterTypes = null;
-			if (isIndexer)
-			{
-				callingConventions = CallingConventions.ExplicitThis | CallingConventions.HasThis;
-				parameterTypes = new[] { propertyInfo.GetIndexParameters().First().ParameterType };
-				propertyAttributes = PropertyAttributes.None;
-			}
 			var propertyBuilder = typeBuilder.DefineProperty(propertyInfo.Name, propertyAttributes, callingConventions, propertyInfo.PropertyType, parameterTypes);
 
 			// Create Get if the property can be read
 			if (propertyInfo.CanRead)
 			{
-				// Indexer have special logic
-				if (isIndexer)
-				{
-					var getterBuilder = IlIndexerBuilder.GenerateIlGetIndexerMethod(typeBuilder, propertyInfo, interceptorField);
-					propertyBuilder.SetGetMethod(getterBuilder);
-					Log.Debug().WriteLine("Created get for indexer property {0}", propertyInfo.Name);
-				}
-				else
-				{
-					var getterBuilder = BuildGetter(typeBuilder, propertyInfo, interceptorField);
-					propertyBuilder.SetGetMethod(getterBuilder);
-					Log.Debug().WriteLine("Created get for property {0}", propertyInfo.Name);
-				}
+				var getterBuilder = BuildGetter(typeBuilder, propertyInfo);
+				propertyBuilder.SetGetMethod(getterBuilder);
+				Log.Debug().WriteLine("Created get for property {0}", propertyInfo.Name);
 			}
 
 			// Create Set if the property can be written
 			if (propertyInfo.CanWrite)
 			{
-				// Indexer have special logic
-				if (isIndexer)
-				{
-					var setterBuilder = IlIndexerBuilder.GenerateIlSetIndexerMethod(typeBuilder, propertyInfo, interceptorField);
-					propertyBuilder.SetSetMethod(setterBuilder);
-					Log.Debug().WriteLine("Created set for indexer property {0}", propertyInfo.Name);
-				}
-				else
-				{
-					var setterBuilder = BuildSetter(typeBuilder, propertyInfo, interceptorField);
-					propertyBuilder.SetSetMethod(setterBuilder);
-					Log.Debug().WriteLine("Created set for property {0}", propertyInfo.Name);
-				}
+				var setterBuilder = BuildSetter(typeBuilder, propertyInfo);
+				propertyBuilder.SetSetMethod(setterBuilder);
+				Log.Debug().WriteLine("Created set for property {0}", propertyInfo.Name);
 			}
 
 		}
@@ -137,12 +110,8 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 		/// <param name="propertyInfo"></param>
 		/// <param name="interceptorField"></param>
 		/// <returns>MethodBuilder with the getter</returns>
-		internal static MethodBuilder BuildGetter(TypeBuilder typeBuilder, PropertyInfo propertyInfo, FieldInfo interceptorField)
+		internal static MethodBuilder BuildGetter(TypeBuilder typeBuilder, PropertyInfo propertyInfo)
 		{
-			if (interceptorField == null)
-			{
-				throw new ArgumentNullException(nameof(interceptorField));
-			}
 			var parameterTypes = Type.EmptyTypes;
 			bool isIndexer = propertyInfo.GetIndexParameters().Length > 0;
 			if (isIndexer)
@@ -154,8 +123,6 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 
 			// Load the instance of the class (this) on the stack
 			ilGetter.Emit(OpCodes.Ldarg_0);
-			// Get the interceptor value from this._interceptor
-			ilGetter.Emit(OpCodes.Ldfld, interceptorField);
 			// Load the name of the property on the stack
 			ilGetter.Emit(OpCodes.Ldstr, propertyInfo.Name);
 			// Call the interceptor.Get method, this returns a GetInfo
@@ -166,7 +133,7 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 
 			ilGetter.Emit(propertyInfo.PropertyType.IsValueType ? OpCodes.Unbox_Any : OpCodes.Castclass, propertyInfo.PropertyType);
 
-			// Return the object on the stack, left by the InterceptorGet call
+			// Return the object on the stack, left by the Get call
 			ilGetter.Emit(OpCodes.Ret);
 
 			return getterBuilder;
@@ -179,16 +146,13 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 		/// <param name="propertyInfo">PropertyInfo which defines the type and name</param>
 		/// <param name="interceptorField">FieldInfo for the backing field of type IInterceptor</param>
 		/// <returns>MethodBuilder with the Setter</returns>
-		internal static MethodBuilder BuildSetter(TypeBuilder typeBuilder, PropertyInfo propertyInfo, FieldInfo interceptorField)
+		internal static MethodBuilder BuildSetter(TypeBuilder typeBuilder, PropertyInfo propertyInfo)
 		{
 			var setterBuilder = typeBuilder.DefineMethod("set_" + propertyInfo.Name, SetGetMethodAttributes, null, new[] { propertyInfo.PropertyType });
 			var ilSetter = setterBuilder.GetILGenerator();
 
 			// Load the instance of the class (this) on the stack
 			ilSetter.Emit(OpCodes.Ldarg_0);
-
-			// Get the interceptor value of this.Interceptor
-			ilSetter.Emit(OpCodes.Ldfld, interceptorField);
 			// Load the name of the property on the stack
 			ilSetter.Emit(OpCodes.Ldstr, propertyInfo.Name);
 			// Load the argument with the value on the stack

@@ -39,6 +39,8 @@ namespace Dapplo.Config.Interceptor
 	{
 		private static readonly List<Type> ExtensionTypes = new List<Type>();
 		private static readonly IDictionary<Type, Type> TypeMap = new Dictionary<Type, Type>();
+		private static readonly IDictionary<Type, Type> _baseTypeMap = new Dictionary<Type, Type>();
+		private static readonly IDictionary<Type, Type[]> _defaultInterfacesMap = new Dictionary<Type, Type[]>();
 
 		static InterceptorFactory()
 		{
@@ -51,6 +53,16 @@ namespace Dapplo.Config.Interceptor
 				where someType.GetCustomAttributes(typeof(ExtensionAttribute), true).Length > 0
 				select someType;
 			ExtensionTypes.AddRange(types);
+		}
+
+		public static void DefineBaseTypeForInterface(Type interfaceType, Type baseType)
+		{
+			_baseTypeMap.Add(interfaceType, baseType);
+		}
+
+		public static void DefineDefaultInterfaces(Type interfaceType, Type[] defaultInterfaces)
+		{
+			_defaultInterfacesMap.Add(interfaceType, defaultInterfaces);
 		}
 
 		/// <summary>
@@ -71,12 +83,38 @@ namespace Dapplo.Config.Interceptor
 			{
 				throw new ArgumentException("Only interfaces are allowed.", nameof(interfaceType));
 			}
+			// GetInterfaces doesn't return the type itself, so we need to add it.
+			var implementingInterfaces = interfaceType.GetInterfaces().Concat(new[] { interfaceType });
+
+			foreach (var implementingInterface in implementingInterfaces.ToList())
+			{
+				Type[] defaultInterfaces;
+				if (_defaultInterfacesMap.TryGetValue(implementingInterface, out defaultInterfaces))
+				{
+					implementingInterfaces = implementingInterfaces.Concat(defaultInterfaces);
+				}
+			}
 
 			// Create an implementation, or lookup
 			Type implementingType;
 			if (!TypeMap.TryGetValue(interfaceType, out implementingType))
 			{
-				implementingType = IlTypeBuilder.CreateType("Dapplo.Config.Interceptor", interfaceType);
+				// Use this baseType if nothing is specified
+				Type baseType = typeof(ExtensibleInterceptorImpl<>);
+				foreach(var implementingInterface in implementingInterfaces.Distinct())
+				{
+					if (_baseTypeMap.ContainsKey(implementingInterface))
+					{
+						baseType = _baseTypeMap[implementingInterface];
+						break;
+					}
+				}
+				// Make sure we have a non generic type, by filling in the "blanks"
+				if (baseType.IsGenericType)
+				{
+					baseType = baseType.MakeGenericType(interfaceType);
+				}
+				implementingType = IlTypeBuilder.CreateType("Dapplo.Config.Interceptor", interfaceType.Name + "Impl", implementingInterfaces.Distinct().ToArray(), baseType);
 				TypeMap.Add(interfaceType, implementingType);
 			}
 
@@ -84,14 +122,13 @@ namespace Dapplo.Config.Interceptor
 			var result = (TResult)Activator.CreateInstance(implementingType);
 
 			// cast to IIntercepted, so we can set the interceptor and use it in the extensions
-			var intercepted = result as IIntercepted;
-			if (intercepted == null)
+			var interceptor = result as IExtensibleInterceptor;
+			if (interceptor == null)
 			{
-				throw new ArgumentNullException(nameof(intercepted), "The created type didn't implement IInterceptor.");
+				throw new ArgumentNullException(nameof(interceptor), "The created type didn't implement IExtensibleInterceptor.");
 			}
 			// Create interceptor
 			var interfaces = typeof (TResult).GetInterfaces();
-			var interceptor = new InterceptorImpl<TResult>();
 
 			// Add the extensions
 			foreach (var extensionType in ExtensionTypes)
@@ -100,13 +137,12 @@ namespace Dapplo.Config.Interceptor
 				foreach (var extensionAttribute in extensionAttributes)
 				{
 					var implementing = extensionAttribute.Implementing;
-					if (interfaces.Contains(implementing))
+					if (implementingInterfaces.Contains(implementing))
 					{
-						interceptor.AddExtension(extensionType, intercepted);
+						interceptor.AddExtension(extensionType);
 					}
 				}
 			}
-			intercepted.Interceptor = interceptor;
 			interceptor.Init();
 			return result;
 		}

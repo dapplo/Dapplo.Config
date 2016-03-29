@@ -36,14 +36,9 @@ namespace Dapplo.Config.Interceptor.Extensions
 	public abstract class AbstractInterceptorExtension<T> : IInterceptorExtension
 	{
 		/// <summary>
-		/// The intercepted instance
-		/// </summary>
-		public IIntercepted Intercepted { get; set; }
-
-		/// <summary>
 		/// The intercepting instance
 		/// </summary>
-		public IInterceptor Interceptor { get; set; }
+		public IExtensibleInterceptor Interceptor { get; set; }
 
 		/// <summary>
 		/// Initialize the extension, e.g. register methods etc.
@@ -72,18 +67,6 @@ namespace Dapplo.Config.Interceptor.Extensions
 		/// </summary>
 		public virtual void AfterInitialization()
 		{
-		}
-
-		/// <summary>
-		///     Force that the type extends the type we build an extension for
-		/// </summary>
-		/// <param name="extensionType"></param>
-		protected void CheckType(Type extensionType)
-		{
-			if (!typeof (T).GetInterfaces().Contains(extensionType))
-			{
-				throw new NotSupportedException($"Type needs to implement {extensionType.Name}");
-			}
 		}
 	}
 }

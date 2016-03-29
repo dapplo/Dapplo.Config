@@ -41,7 +41,6 @@ namespace Dapplo.Config.Interceptor.Extensions
 		/// </summary>
 		public override void Initialize()
 		{
-			CheckType(typeof (INotifyPropertyChanged));
 			Interceptor.RegisterMethod("add_PropertyChanged", AddPropertyChanged);
 			Interceptor.RegisterMethod("remove_PropertyChanged", RemovePropertyChanged);
 			// Register the NotifyPropertyChangedSetter as a last setter, it will call the NPC event
@@ -78,7 +77,7 @@ namespace Dapplo.Config.Interceptor.Extensions
 				}
 				else
 				{
-					PropertyChanged(Intercepted, propertyChangedEventArgs);
+					PropertyChanged(Interceptor, propertyChangedEventArgs);
 				}
 			}
 		}

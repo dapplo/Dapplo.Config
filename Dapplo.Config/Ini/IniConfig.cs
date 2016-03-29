@@ -34,6 +34,8 @@ using Dapplo.LogFacade;
 using Timer = System.Timers.Timer;
 using System.Reflection;
 using Dapplo.Config.Interceptor;
+using Dapplo.Config.Interfaces;
+using Dapplo.Config.Ini.Implementation;
 
 #endregion
 
@@ -64,6 +66,13 @@ namespace Dapplo.Config.Ini
 		private IDictionary<string, IDictionary<string, string>> _ini = new SortedDictionary<string, IDictionary<string, string>>();
 		private ReadFrom _initialRead = ReadFrom.Nothing;
 		private readonly Timer _saveTimer;
+
+		static IniConfig()
+		{
+			InterceptorFactory.DefineBaseTypeForInterface(typeof(IIniSection), typeof(IniSection<>));
+			// Make sure every IIniSection gets IDefaultValue and IHasChanges
+			InterceptorFactory.DefineDefaultInterfaces(typeof(IIniSection), new[] { typeof(IDefaultValue), typeof(IHasChanges) });
+		}
 
 		/// <summary>
 		///     Setup the management of an .ini file location
@@ -103,10 +112,11 @@ namespace Dapplo.Config.Ini
 					var needsSave = false;
 					foreach (var iniSection in _iniSections.Values)
 					{
-						if (iniSection.HasChanges())
+						var hasChangesInterface = iniSection as IHasChanges;
+						if (hasChangesInterface?.HasChanges() == true)
 						{
 							needsSave = true;
-							iniSection.ResetHasChanges();
+							hasChangesInterface?.ResetHasChanges();
 						}
 					}
 					if (needsSave)
@@ -495,8 +505,12 @@ namespace Dapplo.Config.Ini
 			{
 				_saveTimer.Enabled = false;
 			}
+			var writeProtectedPropertiesInterface = iniSection as IWriteProtectProperties;
+			var hasChangesInterface = iniSection as IHasChanges;
+			var interceptor = iniSection as IExtensibleInterceptor;
+
 			// Make sure there is no write protection
-			iniSection.RemoveWriteProtection();
+			writeProtectedPropertiesInterface?.RemoveWriteProtection();
 			// Defaults:
 			if (_defaults != null)
 			{
@@ -510,23 +524,19 @@ namespace Dapplo.Config.Ini
 			// Constants:
 			if (_constants != null)
 			{
-				iniSection.StartWriteProtecting();
+				writeProtectedPropertiesInterface?.StartWriteProtecting();
 				FillSection(_constants, iniSection);
-				iniSection.StopWriteProtecting();
+				writeProtectedPropertiesInterface?.StopWriteProtecting();
 			}
 
 			// After load
-			foreach (var interfaceType in iniSection.GetType().GetInterfaces())
+			Action<IIniSection> afterLoadAction;
+			if (_afterLoadActions.TryGetValue(interceptor.InterceptedType, out afterLoadAction))
 			{
-				Action<IIniSection> afterLoadAction;
-				if (_afterLoadActions.TryGetValue(interfaceType, out afterLoadAction))
-				{
-					afterLoadAction(iniSection);
-					break;
-				}
+				afterLoadAction(iniSection);
 			}
 
-			iniSection.ResetHasChanges();
+			hasChangesInterface?.ResetHasChanges();
 			if (_saveTimer != null)
 			{
 				_saveTimer.Enabled = true;
@@ -787,22 +797,27 @@ namespace Dapplo.Config.Ini
 
 		/// <summary>
 		///     Reset all the values, in all the registered ini sections, to their defaults
-		///     This is for internal usage, so no lock
+		///     Important, this only works for types that extend IDefaultValue
 		/// </summary>
 		public void ResetInternal()
 		{
 			foreach (var iniSection in _iniSections.Values)
 			{
-				foreach (var propertyName in iniSection.GetIniValues().Keys)
+				var defaultValueInterface = iniSection as IDefaultValue;
+				if (defaultValueInterface != null)
 				{
-					// TODO: Do we need to skip read/write protected values here?
-					iniSection.RestoreToDefault(propertyName);
-				}
-				// Call the after load action
-				Action<IIniSection> afterLoadAction;
-				if (_afterLoadActions.TryGetValue(iniSection.GetType(), out afterLoadAction))
-				{
-					afterLoadAction(iniSection);
+					foreach (var propertyName in iniSection.GetIniValues().Keys)
+					{
+						// TODO: Do we need to skip read/write protected values here?
+						defaultValueInterface?.RestoreToDefault(propertyName);
+					}
+					var intercepted = iniSection as IExtensibleInterceptor;
+					// Call the after load action
+					Action<IIniSection> afterLoadAction;
+					if (_afterLoadActions.TryGetValue(intercepted.InterceptedType, out afterLoadAction))
+					{
+						afterLoadAction(iniSection);
+					}
 				}
 			}
 		}
@@ -877,14 +892,12 @@ namespace Dapplo.Config.Ini
 			// Loop over the "registered" sections
 			foreach (var iniSection in _iniSections.Values.ToList())
 			{
+				var intercepted = iniSection as IExtensibleInterceptor;
 				// set the values before save
-				foreach (var interfaceType in iniSection.GetType().GetInterfaces())
+				Action<IIniSection> beforeSaveAction;
+				if (_beforeSaveActions.TryGetValue(intercepted.InterceptedType, out beforeSaveAction))
 				{
-					Action<IIniSection> beforeSaveAction;
-					if (_beforeSaveActions.TryGetValue(interfaceType, out beforeSaveAction))
-					{
-						beforeSaveAction(iniSection);
-					}
+					beforeSaveAction(iniSection);
 				}
 				try
 				{
@@ -893,13 +906,10 @@ namespace Dapplo.Config.Ini
 				finally
 				{
 					// Eventually set the values back, after save
-					foreach (var interfaceType in iniSection.GetType().GetInterfaces())
+					Action<IIniSection> afterSaveAction;
+					if (_afterLoadActions.TryGetValue(intercepted.InterceptedType, out afterSaveAction))
 					{
-						Action<IIniSection> afterSaveAction;
-						if (_afterLoadActions.TryGetValue(interfaceType, out afterSaveAction))
-						{
-							afterSaveAction(iniSection);
-						}
+						afterSaveAction(iniSection);
 					}
 				}
 			}

@@ -34,9 +34,9 @@ namespace Dapplo.Config.Ini
 	/// </summary>
 	public class IniValue
 	{
-		private readonly IInterceptor _interceptor;
+		private readonly IExtensibleInterceptor _interceptor;
 
-		public IniValue(IInterceptor interceptor)
+		public IniValue(IExtensibleInterceptor interceptor)
 		{
 			_interceptor = interceptor;
 		}

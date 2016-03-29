@@ -33,7 +33,7 @@ namespace Dapplo.Config.Ini
 	/// <summary>
 	///     By making your property proxy interface extend this, you will be able to write the property to an ini file
 	/// </summary>
-	public interface IIniSection : IDefaultValue, IWriteProtectProperties, IHasChanges
+	public interface IIniSection
 	{
 		/// <summary>
 		///     Get the IniValue for a property, this is quicker and uses less memory than to iterate over the GetIniValues result
@@ -78,7 +78,7 @@ namespace Dapplo.Config.Ini
 	/// <summary>
 	///     Generic version of IIniSection
 	/// </summary>
-	public interface IIniSection<T> : IIniSection, IDefaultValue<T>, IWriteProtectProperties<T>
+	public interface IIniSection<T> : IIniSection
 	{
 		/// <summary>
 		///     Get the IniValue for a property, this is quicker and uses less memory than to iterate over the GetIniValues result

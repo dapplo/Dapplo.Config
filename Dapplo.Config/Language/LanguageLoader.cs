@@ -36,13 +36,15 @@ using Dapplo.Config.Ini;
 using Dapplo.Config.Interceptor;
 using Dapplo.Config.Support;
 using Dapplo.LogFacade;
+using Dapplo.Config.Language.Implementation;
+using Dapplo.Config.Interfaces;
 
 #endregion
 
 namespace Dapplo.Config.Language
 {
 	/// <summary>
-	///     The language loader should be used to fill ILanguage proxy interfaces.
+	///     The language loader should be used to fill ILanguage interfaces.
 	///     It is possible to specify the directory locations, in order, where files with certain patterns should be located.
 	/// </summary>
 	public class LanguageLoader
@@ -56,6 +58,12 @@ namespace Dapplo.Config.Language
 		private readonly IDictionary<string, ILanguage> _languageConfigs = new Dictionary<string, ILanguage>(AbcComparer.Instance);
 		private readonly IDictionary<Type, ILanguage> _languageTypeConfigs = new Dictionary<Type, ILanguage>();
 		private bool _initialReadDone;
+
+		static LanguageLoader()
+		{
+			InterceptorFactory.DefineBaseTypeForInterface(typeof(ILanguage), typeof(Language<>));
+			InterceptorFactory.DefineDefaultInterfaces(typeof(ILanguage), new[] { typeof(IDefaultValue), typeof(IHasChanges) });
+		}
 
 		/// <summary>
 		///     Create a LanguageLoader, this is your container for all the ILanguage implementing interfaces.
@@ -195,43 +203,50 @@ namespace Dapplo.Config.Language
 		}
 
 		/// <summary>
-		///     Fill the backing properties of the supplied proxy-object.
+		///     Fill the backing properties of the supplied object.
 		///     Match the ini-file properties with the name of the property.
 		/// </summary>
 		/// <param name="language"></param>
 		private void FillLanguageConfig(ILanguage language)
 		{
-			var prefix = GetPrefix(language);
+			var prefix = language.PrefixName();
 			IDictionary<string, string> sectionTranslations;
+			var defaultValueInterface = language as IDefaultValue;
+			var interceptor = language as IExtensibleInterceptor;
+
 			if (!_allTranslations.TryGetValue(prefix, out sectionTranslations))
 			{
-				// No values, reset all
-				foreach (var propertyInfo in language.Interceptor.AllPropertyInfos.Values)
+
+				if (defaultValueInterface != null)
 				{
-					language.RestoreToDefault(propertyInfo.Name);
+					// No values, reset all (only available via the PropertyTypes dictionary
+					foreach (var key in interceptor.PropertyTypes.Keys)
+					{
+						defaultValueInterface?.RestoreToDefault(key);
+					}
 				}
 				return;
 			}
 
-			foreach (var propertyInfo in language.Interceptor.AllPropertyInfos.Values)
+			// Use PropertyTypes.Keys to get ALL possible properties.
+			foreach (var key in interceptor.PropertyTypes.Keys.ToList())
 			{
-				var key = propertyInfo.Name;
 				string translation;
 				if (sectionTranslations.TryGetValue(key, out translation))
 				{
-					language.Interceptor.Set(key, translation);
+					interceptor.Set(key, translation);
 					sectionTranslations.Remove(key);
 				}
 				else
 				{
-					language.RestoreToDefault(key);
+					defaultValueInterface?.RestoreToDefault(key);
 				}
 			}
 
 			// Add all unprocessed values
 			foreach (var key in sectionTranslations.Keys)
 			{
-				language.Interceptor.Properties.SafelyAddOrOverwrite(key, sectionTranslations[key]);
+				interceptor.Properties.SafelyAddOrOverwrite(key, sectionTranslations[key]);
 			}
 		}
 
@@ -261,26 +276,6 @@ namespace Dapplo.Config.Language
 				throw new InvalidOperationException("Please load before retrieving the language");
 			}
 			return InterceptorFactory.New<T>();
-		}
-
-		/// <summary>
-		///     Retrieve the language prefix from the IPropertyProxy
-		/// </summary>
-		/// <param name="language"></param>
-		/// <returns>string</returns>
-		private string GetPrefix(ILanguage language)
-		{
-			var prefix = "";
-			foreach (var languageType in language.GetType().GetInterfaces())
-			{
-				var languageAttribute = languageType.GetCustomAttribute<LanguageAttribute>();
-				if (languageAttribute != null)
-				{
-					prefix = languageAttribute.Prefix;
-					break;
-				}
-			}
-			return prefix;
 		}
 
 		/// <summary>
@@ -317,7 +312,7 @@ namespace Dapplo.Config.Language
 			if (!_languageTypeConfigs.ContainsKey(typeof(T)))
 			{
 				_languageTypeConfigs.Add(type, language);
-				_languageConfigs.Add(GetPrefix(language), language);
+				_languageConfigs.Add(language.PrefixName(), language);
 				FillLanguageConfig(language);
 			}
 
@@ -339,7 +334,7 @@ namespace Dapplo.Config.Language
 				{
 					language = InterceptorFactory.New<T>();
 					_languageTypeConfigs.Add(type, language);
-					_languageConfigs.Add(GetPrefix(language), language);
+					_languageConfigs.Add(language.PrefixName(), language);
 					if (!_initialReadDone)
 					{
 						await ReloadAsync(token).ConfigureAwait(false);
@@ -399,9 +394,9 @@ namespace Dapplo.Config.Language
 			_initialReadDone = true;
 
 			// Reset the sections that have already been registered
-			foreach (var proxy in _languageTypeConfigs.Values)
+			foreach (var language in _languageTypeConfigs.Values)
 			{
-				FillLanguageConfig(proxy);
+				FillLanguageConfig(language);
 			}
 		}
 

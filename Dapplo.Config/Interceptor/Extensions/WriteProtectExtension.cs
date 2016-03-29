@@ -47,7 +47,6 @@ namespace Dapplo.Config.Interceptor.Extensions
 		/// </summary>
 		public override void Initialize()
 		{
-			CheckType(typeof (IWriteProtectProperties));
 			Interceptor.RegisterSetter((int) CallOrder.First, WriteProtectSetter);
 
 			// Use Lambdas to make refactoring possible

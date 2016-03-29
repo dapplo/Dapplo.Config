@@ -47,7 +47,6 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 
 		public override void Initialize()
 		{
-			CheckType(typeof (IRegistry));
 			_registryAttribute = typeof (T).GetCustomAttribute<RegistryAttribute>() ?? new RegistryAttribute();
 			Interceptor.RegisterMethod(ExpressionExtensions.GetMemberName<IRegistry, object>(x => x.PathFor("")), PathFor);
 		}

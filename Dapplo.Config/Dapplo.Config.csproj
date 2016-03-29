@@ -45,17 +45,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DapploConfig.cs" />
+    <Compile Include="Ini\Implementation\IniSection.cs" />
     <Compile Include="Interceptor\ExtensionAttribute.cs" />
-    <Compile Include="Interceptor\IIntercepted.cs" />
-    <Compile Include="Interceptor\IInterceptor.cs" />
+    <Compile Include="Interceptor\IExtensibleInterceptor.cs" />
     <Compile Include="Ini\IniRestCommand.cs" />
-    <Compile Include="Interceptor\IlGeneration\IlIndexerBuilder.cs" />
     <Compile Include="Interceptor\IlGeneration\IlTypeBuilder.cs" />
     <Compile Include="Interceptor\IlGeneration\IlGetSetBuilder.cs" />
     <Compile Include="Interceptor\IlGeneration\IlMethodBuilder.cs" />
     <Compile Include="Interceptor\Implementation\CallOrder.cs" />
     <Compile Include="Interceptor\Implementation\MethodCallExtensions.cs" />
-    <Compile Include="Interceptor\Implementation\InterceptorImpl.cs" />
+    <Compile Include="Interceptor\Implementation\ExtensibleInterceptorImpl.cs" />
     <Compile Include="Interfaces\IDescription.cs" />
     <Compile Include="Interfaces\IDefaultValue.cs" />
     <Compile Include="Interceptor\Extensions\AbstractInterceptorExtension.cs" />
@@ -78,11 +77,10 @@
     <Compile Include="Ini\IniSectionAttribute.cs" />
     <Compile Include="Ini\IniValue.cs" />
     <Compile Include="Ini\IniConfig.cs" />
-    <Compile Include="Ini\Implementation\IniExtension.cs" />
     <Compile Include="Interceptor\IInterceptorExtension.cs" />
     <Compile Include="Interceptor\Extensions\NotifyPropertyChangedExtension.cs" />
     <Compile Include="Language\ILanguage.cs" />
-    <Compile Include="Language\Implementation\LanguageExtension.cs" />
+    <Compile Include="Language\Implementation\Language.cs" />
     <Compile Include="Language\LanguageAttribute.cs" />
     <Compile Include="Language\LanguageLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

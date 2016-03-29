@@ -47,7 +47,6 @@ namespace Dapplo.Config.Interceptor.Extensions
 		/// </summary>
 		public override void Initialize()
 		{
-			CheckType(typeof (ITransactionalProperties));
 			Interceptor.RegisterSetter((int) CallOrder.First, TransactionalSetter);
 			Interceptor.RegisterGetter((int) CallOrder.First, TransactionalGetter);
 

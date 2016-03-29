@@ -27,52 +27,54 @@ using Dapplo.Config.Interceptor;
 using Dapplo.Config.Interceptor.Extensions;
 using Dapplo.Config.Interceptor.Implementation;
 using Dapplo.Config.Support;
+using System.Collections.Generic;
 
 #endregion
 
 namespace Dapplo.Config.Language.Implementation
 {
 	/// <summary>
-	///     Extend the PropertyProxy with Ini functionality
+	/// Base Language functionality
 	/// </summary>
-	[Extension(typeof (ILanguage))]
-	internal class LanguageExtension<T> : AbstractInterceptorExtension<T>
+	public class Language<T> : ExtensibleInterceptorImpl<T>, ILanguage
 	{
-		public override void Initialize()
-		{
-			CheckType(typeof (ILanguage));
-			Interceptor.RegisterMethod(ExpressionExtensions.GetMemberName<ILanguage, object>(x => x[null]), GetTranslation);
-			Interceptor.RegisterMethod(ExpressionExtensions.GetMemberName<ILanguage, object>(x => x.Keys()), GetKeys);
-		}
-
+		private readonly LanguageAttribute _languageAttribute = typeof(T).GetCustomAttribute<LanguageAttribute>();
 		/// <summary>
-		///     Get a all the keys
+		/// Get a translation for a property
 		/// </summary>
-		private void GetKeys(MethodCallInfo methodCallInfo)
+		/// <param name="languageKey"></param>
+		/// <returns>string</returns>
+		public string this[string languageKey]
 		{
-			methodCallInfo.ReturnValue = Interceptor.Properties.Keys;
-		}
-
-		/// <summary>
-		///     Get a single translation
-		/// </summary>
-		private void GetTranslation(MethodCallInfo methodCallInfo)
-		{
-			var key = methodCallInfo.PropertyNameOf(0);
-			if (Interceptor.Properties.ContainsKey(key))
+			get
 			{
-				methodCallInfo.ReturnValue = Interceptor.Properties[key] as string;
+				return Properties[languageKey] as string;
 			}
 		}
 
-		public override void InitProperty(PropertyInfo propertyInfo)
+		/// <summary>
+		/// Logic to check every property for read only
+		/// </summary>
+		/// <param name="propertyInfo"></param>
+		/// <param name="extensions"></param>
+		protected override void InitProperty(PropertyInfo propertyInfo, IList<IInterceptorExtension> extensions)
 		{
-			base.InitProperty(propertyInfo);
+			base.InitProperty(propertyInfo, extensions);
 			if (propertyInfo.CanWrite && propertyInfo.GetSetMethod(true).IsPublic)
 			{
 				throw new NotSupportedException(
-					$"Property {propertyInfo.DeclaringType}.{propertyInfo.Name} has defined a set, this is not allowed for {typeof (ILanguage).Name} derrived interfaces. Fix by removing the set for the property, leave the get.");
+					$"Property {propertyInfo.DeclaringType}.{propertyInfo.Name} has defined a set, this is not allowed for {typeof(ILanguage).Name} derrived interfaces. Fix by removing the set for the property, leave the get.");
 			}
+		}
+
+		public ICollection<string> Keys()
+		{
+			return Properties.Keys;
+		}
+
+		public string PrefixName()
+		{
+			return _languageAttribute?.Prefix ?? typeof(T).Name;
 		}
 	}
 }

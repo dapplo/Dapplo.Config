@@ -28,6 +28,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Dapplo.Config.Support;
 using Dapplo.LogFacade;
+using System.Collections.ObjectModel;
 
 #endregion
 
@@ -36,43 +37,70 @@ namespace Dapplo.Config.Interceptor.Implementation
 	/// <summary>
 	///     Implementation of the IInterceptor
 	/// </summary>
-	internal sealed class InterceptorImpl<TInterceptor> : IInterceptor
+	public class ExtensibleInterceptorImpl<T> : IExtensibleInterceptor
 	{
 		// ReSharper disable once StaticMemberInGenericType
 		private static readonly LogSource Log = new LogSource();
-		private readonly List<IInterceptorExtension> _extensions = new List<IInterceptorExtension>();
-		private readonly List<Getter> _getters = new List<Getter>();
+		private readonly IList<IInterceptorExtension> _extensions = new List<IInterceptorExtension>();
+		private readonly IList<Getter> _getters = new List<Getter>();
 		private readonly IDictionary<string, List<Action<MethodCallInfo>>> _methodMap = new Dictionary<string, List<Action<MethodCallInfo>>>();
 		private readonly IDictionary<string, object> _properties = new Dictionary<string, object>(AbcComparer.Instance);
-		private readonly List<Setter> _setters = new List<Setter>();
-
-		/// <summary>
-		///     Cache the AllPropertyInfos
-		/// </summary>
-		private IDictionary<string, PropertyInfo> _allPropertyInfos;
+		private IReadOnlyDictionary<string, Type> _propertyTypes;
+		private readonly IList<Setter> _setters = new List<Setter>();
 
 		/// <summary>
 		///     Constructor
 		/// </summary>
-		public InterceptorImpl()
+		public ExtensibleInterceptorImpl()
 		{
-			// Register the GetType handler, use Lambda to make refactoring possible
-			// ReSharper disable ReturnValueOfPureMethodIsNotUsed
-			RegisterMethod(ExpressionExtensions.GetMemberName<object>(x => x.GetType()), HandleGetType);
-			RegisterMethod(ExpressionExtensions.GetMemberName<object>(x => x.GetHashCode()), HandleGetHashCode);
-			RegisterMethod(ExpressionExtensions.GetMemberName<object>(x => x.Equals(null)), HandleEquals);
-			RegisterMethod(ExpressionExtensions.GetMemberName<object>(x => x.Equals(null)), HandleEquals);
-			// ReSharper restore ReturnValueOfPureMethodIsNotUsed
 			// Make sure the default set logic is registered
 			RegisterSetter((int) CallOrder.Middle, DefaultSet);
 			// Make sure the default get logic is registered
 			RegisterGetter((int) CallOrder.Middle, DefaultGet);
 		}
 
+		#region IInterceptor
+
 		/// <summary>
-		///     Get the Type for a property
+		///     If an exception is catched during the initialization, it can be found here
 		/// </summary>
-		public IDictionary<string, Type> PropertyTypes { get; } = new Dictionary<string, Type>(AbcComparer.Instance);
+		public IDictionary<string, Exception> InitializationErrors { get; } = new Dictionary<string, Exception>(AbcComparer.Instance);
+
+		/// <summary>
+		///     Get type of a property
+		/// </summary>
+		public IReadOnlyDictionary<string, Type> PropertyTypes
+		{
+			get {
+				return _propertyTypes;
+			}
+		}
+
+		/// <summary>
+		///     Get the raw property values of the property object
+		///     Can be used to modify the directly, or for load/save
+		///     Assignment to this will copy all the supplied properties.
+		/// </summary>
+		public IDictionary<string, object> Properties
+		{
+			get { return _properties; }
+			set
+			{
+				foreach (var key in value.Keys)
+				{
+					_properties.SafelyAddOrOverwrite(key, value[key]);
+				}
+			}
+		}
+
+		public Type InterceptedType
+		{
+			get
+			{
+				return typeof(T);
+			}
+		}
+
 
 		/// <summary>
 		///     Register a method for the proxy
@@ -103,7 +131,7 @@ namespace Dapplo.Config.Interceptor.Implementation
 				Order = order,
 				SetterAction = setterAction
 			});
-			_setters.Sort();
+			((List<Setter>)_setters).Sort();
 		}
 
 		/// <summary>
@@ -118,64 +146,9 @@ namespace Dapplo.Config.Interceptor.Implementation
 				Order = order,
 				GetterAction = getterAction
 			});
-			_getters.Sort();
+			((List<Getter>)_getters).Sort();
 		}
-
-		/// <summary>
-		///     Simple getter for all properties on the type, including derrived interfaces
-		/// </summary>
-		public IDictionary<string, PropertyInfo> AllPropertyInfos
-		{
-			get
-			{
-				if (_allPropertyInfos == null)
-				{
-					// Exclude properties from this assembly
-					var thisAssembly = GetType().Assembly;
-
-					// as GetInterfaces doesn't return the type itself (makes sense), the following 2 lines makes a list of all
-					var interfacesToCheck = new List<Type>(typeof(TInterceptor).GetInterfaces())
-					{
-						typeof(TInterceptor)
-					};
-					// Now, create an IEnumerable for all the property info of all the properties in the interfaces that the
-					// "user" code introduced in the type. (e.g skip all types & properties from this assembly)
-					var allPropertyInfos = from interfaceType in interfacesToCheck
-						where interfaceType.Assembly != thisAssembly
-						from propertyInfo in interfaceType.GetProperties()
-						select propertyInfo;
-					_allPropertyInfos = new Dictionary<string, PropertyInfo>(AbcComparer.Instance);
-					foreach (var propertyInfo in allPropertyInfos)
-					{
-						_allPropertyInfos.Add(propertyInfo.Name, propertyInfo);
-					}
-				}
-
-				return _allPropertyInfos;
-			}
-		}
-
-		/// <summary>
-		///     If an exception is catched during the initialization, it can be found here
-		/// </summary>
-		public IDictionary<string, Exception> InitializationErrors { get; } = new Dictionary<string, Exception>(AbcComparer.Instance);
-
-		/// <summary>
-		///     Get the raw property values of the property object
-		///     Can be used to modify the directly, or for load/save
-		///     Assignment to this will copy all the supplied properties.
-		/// </summary>
-		public IDictionary<string, object> Properties
-		{
-			get { return _properties; }
-			set
-			{
-				foreach (var key in value.Keys)
-				{
-					_properties.SafelyAddOrOverwrite(key, value[key]);
-				}
-			}
-		}
+		#endregion
 
 		#region Intercepting code
 
@@ -186,14 +159,14 @@ namespace Dapplo.Config.Interceptor.Implementation
 		/// <param name="propertyName">Name of the property</param>
 		public GetInfo Get(string propertyName)
 		{
-			var propertyInfo = AllPropertyInfos[propertyName];
+			var propertyType = PropertyTypes[propertyName];
 
 			object value;
 			bool hasValue = _properties.TryGetValue(propertyName, out value);
 			var getInfo = new GetInfo
 			{
 				PropertyName = propertyName,
-				PropertyType = propertyInfo.PropertyType,
+				PropertyType = propertyType,
 				CanContinue = true,
 				Value = value,
 				HasValue = hasValue
@@ -218,14 +191,14 @@ namespace Dapplo.Config.Interceptor.Implementation
 		/// <param name="value">Value to set</param>
 		public void Set(string propertyName, object value)
 		{
-			var propertyInfo = AllPropertyInfos[propertyName];
+			var propertyInfo = PropertyTypes[propertyName];
 
 			object oldValue;
 			var hasOldValue = _properties.TryGetValue(propertyName, out oldValue);
 			var setInfo = new SetInfo
 			{
 				PropertyName = propertyName,
-				PropertyType = propertyInfo.PropertyType,
+				PropertyType = propertyInfo,
 				CanContinue = true,
 				NewValue = value,
 				HasOldValue = hasOldValue,
@@ -289,15 +262,15 @@ namespace Dapplo.Config.Interceptor.Implementation
 		/// </summary>
 		/// <param name="extensionType">Type for the extension</param>
 		/// <param name="intercepted">The intercepted instance</param>
-		internal void AddExtension(Type extensionType, IIntercepted intercepted)
+		public void AddExtension(Type extensionType)
 		{
-			var extension = (IInterceptorExtension) Activator.CreateInstance(extensionType.MakeGenericType(typeof(TInterceptor)));
+			var extension = (IInterceptorExtension) Activator.CreateInstance(extensionType.MakeGenericType(typeof(T)));
 			extension.Interceptor = this;
-			extension.Intercepted = intercepted;
 			extension.Initialize();
 			_extensions.Add(extension);
 		}
 
+		#region Default Get/Set
 		/// <summary>
 		///     A default implementation of the get logic
 		/// </summary>
@@ -330,12 +303,13 @@ namespace Dapplo.Config.Interceptor.Implementation
 		/// <param name="setInfo"></param>
 		private void DefaultSet(SetInfo setInfo)
 		{
-			var propertyType = PropertyTypes[setInfo.PropertyName];
+			var propertyType = _propertyTypes[setInfo.PropertyName];
 
 			var newValue = propertyType.ConvertOrCastValueToType(setInfo.NewValue);
 			// Add the value to the dictionary
 			_properties.SafelyAddOrOverwrite(setInfo.PropertyName, newValue);
 		}
+		#endregion
 
 		/// <summary>
 		///     Get the description attribute for a property
@@ -343,80 +317,90 @@ namespace Dapplo.Config.Interceptor.Implementation
 		/// <typeparam name="TProp"></typeparam>
 		/// <param name="propertyExpression"></param>
 		/// <returns>description</returns>
-		public string Description<TProp>(Expression<Func<TInterceptor, TProp>> propertyExpression)
+		public string Description<TProp>(Expression<Func<T, TProp>> propertyExpression)
 		{
 			var propertyName = propertyExpression.GetMemberName();
+			return Description(propertyName);
+		}
 
-			var proxiedType = typeof (TInterceptor);
+		/// <summary>
+		///     Get the description attribute for a property
+		/// </summary>
+		/// <param name="propertyName">Name of the property</param>
+		/// <returns>description</returns>
+		public string Description(string propertyName)
+		{
+			var proxiedType = typeof (T);
 			var propertyInfo = proxiedType.GetProperty(propertyName);
 			return propertyInfo.GetDescription();
 		}
 
 		/// <summary>
-		///     This is an implementation of the Equals which returns the Equals for this
-		/// </summary>
-		/// <param name="methodCallInfo">IMethodCallMessage</param>
-		private void HandleEquals(MethodCallInfo methodCallInfo)
-		{
-			methodCallInfo.ReturnValue = Equals(methodCallInfo.Arguments[0]);
-		}
-
-		/// <summary>
-		///     This is an implementation of the GetHashCode which returns the GetHashCode of this
-		/// </summary>
-		/// <param name="methodCallInfo">IMethodCallMessage</param>
-		private void HandleGetHashCode(MethodCallInfo methodCallInfo)
-		{
-			methodCallInfo.ReturnValue = GetHashCode();
-		}
-
-		/// <summary>
-		///     This is an implementation of the GetType which returns the interface
-		/// </summary>
-		/// <param name="methodCallInfo">IMethodCallMessage</param>
-		private void HandleGetType(MethodCallInfo methodCallInfo)
-		{
-			methodCallInfo.ReturnValue = typeof(TInterceptor);
-		}
-
-		/// <summary>
 		///     Initialize, make sure every property is processed by the extensions
 		/// </summary>
-		internal void Init()
+		public virtual void Init()
 		{
 			// Init in the right order
 			var extensions = (from sortedExtension in _extensions
 				orderby sortedExtension.InitOrder ascending
 				select sortedExtension).ToList();
 
-			foreach (var propertyInfo in AllPropertyInfos.Values)
-			{
-				PropertyTypes[propertyInfo.Name] = propertyInfo.PropertyType;
+			// Exclude properties from this assembly
+			var thisAssembly = GetType().Assembly;
 
-				foreach (var extension in extensions)
-				{
-					try
+			// as GetInterfaces doesn't return the type itself (makes sense), the following 2 lines makes a list of all
+			var interfacesToCheck = new List<Type>(typeof(T).GetInterfaces())
 					{
-						extension.InitProperty(propertyInfo);
-					}
-					catch (Exception ex)
-					{
-						Log.Warn().WriteLine(ex.Message);
-						InitializationErrors.SafelyAddOrOverwrite(propertyInfo.Name, ex);
-					}
-				}
+						typeof(T)
+					};
+
+			var propertyTypes = new Dictionary<string, Type>(AbcComparer.Instance);
+			_propertyTypes = new ReadOnlyDictionary<string, Type>(propertyTypes);
+
+			// Now, create an IEnumerable for all the property info of all the properties in the interfaces that the
+			// "user" code introduced in the type. (e.g skip all types & properties from this assembly)
+			var allPropertyInfos = (from interfaceType in interfacesToCheck
+									where interfaceType.Assembly != thisAssembly
+									from propertyInfo in interfaceType.GetProperties()
+									select propertyInfo).GroupBy(p => p.Name).Select(group => group.First());
+
+			foreach (var propertyInfo in allPropertyInfos)
+			{
+				propertyTypes.Add(propertyInfo.Name, propertyInfo.PropertyType);
+				InitProperty(propertyInfo, extensions);
 			}
 
-			// Call all AfterInitialization, this allows us to ignore errors
-			foreach (var extension in extensions)
-			{
-				extension.AfterInitialization();
-			}
+			AfterInitialization(extensions);
 
 			// Throw if an exception was left over
 			if (InitializationErrors.Count > 0)
 			{
 				throw InitializationErrors.Values.First();
+			}
+		}
+
+		protected virtual void InitProperty(PropertyInfo propertyInfo, IList<IInterceptorExtension> extensions)
+		{
+			foreach (var extension in extensions)
+			{
+				try
+				{
+					extension.InitProperty(propertyInfo);
+				}
+				catch (Exception ex)
+				{
+					Log.Warn().WriteLine(ex.Message);
+					InitializationErrors.SafelyAddOrOverwrite(propertyInfo.Name, ex);
+				}
+			}
+		}
+
+		protected virtual void AfterInitialization(IList<IInterceptorExtension> extensions)
+		{
+			// Call all AfterInitialization, this allows us to ignore errors
+			foreach (var extension in extensions)
+			{
+				extension.AfterInitialization();
 			}
 		}
 	}

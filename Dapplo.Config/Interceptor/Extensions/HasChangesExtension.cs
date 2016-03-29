@@ -44,7 +44,6 @@ namespace Dapplo.Config.Interceptor.Extensions
 		/// </summary>
 		public override void Initialize()
 		{
-			CheckType(typeof (IHasChanges));
 			Interceptor.RegisterSetter((int) CallOrder.Last, HasChangesSetter);
 
 			// Use Lambdas to make refactoring possible
