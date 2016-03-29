@@ -23,7 +23,6 @@
 
 using System;
 using System.Linq.Expressions;
-using Dapplo.Config.Interceptor;
 using Dapplo.Config.Interfaces;
 
 #endregion

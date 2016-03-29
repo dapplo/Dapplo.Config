@@ -37,7 +37,7 @@ namespace Dapplo.Config.Interceptor.Extensions
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	[Extension(typeof (IDefaultValue))]
-	internal class DefaultValueExtension<T> : AbstractInterceptorExtension<T>
+	internal class DefaultValueExtension<T> : AbstractInterceptorExtension
 	{
 		private static readonly LogSource Log = new LogSource();
 

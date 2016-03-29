@@ -32,9 +32,8 @@ namespace Dapplo.Config.Interceptor.Extensions
 	///     This class implements the NotifyPropertyChanging extension logic,
 	///     which automatically generates NotifyPropertyChanging events when set is called.
 	/// </summary>
-	/// <typeparam name="T"></typeparam>
 	[Extension(typeof (INotifyPropertyChanging))]
-	internal class NotifyPropertyChangingExtension<T> : AbstractInterceptorExtension<T>
+	internal class NotifyPropertyChangingExtension : AbstractInterceptorExtension
 	{
 		/// <summary>
 		/// Register methods and setter

@@ -42,7 +42,6 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 		/// </summary>
 		/// <param name="typeBuilder"></param>
 		/// <param name="methodInfo"></param>
-		/// <param name="interceptorField"></param>
 		internal static void BuildMethod(TypeBuilder typeBuilder, MethodInfo methodInfo)
 		{
 			var parameterTypes = (

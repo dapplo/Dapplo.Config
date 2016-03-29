@@ -69,12 +69,7 @@ namespace Dapplo.Config.Interceptor.Implementation
 		/// <summary>
 		///     Get type of a property
 		/// </summary>
-		public IReadOnlyDictionary<string, Type> PropertyTypes
-		{
-			get {
-				return _propertyTypes;
-			}
-		}
+		public IReadOnlyDictionary<string, Type> PropertyTypes => _propertyTypes;
 
 		/// <summary>
 		///     Get the raw property values of the property object
@@ -93,13 +88,7 @@ namespace Dapplo.Config.Interceptor.Implementation
 			}
 		}
 
-		public Type InterceptedType
-		{
-			get
-			{
-				return typeof(T);
-			}
-		}
+		public Type InterceptedType => typeof(T);
 
 
 		/// <summary>
@@ -261,10 +250,14 @@ namespace Dapplo.Config.Interceptor.Implementation
 		///     Add an extension to the proxy, these extensions contain logic which enhances the proxy
 		/// </summary>
 		/// <param name="extensionType">Type for the extension</param>
-		/// <param name="intercepted">The intercepted instance</param>
 		public void AddExtension(Type extensionType)
 		{
-			var extension = (IInterceptorExtension) Activator.CreateInstance(extensionType.MakeGenericType(typeof(T)));
+			if (extensionType.IsGenericType)
+			{
+				extensionType = extensionType.MakeGenericType(typeof(T));
+			}
+
+			var extension = (IInterceptorExtension) Activator.CreateInstance(extensionType);
 			extension.Interceptor = this;
 			extension.Initialize();
 			_extensions.Add(extension);

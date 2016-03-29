@@ -32,9 +32,8 @@ namespace Dapplo.Config.Interceptor.Extensions
 	/// <summary>
 	///     This implements logic to add change detection to your proxied interface.
 	/// </summary>
-	/// <typeparam name="T"></typeparam>
 	[Extension(typeof (IHasChanges))]
-	internal class HasChangesExtension<T> : AbstractInterceptorExtension<T>
+	internal class HasChangesExtension : AbstractInterceptorExtension
 	{
 		// This boolean has the value true if we have changes sind the last "reset"
 		private bool _hasChanges;

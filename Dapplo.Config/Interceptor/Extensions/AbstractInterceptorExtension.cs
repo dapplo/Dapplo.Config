@@ -21,8 +21,6 @@
 
 #region using
 
-using System;
-using System.Linq;
 using System.Reflection;
 
 #endregion
@@ -32,8 +30,7 @@ namespace Dapplo.Config.Interceptor.Extensions
 	/// <summary>
 	///     Base class for extensions, this should take away some default handling
 	/// </summary>
-	/// <typeparam name="T"></typeparam>
-	public abstract class AbstractInterceptorExtension<T> : IInterceptorExtension
+	public abstract class AbstractInterceptorExtension : IInterceptorExtension
 	{
 		/// <summary>
 		/// The intercepting instance

@@ -33,7 +33,7 @@ using Dapplo.Config.Support;
 namespace Dapplo.Config.Interceptor.Extensions
 {
 	[Extension(typeof (ITagging))]
-	internal class TagExtension<T> : AbstractInterceptorExtension<T>
+	internal class TagExtension : AbstractInterceptorExtension
 	{
 		// The set of found expert properties
 		private readonly IDictionary<string, IDictionary<object, object>> _taggedProperties = new Dictionary<string, IDictionary<object, object>>(AbcComparer.Instance);

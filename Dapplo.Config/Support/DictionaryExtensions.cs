@@ -30,22 +30,6 @@ namespace Dapplo.Config.Support
 	public static class DictionaryExtensions
 	{
 		/// <summary>
-		///     Safely retrieve a value from the dictionary, by using a key
-		/// </summary>
-		/// <param name="dictionary"></param>
-		/// <param name="key"></param>
-		/// <returns>object</returns>
-		public static object SafeGet(this IDictionary<string, object> dictionary, string key)
-		{
-			object value;
-			if (dictionary.TryGetValue(key, out value))
-			{
-				return value;
-			}
-			return null;
-		}
-
-		/// <summary>
 		///     Safely add or overwrite a value in the dictionary, supply the key & value
 		/// </summary>
 		/// <param name="dictionary"></param>

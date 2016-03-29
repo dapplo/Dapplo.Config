@@ -77,14 +77,12 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 		/// </summary>
 		/// <param name="typeBuilder"></param>
 		/// <param name="propertyInfo"></param>
-		/// <param name="interceptorField"></param>
 		internal static void BuildGetSet(TypeBuilder typeBuilder, PropertyInfo propertyInfo)
 		{
 			// Special logic to allow indexer
 			var callingConventions = CallingConventions.Any;
 			var propertyAttributes = PropertyAttributes.HasDefault;
-			Type[] parameterTypes = null;
-			var propertyBuilder = typeBuilder.DefineProperty(propertyInfo.Name, propertyAttributes, callingConventions, propertyInfo.PropertyType, parameterTypes);
+			var propertyBuilder = typeBuilder.DefineProperty(propertyInfo.Name, propertyAttributes, callingConventions, propertyInfo.PropertyType, null);
 
 			// Create Get if the property can be read
 			if (propertyInfo.CanRead)
@@ -103,12 +101,12 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 			}
 
 		}
+
 		/// <summary>
 		///     Build the getter for the property
 		/// </summary>
 		/// <param name="typeBuilder"></param>
 		/// <param name="propertyInfo"></param>
-		/// <param name="interceptorField"></param>
 		/// <returns>MethodBuilder with the getter</returns>
 		internal static MethodBuilder BuildGetter(TypeBuilder typeBuilder, PropertyInfo propertyInfo)
 		{
@@ -144,7 +142,6 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 		/// </summary>
 		/// <param name="typeBuilder">TypeBuilder</param>
 		/// <param name="propertyInfo">PropertyInfo which defines the type and name</param>
-		/// <param name="interceptorField">FieldInfo for the backing field of type IInterceptor</param>
 		/// <returns>MethodBuilder with the Setter</returns>
 		internal static MethodBuilder BuildSetter(TypeBuilder typeBuilder, PropertyInfo propertyInfo)
 		{

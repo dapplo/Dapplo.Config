@@ -27,7 +27,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using Dapplo.Config.Interceptor;
-using Dapplo.Config.Interceptor.Extensions;
 using Dapplo.Config.Interceptor.Implementation;
 using Dapplo.Config.Support;
 using System.Linq.Expressions;
@@ -40,10 +39,10 @@ namespace Dapplo.Config.Ini.Implementation
 	/// <summary>
 	///     Implementation for IIniSection
 	/// </summary>
-	public class IniSection<T> : ExtensibleInterceptorImpl<T>, IIniSection, IIniSection<T>
+	public class IniSection<T> : ExtensibleInterceptorImpl<T>, IIniSection<T>
 	{
 		private readonly IniSectionAttribute _iniSectionAttribute = typeof (T).GetCustomAttribute<IniSectionAttribute>();
-		private IDictionary<string, IniValue> _iniValues = new Dictionary<string, IniValue>(AbcComparer.Instance);
+		private readonly IDictionary<string, IniValue> _iniValues = new Dictionary<string, IniValue>(AbcComparer.Instance);
 
 		/// <summary>
 		/// Logic to generate an IniValue for every property
@@ -106,13 +105,7 @@ namespace Dapplo.Config.Ini.Implementation
 		/// </summary>
 		/// <param name="propertyName"></param>
 		/// <returns></returns>
-		public IniValue this[string propertyName]
-		{
-			get
-			{
-				return GetIniValue(propertyName);
-			}
-		}
+		public IniValue this[string propertyName] => GetIniValue(propertyName);
 
 		/// <summary>
 		/// Get a single ini value via the property name
@@ -159,23 +152,23 @@ namespace Dapplo.Config.Ini.Implementation
 		///     Try to get a single ini value
 		/// </summary>
 		/// <param name="propertyName">Name of the property</param>
-		/// <param name="outIniValue">IniValue out</param>
+		/// <param name="value">IniValue out</param>
 		/// <returns>bool</returns>
-		public bool TryGetIniValue(string propertyName, out IniValue outIniValue)
+		public bool TryGetIniValue(string propertyName, out IniValue value)
 		{
-			return _iniValues.TryGetValue(propertyName, out outIniValue);
+			return _iniValues.TryGetValue(propertyName, out value);
 		}
 
 		/// <summary>
 		///     Try to get a single ini value
 		/// </summary>
 		/// <param name="propertyExpression">LambdaExpression</param>
-		/// <param name="outIniValue">IniValue out</param>
+		/// <param name="value">IniValue out</param>
 		/// <returns>bool</returns>
-		public bool TryGetIniValue<TProp>(Expression<Func<T, TProp>> propertyExpression, out IniValue iniValue)
+		public bool TryGetIniValue<TProp>(Expression<Func<T, TProp>> propertyExpression, out IniValue value)
 		{
 			var propertyName = propertyExpression.GetMemberName();
-			return TryGetIniValue(propertyName, out iniValue);
+			return TryGetIniValue(propertyName, out value);
 		}
 
 		#endregion

@@ -33,9 +33,8 @@ namespace Dapplo.Config.Interceptor.Extensions
 	/// <summary>
 	///     This implements logic to add transactional support to your proxied interface.
 	/// </summary>
-	/// <typeparam name="T"></typeparam>
 	[Extension(typeof (ITransactionalProperties))]
-	internal class TransactionExtension<T> : AbstractInterceptorExtension<T>
+	internal class TransactionExtension : AbstractInterceptorExtension
 	{
 		// A store for the values that are set during the transaction
 		private readonly IDictionary<string, object> _transactionProperties = new Dictionary<string, object>(AbcComparer.Instance);

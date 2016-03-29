@@ -116,7 +116,7 @@ namespace Dapplo.Config.Ini
 						if (hasChangesInterface?.HasChanges() == true)
 						{
 							needsSave = true;
-							hasChangesInterface?.ResetHasChanges();
+							hasChangesInterface.ResetHasChanges();
 						}
 					}
 					if (needsSave)
@@ -505,6 +505,7 @@ namespace Dapplo.Config.Ini
 			{
 				_saveTimer.Enabled = false;
 			}
+			// ReSharper disable once SuspiciousTypeConversion.Global
 			var writeProtectedPropertiesInterface = iniSection as IWriteProtectProperties;
 			var hasChangesInterface = iniSection as IHasChanges;
 			var interceptor = iniSection as IExtensibleInterceptor;
@@ -531,7 +532,7 @@ namespace Dapplo.Config.Ini
 
 			// After load
 			Action<IIniSection> afterLoadAction;
-			if (_afterLoadActions.TryGetValue(interceptor.InterceptedType, out afterLoadAction))
+			if (interceptor != null && _afterLoadActions.TryGetValue(interceptor.InterceptedType, out afterLoadAction))
 			{
 				afterLoadAction(iniSection);
 			}
@@ -809,12 +810,12 @@ namespace Dapplo.Config.Ini
 					foreach (var propertyName in iniSection.GetIniValues().Keys)
 					{
 						// TODO: Do we need to skip read/write protected values here?
-						defaultValueInterface?.RestoreToDefault(propertyName);
+						defaultValueInterface.RestoreToDefault(propertyName);
 					}
 					var intercepted = iniSection as IExtensibleInterceptor;
 					// Call the after load action
 					Action<IIniSection> afterLoadAction;
-					if (_afterLoadActions.TryGetValue(intercepted.InterceptedType, out afterLoadAction))
+					if (intercepted != null && _afterLoadActions.TryGetValue(intercepted.InterceptedType, out afterLoadAction))
 					{
 						afterLoadAction(iniSection);
 					}
@@ -895,7 +896,7 @@ namespace Dapplo.Config.Ini
 				var intercepted = iniSection as IExtensibleInterceptor;
 				// set the values before save
 				Action<IIniSection> beforeSaveAction;
-				if (_beforeSaveActions.TryGetValue(intercepted.InterceptedType, out beforeSaveAction))
+				if (intercepted != null && _beforeSaveActions.TryGetValue(intercepted.InterceptedType, out beforeSaveAction))
 				{
 					beforeSaveAction(iniSection);
 				}
@@ -907,7 +908,7 @@ namespace Dapplo.Config.Ini
 				{
 					// Eventually set the values back, after save
 					Action<IIniSection> afterSaveAction;
-					if (_afterLoadActions.TryGetValue(intercepted.InterceptedType, out afterSaveAction))
+					if (intercepted != null && _afterLoadActions.TryGetValue(intercepted.InterceptedType, out afterSaveAction))
 					{
 						afterSaveAction(iniSection);
 					}

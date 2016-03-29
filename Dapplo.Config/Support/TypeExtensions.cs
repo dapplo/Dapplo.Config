@@ -39,7 +39,7 @@ namespace Dapplo.Config.Support
 	public static class TypeExtensions
 	{
 		private static readonly LogSource Log = new LogSource();
-		private static readonly IDictionary<Type, Type> _converters = new Dictionary<Type, Type>();
+		private static readonly IDictionary<Type, Type> Converters = new Dictionary<Type, Type>();
 
 		// A map for converting interfaces to types
 		private static readonly IDictionary<Type, Type> TypeMap = new Dictionary<Type, Type>
@@ -60,7 +60,7 @@ namespace Dapplo.Config.Support
 		/// <param name="typeConverter"></param>
 		public static void AddDefaultConverter(Type type, Type typeConverter)
 		{
-			_converters.SafelyAddOrOverwrite(type, typeConverter);
+			Converters.SafelyAddOrOverwrite(type, typeConverter);
 		}
 
 		/// <summary>
@@ -70,6 +70,7 @@ namespace Dapplo.Config.Support
 		/// <param name="value"></param>
 		/// <param name="typeConverter">A TypeConverter can be passed for special cases</param>
 		/// <param name="typeDescriptorContext">A TypeDescriptorContext can be passed for special cases</param>
+		/// <param name="convertFrom"></param>
 		/// <returns>T</returns>
 		public static T ConvertOrCastValueToType<T>(object value, TypeConverter typeConverter = null, ITypeDescriptorContext typeDescriptorContext = null,
 			bool convertFrom = true)
@@ -141,7 +142,7 @@ namespace Dapplo.Config.Support
 						var genericType = genericArguments[0];
 						var addMethod = instanceType.GetMethod("Add");
 
-						foreach (var item in stringValue != null ? stringValue.SplitCSV() : (IEnumerable) value)
+						foreach (var item in stringValue != null ? stringValue.SplitCsv() : (IEnumerable) value)
 						{
 							try
 							{
@@ -255,9 +256,9 @@ namespace Dapplo.Config.Support
 		/// <returns>TypeConverter</returns>
 		public static TypeConverter GetConverter(this Type valueType)
 		{
-			TypeConverter converter = null;
+			TypeConverter converter;
 			Type converterType;
-			if (_converters.TryGetValue(valueType, out converterType))
+			if (Converters.TryGetValue(valueType, out converterType))
 			{
 				converter = (TypeConverter) Activator.CreateInstance(converterType);
 			}
@@ -286,7 +287,8 @@ namespace Dapplo.Config.Support
 			outValue = null;
 			if (convertFrom)
 			{
-				if (stringValue != null && (bool) typeConverter?.CanConvertFrom(typeof (string)))
+				var canConvertFrom = typeConverter?.CanConvertFrom(typeof (string));
+				if (canConvertFrom != null && (stringValue != null && (bool) canConvertFrom))
 				{
 					try
 					{
@@ -299,23 +301,28 @@ namespace Dapplo.Config.Support
 						Log.Warn().WriteLine(ex.Message);
 					}
 				}
-				else if ((bool) typeConverter?.CanConvertFrom(valueType))
+				else
 				{
-					try
+					var canConverFrom = typeConverter?.CanConvertFrom(valueType);
+					if (canConverFrom != null && (bool) canConverFrom)
 					{
-						outValue = typeConverter.ConvertFrom(typeDescriptorContext, CultureInfo.CurrentCulture, value);
-						return true;
-					}
-					catch (Exception ex)
-					{
-						// Ignore, can't convert the value, this should actually not happen much
-						Log.Warn().WriteLine(ex.Message);
+						try
+						{
+							outValue = typeConverter.ConvertFrom(typeDescriptorContext, CultureInfo.CurrentCulture, value);
+							return true;
+						}
+						catch (Exception ex)
+						{
+							// Ignore, can't convert the value, this should actually not happen much
+							Log.Warn().WriteLine(ex.Message);
+						}
 					}
 				}
 			}
 			else
 			{
-				if ((bool) typeConverter?.CanConvertTo(typeof (string)))
+				var canConvertTo = typeConverter?.CanConvertTo(typeof (string));
+				if (canConvertTo != null && (bool) canConvertTo)
 				{
 					try
 					{
@@ -328,17 +335,21 @@ namespace Dapplo.Config.Support
 						Log.Warn().WriteLine(ex.Message);
 					}
 				}
-				else if ((bool) typeConverter?.CanConvertTo(targetType))
+				else
 				{
-					try
+					var convertTo = typeConverter?.CanConvertTo(targetType);
+					if (convertTo != null && (bool) convertTo)
 					{
-						outValue = typeConverter.ConvertTo(typeDescriptorContext, CultureInfo.CurrentCulture, value, targetType);
-						return true;
-					}
-					catch (Exception ex)
-					{
-						// Ignore, can't convert the value, this should actually not happen much
-						Log.Warn().WriteLine(ex.Message);
+						try
+						{
+							outValue = typeConverter.ConvertTo(typeDescriptorContext, CultureInfo.CurrentCulture, value, targetType);
+							return true;
+						}
+						catch (Exception ex)
+						{
+							// Ignore, can't convert the value, this should actually not happen much
+							Log.Warn().WriteLine(ex.Message);
+						}
 					}
 				}
 			}

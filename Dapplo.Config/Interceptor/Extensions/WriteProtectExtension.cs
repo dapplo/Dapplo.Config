@@ -34,9 +34,8 @@ namespace Dapplo.Config.Interceptor.Extensions
 	/// <summary>
 	///     This implements logic to add write protect support to your proxied interface.
 	/// </summary>
-	/// <typeparam name="T"></typeparam>
 	[Extension(typeof (IWriteProtectProperties))]
-	internal class WriteProtectExtension<T> : AbstractInterceptorExtension<T>
+	internal class WriteProtectExtension : AbstractInterceptorExtension
 	{
 		// A store for the values that are write protected
 		private readonly ISet<string> _writeProtectedProperties = new HashSet<string>(AbcComparer.Instance);

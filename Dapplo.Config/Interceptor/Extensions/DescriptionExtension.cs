@@ -34,7 +34,7 @@ namespace Dapplo.Config.Interceptor.Extensions
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	[Extension(typeof (IDescription))]
-	internal class DescriptionExtension<T> : AbstractInterceptorExtension<T>
+	internal class DescriptionExtension<T> : AbstractInterceptorExtension
 	{
 		/// <summary>
 		/// Register methods

@@ -26,7 +26,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -211,19 +210,19 @@ namespace Dapplo.Config.Language
 		{
 			var prefix = language.PrefixName();
 			IDictionary<string, string> sectionTranslations;
+			// ReSharper disable once SuspiciousTypeConversion.Global
 			var defaultValueInterface = language as IDefaultValue;
 			var interceptor = language as IExtensibleInterceptor;
-
+			if (interceptor == null || defaultValueInterface == null)
+			{
+				throw new NullReferenceException("Should not happen.");
+			}
 			if (!_allTranslations.TryGetValue(prefix, out sectionTranslations))
 			{
-
-				if (defaultValueInterface != null)
+				// No values, reset all (only available via the PropertyTypes dictionary
+				foreach (var key in interceptor.PropertyTypes.Keys)
 				{
-					// No values, reset all (only available via the PropertyTypes dictionary
-					foreach (var key in interceptor.PropertyTypes.Keys)
-					{
-						defaultValueInterface?.RestoreToDefault(key);
-					}
+					defaultValueInterface.RestoreToDefault(key);
 				}
 				return;
 			}
@@ -239,7 +238,7 @@ namespace Dapplo.Config.Language
 				}
 				else
 				{
-					defaultValueInterface?.RestoreToDefault(key);
+					defaultValueInterface.RestoreToDefault(key);
 				}
 			}
 

@@ -40,7 +40,7 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 	///     Extend the PropertyProxy with Registry functionality
 	/// </summary>
 	[Extension(typeof (IRegistry))]
-	internal class RegistryExtension<T> : AbstractInterceptorExtension<T>
+	internal class RegistryExtension<T> : AbstractInterceptorExtension
 	{
 		private static readonly LogSource Log = new LogSource();
 		private RegistryAttribute _registryAttribute;

@@ -24,7 +24,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using Dapplo.Config.Interfaces;
 
 #endregion
 
@@ -70,9 +69,9 @@ namespace Dapplo.Config.Ini
 		///     result
 		/// </summary>
 		/// <param name="propertyName">Name of the property</param>
-		/// <param name="iniValue">out IniValue</param>
+		/// <param name="value">out IniValue</param>
 		/// <returns>bool with true if found</returns>
-		bool TryGetIniValue(string propertyName, out IniValue iniValue);
+		bool TryGetIniValue(string propertyName, out IniValue value);
 	}
 
 	/// <summary>
@@ -94,8 +93,8 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		/// <typeparam name="TProp">Your interface</typeparam>
 		/// <param name="propertyExpression">expression for the property name</param>
-		/// <param name="iniValue">out IniValue</param>
+		/// <param name="value">out IniValue</param>
 		/// <returns>bool with true if found</returns>
-		bool TryGetIniValue<TProp>(Expression<Func<T, TProp>> propertyExpression, out IniValue iniValue);
+		bool TryGetIniValue<TProp>(Expression<Func<T, TProp>> propertyExpression, out IniValue value);
 	}
 }
