@@ -48,7 +48,7 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 				from parameterInfo in methodInfo.GetParameters()
 				select parameterInfo.ParameterType).ToList();
 
-			Log.Debug().WriteLine("Parameters: {0}", string.Join(", ", parameterTypes));
+			Log.Verbose().WriteLine("Parameters: {0}", string.Join(", ", parameterTypes));
 
 			var methodBuilder = typeBuilder.DefineMethod(methodInfo.Name, MethodAttributes);
 			methodBuilder.SetParameters(parameterTypes.ToArray());

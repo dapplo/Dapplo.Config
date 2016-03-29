@@ -50,7 +50,7 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 		/// <returns>FieldInfo</returns>
 		internal static FieldInfo BuildProperty(TypeBuilder typeBuilder, string name, Type type)
 		{
-			Log.Debug().WriteLine("Generating property {0} with type {1}", name, type.FullName);
+			Log.Verbose().WriteLine("Generating property {0} with type {1}", name, type.FullName);
 
 			var backingField = typeBuilder.DefineField("_" + name.ToLowerInvariant(), type, FieldAttributes.Private | FieldAttributes.HasDefault);
 			var propertyBuilder = typeBuilder.DefineProperty(name, PropertyAttributes.HasDefault, type, null);
@@ -89,7 +89,7 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 			{
 				var getterBuilder = BuildGetter(typeBuilder, propertyInfo);
 				propertyBuilder.SetGetMethod(getterBuilder);
-				Log.Debug().WriteLine("Created get for property {0}", propertyInfo.Name);
+				Log.Verbose().WriteLine("Created get for property {0}", propertyInfo.Name);
 			}
 
 			// Create Set if the property can be written
@@ -97,7 +97,7 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 			{
 				var setterBuilder = BuildSetter(typeBuilder, propertyInfo);
 				propertyBuilder.SetSetMethod(setterBuilder);
-				Log.Debug().WriteLine("Created set for property {0}", propertyInfo.Name);
+				Log.Verbose().WriteLine("Created set for property {0}", propertyInfo.Name);
 			}
 
 		}
@@ -167,8 +167,5 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 
 			return setterBuilder;
 		}
-
-
-
 	}
 }
