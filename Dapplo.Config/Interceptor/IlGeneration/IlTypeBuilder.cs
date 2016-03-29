@@ -72,12 +72,12 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 			{
 				if (propertyInfo.Name == "Interceptor")
 				{
-					Log.Debug().WriteLine("Skipping property {0}", propertyInfo.Name);
+					Log.Verbose().WriteLine("Skipping property {0}", propertyInfo.Name);
 					continue;
 				}
 				if (!propertyInfo.CanRead && !propertyInfo.CanWrite)
 				{
-					Log.Debug().WriteLine("Skipping property {0}", propertyInfo.Name);
+					Log.Verbose().WriteLine("Skipping property {0}", propertyInfo.Name);
 					continue;
 				}
 
@@ -98,11 +98,11 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 			{
 				if (methodInfo.Name.StartsWith("get_") || methodInfo.Name.StartsWith("set_"))
 				{
-					Log.Debug().WriteLine("Skipping method {0}", methodInfo.Name);
+					Log.Verbose().WriteLine("Skipping method {0}", methodInfo.Name);
 					continue;
 				}
 				IlMethodBuilder.BuildMethod(typeBuilder, methodInfo);
-				Log.Debug().WriteLine("Created method {0}", methodInfo.Name);
+				Log.Verbose().WriteLine("Created method {0}", methodInfo.Name);
 			}
 
 			// Example for making a exe, for a methodBuilder which creates a static main
