@@ -58,6 +58,9 @@ namespace Dapplo.Config.Language
 		private readonly IDictionary<Type, ILanguage> _languageTypeConfigs = new Dictionary<Type, ILanguage>();
 		private bool _initialReadDone;
 
+		/// <summary>
+		/// Define some static constants which could not be assigned directly
+		/// </summary>
 		static LanguageLoader()
 		{
 			InterceptorFactory.DefineBaseTypeForInterface(typeof(ILanguage), typeof(Language<>));
@@ -174,8 +177,9 @@ namespace Dapplo.Config.Language
 		/// <summary>
 		///     Call this to make sure that all languages have translations.
 		///     This will walk through the files of the supplied language (or the one with the most translations)
-		///     and copy the "missing" files to the others. By doing this, all non translated components should be in this
-		///     language.
+		///     and copy the "missing" files to the others.
+		///     By doing this, all non translated components will be in the mostly used translation.
+		///     TODO: Use system language?
 		/// </summary>
 		public void CorrectMissingTranslations()
 		{
@@ -209,6 +213,7 @@ namespace Dapplo.Config.Language
 					if (!comparingFiles.Contains(possibleTargetFile))
 					{
 						// Add missing translation
+						Log.Verbose().WriteLine("Added missing file {0}", file);
 						Files[ietf].Add(file);
 					}
 				}

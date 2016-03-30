@@ -41,12 +41,14 @@ namespace Dapplo.Config.Language.Implementation
 		/// Get a translation for a property
 		/// </summary>
 		/// <param name="languageKey"></param>
-		/// <returns>string</returns>
+		/// <returns>string or null if not available</returns>
 		public string this[string languageKey]
 		{
 			get
 			{
-				return Properties[languageKey] as string;
+				object translation;
+				Properties.TryGetValue(languageKey, out translation);
+				return (string)translation;
 			}
 		}
 

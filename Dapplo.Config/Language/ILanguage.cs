@@ -48,12 +48,12 @@ namespace Dapplo.Config.Language
 		///     Get the translation for a key
 		/// </summary>
 		/// <param name="languageKey">Key for the translation</param>
-		/// <returns>IniValue</returns>
+		/// <returns>string or null</returns>
 		string this[string languageKey] { get; }
 
 		/// <summary>
 		///     Get all the language keys, this includes also the ones that don't have an access property.
-		///     This is a method, could have been a property, but this differentiates it from the properties.
+		///     This is a method, could have been a property, but this differentiates it from the properties in the extending interface.
 		/// </summary>
 		/// <returns></returns>
 		ICollection<string> Keys();
