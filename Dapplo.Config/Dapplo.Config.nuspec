@@ -5,7 +5,7 @@
         <version>$version$</version>
         <authors>$author$</authors>
         <licenseUrl>http://www.gnu.org/licenses/lgpl-3.0.en.html</licenseUrl>
-        <projectUrl>http://www.dapplo.net/blocks/Dapplo.Config.html</projectUrl>
+        <projectUrl>http://www.dapplo.net/blocks/Dapplo.Config</projectUrl>
         <iconUrl>http://www.dapplo.net/favicon.ico</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Dapplo.Config makes it easy to add a configuration to your project.</description>
