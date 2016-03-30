@@ -22,10 +22,10 @@
 #region using
 
 using System.Collections.Generic;
-using Dapplo.Config.Support;
 using Dapplo.LogFacade;
 using Xunit;
 using Xunit.Abstractions;
+using Dapplo.Utils;
 
 #endregion
 

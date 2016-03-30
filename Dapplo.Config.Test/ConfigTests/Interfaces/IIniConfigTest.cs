@@ -28,7 +28,7 @@ using System.Drawing;
 using System.Runtime.Serialization;
 using Dapplo.Config.Converters;
 using Dapplo.Config.Ini;
-using Dapplo.Config.Interfaces;
+using Dapplo.InterfaceImpl.Extensions;
 
 #endregion
 

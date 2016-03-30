@@ -32,11 +32,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Dapplo.Config.Ini;
-using Dapplo.Config.Interceptor;
-using Dapplo.Config.Support;
 using Dapplo.LogFacade;
 using Dapplo.Config.Language.Implementation;
-using Dapplo.Config.Interfaces;
+using Dapplo.InterfaceImpl;
+using Dapplo.InterfaceImpl.Extensions;
+using Dapplo.Utils;
 
 #endregion
 

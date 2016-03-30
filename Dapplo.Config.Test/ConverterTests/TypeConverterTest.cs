@@ -24,8 +24,8 @@
 using System;
 using System.ComponentModel;
 using Dapplo.Config.Converters;
-using Dapplo.Config.Support;
 using Dapplo.LogFacade;
+using Dapplo.Utils;
 using Xunit;
 using Xunit.Abstractions;
 

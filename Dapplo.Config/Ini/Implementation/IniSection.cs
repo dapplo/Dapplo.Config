@@ -26,11 +26,12 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using Dapplo.Config.Interceptor;
-using Dapplo.Config.Interceptor.Implementation;
 using Dapplo.Config.Support;
 using System.Linq.Expressions;
 using System;
+using Dapplo.InterfaceImpl;
+using Dapplo.InterfaceImpl.Implementation;
+using Dapplo.Utils;
 
 #endregion
 

@@ -23,8 +23,8 @@
 
 using System;
 using System.Collections.Generic;
-using Dapplo.Config.Support;
 using Dapplo.LogFacade;
+using Dapplo.Utils;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -23,9 +23,9 @@
 
 using System;
 using System.Reflection;
-using Dapplo.Config.Interceptor;
-using Dapplo.Config.Interceptor.Implementation;
 using System.Collections.Generic;
+using Dapplo.InterfaceImpl;
+using Dapplo.InterfaceImpl.Implementation;
 
 #endregion
 

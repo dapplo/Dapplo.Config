@@ -25,11 +25,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Dapplo.Config.Interceptor;
-using Dapplo.Config.Interceptor.Extensions;
-using Dapplo.Config.Interceptor.Implementation;
-using Dapplo.Config.Support;
+using Dapplo.InterfaceImpl;
+using Dapplo.InterfaceImpl.Extensions;
+using Dapplo.InterfaceImpl.Extensions.Implementation;
+using Dapplo.InterfaceImpl.Implementation;
 using Dapplo.LogFacade;
+using Dapplo.Utils;
 using Microsoft.Win32;
 
 #endregion
@@ -40,7 +41,7 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 	///     Extend the PropertyProxy with Registry functionality
 	/// </summary>
 	[Extension(typeof (IRegistry))]
-	internal class RegistryExtension<T> : AbstractInterceptorExtension
+	public class RegistryExtension<T> : AbstractInterceptorExtension
 	{
 		private static readonly LogSource Log = new LogSource();
 		private RegistryAttribute _registryAttribute;
@@ -54,10 +55,7 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 		/// <summary>
 		///     Make sure this extension is initialized last
 		/// </summary>
-		public override int InitOrder
-		{
-			get { return int.MaxValue; }
-		}
+		public override int InitOrder => int.MaxValue;
 
 		/// <summary>
 		///     Process the property, in our case read the registry

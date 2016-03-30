@@ -29,13 +29,13 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Dapplo.Config.Support;
 using Dapplo.LogFacade;
 using Timer = System.Timers.Timer;
 using System.Reflection;
-using Dapplo.Config.Interceptor;
-using Dapplo.Config.Interfaces;
 using Dapplo.Config.Ini.Implementation;
+using Dapplo.InterfaceImpl;
+using Dapplo.InterfaceImpl.Extensions;
+using Dapplo.Utils;
 
 #endregion
 

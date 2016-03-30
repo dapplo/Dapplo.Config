@@ -22,7 +22,9 @@
 #region using
 
 using System;
+using Dapplo.Config.WindowsRegistry.Implementation;
 using Microsoft.Win32;
+using Dapplo.InterfaceImpl;
 
 #endregion
 

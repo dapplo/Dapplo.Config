@@ -23,7 +23,7 @@
 
 using System;
 using System.ComponentModel;
-using Dapplo.Config.Interceptor;
+using Dapplo.InterfaceImpl;
 
 #endregion
 

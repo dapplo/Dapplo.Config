@@ -22,8 +22,6 @@
 #region using
 
 using System.Collections.Generic;
-using Dapplo.Config.Interceptor;
-using Dapplo.Config.Interfaces;
 
 #endregion
 
