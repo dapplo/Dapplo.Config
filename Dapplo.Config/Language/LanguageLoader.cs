@@ -64,6 +64,35 @@ namespace Dapplo.Config.Language
 			InterceptorFactory.DefineDefaultInterfaces(typeof(ILanguage), new[] { typeof(IDefaultValue), typeof(IHasChanges) });
 		}
 
+		#region Static
+
+		/// <summary>
+		///     Static helper to retrieve the LanguageLoader that was created with the supplied parameters
+		/// </summary>
+		/// <param name="applicationName"></param>
+		/// <returns>LanguageLoader</returns>
+		public static LanguageLoader Get(string applicationName)
+		{
+			return LoaderStore[applicationName];
+		}
+
+		/// <summary>
+		///     Static helper to retrieve the first LanguageLoader that was created
+		/// </summary>
+		/// <returns>LanguageLoader or null</returns>
+		public static LanguageLoader Current => LoaderStore.FirstOrDefault().Value;
+
+		/// <summary>
+		///     Delete the Language objects for the specified application, mostly used in tests
+		/// </summary>
+		/// <param name="applicationName"></param>
+		public static void Delete(string applicationName)
+		{
+			Log.Debug().WriteLine("Removing {0}", applicationName);
+			LoaderStore.Remove(applicationName);
+		}
+		#endregion
+
 		/// <summary>
 		///     Create a LanguageLoader, this is your container for all the ILanguage implementing interfaces.
 		///     You can supply a default language right away.
@@ -95,11 +124,6 @@ namespace Dapplo.Config.Language
 		/// </summary>
 		public IDictionary<string, string> AvailableLanguages { get; private set; }
 
-		/// <summary>
-		///     Static helper to retrieve the first LanguageLoader that was created
-		/// </summary>
-		/// <returns>LanguageLoader or null</returns>
-		public static LanguageLoader Current => LoaderStore.FirstOrDefault().Value;
 
 		/// <summary>
 		///     Get the IETF of the current language.
@@ -192,16 +216,6 @@ namespace Dapplo.Config.Language
 		}
 
 		/// <summary>
-		///     Delete the Language objects for the specified application, mostly used in tests
-		/// </summary>
-		/// <param name="applicationName"></param>
-		public static void Delete(string applicationName)
-		{
-			Log.Debug().WriteLine("Removing {0}", applicationName);
-			LoaderStore.Remove(applicationName);
-		}
-
-		/// <summary>
 		///     Fill the backing properties of the supplied object.
 		///     Match the ini-file properties with the name of the property.
 		/// </summary>
@@ -250,52 +264,27 @@ namespace Dapplo.Config.Language
 		}
 
 		/// <summary>
-		///     Static helper to retrieve the LanguageLoader that was created with the supplied parameters
-		/// </summary>
-		/// <param name="applicationName"></param>
-		/// <returns>LanguageLoader</returns>
-		public static LanguageLoader Get(string applicationName)
-		{
-			return LoaderStore[applicationName];
-		}
-
-		/// <summary>
 		///     Get the specified ILanguage type
 		/// </summary>
 		/// <typeparam name="T">ILanguage</typeparam>
 		/// <returns>T</returns>
 		public T Get<T>() where T : ILanguage
 		{
-			if (!typeof(ILanguage).IsAssignableFrom(typeof(T)))
-			{
-				throw new ArgumentException("type is not a ILanguage");
-			}
+			var type = typeof(T);
 			if (!_initialReadDone)
 			{
 				throw new InvalidOperationException("Please load before retrieving the language");
 			}
-			return InterceptorFactory.New<T>();
-		}
-
-		/// <summary>
-		///     Read the resources from the specified file
-		/// </summary>
-		/// <param name="languageFile"></param>
-		/// <returns>name - values sorted to module</returns>
-		private IDictionary<string, IDictionary<string, string>> ReadXmlResources(string languageFile)
-		{
-			var xElement = XDocument.Load(languageFile).Root;
-			if (xElement == null)
+			ILanguage language;
+			if (!_languageTypeConfigs.TryGetValue(type, out language))
 			{
-				return null;
+				language = InterceptorFactory.New<T>();
+				_languageTypeConfigs.Add(type, language);
+				_languageConfigs.Add(language.PrefixName(), language);
+				FillLanguageConfig(language);
 			}
-			return (from resourcesElement in xElement.Elements("resources")
-				where resourcesElement.Attribute("prefix") != null
-				from resourceElement in resourcesElement.Elements("resource")
-				group resourceElement by resourcesElement.Attribute("prefix").Value
-				into resourceElementGroup
-				select resourceElementGroup).ToDictionary(group => @group.Key,
-					group => (IDictionary<string, string>) @group.ToDictionary(x => x.Attribute("name").Value, x => x.Value.Trim()));
+
+			return (T)language;
 		}
 
 		/// <summary>
@@ -328,23 +317,41 @@ namespace Dapplo.Config.Language
 			var type = typeof (T);
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
+				if (!_initialReadDone)
+				{
+					await ReloadAsync(token).ConfigureAwait(false);
+				}
 				ILanguage language;
 				if (!_languageTypeConfigs.TryGetValue(type, out language))
 				{
 					language = InterceptorFactory.New<T>();
 					_languageTypeConfigs.Add(type, language);
 					_languageConfigs.Add(language.PrefixName(), language);
-					if (!_initialReadDone)
-					{
-						await ReloadAsync(token).ConfigureAwait(false);
-					}
-					else
-					{
-						FillLanguageConfig(language);
-					}
+					FillLanguageConfig(language);
 				}
 				return (T)language;
 			}
+		}
+
+		/// <summary>
+		///     Read the resources from the specified file
+		/// </summary>
+		/// <param name="languageFile"></param>
+		/// <returns>name - values sorted to module</returns>
+		private IDictionary<string, IDictionary<string, string>> ReadXmlResources(string languageFile)
+		{
+			var xElement = XDocument.Load(languageFile).Root;
+			if (xElement == null)
+			{
+				return null;
+			}
+			return (from resourcesElement in xElement.Elements("resources")
+					where resourcesElement.Attribute("prefix") != null
+					from resourceElement in resourcesElement.Elements("resource")
+					group resourceElement by resourcesElement.Attribute("prefix").Value
+				into resourceElementGroup
+					select resourceElementGroup).ToDictionary(group => @group.Key,
+					group => (IDictionary<string, string>)@group.ToDictionary(x => x.Attribute("name").Value, x => x.Value.Trim()));
 		}
 
 		/// <summary>

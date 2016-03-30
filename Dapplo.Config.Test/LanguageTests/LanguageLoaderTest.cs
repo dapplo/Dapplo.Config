@@ -67,6 +67,10 @@ namespace Dapplo.Config.Test.LanguageTests
 			test = await _languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
 			ok = test.TranslationOrDefault(x => x.Ok);
 			Assert.Equal("Ok", ok);
+
+			test = _languageLoader.Get<ILanguageLoaderTest>();
+			ok = test.TranslationOrDefault(x => x.Ok);
+			Assert.Equal("Ok", ok);
 		}
 
 		[Fact]

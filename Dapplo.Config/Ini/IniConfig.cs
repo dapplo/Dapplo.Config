@@ -74,6 +74,78 @@ namespace Dapplo.Config.Ini
 			InterceptorFactory.DefineDefaultInterfaces(typeof(IIniSection), new[] { typeof(IDefaultValue), typeof(IHasChanges) });
 		}
 
+		#region Static code
+		/// <summary>
+		///     Static helper to retrieve the first IniConfig, the result when multiple IniConfigs are used is undefined!
+		/// </summary>
+		/// <returns>IniConfig or null if none</returns>
+		public static IniConfig Current => ConfigStore.FirstOrDefault().Value;
+
+		/// <summary>
+		///     Static helper to remove the IniConfig from the store.
+		///     This is interal, mainly for tests, normally it should not be needed.
+		/// </summary>
+		/// <param name="applicationName"></param>
+		/// <param name="fileName"></param>
+		public static void Delete(string applicationName, string fileName)
+		{
+			var identifier = $"{applicationName}.{fileName}";
+			Log.Debug().WriteLine("Deleting IniConfig {0}", identifier);
+			IniConfig iniConfig;
+			if (ConfigStore.TryGetValue(identifier, out iniConfig))
+			{
+				ConfigStore.Remove(identifier);
+			}
+			else
+			{
+				Log.Warn().WriteLine("IniConfig with identifier {0} not found!", identifier);
+			}
+		}
+
+		/// <summary>
+		///     Static helper to retrieve the IniConfig that was created with the supplied parameters
+		/// </summary>
+		/// <param name="applicationName"></param>
+		/// <param name="fileName"></param>
+		/// <returns>IniConfig</returns>
+		public static IniConfig Get(string applicationName, string fileName)
+		{
+			return ConfigStore[$"{applicationName}.{fileName}"];
+		}
+
+		#endregion
+
+		#region Properties
+
+		/// <summary>
+		///     Assign your own error handler to get all the read errors
+		/// </summary>
+		public Action<IIniSection, IniValue, Exception> ReadErrorHandler { get; set; }
+
+		/// <summary>
+		///     Get all the names (from the IniSection annotation) for the sections
+		/// </summary>
+		/// <returns>all keys</returns>
+		public ICollection<string> SectionNames => _iniSections.Keys;
+
+		/// <summary>
+		///     Get all sections
+		/// </summary>
+		/// <returns>all keys</returns>
+		public IEnumerable<IIniSection> Sections => _iniSections.Values;
+
+		/// <summary>
+		///     Assign your own error handler to get all the write errors
+		/// </summary>
+		public Action<IIniSection, IniValue, Exception> WriteErrorHandler { get; set; }
+
+		/// <summary>
+		///     Location of the file where the ini config is stored
+		/// </summary>
+		public string IniLocation { get; }
+
+		#endregion
+
 		/// <summary>
 		///     Setup the management of an .ini file location
 		/// </summary>
@@ -168,68 +240,7 @@ namespace Dapplo.Config.Ini
 			}
 		}
 
-		/// <summary>
-		///     Static helper to retrieve the first IniConfig, the result when multiple IniConfigs are used is undefined!
-		/// </summary>
-		/// <returns>IniConfig or null if none</returns>
-		public static IniConfig Current => ConfigStore.FirstOrDefault().Value;
-
-		/// <summary>
-		///     Location of the file where the ini config is stored
-		/// </summary>
-		public string IniLocation { get; }
-
-		/// <summary>
-		///     Get the specified IIniSection type
-		/// </summary>
-		/// <param name="type">IIniSection to look for</param>
-		/// <returns>IIniSection</returns>
-		public IIniSection this[Type type]
-		{
-			get
-			{
-				if (!typeof (IIniSection).IsAssignableFrom(type))
-				{
-					throw new ArgumentException("type is not a IIniSection");
-				}
-				if (_initialRead == ReadFrom.Nothing)
-				{
-					throw new InvalidOperationException("Please load before retrieving the ini-sections");
-				}
-				var iniSectionAttribute = type.GetCustomAttribute<IniSectionAttribute>();
-				return _iniSections[iniSectionAttribute.Name];
-			}
-		}
-
-		/// <summary>
-		///     A simple indexer by name (from the IniSection annotation) for the IniSection
-		/// </summary>
-		/// <param name="sectionName"></param>
-		/// <returns>IIniSection</returns>
-		public IIniSection this[string sectionName] => _iniSections[sectionName];
-
-		/// <summary>
-		///     Assign your own error handler to get all the read errors
-		/// </summary>
-		public Action<IIniSection, IniValue, Exception> ReadErrorHandler { get; set; }
-
-		/// <summary>
-		///     Get all the names (from the IniSection annotation) for the sections
-		/// </summary>
-		/// <returns>all keys</returns>
-		public ICollection<string> SectionNames => _iniSections.Keys;
-
-		/// <summary>
-		///     Get all sections
-		/// </summary>
-		/// <returns>all keys</returns>
-		public IEnumerable<IIniSection> Sections => _iniSections.Values;
-
-		/// <summary>
-		///     Assign your own error handler to get all the write errors
-		/// </summary>
-		public Action<IIniSection, IniValue, Exception> WriteErrorHandler { get; set; }
-
+		#region Register after/before load/save
 		/// <summary>
 		///     Set the after load action for a IIniSection
 		/// </summary>
@@ -266,6 +277,7 @@ namespace Dapplo.Config.Ini
 			_beforeSaveActions.SafelyAddOrOverwrite(typeof (T), section => beforeSaveAction((T) section));
 			return this;
 		}
+		#endregion
 
 		/// <summary>
 		///     Helper to create the location of a file
@@ -299,138 +311,6 @@ namespace Dapplo.Config.Ini
 			}
 			Log.Verbose().WriteLine("File location: {0}", file);
 			return file;
-		}
-
-		/// <summary>
-		///     Helper method to create ini section values for writing.
-		///     The actual values are stored in the _ini
-		/// </summary>
-		/// <param name="iniSection">Section to write</param>
-		/// <param name="iniSectionsComments">Comments</param>
-		private void CreateSaveValues(IIniSection iniSection, IDictionary<string, IDictionary<string, string>> iniSectionsComments)
-		{
-			// This flag tells us if the header for the section is already written
-			var isSectionCreated = false;
-			var sectionName = iniSection.GetSectionName();
-
-			var sectionProperties = new SortedDictionary<string, string>();
-			var sectionComments = new SortedDictionary<string, string>();
-			// Loop over the ini values, this automatically skips all NonSerialized properties
-			foreach (var iniValue in iniSection.GetIniValues().Values)
-			{
-				// Check if we need to write the value, this is not needed when it has the default or if write is disabled
-				if (!iniValue.IsWriteNeeded)
-				{
-					continue;
-				}
-
-				// Before we are going to write, we need to check if the section header "[Sectionname]" is already written.
-				// If not, do so now before writing the properties of the section itself
-				if (!isSectionCreated)
-				{
-					if (_ini.ContainsKey(sectionName))
-					{
-						_ini.Remove(sectionName);
-					}
-					_ini.Add(sectionName, sectionProperties);
-					iniSectionsComments.Add(sectionName, sectionComments);
-
-					var description = iniSection.GetSectionDescription();
-					if (!string.IsNullOrEmpty(description))
-					{
-						sectionComments.Add(sectionName, description);
-					}
-					// Mark section as created!
-					isSectionCreated = true;
-				}
-
-				// Check if the property has a description, if so write it in the ini comment before the property
-				if (!string.IsNullOrEmpty(iniValue.Description))
-				{
-					sectionComments.Add(iniValue.IniPropertyName, iniValue.Description);
-				}
-
-				ITypeDescriptorContext context = null;
-				try
-				{
-					var propertyDescription = TypeDescriptor.GetProperties(iniSection.GetType()).Find(iniValue.PropertyName, true);
-					context = new TypeDescriptorContext(iniSection, propertyDescription);
-				}
-				catch (Exception ex)
-				{
-					Log.Warn().WriteLine(ex.Message);
-				}
-
-				// Get specified converter
-				var converter = iniValue.Converter;
-
-				// Special case, for idictionary derrivated types
-				if (iniValue.ValueType.IsGenericType && iniValue.ValueType.GetGenericTypeDefinition() == typeof (IDictionary<,>))
-				{
-					var subSection = TypeExtensions.ConvertOrCastValueToType<IDictionary<string, string>>(iniValue.Value, converter, context, false);
-					if (subSection != null)
-					{
-						try
-						{
-							// Use this to build a separate "section" which is called "[section-propertyname]"
-							string dictionaryIdentifier = $"{sectionName}-{iniValue.IniPropertyName}";
-							if (_ini.ContainsKey(dictionaryIdentifier))
-							{
-								_ini.Remove(dictionaryIdentifier);
-							}
-							_ini.Add(dictionaryIdentifier, subSection);
-							if (!string.IsNullOrWhiteSpace(iniValue.Description))
-							{
-								var dictionaryComments = new SortedDictionary<string, string>
-								{
-									{dictionaryIdentifier, iniValue.Description}
-								};
-								iniSectionsComments.Add(dictionaryIdentifier, dictionaryComments);
-							}
-						}
-						catch (Exception ex)
-						{
-							Log.Warn().WriteLine(ex.Message);
-							WriteErrorHandler(iniSection, iniValue, ex);
-						}
-						continue;
-					}
-				}
-
-				try
-				{
-					// Convert the value to a string
-					var writingValue = TypeExtensions.ConvertOrCastValueToType<string>(iniValue.Value, converter, context, false);
-					// And write the value with the IniPropertyName (which does NOT have to be the property name) to the file
-					sectionProperties.Add(iniValue.IniPropertyName, writingValue);
-				}
-				catch (Exception ex)
-				{
-					Log.Warn().WriteLine(ex.Message);
-					WriteErrorHandler(iniSection, iniValue, ex);
-				}
-			}
-		}
-
-		/// <summary>
-		///     Static helper to remove the IniConfig from the store.
-		///     This is interal, mainly for tests, normally it should not be needed.
-		/// </summary>
-		/// <param name="applicationName"></param>
-		/// <param name="fileName"></param>
-		public static void Delete(string applicationName, string fileName)
-		{
-			var identifier = $"{applicationName}.{fileName}";
-			Log.Debug().WriteLine("Deleting IniConfig {0}", identifier);
-			IniConfig iniConfig;
-			if (ConfigStore.TryGetValue(identifier, out iniConfig))
-			{
-				ConfigStore.Remove(identifier);
-			}
-			else
-			{
-				Log.Warn().WriteLine("IniConfig with identifier {0} not found!", identifier);
-			}
 		}
 
 		/// <summary>
@@ -495,6 +375,7 @@ namespace Dapplo.Config.Ini
 			};
 		}
 
+		#region Fill
 		/// <summary>
 		///     Helper method to fill the values of one section
 		/// </summary>
@@ -623,16 +504,47 @@ namespace Dapplo.Config.Ini
 				FillSection(iniSection);
 			}
 		}
+		#endregion
+
+		#region Getting IniSection
+		/// <summary>
+		///     A simple indexer by name (from the IniSection annotation) for the IniSection
+		/// </summary>
+		/// <param name="sectionName"></param>
+		/// <returns>IIniSection</returns>
+		public IIniSection this[string sectionName] => _iniSections[sectionName];
 
 		/// <summary>
-		///     Static helper to retrieve the IniConfig that was created with the supplied parameters
+		///     Get the specified IIniSection type
 		/// </summary>
-		/// <param name="applicationName"></param>
-		/// <param name="fileName"></param>
-		/// <returns>IniConfig</returns>
-		public static IniConfig Get(string applicationName, string fileName)
+		/// <param name="type">IIniSection to look for</param>
+		/// <returns>IIniSection</returns>
+		public IIniSection this[Type type]
 		{
-			return ConfigStore[$"{applicationName}.{fileName}"];
+			get
+			{
+				if (!typeof(IIniSection).IsAssignableFrom(type))
+				{
+					throw new ArgumentException("type is not a IIniSection");
+				}
+				if (_initialRead == ReadFrom.Nothing)
+				{
+					throw new InvalidOperationException("Please load before retrieving the ini-sections");
+				}
+				var iniSectionAttribute = type.GetCustomAttribute<IniSectionAttribute>();
+				return _iniSections[iniSectionAttribute.Name];
+			}
+		}
+
+		/// <summary>
+		///     A simple try get by name for the IniSection
+		/// </summary>
+		/// <param name="sectionName">Name of the section</param>
+		/// <param name="section">out parameter with the IIniSection</param>
+		/// <returns>bool with true if it worked</returns>
+		public bool TryGet(string sectionName, out IIniSection section)
+		{
+			return _iniSections.TryGetValue(sectionName, out section);
 		}
 
 		/// <summary>
@@ -642,69 +554,24 @@ namespace Dapplo.Config.Ini
 		/// <returns>T</returns>
 		public T Get<T>() where T : IIniSection
 		{
-			return (T) this[typeof (T)];
-		}
-
-		/// <summary>
-		///     Get the specified IIniSection type
-		/// </summary>
-		/// <param name="type">IIniSection to look for</param>
-		/// <returns>IIniSection</returns>
-		public IIniSection Get(Type type)
-		{
-			return this[type];
-		}
-
-		/// <summary>
-		///     A simple get by name (from the IniSection annotation) for the IniSection
-		/// </summary>
-		/// <param name="sectionName"></param>
-		/// <returns>IIniSection</returns>
-		public IIniSection Get(string sectionName)
-		{
-			return this[sectionName];
-		}
-
-		/// <summary>
-		///     Initialize the IniConfig by reading all the properties from the stream
-		///     If this is called directly after construction, no files will be read which is useful for testing!
-		/// </summary>
-		public async Task ReadFromStreamAsync(Stream stream, CancellationToken token = default(CancellationToken))
-		{
-			_initialRead = ReadFrom.Stream;
-			// This is for testing, clear all defaults & constants as the 
-			_defaults = null;
-			_constants = null;
-			_ini = await IniFile.ReadAsync(stream, Encoding.UTF8, token).ConfigureAwait(false);
-
-			// Reset the current sections
-			FillSections();
-		}
-
-		/// <summary>
-		///     Register a Property Interface to this ini config, this method will return the property object
-		/// </summary>
-		/// <typeparam name="T">Type to register, this must extend IIniSection</typeparam>
-		/// <returns>instance of T</returns>
-		public T RegisterAndGet<T>() where T : IIniSection
-		{
-			var type = typeof (T);
+			if (_initialRead == ReadFrom.Nothing)
+			{
+				throw new InvalidOperationException("Please load before retrieving the ini-sections");
+			}
+			var type = typeof(T);
 			var iniSectionAttribute = type.GetCustomAttribute<IniSectionAttribute>();
 			IIniSection iniSection;
-
-			if (_iniSections.TryGetValue(iniSectionAttribute.Name, out iniSection))
+			if (!_iniSections.TryGetValue(iniSectionAttribute.Name, out iniSection))
 			{
-				return (T)iniSection;
+				iniSection = InterceptorFactory.New<T>();
+
+				var sectionName = iniSection.GetSectionName();
+				// Add before loading, so it will be handled automatically
+				_iniSections.Add(sectionName, iniSection);
+				FillSection(iniSection);
 			}
 
-			iniSection = InterceptorFactory.New<T>();
-
-			var sectionName = iniSection.GetSectionName();
-			// Add before loading, so it will be handled automatically
-			_iniSections.Add(sectionName, iniSection);
-			FillSection(iniSection);
-
-			return (T)iniSection;
+			return (T) iniSection;
 		}
 
 		/// <summary>
@@ -720,23 +587,39 @@ namespace Dapplo.Config.Ini
 
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
+				if (_initialRead == ReadFrom.Nothing)
+				{
+					await ReloadInternalAsync(false, token).ConfigureAwait(false);
+				}
+
 				if (!_iniSections.TryGetValue(iniSectionAttribute.Name, out iniSection))
 				{
 					iniSection = InterceptorFactory.New<T>();
 					var sectionName = iniSection.GetSectionName();
 					_iniSections.Add(sectionName, iniSection);
-				}
-
-				if (_initialRead == ReadFrom.Nothing)
-				{
-					await ReloadInternalAsync(false, token).ConfigureAwait(false);
-				}
-				else
-				{
 					FillSection(iniSection);
 				}
 			}
 			return (T)iniSection;
+		}
+		#endregion
+
+		#region Read
+
+		/// <summary>
+		///     Initialize the IniConfig by reading all the properties from the stream
+		///     If this is called directly after construction, no files will be read which is useful for testing!
+		/// </summary>
+		public async Task ReadFromStreamAsync(Stream stream, CancellationToken token = default(CancellationToken))
+		{
+			_initialRead = ReadFrom.Stream;
+			// This is for testing, clear all defaults & constants as the 
+			_defaults = null;
+			_constants = null;
+			_ini = await IniFile.ReadAsync(stream, Encoding.UTF8, token).ConfigureAwait(false);
+
+			// Reset the current sections
+			FillSections();
 		}
 
 		/// <summary>
@@ -784,7 +667,9 @@ namespace Dapplo.Config.Ini
 			// Reset the sections that have already been registered
 			FillSections();
 		}
+		#endregion
 
+		#region Reset
 		/// <summary>
 		///     Reset all the values, in all the registered ini sections, to their defaults
 		/// </summary>
@@ -800,7 +685,7 @@ namespace Dapplo.Config.Ini
 		///     Reset all the values, in all the registered ini sections, to their defaults
 		///     Important, this only works for types that extend IDefaultValue
 		/// </summary>
-		public void ResetInternal()
+		internal void ResetInternal()
 		{
 			foreach (var iniSection in _iniSections.Values)
 			{
@@ -822,18 +707,9 @@ namespace Dapplo.Config.Ini
 				}
 			}
 		}
+		#endregion
 
-		/// <summary>
-		///     A simple try get by name for the IniSection
-		/// </summary>
-		/// <param name="sectionName">Name of the section</param>
-		/// <param name="section">out parameter with the IIniSection</param>
-		/// <returns>bool with true if it worked</returns>
-		public bool TryGet(string sectionName, out IIniSection section)
-		{
-			return _iniSections.TryGetValue(sectionName, out section);
-		}
-
+		#region Write
 		/// <summary>
 		///     Write the ini file
 		/// </summary>
@@ -917,6 +793,118 @@ namespace Dapplo.Config.Ini
 			await IniFile.WriteAsync(stream, Encoding.UTF8, _ini, iniSectionsComments, token).ConfigureAwait(false);
 			await stream.FlushAsync(token).ConfigureAwait(false);
 		}
+
+		/// <summary>
+		///     Helper method to create ini section values for writing.
+		///     The actual values are stored in the _ini
+		/// </summary>
+		/// <param name="iniSection">Section to write</param>
+		/// <param name="iniSectionsComments">Comments</param>
+		private void CreateSaveValues(IIniSection iniSection, IDictionary<string, IDictionary<string, string>> iniSectionsComments)
+		{
+			// This flag tells us if the header for the section is already written
+			var isSectionCreated = false;
+			var sectionName = iniSection.GetSectionName();
+
+			var sectionProperties = new SortedDictionary<string, string>();
+			var sectionComments = new SortedDictionary<string, string>();
+			// Loop over the ini values, this automatically skips all NonSerialized properties
+			foreach (var iniValue in iniSection.GetIniValues().Values)
+			{
+				// Check if we need to write the value, this is not needed when it has the default or if write is disabled
+				if (!iniValue.IsWriteNeeded)
+				{
+					continue;
+				}
+
+				// Before we are going to write, we need to check if the section header "[Sectionname]" is already written.
+				// If not, do so now before writing the properties of the section itself
+				if (!isSectionCreated)
+				{
+					if (_ini.ContainsKey(sectionName))
+					{
+						_ini.Remove(sectionName);
+					}
+					_ini.Add(sectionName, sectionProperties);
+					iniSectionsComments.Add(sectionName, sectionComments);
+
+					var description = iniSection.GetSectionDescription();
+					if (!string.IsNullOrEmpty(description))
+					{
+						sectionComments.Add(sectionName, description);
+					}
+					// Mark section as created!
+					isSectionCreated = true;
+				}
+
+				// Check if the property has a description, if so write it in the ini comment before the property
+				if (!string.IsNullOrEmpty(iniValue.Description))
+				{
+					sectionComments.Add(iniValue.IniPropertyName, iniValue.Description);
+				}
+
+				ITypeDescriptorContext context = null;
+				try
+				{
+					var propertyDescription = TypeDescriptor.GetProperties(iniSection.GetType()).Find(iniValue.PropertyName, true);
+					context = new TypeDescriptorContext(iniSection, propertyDescription);
+				}
+				catch (Exception ex)
+				{
+					Log.Warn().WriteLine(ex.Message);
+				}
+
+				// Get specified converter
+				var converter = iniValue.Converter;
+
+				// Special case, for idictionary derrivated types
+				if (iniValue.ValueType.IsGenericType && iniValue.ValueType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+				{
+					var subSection = TypeExtensions.ConvertOrCastValueToType<IDictionary<string, string>>(iniValue.Value, converter, context, false);
+					if (subSection != null)
+					{
+						try
+						{
+							// Use this to build a separate "section" which is called "[section-propertyname]"
+							string dictionaryIdentifier = $"{sectionName}-{iniValue.IniPropertyName}";
+							if (_ini.ContainsKey(dictionaryIdentifier))
+							{
+								_ini.Remove(dictionaryIdentifier);
+							}
+							_ini.Add(dictionaryIdentifier, subSection);
+							if (!string.IsNullOrWhiteSpace(iniValue.Description))
+							{
+								var dictionaryComments = new SortedDictionary<string, string>
+								{
+									{dictionaryIdentifier, iniValue.Description}
+								};
+								iniSectionsComments.Add(dictionaryIdentifier, dictionaryComments);
+							}
+						}
+						catch (Exception ex)
+						{
+							Log.Warn().WriteLine(ex.Message);
+							WriteErrorHandler(iniSection, iniValue, ex);
+						}
+						continue;
+					}
+				}
+
+				try
+				{
+					// Convert the value to a string
+					var writingValue = TypeExtensions.ConvertOrCastValueToType<string>(iniValue.Value, converter, context, false);
+					// And write the value with the IniPropertyName (which does NOT have to be the property name) to the file
+					sectionProperties.Add(iniValue.IniPropertyName, writingValue);
+				}
+				catch (Exception ex)
+				{
+					Log.Warn().WriteLine(ex.Message);
+					WriteErrorHandler(iniSection, iniValue, ex);
+				}
+			}
+		}
+		#endregion
 
 		/// <summary>
 		///     Used to detect if we have an intial read, and if so from where.
