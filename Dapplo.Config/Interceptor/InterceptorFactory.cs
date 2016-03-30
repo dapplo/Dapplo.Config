@@ -139,7 +139,7 @@ namespace Dapplo.Config.Interceptor
 					implementingAndDefaultInterfaces.AddRange(defaultInterfaces);
 				}
 			}
-			implementingInterfaces = implementingAndDefaultInterfaces;
+			implementingInterfaces = implementingAndDefaultInterfaces.Distinct().ToList();
 
 			// Create an implementation, or lookup
 			Type implementingType;
@@ -147,7 +147,7 @@ namespace Dapplo.Config.Interceptor
 			{
 				// Use this baseType if nothing is specified
 				Type baseType = typeof(ExtensibleInterceptorImpl<>);
-				foreach (var implementingInterface in implementingInterfaces.Distinct())
+				foreach (var implementingInterface in implementingInterfaces)
 				{
 					if (BaseTypeMap.ContainsKey(implementingInterface))
 					{
@@ -160,9 +160,15 @@ namespace Dapplo.Config.Interceptor
 				{
 					baseType = baseType.MakeGenericType(interfaceType);
 				}
-				implementingType = IlTypeBuilder.CreateType("Dapplo.Config.Interceptor", interfaceType.Name + "Impl", implementingInterfaces.Distinct().ToArray(), baseType);
+				var typeName = interfaceType.Name + "Impl";
+				// Remove "I" at the start
+				if (typeName.StartsWith("I"))
+				{
+					typeName = typeName.Substring(1);
+				}
+				implementingType = IlTypeBuilder.CreateType(typeName, implementingInterfaces.ToArray(), baseType);
 
-				// Register the implementation
+				// Register the implementation for the interface
 				DefineImplementationTypeForInterface(interfaceType, implementingType);
 			}
 

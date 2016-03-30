@@ -89,7 +89,6 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 			{
 				var getterBuilder = BuildGetter(typeBuilder, propertyInfo);
 				propertyBuilder.SetGetMethod(getterBuilder);
-				Log.Verbose().WriteLine("Created get for property {0}", propertyInfo.Name);
 			}
 
 			// Create Set if the property can be written
@@ -97,7 +96,6 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 			{
 				var setterBuilder = BuildSetter(typeBuilder, propertyInfo);
 				propertyBuilder.SetSetMethod(setterBuilder);
-				Log.Verbose().WriteLine("Created set for property {0}", propertyInfo.Name);
 			}
 
 		}

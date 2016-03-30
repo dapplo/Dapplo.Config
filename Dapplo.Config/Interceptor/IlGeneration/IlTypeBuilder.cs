@@ -37,6 +37,19 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 	internal static class IlTypeBuilder
 	{
 		private static readonly LogSource Log = new LogSource();
+		private static string _assemblyNameString = "Dapplo.Config.Interceptor.Impl";
+		private static AssemblyBuilder _assemblyBuilder;
+		private static ModuleBuilder _moduleBuilder;
+		private static bool _isInitialized;
+
+		/// <summary>
+		/// Make it possible to save the assembly after generating types.
+		/// </summary>
+		public static bool AllowSave
+		{
+			get;
+			set;
+		}
 
 		/// <summary>
 		///     Creates an implementation as Type for a given interface, which can be intercepted
@@ -46,16 +59,22 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 		/// <param name="implementingInterfaces">Interfaces to implement</param>
 		/// <param name="baseType">Type as base</param>
 		/// <returns>Type</returns>
-		internal static Type CreateType(string assemblyNameString, string typeName, Type[] implementingInterfaces, Type baseType)
+		internal static Type CreateType(string typeName, Type[] implementingInterfaces, Type baseType)
 		{
-			string dllName = $"{assemblyNameString}.dll";
-			var assemblyName = new AssemblyName(assemblyNameString);
-			var appDomain = AppDomain.CurrentDomain;
-			var assemblyBuilder = appDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave, AppDomain.CurrentDomain.BaseDirectory);
-			var moduleBuilder = assemblyBuilder.DefineDynamicModule(assemblyName.Name, dllName, false);
+			Log.Verbose().WriteLine("Creating type {0}", typeName);
+			// Cache the assembly/module builder
+			if (!_isInitialized)
+			{
+				string dllName = $"{_assemblyNameString}.dll";
+				var assemblyName = new AssemblyName(_assemblyNameString);
+				var appDomain = AppDomain.CurrentDomain;
+				_assemblyBuilder = appDomain.DefineDynamicAssembly(assemblyName, AllowSave ? AssemblyBuilderAccess.RunAndSave : AssemblyBuilderAccess.RunAndCollect, appDomain.BaseDirectory);
+				_moduleBuilder = _assemblyBuilder.DefineDynamicModule(assemblyName.Name, dllName, false);
+				_isInitialized = true;
+			}
 
 			// Create the type, and let it implement our interface
-			var typeBuilder = moduleBuilder.DefineType(typeName,
+			var typeBuilder = _moduleBuilder.DefineType(typeName,
 				TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.Sealed,
 				baseType, implementingInterfaces);
 
@@ -104,13 +123,22 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 				IlMethodBuilder.BuildMethod(typeBuilder, methodInfo);
 				Log.Verbose().WriteLine("Created method {0}", methodInfo.Name);
 			}
+			Log.Verbose().WriteLine("Created type {0}", typeName);
+			return typeBuilder.CreateType();
+		}
 
-			// Example for making a exe, for a methodBuilder which creates a static main
-			//assemblyBuilder.SetEntryPoint(methodBuilder,PEFileKinds.Exe);
-			var returnType = typeBuilder.CreateType();
-			//Log.Debug().WriteLine("Wrote {0} to {1}", dllName, AppDomain.CurrentDomain.BaseDirectory);
-			//assemblyBuilder.Save(dllName, PortableExecutableKinds.ILOnly, ImageFileMachine.AMD64);
-			return returnType;
+		/// <summary>
+		/// Save the "up to now" generated assembly
+		/// </summary>
+		/// <param name="dllName">Full path for the DLL</param>
+		public static void SaveAssemblyDll(string dllName)
+		{
+			if (!AllowSave)
+			{
+				throw new InvalidOperationException("Only allowed when before generation types the AllowSave was set to true.");
+			}
+			_assemblyBuilder.Save(dllName, PortableExecutableKinds.ILOnly, ImageFileMachine.AMD64);
+			Log.Debug().WriteLine("Wrote {0} to {1}", dllName, AppDomain.CurrentDomain.BaseDirectory);
 		}
 	}
 }

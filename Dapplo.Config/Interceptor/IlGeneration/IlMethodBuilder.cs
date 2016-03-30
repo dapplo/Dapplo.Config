@@ -32,8 +32,6 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 	/// </summary>
 	internal static class IlMethodBuilder
 	{
-		private static readonly LogSource Log = new LogSource();
-
 		private static readonly MethodAttributes MethodAttributes = MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.Final;
 		private static readonly MethodInfo InterceptorInvoke = typeof(IExtensibleInterceptor).GetMethod("Invoke");
 
@@ -47,8 +45,6 @@ namespace Dapplo.Config.Interceptor.IlGeneration
 			var parameterTypes = (
 				from parameterInfo in methodInfo.GetParameters()
 				select parameterInfo.ParameterType).ToList();
-
-			Log.Verbose().WriteLine("Parameters: {0}", string.Join(", ", parameterTypes));
 
 			var methodBuilder = typeBuilder.DefineMethod(methodInfo.Name, MethodAttributes);
 			methodBuilder.SetParameters(parameterTypes.ToArray());
