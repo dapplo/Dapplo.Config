@@ -11,11 +11,11 @@
         <description>Dapplo.Config makes it easy to add a configuration to your project.</description>
 		<summary>A library with code to quickly add a configuration to your application.</summary>
         <language>en-us</language>
-		<copyright>Dapplo</copyright>
+		<copyright>$author$</copyright>
 		<tags>config ini language translations</tags>
     </metadata>
 	<files>
-		<file src="bin\release\$id$.pdb" target="lib\net46" />
-		<file src="bin\release\$id$.dll" target="lib\net46" />
+		<file src="bin\release\$id$.pdb" target="lib\net452" />
+		<file src="bin\release\$id$.dll" target="lib\net452" />
 	</files>
 </package>
