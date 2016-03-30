@@ -591,10 +591,7 @@ namespace Dapplo.Config.Ini
 
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
-				if (_initialRead == ReadFrom.Nothing)
-				{
-					await ReloadInternalAsync(false, token).ConfigureAwait(false);
-				}
+				await LoadIfNeededAsync(token).ConfigureAwait(false);
 
 				iniSection = this[type];
 			}
@@ -603,6 +600,19 @@ namespace Dapplo.Config.Ini
 		#endregion
 
 		#region Read
+
+		/// <summary>
+		/// This will do an intial load, if none was made
+		/// </summary>
+		/// <param name="token">CancellationToken</param>
+		/// <returns>Task</returns>
+		public async Task LoadIfNeededAsync(CancellationToken token = default(CancellationToken))
+		{
+			if (_initialRead == ReadFrom.Nothing)
+			{
+				await ReloadInternalAsync(false, token).ConfigureAwait(false);
+			}
+		}
 
 		/// <summary>
 		///     Initialize the IniConfig by reading all the properties from the stream

@@ -83,7 +83,7 @@ namespace Dapplo.Config.Test.LanguageTests
 		public async Task TestIndexer()
 		{
 			var language = await _languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
-			await _languageLoader.ChangeLanguage("nl-NL");
+			await _languageLoader.ChangeLanguageAsync("nl-NL");
 			Assert.Equal("Afbreken", language["TestValue"]);
 			// Test using the raw property name with the indexer
 			Assert.Equal("Afbreken", _languageLoader["test"]["test_value"]);
@@ -111,18 +111,18 @@ namespace Dapplo.Config.Test.LanguageTests
 			Assert.True(_languageLoader.AvailableLanguages.ContainsKey("de-DE"));
 			Assert.True(_languageLoader.AvailableLanguages.ContainsKey("sr-Cyrl-RS"));
 			Assert.Equal("Nederlands (Nederland)", _languageLoader.AvailableLanguages["nl-NL"]);
-			await _languageLoader.ChangeLanguage("en-US");
+			await _languageLoader.ChangeLanguageAsync("en-US");
 			Assert.Equal(Ok, language.Ok);
 			Assert.Equal("Cancel", language.TestValue);
 			Assert.Equal("BlubEN", language.OnlyenUs);
 			Assert.NotEqual("BlubNL", language.OnlynlNl);
 			Assert.NotEqual("BlubDE", language.OnlydeDe);
-			await _languageLoader.ChangeLanguage("nl-NL");
+			await _languageLoader.ChangeLanguageAsync("nl-NL");
 			Assert.Equal("Afbreken", language.TestValue);
 			Assert.NotEqual("BlubEN", language.OnlyenUs);
 			Assert.NotEqual("BlubDE", language.OnlydeDe);
 			Assert.Equal("BlubNL", language.OnlynlNl);
-			await _languageLoader.ChangeLanguage("de-DE");
+			await _languageLoader.ChangeLanguageAsync("de-DE");
 			Assert.Equal("BlubDE", language.OnlydeDe);
 		}
 	}

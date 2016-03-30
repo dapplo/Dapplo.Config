@@ -153,7 +153,7 @@ namespace Dapplo.Config.Language
 		/// <param name="ietf">The iso code for the language to use</param>
 		/// <param name="token">CancellationToken for the loading</param>
 		/// <returns>Task</returns>
-		public async Task ChangeLanguage(string ietf, CancellationToken token = default(CancellationToken))
+		public async Task ChangeLanguageAsync(string ietf, CancellationToken token = default(CancellationToken))
 		{
 			if (ietf == CurrentLanguage)
 			{
@@ -308,10 +308,7 @@ namespace Dapplo.Config.Language
 			var type = typeof (T);
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
-				if (!_initialReadDone)
-				{
-					await ReloadAsync(token).ConfigureAwait(false);
-				}
+				await LoadIfNeededAsync(token);
 				return Get<T>();
 			}
 		}
@@ -335,6 +332,19 @@ namespace Dapplo.Config.Language
 				into resourceElementGroup
 					select resourceElementGroup).ToDictionary(group => @group.Key,
 					group => (IDictionary<string, string>)@group.ToDictionary(x => x.Attribute("name").Value, x => x.Value.Trim()));
+		}
+
+		/// <summary>
+		/// Start the intial load, but if none was made yet
+		/// </summary>
+		/// <param name="token">CancellationToken</param>
+		/// <returns>Task</returns>
+		public async Task LoadIfNeededAsync(CancellationToken token = default(CancellationToken))
+		{
+			if (!_initialReadDone)
+			{
+				await ReloadAsync(token);
+			}
 		}
 
 		/// <summary>
