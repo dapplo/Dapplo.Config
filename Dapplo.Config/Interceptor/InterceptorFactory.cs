@@ -26,6 +26,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Dapplo.Config.Interceptor.IlGeneration;
 using Dapplo.Config.Interceptor.Implementation;
+using Dapplo.Config.Support;
+using Dapplo.Config.Interceptor.Extensions;
+using Dapplo.Config.WindowsRegistry.Implementation;
 
 #endregion
 
@@ -33,36 +36,65 @@ namespace Dapplo.Config.Interceptor
 {
 	/// <summary>
 	/// This class is a factory which can create an implementation for an interface.
-	/// It can new the implementation, and add intercepting code.
+	/// It can "new" the implementation, add intercepting code and extensions. 
 	/// </summary>
 	public class InterceptorFactory
 	{
-		private static readonly List<Type> ExtensionTypes = new List<Type>();
+		private static readonly IList<Type> ExtensionTypes = new List<Type>();
 		private static readonly IDictionary<Type, Type> TypeMap = new Dictionary<Type, Type>();
 		private static readonly IDictionary<Type, Type> BaseTypeMap = new Dictionary<Type, Type>();
 		private static readonly IDictionary<Type, Type[]> DefaultInterfacesMap = new Dictionary<Type, Type[]>();
 
 		static InterceptorFactory()
 		{
-			var types =
-				from assembly in AppDomain.CurrentDomain.GetAssemblies()
-				where
-					!assembly.FullName.StartsWith("System") && !assembly.FullName.StartsWith("mscorlib") && !assembly.FullName.StartsWith("Microsoft") &&
-					!assembly.FullName.StartsWith("xunit")
-				from someType in assembly.GetTypes()
-				where someType.GetCustomAttributes(typeof(ExtensionAttribute), true).Length > 0
-				select someType;
-			ExtensionTypes.AddRange(types);
+			RegisterExtension(typeof(DefaultValueExtension<>));
+			RegisterExtension(typeof(DescriptionExtension<>));
+			RegisterExtension(typeof(HasChangesExtension));
+			RegisterExtension(typeof(NotifyPropertyChangedExtension));
+			RegisterExtension(typeof(NotifyPropertyChangingExtension));
+			RegisterExtension(typeof(TagExtension));
+			RegisterExtension(typeof(TransactionExtension));
+			RegisterExtension(typeof(WriteProtectExtension));
+			RegisterExtension(typeof(RegistryExtension<>));
 		}
 
+		/// <summary>
+		/// Use this to register an Type for extension
+		/// </summary>
+		/// <param name="extensionType">Type</param>
+		public static void RegisterExtension(Type extensionType)
+		{
+			ExtensionTypes.Add(extensionType);
+		}
+		/// <summary>
+		/// If there is an implementation for the interface available, register it here.
+		/// </summary>
+		/// <param name="interfaceType"></param>
+		/// <param name="implementation"></param>
+		public static void DefineImplementationTypeForInterface(Type interfaceType, Type implementation)
+		{
+			TypeMap.SafelyAddOrOverwrite(interfaceType, implementation);
+		}
+
+		/// <summary>
+		/// This should be used to define the base type for the implementation of the interface
+		/// </summary>
+		/// <param name="interfaceType"></param>
+		/// <param name="baseType">should extend ExtensibleInterceptorImpl</param>
 		public static void DefineBaseTypeForInterface(Type interfaceType, Type baseType)
 		{
-			BaseTypeMap.Add(interfaceType, baseType);
+			BaseTypeMap.SafelyAddOrOverwrite(interfaceType, baseType);
 		}
 
+		/// <summary>
+		/// This should be used to difine which default interfaces are added to the interfaces
+		/// e.g. the IIniSection gets IDefaultValue and IHasChanges
+		/// </summary>
+		/// <param name="interfaceType"></param>
+		/// <param name="defaultInterfaces"></param>
 		public static void DefineDefaultInterfaces(Type interfaceType, Type[] defaultInterfaces)
 		{
-			DefaultInterfacesMap.Add(interfaceType, defaultInterfaces);
+			DefaultInterfacesMap.SafelyAddOrOverwrite(interfaceType, defaultInterfaces);
 		}
 
 		/// <summary>
@@ -74,7 +106,18 @@ namespace Dapplo.Config.Interceptor
 		public static TResult New<TResult>()
 		{
 			// create the intercepted object
-			var interfaceType = typeof(TResult);
+			return (TResult)New(typeof(TResult));
+		}
+
+		/// <summary>
+		/// Create an implementation, or reuse an existing, for an interface.
+		/// Create an instance, add intercepting code, which implements a range of interfaces
+		/// </summary>
+		/// <param name="interfaceType">Type</param>
+		/// <returns>implementation</returns>
+		public static IExtensibleInterceptor New(Type interfaceType)
+		{
+			// create the intercepted object
 			if (!interfaceType.IsVisible)
 			{
 				throw new ArgumentException("Internal types are not allowed.", interfaceType.Name);
@@ -104,7 +147,7 @@ namespace Dapplo.Config.Interceptor
 			{
 				// Use this baseType if nothing is specified
 				Type baseType = typeof(ExtensibleInterceptorImpl<>);
-				foreach(var implementingInterface in implementingInterfaces.Distinct())
+				foreach (var implementingInterface in implementingInterfaces.Distinct())
 				{
 					if (BaseTypeMap.ContainsKey(implementingInterface))
 					{
@@ -118,14 +161,14 @@ namespace Dapplo.Config.Interceptor
 					baseType = baseType.MakeGenericType(interfaceType);
 				}
 				implementingType = IlTypeBuilder.CreateType("Dapplo.Config.Interceptor", interfaceType.Name + "Impl", implementingInterfaces.Distinct().ToArray(), baseType);
-				TypeMap.Add(interfaceType, implementingType);
+
+				// Register the implementation
+				DefineImplementationTypeForInterface(interfaceType, implementingType);
 			}
 
 			// Create an instance for the implementation
-			var result = (TResult)Activator.CreateInstance(implementingType);
+			var interceptor = (IExtensibleInterceptor)Activator.CreateInstance(implementingType);
 
-			// cast to IIntercepted, so we can set the interceptor and use it in the extensions
-			var interceptor = result as IExtensibleInterceptor;
 			if (interceptor == null)
 			{
 				throw new ArgumentNullException(nameof(interceptor), "The created type didn't implement IExtensibleInterceptor.");
@@ -134,7 +177,7 @@ namespace Dapplo.Config.Interceptor
 			// Add the extensions
 			foreach (var extensionType in ExtensionTypes)
 			{
-				var extensionAttributes = (ExtensionAttribute[]) extensionType.GetCustomAttributes(typeof (ExtensionAttribute), false);
+				var extensionAttributes = (ExtensionAttribute[])extensionType.GetCustomAttributes(typeof(ExtensionAttribute), false);
 				foreach (var extensionAttribute in extensionAttributes)
 				{
 					var implementing = extensionAttribute.Implementing;
@@ -145,7 +188,7 @@ namespace Dapplo.Config.Interceptor
 				}
 			}
 			interceptor.Init();
-			return result;
+			return interceptor;
 		}
 
 	}

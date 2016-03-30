@@ -264,13 +264,12 @@ namespace Dapplo.Config.Language
 		}
 
 		/// <summary>
-		///     Get the specified ILanguage type
+		///     Get or register/get Interface to this language loader, this method will return the filled property object
 		/// </summary>
-		/// <typeparam name="T">ILanguage</typeparam>
-		/// <returns>T</returns>
-		public T Get<T>() where T : ILanguage
+		/// <param name="type">ILanguage Type</typeparam>
+		/// <returns>ILanguage</returns>
+		public ILanguage Get(Type type)
 		{
-			var type = typeof(T);
 			if (!_initialReadDone)
 			{
 				throw new InvalidOperationException("Please load before retrieving the language");
@@ -278,33 +277,25 @@ namespace Dapplo.Config.Language
 			ILanguage language;
 			if (!_languageTypeConfigs.TryGetValue(type, out language))
 			{
-				language = InterceptorFactory.New<T>();
-				_languageTypeConfigs.Add(type, language);
-				_languageConfigs.Add(language.PrefixName(), language);
-				FillLanguageConfig(language);
-			}
-
-			return (T)language;
-		}
-
-		/// <summary>
-		///     Register a Property Interface to this language loader, this method will return the filled property object
-		/// </summary>
-		/// <typeparam name="T">The language interface to register</typeparam>
-		/// <returns>instance of T</returns>
-		public T RegisterAndGet<T>() where T : ILanguage
-		{
-			var type = typeof (T);
-			Log.Verbose().WriteLine("Registering {0}", type.FullName);
-			var language = InterceptorFactory.New<T>();
-			if (!_languageTypeConfigs.ContainsKey(typeof(T)))
-			{
+				language = (ILanguage)InterceptorFactory.New(type);
 				_languageTypeConfigs.Add(type, language);
 				_languageConfigs.Add(language.PrefixName(), language);
 				FillLanguageConfig(language);
 			}
 
 			return language;
+		}
+
+
+		/// <summary>
+		///     Get or register/get Interface to this language loader, this method will return the filled property object
+		/// </summary>
+		/// <typeparam name="T">ILanguage</typeparam>
+		/// <returns>T</returns>
+		public T Get<T>() where T : ILanguage
+		{
+			var type = typeof(T);
+			return (T)Get(type);
 		}
 
 		/// <summary>
@@ -321,15 +312,7 @@ namespace Dapplo.Config.Language
 				{
 					await ReloadAsync(token).ConfigureAwait(false);
 				}
-				ILanguage language;
-				if (!_languageTypeConfigs.TryGetValue(type, out language))
-				{
-					language = InterceptorFactory.New<T>();
-					_languageTypeConfigs.Add(type, language);
-					_languageConfigs.Add(language.PrefixName(), language);
-					FillLanguageConfig(language);
-				}
-				return (T)language;
+				return Get<T>();
 			}
 		}
 

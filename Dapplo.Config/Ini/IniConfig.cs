@@ -532,7 +532,17 @@ namespace Dapplo.Config.Ini
 					throw new InvalidOperationException("Please load before retrieving the ini-sections");
 				}
 				var iniSectionAttribute = type.GetCustomAttribute<IniSectionAttribute>();
-				return _iniSections[iniSectionAttribute.Name];
+				IIniSection iniSection;
+				if (!_iniSections.TryGetValue(iniSectionAttribute.Name, out iniSection))
+				{
+					iniSection = InterceptorFactory.New(type) as IIniSection;
+
+					var sectionName = iniSection.GetSectionName();
+					// Add before loading, so it will be handled automatically
+					_iniSections.Add(sectionName, iniSection);
+					FillSection(iniSection);
+				}
+				return iniSection;
 			}
 		}
 
@@ -554,24 +564,18 @@ namespace Dapplo.Config.Ini
 		/// <returns>T</returns>
 		public T Get<T>() where T : IIniSection
 		{
-			if (_initialRead == ReadFrom.Nothing)
-			{
-				throw new InvalidOperationException("Please load before retrieving the ini-sections");
-			}
 			var type = typeof(T);
-			var iniSectionAttribute = type.GetCustomAttribute<IniSectionAttribute>();
-			IIniSection iniSection;
-			if (!_iniSections.TryGetValue(iniSectionAttribute.Name, out iniSection))
-			{
-				iniSection = InterceptorFactory.New<T>();
+			return (T) this[type];
+		}
 
-				var sectionName = iniSection.GetSectionName();
-				// Add before loading, so it will be handled automatically
-				_iniSections.Add(sectionName, iniSection);
-				FillSection(iniSection);
-			}
-
-			return (T) iniSection;
+		/// <summary>
+		///     Get the specified ini type
+		/// </summary>
+		/// <param name="type">Type</param>
+		/// <returns>IIniSection</returns>
+		public IIniSection Get(Type type)
+		{
+			return this[type];
 		}
 
 		/// <summary>
@@ -592,13 +596,7 @@ namespace Dapplo.Config.Ini
 					await ReloadInternalAsync(false, token).ConfigureAwait(false);
 				}
 
-				if (!_iniSections.TryGetValue(iniSectionAttribute.Name, out iniSection))
-				{
-					iniSection = InterceptorFactory.New<T>();
-					var sectionName = iniSection.GetSectionName();
-					_iniSections.Add(sectionName, iniSection);
-					FillSection(iniSection);
-				}
+				iniSection = this[type];
 			}
 			return (T)iniSection;
 		}
