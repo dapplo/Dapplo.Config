@@ -16,7 +16,7 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU Lesser General Public License for more details.
 // 
-//  You should have Config a copy of the GNU Lesser General Public License
+//  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 #region using
@@ -74,7 +74,7 @@ namespace Dapplo.Config.Test.ConfigTests
 		private IniConfig Create()
 		{
 			// Important to disable the auto-save, otherwise we get test issues
-			return new IniConfig("Dapplo", "dapplo", autoSaveInterval:0, saveOnExit: false);
+			return new IniConfig("Dapplo", "dapplo", autoSaveInterval: 0, saveOnExit: false);
 		}
 
 		private async Task<IniConfig> InitializeAsync()

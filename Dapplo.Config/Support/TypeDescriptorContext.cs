@@ -22,38 +22,51 @@
 #region using
 
 using System;
-using System.Linq.Expressions;
-using Dapplo.InterfaceImpl.Extensions;
+using System.ComponentModel;
 
 #endregion
 
-namespace Dapplo.Config.WindowsRegistry
+namespace Dapplo.Config.Support
 {
 	/// <summary>
-	///     Interface for a registry object
+	///     Used internally for type conversion
 	/// </summary>
-	public interface IRegistry : IDefaultValue, IWriteProtectProperties
+	internal sealed class TypeDescriptorContext : ITypeDescriptorContext
 	{
-		/// <summary>
-		///     The path for the property
-		/// </summary>
-		/// <param name="propertyName">Name of the property</param>
-		/// <returns>string with the path</returns>
-		string PathFor(string propertyName);
-	}
+		private readonly object _component;
+		private readonly PropertyDescriptor _property;
 
-	/// <summary>
-	///     Generic version of the IRegistry interface
-	/// </summary>
-	/// <typeparam name="T"></typeparam>
-	public interface IRegistry<T> : IRegistry, IDefaultValue<T>, IWriteProtectProperties<T>
-	{
-		/// <summary>
-		///     Return the registry path for a property
-		/// </summary>
-		/// <typeparam name="TProp"></typeparam>
-		/// <param name="propertyExpression"></param>
-		/// <returns>the path to a property</returns>
-		string PathFor<TProp>(Expression<Func<T, TProp>> propertyExpression);
+		/// <inheritdoc />
+		public TypeDescriptorContext(object component, PropertyDescriptor property)
+		{
+			_component = component;
+			_property = property;
+		}
+
+		/// <inheritdoc />
+		IContainer ITypeDescriptorContext.Container => null;
+
+		/// <inheritdoc />
+		object ITypeDescriptorContext.Instance => _component;
+
+		/// <inheritdoc />
+		void ITypeDescriptorContext.OnComponentChanged()
+		{
+		}
+
+		/// <inheritdoc />
+		bool ITypeDescriptorContext.OnComponentChanging()
+		{
+			return true;
+		}
+
+		/// <inheritdoc />
+		PropertyDescriptor ITypeDescriptorContext.PropertyDescriptor => _property;
+
+		/// <inheritdoc />
+		object IServiceProvider.GetService(Type serviceType)
+		{
+			return null;
+		}
 	}
 }

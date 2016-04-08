@@ -16,7 +16,7 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU Lesser General Public License for more details.
 // 
-//  You should have Config a copy of the GNU Lesser General Public License
+//  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 #region using
@@ -28,18 +28,29 @@ using Microsoft.Win32;
 
 namespace Dapplo.Config.WindowsRegistry
 {
+	/// <summary>
+	///     Attribute to mark properties, and map them to the registry
+	/// </summary>
 	[AttributeUsage(AttributeTargets.Property)]
 	public class RegistryPropertyAttribute : Attribute
 	{
 		private RegistryHive _hive = RegistryHive.CurrentUser;
 		private RegistryView _view = RegistryView.Default;
 
+		/// <summary>
+		///     Default constructor
+		/// </summary>
 		public RegistryPropertyAttribute()
 		{
 			Kind = RegistryValueKind.Unknown;
 			IgnoreErrors = true;
 		}
 
+		/// <summary>
+		///     Constructor with path and value
+		/// </summary>
+		/// <param name="path">Path in the registry</param>
+		/// <param name="value">Name of the value</param>
 		public RegistryPropertyAttribute(string path, string value = null) : this()
 		{
 			Path = path;

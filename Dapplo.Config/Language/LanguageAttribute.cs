@@ -16,7 +16,7 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU Lesser General Public License for more details.
 // 
-//  You should have Config a copy of the GNU Lesser General Public License
+//  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 #region using
@@ -27,9 +27,16 @@ using System;
 
 namespace Dapplo.Config.Language
 {
+	/// <summary>
+	///     Use this attribute to mark a language object, and the prefix
+	/// </summary>
 	[AttributeUsage(AttributeTargets.Interface)]
 	public class LanguageAttribute : Attribute
 	{
+		/// <summary>
+		///     Constructor
+		/// </summary>
+		/// <param name="prefix">string with the prefix</param>
 		public LanguageAttribute(string prefix)
 		{
 			Prefix = prefix;

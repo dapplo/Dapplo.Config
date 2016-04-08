@@ -16,7 +16,7 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU Lesser General Public License for more details.
 // 
-//  You should have Config a copy of the GNU Lesser General Public License
+//  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 #region using
@@ -32,10 +32,29 @@ namespace Dapplo.Config.Ini
 	/// </summary>
 	public enum IniRestCommands
 	{
+		/// <summary>
+		///     Set a value
+		/// </summary>
 		Set,
+
+		/// <summary>
+		///     Get a value
+		/// </summary>
 		Get,
+
+		/// <summary>
+		///     Reset a value (to it's default)
+		/// </summary>
 		Reset,
+
+		/// <summary>
+		///     Add a value to a collection
+		/// </summary>
 		Add,
+
+		/// <summary>
+		///     Remove a value from a collection
+		/// </summary>
 		Remove
 	}
 

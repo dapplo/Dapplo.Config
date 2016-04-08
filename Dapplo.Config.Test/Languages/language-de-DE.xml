@@ -1,4 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8"?>
+
 <language>
 	<resources prefix="Test">
 		<resource name="TestValue">Abbrechen</resource>
@@ -6,5 +7,5 @@
 	</resources>
 	<resources prefix="Core">
 		<resource name="test_value_2">Another value</resource>
-  </resources>
+	</resources>
 </language>

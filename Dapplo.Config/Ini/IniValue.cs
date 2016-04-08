@@ -16,7 +16,7 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU Lesser General Public License for more details.
 // 
-//  You should have Config a copy of the GNU Lesser General Public License
+//  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 #region using
@@ -36,11 +36,19 @@ namespace Dapplo.Config.Ini
 	{
 		private readonly IExtensibleInterceptor _interceptor;
 
+		/// <summary>
+		///     The constructor of an IniValue
+		/// </summary>
+		/// <param name="interceptor"></param>
 		public IniValue(IExtensibleInterceptor interceptor)
 		{
 			_interceptor = interceptor;
 		}
 
+		/// <summary>
+		///     Specific behavior of the ini-value
+		///     This describes if the value should be read or written
+		/// </summary>
 		public IniPropertyBehaviorAttribute Behavior { get; set; }
 
 		/// <summary>
@@ -71,10 +79,7 @@ namespace Dapplo.Config.Ini
 		/// <summary>
 		///     Check if this IniValue has a value
 		/// </summary>
-		public bool HasValue
-		{
-			get { return _interceptor.Properties.ContainsKey(PropertyName); }
-		}
+		public bool HasValue => _interceptor.Properties.ContainsKey(PropertyName);
 
 		/// <summary>
 		///     Name of the property in the file, this could be different
@@ -133,6 +138,9 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		public Type ValueType { get; set; }
 
+		/// <summary>
+		///     Reset the value to a default
+		/// </summary>
 		public void ResetToDefault()
 		{
 			_interceptor.Set(PropertyName, DefaultValue);

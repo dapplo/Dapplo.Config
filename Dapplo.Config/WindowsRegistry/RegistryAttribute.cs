@@ -16,15 +16,13 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU Lesser General Public License for more details.
 // 
-//  You should have Config a copy of the GNU Lesser General Public License
+//  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 #region using
 
 using System;
-using Dapplo.Config.WindowsRegistry.Implementation;
 using Microsoft.Win32;
-using Dapplo.InterfaceImpl;
 
 #endregion
 
@@ -36,12 +34,19 @@ namespace Dapplo.Config.WindowsRegistry
 	[AttributeUsage(AttributeTargets.Interface)]
 	public class RegistryAttribute : Attribute
 	{
+		/// <summary>
+		///     Default Constructor
+		/// </summary>
 		public RegistryAttribute()
 		{
 			View = RegistryView.Default;
 			Hive = RegistryHive.CurrentUser;
 		}
 
+		/// <summary>
+		///     Constructor with path
+		/// </summary>
+		/// <param name="path"></param>
 		public RegistryAttribute(string path) : this()
 		{
 			Path = path;

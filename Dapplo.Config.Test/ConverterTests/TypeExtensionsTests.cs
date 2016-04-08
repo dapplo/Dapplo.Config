@@ -16,7 +16,7 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU Lesser General Public License for more details.
 // 
-//  You should have Config a copy of the GNU Lesser General Public License
+//  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 #region using
@@ -24,7 +24,7 @@
 using System;
 using System.Collections.Generic;
 using Dapplo.LogFacade;
-using Dapplo.Utils;
+using Dapplo.Utils.Extensions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -48,9 +48,11 @@ namespace Dapplo.Config.Test.ConverterTests
 			testValues.Add("value1", testUri);
 
 			var stringDictionary = typeof (IDictionary<string, string>).ConvertOrCastValueToType(testValues, convertFrom: false) as IDictionary<string, string>;
+			Assert.NotNull(stringDictionary);
 			Assert.Equal(testValues["value1"].AbsoluteUri, stringDictionary["value1"]);
 
 			var uriDictionary = typeof (Dictionary<string, Uri>).ConvertOrCastValueToType(stringDictionary) as IDictionary<string, Uri>;
+			Assert.NotNull(uriDictionary);
 			Assert.Equal(testValues["value1"].AbsoluteUri, uriDictionary["value1"].AbsoluteUri);
 		}
 

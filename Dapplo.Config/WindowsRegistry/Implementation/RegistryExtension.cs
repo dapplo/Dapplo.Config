@@ -16,7 +16,7 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU Lesser General Public License for more details.
 // 
-//  You should have Config a copy of the GNU Lesser General Public License
+//  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 #region using
@@ -27,10 +27,9 @@ using System.IO;
 using System.Reflection;
 using Dapplo.InterfaceImpl;
 using Dapplo.InterfaceImpl.Extensions;
-using Dapplo.InterfaceImpl.Extensions.Implementation;
 using Dapplo.InterfaceImpl.Implementation;
 using Dapplo.LogFacade;
-using Dapplo.Utils;
+using Dapplo.Utils.Extensions;
 using Microsoft.Win32;
 
 #endregion
@@ -46,16 +45,19 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 		private static readonly LogSource Log = new LogSource();
 		private RegistryAttribute _registryAttribute;
 
+		/// <summary>
+		///     Make sure this extension is initialized last
+		/// </summary>
+		public override int InitOrder => int.MaxValue;
+
+		/// <summary>
+		///     Initialize the extension
+		/// </summary>
 		public override void Initialize()
 		{
 			_registryAttribute = typeof (T).GetCustomAttribute<RegistryAttribute>() ?? new RegistryAttribute();
 			Interceptor.RegisterMethod(ExpressionExtensions.GetMemberName<IRegistry, object>(x => x.PathFor("")), PathFor);
 		}
-
-		/// <summary>
-		///     Make sure this extension is initialized last
-		/// </summary>
-		public override int InitOrder => int.MaxValue;
 
 		/// <summary>
 		///     Process the property, in our case read the registry

@@ -16,14 +16,14 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU Lesser General Public License for more details.
 // 
-//  You should have Config a copy of the GNU Lesser General Public License
+//  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 #region using
 
 using System;
-using System.Reflection;
 using System.Collections.Generic;
+using System.Reflection;
 using Dapplo.InterfaceImpl;
 using Dapplo.InterfaceImpl.Implementation;
 
@@ -32,13 +32,14 @@ using Dapplo.InterfaceImpl.Implementation;
 namespace Dapplo.Config.Language.Implementation
 {
 	/// <summary>
-	/// Base Language functionality
+	///     Base Language functionality
 	/// </summary>
 	public class Language<T> : ExtensibleInterceptorImpl<T>, ILanguage
 	{
-		private readonly LanguageAttribute _languageAttribute = typeof(T).GetCustomAttribute<LanguageAttribute>();
+		private readonly LanguageAttribute _languageAttribute = typeof (T).GetCustomAttribute<LanguageAttribute>();
+
 		/// <summary>
-		/// Get a translation for a property
+		///     Get a translation for a property
 		/// </summary>
 		/// <param name="languageKey"></param>
 		/// <returns>string or null if not available</returns>
@@ -48,12 +49,30 @@ namespace Dapplo.Config.Language.Implementation
 			{
 				object translation;
 				Properties.TryGetValue(languageKey, out translation);
-				return (string)translation;
+				return (string) translation;
 			}
 		}
 
 		/// <summary>
-		/// Logic to check every property for read only
+		///     All available keys for the language object
+		/// </summary>
+		/// <returns>collection</returns>
+		public ICollection<string> Keys()
+		{
+			return Properties.Keys;
+		}
+
+		/// <summary>
+		///     The prefix
+		/// </summary>
+		/// <returns>string</returns>
+		public string PrefixName()
+		{
+			return _languageAttribute?.Prefix ?? typeof (T).Name;
+		}
+
+		/// <summary>
+		///     Logic to check every property for read only
 		/// </summary>
 		/// <param name="propertyInfo"></param>
 		/// <param name="extensions"></param>
@@ -63,18 +82,8 @@ namespace Dapplo.Config.Language.Implementation
 			if (propertyInfo.CanWrite && propertyInfo.GetSetMethod(true).IsPublic)
 			{
 				throw new NotSupportedException(
-					$"Property {propertyInfo.DeclaringType}.{propertyInfo.Name} has defined a set, this is not allowed for {typeof(ILanguage).Name} derrived interfaces. Fix by removing the set for the property, leave the get.");
+					$"Property {propertyInfo.DeclaringType}.{propertyInfo.Name} has defined a set, this is not allowed for {typeof (ILanguage).Name} derrived interfaces. Fix by removing the set for the property, leave the get.");
 			}
-		}
-
-		public ICollection<string> Keys()
-		{
-			return Properties.Keys;
-		}
-
-		public string PrefixName()
-		{
-			return _languageAttribute?.Prefix ?? typeof(T).Name;
 		}
 	}
 }

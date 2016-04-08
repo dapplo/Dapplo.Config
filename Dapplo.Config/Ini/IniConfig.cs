@@ -16,7 +16,7 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU Lesser General Public License for more details.
 // 
-//  You should have Config a copy of the GNU Lesser General Public License
+//  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 #region using
@@ -26,16 +26,18 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Dapplo.LogFacade;
-using Timer = System.Timers.Timer;
-using System.Reflection;
 using Dapplo.Config.Ini.Implementation;
+using Dapplo.Config.Support;
 using Dapplo.InterfaceImpl;
 using Dapplo.InterfaceImpl.Extensions;
+using Dapplo.LogFacade;
 using Dapplo.Utils;
+using Dapplo.Utils.Extensions;
+using Timer = System.Timers.Timer;
 
 #endregion
 
@@ -53,98 +55,26 @@ namespace Dapplo.Config.Ini
 		private static readonly IDictionary<string, IniConfig> ConfigStore = new Dictionary<string, IniConfig>();
 		private readonly IDictionary<Type, Action<IIniSection>> _afterLoadActions = new Dictionary<Type, Action<IIniSection>>();
 		private readonly IDictionary<Type, Action<IIniSection>> _afterSaveActions = new Dictionary<Type, Action<IIniSection>>();
-		private readonly IDictionary<Type, Action<IIniSection>> _beforeSaveActions = new Dictionary<Type, Action<IIniSection>>();
 		private readonly string _applicationName;
 		private readonly AsyncLock _asyncLock = new AsyncLock();
+		private readonly IDictionary<Type, Action<IIniSection>> _beforeSaveActions = new Dictionary<Type, Action<IIniSection>>();
 		private readonly string _fileName;
 		private readonly string _fixedDirectory;
 		private readonly IDictionary<string, IIniSection> _iniSections = new SortedDictionary<string, IIniSection>();
+		private readonly Timer _saveTimer;
 		private readonly bool _watchFileChanges;
 		private FileSystemWatcher _configFileWatcher;
 		private IDictionary<string, IDictionary<string, string>> _constants;
 		private IDictionary<string, IDictionary<string, string>> _defaults;
 		private IDictionary<string, IDictionary<string, string>> _ini = new SortedDictionary<string, IDictionary<string, string>>();
 		private ReadFrom _initialRead = ReadFrom.Nothing;
-		private readonly Timer _saveTimer;
 
 		static IniConfig()
 		{
-			InterceptorFactory.DefineBaseTypeForInterface(typeof(IIniSection), typeof(IniSection<>));
+			InterceptorFactory.DefineBaseTypeForInterface(typeof (IIniSection), typeof (IniSection<>));
 			// Make sure every IIniSection gets IDefaultValue and IHasChanges
-			InterceptorFactory.DefineDefaultInterfaces(typeof(IIniSection), new[] { typeof(IDefaultValue), typeof(IHasChanges) });
+			InterceptorFactory.DefineDefaultInterfaces(typeof (IIniSection), new[] {typeof (IDefaultValue), typeof (IHasChanges)});
 		}
-
-		#region Static code
-		/// <summary>
-		///     Static helper to retrieve the first IniConfig, the result when multiple IniConfigs are used is undefined!
-		/// </summary>
-		/// <returns>IniConfig or null if none</returns>
-		public static IniConfig Current => ConfigStore.FirstOrDefault().Value;
-
-		/// <summary>
-		///     Static helper to remove the IniConfig from the store.
-		///     This is interal, mainly for tests, normally it should not be needed.
-		/// </summary>
-		/// <param name="applicationName"></param>
-		/// <param name="fileName"></param>
-		public static void Delete(string applicationName, string fileName)
-		{
-			var identifier = $"{applicationName}.{fileName}";
-			Log.Debug().WriteLine("Deleting IniConfig {0}", identifier);
-			IniConfig iniConfig;
-			if (ConfigStore.TryGetValue(identifier, out iniConfig))
-			{
-				ConfigStore.Remove(identifier);
-			}
-			else
-			{
-				Log.Warn().WriteLine("IniConfig with identifier {0} not found!", identifier);
-			}
-		}
-
-		/// <summary>
-		///     Static helper to retrieve the IniConfig that was created with the supplied parameters
-		/// </summary>
-		/// <param name="applicationName"></param>
-		/// <param name="fileName"></param>
-		/// <returns>IniConfig</returns>
-		public static IniConfig Get(string applicationName, string fileName)
-		{
-			return ConfigStore[$"{applicationName}.{fileName}"];
-		}
-
-		#endregion
-
-		#region Properties
-
-		/// <summary>
-		///     Assign your own error handler to get all the read errors
-		/// </summary>
-		public Action<IIniSection, IniValue, Exception> ReadErrorHandler { get; set; }
-
-		/// <summary>
-		///     Get all the names (from the IniSection annotation) for the sections
-		/// </summary>
-		/// <returns>all keys</returns>
-		public ICollection<string> SectionNames => _iniSections.Keys;
-
-		/// <summary>
-		///     Get all sections
-		/// </summary>
-		/// <returns>all keys</returns>
-		public IEnumerable<IIniSection> Sections => _iniSections.Values;
-
-		/// <summary>
-		///     Assign your own error handler to get all the write errors
-		/// </summary>
-		public Action<IIniSection, IniValue, Exception> WriteErrorHandler { get; set; }
-
-		/// <summary>
-		///     Location of the file where the ini config is stored
-		/// </summary>
-		public string IniLocation { get; }
-
-		#endregion
 
 		/// <summary>
 		///     Setup the management of an .ini file location
@@ -239,45 +169,6 @@ namespace Dapplo.Config.Ini
 				}).Wait();
 			}
 		}
-
-		#region Register after/before load/save
-		/// <summary>
-		///     Set the after load action for a IIniSection
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="afterLoadAction"></param>
-		/// <returns></returns>
-		public IniConfig AfterLoad<T>(Action<T> afterLoadAction) where T : IIniSection
-		{
-			_afterLoadActions.SafelyAddOrOverwrite(typeof (T), section => afterLoadAction((T) section));
-			return this;
-		}
-
-
-		/// <summary>
-		///     Set after save action for a IIniSection, this can be used to change value changed in before save back, after saving
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="afterSaveAction"></param>
-		/// <returns>this</returns>
-		public IniConfig AfterSave<T>(Action<T> afterSaveAction)
-		{
-			_afterSaveActions.SafelyAddOrOverwrite(typeof (T), section => afterSaveAction((T) section));
-			return this;
-		}
-
-		/// <summary>
-		///     Set before save action for a IIniSection, this can be used to chance values before they are stored
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="beforeSaveAction"></param>
-		/// <returns></returns>
-		public IniConfig BeforeSave<T>(Action<T> beforeSaveAction)
-		{
-			_beforeSaveActions.SafelyAddOrOverwrite(typeof (T), section => beforeSaveAction((T) section));
-			return this;
-		}
-		#endregion
 
 		/// <summary>
 		///     Helper to create the location of a file
@@ -375,7 +266,133 @@ namespace Dapplo.Config.Ini
 			};
 		}
 
+		/// <summary>
+		///     Used to detect if we have an intial read, and if so from where.
+		///     This is important for the auto-save and FileSystemWatcher
+		/// </summary>
+		private enum ReadFrom
+		{
+			Nothing,
+			File,
+			Stream
+		}
+
+		#region Static code
+
+		/// <summary>
+		///     Static helper to retrieve the first IniConfig, the result when multiple IniConfigs are used is undefined!
+		/// </summary>
+		/// <returns>IniConfig or null if none</returns>
+		public static IniConfig Current => ConfigStore.FirstOrDefault().Value;
+
+		/// <summary>
+		///     Static helper to remove the IniConfig from the store.
+		///     This is interal, mainly for tests, normally it should not be needed.
+		/// </summary>
+		/// <param name="applicationName"></param>
+		/// <param name="fileName"></param>
+		public static void Delete(string applicationName, string fileName)
+		{
+			var identifier = $"{applicationName}.{fileName}";
+			Log.Debug().WriteLine("Deleting IniConfig {0}", identifier);
+			IniConfig iniConfig;
+			if (ConfigStore.TryGetValue(identifier, out iniConfig))
+			{
+				ConfigStore.Remove(identifier);
+			}
+			else
+			{
+				Log.Warn().WriteLine("IniConfig with identifier {0} not found!", identifier);
+			}
+		}
+
+		/// <summary>
+		///     Static helper to retrieve the IniConfig that was created with the supplied parameters
+		/// </summary>
+		/// <param name="applicationName"></param>
+		/// <param name="fileName"></param>
+		/// <returns>IniConfig</returns>
+		public static IniConfig Get(string applicationName, string fileName)
+		{
+			return ConfigStore[$"{applicationName}.{fileName}"];
+		}
+
+		#endregion
+
+		#region Properties
+
+		/// <summary>
+		///     Assign your own error handler to get all the read errors
+		/// </summary>
+		public Action<IIniSection, IniValue, Exception> ReadErrorHandler { get; set; }
+
+		/// <summary>
+		///     Get all the names (from the IniSection annotation) for the sections
+		/// </summary>
+		/// <returns>all keys</returns>
+		public ICollection<string> SectionNames => _iniSections.Keys;
+
+		/// <summary>
+		///     Get all sections
+		/// </summary>
+		/// <returns>all keys</returns>
+		public IEnumerable<IIniSection> Sections => _iniSections.Values;
+
+		/// <summary>
+		///     Assign your own error handler to get all the write errors
+		/// </summary>
+		public Action<IIniSection, IniValue, Exception> WriteErrorHandler { get; set; }
+
+		/// <summary>
+		///     Location of the file where the ini config is stored
+		/// </summary>
+		public string IniLocation { get; }
+
+		#endregion
+
+		#region Register after/before load/save
+
+		/// <summary>
+		///     Set the after load action for a IIniSection
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="afterLoadAction"></param>
+		/// <returns></returns>
+		public IniConfig AfterLoad<T>(Action<T> afterLoadAction) where T : IIniSection
+		{
+			_afterLoadActions.AddOrOverwrite(typeof (T), section => afterLoadAction((T) section));
+			return this;
+		}
+
+
+		/// <summary>
+		///     Set after save action for a IIniSection, this can be used to change value changed in before save back, after saving
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="afterSaveAction"></param>
+		/// <returns>this</returns>
+		public IniConfig AfterSave<T>(Action<T> afterSaveAction)
+		{
+			_afterSaveActions.AddOrOverwrite(typeof (T), section => afterSaveAction((T) section));
+			return this;
+		}
+
+		/// <summary>
+		///     Set before save action for a IIniSection, this can be used to chance values before they are stored
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="beforeSaveAction"></param>
+		/// <returns></returns>
+		public IniConfig BeforeSave<T>(Action<T> beforeSaveAction)
+		{
+			_beforeSaveActions.AddOrOverwrite(typeof (T), section => beforeSaveAction((T) section));
+			return this;
+		}
+
+		#endregion
+
 		#region Fill
+
 		/// <summary>
 		///     Helper method to fill the values of one section
 		/// </summary>
@@ -495,7 +512,7 @@ namespace Dapplo.Config.Ini
 		}
 
 		/// <summary>
-		///     Internal method, use the supplied ini-sections & properties to fill the sectoins
+		///     Internal method, use the supplied ini-sections and properties to fill the sectoins
 		/// </summary>
 		private void FillSections()
 		{
@@ -504,9 +521,11 @@ namespace Dapplo.Config.Ini
 				FillSection(iniSection);
 			}
 		}
+
 		#endregion
 
 		#region Getting IniSection
+
 		/// <summary>
 		///     A simple indexer by name (from the IniSection annotation) for the IniSection
 		/// </summary>
@@ -523,7 +542,7 @@ namespace Dapplo.Config.Ini
 		{
 			get
 			{
-				if (!typeof(IIniSection).IsAssignableFrom(type))
+				if (!typeof (IIniSection).IsAssignableFrom(type))
 				{
 					throw new ArgumentException("type is not a IIniSection");
 				}
@@ -535,7 +554,7 @@ namespace Dapplo.Config.Ini
 				IIniSection iniSection;
 				if (!_iniSections.TryGetValue(iniSectionAttribute.Name, out iniSection))
 				{
-					iniSection = InterceptorFactory.New(type) as IIniSection;
+					iniSection = (IIniSection) InterceptorFactory.New(type);
 
 					var sectionName = iniSection.GetSectionName();
 					// Add before loading, so it will be handled automatically
@@ -564,7 +583,7 @@ namespace Dapplo.Config.Ini
 		/// <returns>T</returns>
 		public T Get<T>() where T : IIniSection
 		{
-			var type = typeof(T);
+			var type = typeof (T);
 			return (T) this[type];
 		}
 
@@ -585,24 +604,23 @@ namespace Dapplo.Config.Ini
 		/// <returns>instance of type T</returns>
 		public async Task<T> RegisterAndGetAsync<T>(CancellationToken token = default(CancellationToken)) where T : IIniSection
 		{
-			var type = typeof(T);
-			var iniSectionAttribute = type.GetCustomAttribute<IniSectionAttribute>();
 			IIniSection iniSection;
 
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
 				await LoadIfNeededAsync(token).ConfigureAwait(false);
 
-				iniSection = this[type];
+				iniSection = this[typeof (T)];
 			}
-			return (T)iniSection;
+			return (T) iniSection;
 		}
+
 		#endregion
 
 		#region Read
 
 		/// <summary>
-		/// This will do an intial load, if none was made
+		///     This will do an intial load, if none was made
 		/// </summary>
 		/// <param name="token">CancellationToken</param>
 		/// <returns>Task</returns>
@@ -675,9 +693,11 @@ namespace Dapplo.Config.Ini
 			// Reset the sections that have already been registered
 			FillSections();
 		}
+
 		#endregion
 
 		#region Reset
+
 		/// <summary>
 		///     Reset all the values, in all the registered ini sections, to their defaults
 		/// </summary>
@@ -715,9 +735,11 @@ namespace Dapplo.Config.Ini
 				}
 			}
 		}
+
 		#endregion
 
 		#region Write
+
 		/// <summary>
 		///     Write the ini file
 		/// </summary>
@@ -866,7 +888,7 @@ namespace Dapplo.Config.Ini
 				var converter = iniValue.Converter;
 
 				// Special case, for idictionary derrivated types
-				if (iniValue.ValueType.IsGenericType && iniValue.ValueType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+				if (iniValue.ValueType.IsGenericType && iniValue.ValueType.GetGenericTypeDefinition() == typeof (IDictionary<,>))
 				{
 					var subSection = TypeExtensions.ConvertOrCastValueToType<IDictionary<string, string>>(iniValue.Value, converter, context, false);
 					if (subSection != null)
@@ -912,17 +934,7 @@ namespace Dapplo.Config.Ini
 				}
 			}
 		}
-		#endregion
 
-		/// <summary>
-		///     Used to detect if we have an intial read, and if so from where.
-		///     This is important for the auto-save & FileSystemWatcher
-		/// </summary>
-		private enum ReadFrom
-		{
-			Nothing,
-			File,
-			Stream
-		}
+		#endregion
 	}
 }

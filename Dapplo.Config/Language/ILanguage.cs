@@ -16,7 +16,7 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU Lesser General Public License for more details.
 // 
-//  You should have Config a copy of the GNU Lesser General Public License
+//  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 #region using
@@ -37,12 +37,6 @@ namespace Dapplo.Config.Language
 	public interface ILanguage
 	{
 		/// <summary>
-		/// Get the prefix / module name of this ILanguage
-		/// </summary>
-		/// <returns></returns>
-		string PrefixName();
-
-		/// <summary>
 		///     Get the translation for a key
 		/// </summary>
 		/// <param name="languageKey">Key for the translation</param>
@@ -51,9 +45,16 @@ namespace Dapplo.Config.Language
 
 		/// <summary>
 		///     Get all the language keys, this includes also the ones that don't have an access property.
-		///     This is a method, could have been a property, but this differentiates it from the properties in the extending interface.
+		///     This is a method, could have been a property, but this differentiates it from the properties in the extending
+		///     interface.
 		/// </summary>
 		/// <returns></returns>
 		ICollection<string> Keys();
+
+		/// <summary>
+		///     Get the prefix / module name of this ILanguage
+		/// </summary>
+		/// <returns></returns>
+		string PrefixName();
 	}
 }

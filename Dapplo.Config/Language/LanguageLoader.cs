@@ -16,7 +16,7 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU Lesser General Public License for more details.
 // 
-//  You should have Config a copy of the GNU Lesser General Public License
+//  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 #region using
@@ -32,11 +32,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Dapplo.Config.Ini;
-using Dapplo.LogFacade;
 using Dapplo.Config.Language.Implementation;
 using Dapplo.InterfaceImpl;
 using Dapplo.InterfaceImpl.Extensions;
+using Dapplo.LogFacade;
 using Dapplo.Utils;
+using Dapplo.Utils.Extensions;
 
 #endregion
 
@@ -49,52 +50,23 @@ namespace Dapplo.Config.Language
 	public class LanguageLoader
 	{
 		private static readonly LogSource Log = new LogSource();
-		private static readonly IDictionary<string, LanguageLoader> LoaderStore = new Dictionary<string, LanguageLoader>(AbcComparer.Instance);
-		private readonly IDictionary<string, IDictionary<string, string>> _allTranslations = new Dictionary<string, IDictionary<string, string>>(AbcComparer.Instance);
+		private static readonly IDictionary<string, LanguageLoader> LoaderStore = new Dictionary<string, LanguageLoader>(new AbcComparer());
+		private readonly IDictionary<string, IDictionary<string, string>> _allTranslations = new Dictionary<string, IDictionary<string, string>>(new AbcComparer());
 		private readonly string _applicationName;
 		private readonly AsyncLock _asyncLock = new AsyncLock();
 		private readonly Regex _filePattern;
-		private readonly IDictionary<string, ILanguage> _languageConfigs = new Dictionary<string, ILanguage>(AbcComparer.Instance);
+		private readonly IDictionary<string, ILanguage> _languageConfigs = new Dictionary<string, ILanguage>(new AbcComparer());
 		private readonly IDictionary<Type, ILanguage> _languageTypeConfigs = new Dictionary<Type, ILanguage>();
 		private bool _initialReadDone;
 
 		/// <summary>
-		/// Define some static constants which could not be assigned directly
+		///     Define some static constants which could not be assigned directly
 		/// </summary>
 		static LanguageLoader()
 		{
-			InterceptorFactory.DefineBaseTypeForInterface(typeof(ILanguage), typeof(Language<>));
-			InterceptorFactory.DefineDefaultInterfaces(typeof(ILanguage), new[] { typeof(IDefaultValue), typeof(IHasChanges) });
+			InterceptorFactory.DefineBaseTypeForInterface(typeof (ILanguage), typeof (Language<>));
+			InterceptorFactory.DefineDefaultInterfaces(typeof (ILanguage), new[] {typeof (IDefaultValue), typeof (IHasChanges)});
 		}
-
-		#region Static
-
-		/// <summary>
-		///     Static helper to retrieve the LanguageLoader that was created with the supplied parameters
-		/// </summary>
-		/// <param name="applicationName"></param>
-		/// <returns>LanguageLoader</returns>
-		public static LanguageLoader Get(string applicationName)
-		{
-			return LoaderStore[applicationName];
-		}
-
-		/// <summary>
-		///     Static helper to retrieve the first LanguageLoader that was created
-		/// </summary>
-		/// <returns>LanguageLoader or null</returns>
-		public static LanguageLoader Current => LoaderStore.FirstOrDefault().Value;
-
-		/// <summary>
-		///     Delete the Language objects for the specified application, mostly used in tests
-		/// </summary>
-		/// <param name="applicationName"></param>
-		public static void Delete(string applicationName)
-		{
-			Log.Debug().WriteLine("Removing {0}", applicationName);
-			LoaderStore.Remove(applicationName);
-		}
-		#endregion
 
 		/// <summary>
 		///     Create a LanguageLoader, this is your container for all the ILanguage implementing interfaces.
@@ -119,7 +91,7 @@ namespace Dapplo.Config.Language
 			_applicationName = applicationName;
 			ScanFiles(checkStartupDirectory, checkAppDataDirectory, specifiedDirectories);
 			Log.Debug().WriteLine("Adding {0}", applicationName);
-			LoaderStore.SafelyAddOrOverwrite(applicationName, this);
+			LoaderStore.AddOrOverwrite(applicationName, this);
 		}
 
 		/// <summary>
@@ -144,10 +116,7 @@ namespace Dapplo.Config.Language
 		/// </summary>
 		/// <param name="prefix">ILanguage prefix to look for</param>
 		/// <returns>ILanguage</returns>
-		public ILanguage this[string prefix]
-		{
-			get { return _languageConfigs[prefix]; }
-		}
+		public ILanguage this[string prefix] => _languageConfigs[prefix];
 
 		/// <summary>
 		///     Change the language, this will only do something if the language actually changed.
@@ -264,14 +233,14 @@ namespace Dapplo.Config.Language
 			// Add all unprocessed values
 			foreach (var key in sectionTranslations.Keys)
 			{
-				interceptor.Properties.SafelyAddOrOverwrite(key, sectionTranslations[key]);
+				interceptor.Properties.AddOrOverwrite(key, sectionTranslations[key]);
 			}
 		}
 
 		/// <summary>
 		///     Get or register/get Interface to this language loader, this method will return the filled property object
 		/// </summary>
-		/// <param name="type">ILanguage Type</typeparam>
+		/// <param name="type">ILanguage Type</param>
 		/// <returns>ILanguage</returns>
 		public ILanguage Get(Type type)
 		{
@@ -282,7 +251,7 @@ namespace Dapplo.Config.Language
 			ILanguage language;
 			if (!_languageTypeConfigs.TryGetValue(type, out language))
 			{
-				language = (ILanguage)InterceptorFactory.New(type);
+				language = (ILanguage) InterceptorFactory.New(type);
 				_languageTypeConfigs.Add(type, language);
 				_languageConfigs.Add(language.PrefixName(), language);
 				FillLanguageConfig(language);
@@ -299,22 +268,20 @@ namespace Dapplo.Config.Language
 		/// <returns>T</returns>
 		public T Get<T>() where T : ILanguage
 		{
-			var type = typeof(T);
-			return (T)Get(type);
+			var type = typeof (T);
+			return (T) Get(type);
 		}
 
 		/// <summary>
-		///     Register a Property Interface to this ini config, this method will return the property object
+		///     Start the intial load, but if none was made yet
 		/// </summary>
-		/// <typeparam name="T">Your property interface, which extends IIniSection</typeparam>
-		/// <returns>instance of type T</returns>
-		public async Task<T> RegisterAndGetAsync<T>(CancellationToken token = default(CancellationToken)) where T : ILanguage
+		/// <param name="token">CancellationToken</param>
+		/// <returns>Task</returns>
+		public async Task LoadIfNeededAsync(CancellationToken token = default(CancellationToken))
 		{
-			var type = typeof (T);
-			using (await _asyncLock.LockAsync().ConfigureAwait(false))
+			if (!_initialReadDone)
 			{
-				await LoadIfNeededAsync(token);
-				return Get<T>();
+				await ReloadAsync(token);
 			}
 		}
 
@@ -331,24 +298,25 @@ namespace Dapplo.Config.Language
 				return null;
 			}
 			return (from resourcesElement in xElement.Elements("resources")
-					where resourcesElement.Attribute("prefix") != null
-					from resourceElement in resourcesElement.Elements("resource")
-					group resourceElement by resourcesElement.Attribute("prefix").Value
+				where resourcesElement.Attribute("prefix") != null
+				from resourceElement in resourcesElement.Elements("resource")
+				group resourceElement by resourcesElement.Attribute("prefix").Value
 				into resourceElementGroup
-					select resourceElementGroup).ToDictionary(group => @group.Key,
-					group => (IDictionary<string, string>)@group.ToDictionary(x => x.Attribute("name").Value, x => x.Value.Trim()));
+				select resourceElementGroup).ToDictionary(group => @group.Key,
+					group => (IDictionary<string, string>) @group.ToDictionary(x => x.Attribute("name").Value, x => x.Value.Trim()));
 		}
 
 		/// <summary>
-		/// Start the intial load, but if none was made yet
+		///     Register a Property Interface to this ini config, this method will return the property object
 		/// </summary>
-		/// <param name="token">CancellationToken</param>
-		/// <returns>Task</returns>
-		public async Task LoadIfNeededAsync(CancellationToken token = default(CancellationToken))
+		/// <typeparam name="T">Your property interface, which extends IIniSection</typeparam>
+		/// <returns>instance of type T</returns>
+		public async Task<T> RegisterAndGetAsync<T>(CancellationToken token = default(CancellationToken)) where T : ILanguage
 		{
-			if (!_initialReadDone)
+			using (await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
-				await ReloadAsync(token);
+				await LoadIfNeededAsync(token);
+				return Get<T>();
 			}
 		}
 
@@ -390,7 +358,7 @@ namespace Dapplo.Config.Language
 						}
 						foreach (var key in properties.Keys)
 						{
-							sectionTranslations.SafelyAddOrOverwrite(key, properties[key]);
+							sectionTranslations.AddOrOverwrite(key, properties[key]);
 						}
 					}
 				}
@@ -463,5 +431,35 @@ namespace Dapplo.Config.Language
 				Log.Verbose().WriteLine("Languages found: {0}", string.Join(",", AvailableLanguages.Keys));
 			}
 		}
+
+		#region Static
+
+		/// <summary>
+		///     Static helper to retrieve the LanguageLoader that was created with the supplied parameters
+		/// </summary>
+		/// <param name="applicationName"></param>
+		/// <returns>LanguageLoader</returns>
+		public static LanguageLoader Get(string applicationName)
+		{
+			return LoaderStore[applicationName];
+		}
+
+		/// <summary>
+		///     Static helper to retrieve the first LanguageLoader that was created
+		/// </summary>
+		/// <returns>LanguageLoader or null</returns>
+		public static LanguageLoader Current => LoaderStore.FirstOrDefault().Value;
+
+		/// <summary>
+		///     Delete the Language objects for the specified application, mostly used in tests
+		/// </summary>
+		/// <param name="applicationName"></param>
+		public static void Delete(string applicationName)
+		{
+			Log.Debug().WriteLine("Removing {0}", applicationName);
+			LoaderStore.Remove(applicationName);
+		}
+
+		#endregion
 	}
 }

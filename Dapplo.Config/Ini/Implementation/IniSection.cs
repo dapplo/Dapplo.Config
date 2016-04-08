@@ -16,22 +16,23 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU Lesser General Public License for more details.
 // 
-//  You should have Config a copy of the GNU Lesser General Public License
+//  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 #region using
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using Dapplo.Config.Support;
-using System.Linq.Expressions;
-using System;
 using Dapplo.InterfaceImpl;
 using Dapplo.InterfaceImpl.Implementation;
 using Dapplo.Utils;
+using Dapplo.Utils.Extensions;
 
 #endregion
 
@@ -43,10 +44,32 @@ namespace Dapplo.Config.Ini.Implementation
 	public class IniSection<T> : ExtensibleInterceptorImpl<T>, IIniSection<T>
 	{
 		private readonly IniSectionAttribute _iniSectionAttribute = typeof (T).GetCustomAttribute<IniSectionAttribute>();
-		private readonly IDictionary<string, IniValue> _iniValues = new Dictionary<string, IniValue>(AbcComparer.Instance);
+		private readonly IDictionary<string, IniValue> _iniValues = new Dictionary<string, IniValue>(new AbcComparer());
 
 		/// <summary>
-		/// Logic to generate an IniValue for every property
+		///     This is called by the ExtensibleInterceptorImpl with a list of extensions
+		/// </summary>
+		/// <param name="extensions">list of extensions</param>
+		protected override void AfterInitialization(IList<IInterceptorExtension> extensions)
+		{
+			base.AfterInitialization(extensions);
+			foreach (var propertyName in InitializationErrors.Keys.ToList())
+			{
+				IniValue currentValue;
+				if (_iniValues.TryGetValue(propertyName, out currentValue))
+				{
+					if (currentValue.Behavior.IgnoreErrors)
+					{
+						InitializationErrors.Remove(propertyName);
+						continue;
+					}
+					throw InitializationErrors[propertyName];
+				}
+			}
+		}
+
+		/// <summary>
+		///     Logic to generate an IniValue for every property
 		/// </summary>
 		/// <param name="propertyInfo"></param>
 		/// <param name="extensions"></param>
@@ -72,44 +95,27 @@ namespace Dapplo.Config.Ini.Implementation
 			_iniValues.Add(iniValue.PropertyName, iniValue);
 		}
 
-		protected override void AfterInitialization(IList<IInterceptorExtension> extensions)
-		{
-			base.AfterInitialization(extensions);
-			foreach (var propertyName in InitializationErrors.Keys.ToList())
-			{
-				IniValue currentValue;
-				if (_iniValues.TryGetValue(propertyName, out currentValue))
-				{
-					if (currentValue.Behavior.IgnoreErrors)
-					{
-						InitializationErrors.Remove(propertyName);
-						continue;
-					}
-					throw InitializationErrors[propertyName];
-				}
-			}
-		}
-
 		#region IIniSection
+
 		/// <summary>
-		/// Get the description for the IniSection
+		///     Get the description for the IniSection
 		/// </summary>
 		/// <returns>string</returns>
 		public string GetSectionDescription()
 		{
-			var descriptionAttribute = typeof(T).GetCustomAttribute<DescriptionAttribute>();
+			var descriptionAttribute = typeof (T).GetCustomAttribute<DescriptionAttribute>();
 			return descriptionAttribute?.Description;
 		}
 
 		/// <summary>
-		/// Indexer for this
+		///     Indexer for this
 		/// </summary>
 		/// <param name="propertyName"></param>
 		/// <returns></returns>
 		public IniValue this[string propertyName] => GetIniValue(propertyName);
 
 		/// <summary>
-		/// Get a single ini value via the property name
+		///     Get a single ini value via the property name
 		/// </summary>
 		/// <param name="propertyName">Name of the property</param>
 		/// <returns>IniValue</returns>
@@ -121,7 +127,7 @@ namespace Dapplo.Config.Ini.Implementation
 		}
 
 		/// <summary>
-		/// Get a single ini value via an expression which defines the property name
+		///     Get a single ini value via an expression which defines the property name
 		/// </summary>
 		/// <param name="propertyExpression">LambdaExpression for the property</param>
 		/// <returns>IniValue</returns>
@@ -141,7 +147,7 @@ namespace Dapplo.Config.Ini.Implementation
 		}
 
 		/// <summary>
-		/// Supply the iniSection name
+		///     Supply the iniSection name
 		/// </summary>
 		/// <returns>string</returns>
 		public string GetSectionName()

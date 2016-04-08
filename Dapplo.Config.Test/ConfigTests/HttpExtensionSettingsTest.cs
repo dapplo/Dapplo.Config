@@ -16,7 +16,7 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU Lesser General Public License for more details.
 // 
-//  You should have Config a copy of the GNU Lesser General Public License
+//  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 #region using
@@ -46,7 +46,7 @@ namespace Dapplo.Config.Test.ConfigTests
 		public async Task TestHttpExtensionsDefaultReadWrite()
 		{
 			// Important to disable the auto-save, otherwise we get test issues
-			var iniConfig = new IniConfig("Dapplo", "dapplo.httpextensions", autoSaveInterval:0, saveOnExit: false);
+			var iniConfig = new IniConfig("Dapplo", "dapplo.httpextensions", autoSaveInterval: 0, saveOnExit: false);
 			using (var testMemoryStream = new MemoryStream())
 			{
 				await IniConfig.Current.ReadFromStreamAsync(testMemoryStream).ConfigureAwait(false);

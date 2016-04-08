@@ -16,7 +16,7 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU Lesser General Public License for more details.
 // 
-//  You should have Config a copy of the GNU Lesser General Public License
+//  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 #region using
@@ -31,6 +31,9 @@ using Dapplo.LogFacade;
 
 namespace Dapplo.Config.Ini
 {
+	/// <summary>
+	///     This class implements a "REST" API for the Ini configuration
+	/// </summary>
 	public static class IniRest
 	{
 		private static readonly LogSource Log = new LogSource();
@@ -133,7 +136,7 @@ namespace Dapplo.Config.Ini
 		///     hostname is not important, this can be an application specific thing
 		///     port is not important, this can be an application specific thing
 		///     The command is get/set/add/remove/reset
-		///     the Applicationname & Configname must be registered by new IniConfig(Applicationname,Configname)
+		///     the Applicationname and Configname must be registered by new IniConfig(Applicationname,Configname)
 		///     The Section is that which is used in the IniSection
 		///     The property needs to be available
 		///     NewValue is optional (read) can be used to set the property (write)

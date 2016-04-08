@@ -16,7 +16,7 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU Lesser General Public License for more details.
 // 
-//  You should have Config a copy of the GNU Lesser General Public License
+//  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 #region using
@@ -27,9 +27,16 @@ using System;
 
 namespace Dapplo.Config.Ini
 {
+	/// <summary>
+	///     This attribute should be used to mark a class as IniSection
+	/// </summary>
 	[AttributeUsage(AttributeTargets.Interface)]
 	public class IniSectionAttribute : Attribute
 	{
+		/// <summary>
+		///     Constructor
+		/// </summary>
+		/// <param name="name">Name of the ini-section</param>
 		public IniSectionAttribute(string name)
 		{
 			Name = name;
