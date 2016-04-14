@@ -26,20 +26,14 @@ using Dapplo.Config.Language;
 
 #endregion
 
-namespace Dapplo.Config.Test.LanguageTests.Interfaces
+namespace Dapplo.Config.Tests.LanguageTests.Interfaces
 {
-	[Language("Test")]
-	public interface ILanguageLoaderTest : ILanguage
+	[Language("TestFail")]
+	public interface ILanguageLoaderFailTest : ILanguage
 	{
 		[DefaultValue(LanguageLoaderTest.Ok)]
-		string Ok { get; }
-
-		string OnlydeDe { get; }
-
-		string OnlyenUs { get; }
-
-		string OnlynlNl { get; }
-
-		string TestValue { get; }
+		string Ok { get;
+			// Set is not allowed!
+			set; }
 	}
 }

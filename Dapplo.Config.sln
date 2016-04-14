@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapplo.Config", "Dapplo.Config\Dapplo.Config.csproj", "{F57325B4-9444-4E68-9485-080A5171E8BC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapplo.Config.Test", "Dapplo.Config.Test\Dapplo.Config.Test.csproj", "{2C8817A3-AF0F-40CE-89C3-325BBB9417AB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapplo.Config.Tests", "Dapplo.Config.Tests\Dapplo.Config.Tests.csproj", "{2C8817A3-AF0F-40CE-89C3-325BBB9417AB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

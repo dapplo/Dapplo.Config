@@ -8,8 +8,8 @@
     <ProjectGuid>{2C8817A3-AF0F-40CE-89C3-325BBB9417AB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Dapplo.Config.Test</RootNamespace>
-    <AssemblyName>Dapplo.Config.Test</AssemblyName>
+    <RootNamespace>Dapplo.Config.Tests</RootNamespace>
+    <AssemblyName>Dapplo.Config.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />

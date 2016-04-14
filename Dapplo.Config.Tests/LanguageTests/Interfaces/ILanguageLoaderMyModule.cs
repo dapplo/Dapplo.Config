@@ -26,7 +26,7 @@ using Dapplo.Config.Language;
 
 #endregion
 
-namespace Dapplo.Config.Test.LanguageTests.Interfaces
+namespace Dapplo.Config.Tests.LanguageTests.Interfaces
 {
 	[Language("MyModule")]
 	public interface ILanguageLoaderMyModuleTest : ILanguage

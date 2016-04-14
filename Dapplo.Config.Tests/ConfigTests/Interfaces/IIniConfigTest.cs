@@ -32,7 +32,7 @@ using Dapplo.InterfaceImpl.Extensions;
 
 #endregion
 
-namespace Dapplo.Config.Test.ConfigTests.Interfaces
+namespace Dapplo.Config.Tests.ConfigTests.Interfaces
 {
 	public enum IniConfigTestEnum
 	{

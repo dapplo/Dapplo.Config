@@ -24,7 +24,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Dapplo.Config.Ini;
-using Dapplo.Config.Test.ConfigTests.Interfaces;
+using Dapplo.Config.Tests.ConfigTests.Interfaces;
 using Dapplo.HttpExtensions;
 using Dapplo.HttpExtensions.Factory;
 using Dapplo.LogFacade;
@@ -33,7 +33,7 @@ using Xunit.Abstractions;
 
 #endregion
 
-namespace Dapplo.Config.Test.ConfigTests
+namespace Dapplo.Config.Tests.ConfigTests
 {
 	public class HttpExtensionSettingsTest
 	{

@@ -21,21 +21,33 @@
 
 #region using
 
-using System.ComponentModel;
-using Dapplo.Config.Ini;
-using Dapplo.HttpExtensions;
-using Dapplo.InterfaceImpl.Extensions;
+using System.Collections.Generic;
+using Dapplo.Config.WindowsRegistry;
+using Microsoft.Win32;
 
 #endregion
 
-namespace Dapplo.Config.Test.ConfigTests.Interfaces
+namespace Dapplo.Config.Tests.ConfigTests.Interfaces
 {
 	/// <summary>
-	///     Testing interface for storing the IHttpSettings from the Dapplo.HttpExtensions nuget package
+	///     This is the interface under test
 	/// </summary>
-	[IniSection("Http")]
-	[Description("Test Configuration")]
-	public interface IHttpConfiguration : IHttpSettings, IIniSection<IHttpConfiguration>, INotifyPropertyChanged, ITagging<IHttpConfiguration>
+	[Registry(@"Software\Microsoft\Windows\CurrentVersion", Hive = RegistryHive.CurrentUser, View = RegistryView.Registry32)]
+	public interface IRegistryTest : IRegistry
 	{
+		[RegistryProperty(@"Run")]
+		Dictionary<string, object> CuRun32 { get; set; }
+
+		[RegistryProperty(@"Run", View = RegistryView.Registry64)]
+		Dictionary<string, object> CuRun64 { get; set; }
+
+		[RegistryProperty(@"Run", Hive = RegistryHive.LocalMachine)]
+		Dictionary<string, object> LmRun32 { get; set; }
+
+		[RegistryProperty(@"Run", Hive = RegistryHive.LocalMachine, View = RegistryView.Registry64)]
+		Dictionary<string, object> LmRun64 { get; set; }
+
+		[RegistryProperty(@"\Software\Microsoft\Windows NT\CurrentVersion", "ProductName", Hive = RegistryHive.LocalMachine, View = RegistryView.Default)]
+		string ProductName { get; set; }
 	}
 }

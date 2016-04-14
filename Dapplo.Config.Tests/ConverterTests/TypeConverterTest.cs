@@ -31,7 +31,7 @@ using Xunit.Abstractions;
 
 #endregion
 
-namespace Dapplo.Config.Test.ConverterTests
+namespace Dapplo.Config.Tests.ConverterTests
 {
 	public class TypeConverterTest
 	{

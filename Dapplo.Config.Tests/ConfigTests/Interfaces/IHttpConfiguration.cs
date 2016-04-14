@@ -22,18 +22,20 @@
 #region using
 
 using System.ComponentModel;
-using Dapplo.Config.Language;
+using Dapplo.Config.Ini;
+using Dapplo.HttpExtensions;
+using Dapplo.InterfaceImpl.Extensions;
 
 #endregion
 
-namespace Dapplo.Config.Test.LanguageTests.Interfaces
+namespace Dapplo.Config.Tests.ConfigTests.Interfaces
 {
-	[Language("TestFail")]
-	public interface ILanguageLoaderFailTest : ILanguage
+	/// <summary>
+	///     Testing interface for storing the IHttpSettings from the Dapplo.HttpExtensions nuget package
+	/// </summary>
+	[IniSection("Http")]
+	[Description("Test Configuration")]
+	public interface IHttpConfiguration : IHttpSettings, IIniSection<IHttpConfiguration>, INotifyPropertyChanged, ITagging<IHttpConfiguration>
 	{
-		[DefaultValue(LanguageLoaderTest.Ok)]
-		string Ok { get;
-			// Set is not allowed!
-			set; }
 	}
 }

@@ -29,7 +29,7 @@ using Dapplo.LogFacade.Loggers;
 
 #endregion
 
-namespace Dapplo.Config.Test
+namespace Dapplo.Config.Tests
 {
 	/// <summary>
 	///     xUnit will have tests run parallel, and due to this it won't capture trace output correctly.

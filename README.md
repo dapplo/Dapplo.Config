@@ -1,7 +1,9 @@
 Dapplo.Config
 =============
 
-Current build status: [![Build status](https://ci.appveyor.com/api/projects/status/ujfvy3g49g6a1d1q?svg=true)](https://ci.appveyor.com/project/dapplo/dapplo-config)
+- Documentation can be found [here](http://www.dapplo.net/blocks/Dapplo.Config) (soon)
+- Current build status: [![Build status](https://ci.appveyor.com/api/projects/status/ujfvy3g49g6a1d1q?svg=true)](https://ci.appveyor.com/project/dapplo/dapplo-config)
+- Coverage Status: [![Coverage Status](https://coveralls.io/repos/github/dapplo/Dapplo.Config/badge.svg?branch=master)](https://coveralls.io/github/dapplo/Dapplo.Config?branch=master)
 
 Dapplo.Config is a project which helps you to extend your application with a configuration.
 This can be found on NuGet!

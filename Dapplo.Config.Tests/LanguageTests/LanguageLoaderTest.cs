@@ -26,14 +26,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dapplo.Config.Language;
 using Dapplo.Config.Support;
-using Dapplo.Config.Test.LanguageTests.Interfaces;
+using Dapplo.Config.Tests.LanguageTests.Interfaces;
 using Dapplo.LogFacade;
 using Xunit;
 using Xunit.Abstractions;
 
 #endregion
 
-namespace Dapplo.Config.Test.LanguageTests
+namespace Dapplo.Config.Tests.LanguageTests
 {
 	/// <summary>
 	///     This test class tests the transactional capabilities of the proxy

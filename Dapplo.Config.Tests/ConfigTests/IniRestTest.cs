@@ -27,14 +27,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dapplo.Config.Converters;
 using Dapplo.Config.Ini;
-using Dapplo.Config.Test.ConfigTests.Interfaces;
+using Dapplo.Config.Tests.ConfigTests.Interfaces;
 using Dapplo.LogFacade;
 using Xunit;
 using Xunit.Abstractions;
 
 #endregion
 
-namespace Dapplo.Config.Test.ConfigTests
+namespace Dapplo.Config.Tests.ConfigTests
 {
 	public class IniRestTest : IDisposable
 	{

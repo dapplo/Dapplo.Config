@@ -1,4 +1,4 @@
-//  Dapplo - building blocks for desktop applications
+﻿//  Dapplo - building blocks for desktop applications
 //  Copyright (C) 2015-2016 Dapplo
 // 
 //  For more information see: http://dapplo.net/
@@ -21,37 +21,20 @@
 
 #region using
 
-using Dapplo.Config.Test.ConfigTests.Interfaces;
-using Dapplo.Config.WindowsRegistry.Implementation;
-using Dapplo.InterfaceImpl;
-using Dapplo.LogFacade;
-using Xunit;
-using Xunit.Abstractions;
+using System.ComponentModel;
 
 #endregion
 
-namespace Dapplo.Config.Test.ConfigTests
+namespace Dapplo.Config.Tests.ConfigTests.Interfaces
 {
-	/// <summary>
-	///     This test class tests the registry capabilities of the proxy
-	/// </summary>
-	public class RegistryTest
+	public interface IIniConfigSubInterfaceTest
 	{
-		public RegistryTest(ITestOutputHelper testOutputHelper)
-		{
-			XUnitLogger.RegisterLogger(testOutputHelper, LogLevel.Verbose);
-		}
+		string SubValue { get; set; }
 
-		[Fact]
-		public void TestRegistryRead()
-		{
-			// TODO: Fix that we need this
-			InterceptorFactory.RegisterExtension(typeof (RegistryExtension<>));
+		[DefaultValue("It works!")]
+		string SubValuewithDefault { get; set; }
 
-			var registryTest = InterceptorFactory.New<IRegistryTest>();
-
-			// assume that the product name is set
-			Assert.NotNull(registryTest.ProductName);
-		}
+		[Description("Test property 2 for enums"), DefaultValue(IniConfigTestEnum.Value2)]
+		IniConfigTestEnum TestWithEnumSubValue { get; set; }
 	}
 }

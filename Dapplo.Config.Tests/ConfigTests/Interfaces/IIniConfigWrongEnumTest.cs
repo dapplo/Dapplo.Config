@@ -21,33 +21,21 @@
 
 #region using
 
-using System.Collections.Generic;
-using Dapplo.Config.WindowsRegistry;
-using Microsoft.Win32;
+using System.ComponentModel;
+using Dapplo.Config.Ini;
 
 #endregion
 
-namespace Dapplo.Config.Test.ConfigTests.Interfaces
+namespace Dapplo.Config.Tests.ConfigTests.Interfaces
 {
 	/// <summary>
 	///     This is the interface under test
 	/// </summary>
-	[Registry(@"Software\Microsoft\Windows\CurrentVersion", Hive = RegistryHive.CurrentUser, View = RegistryView.Registry32)]
-	public interface IRegistryTest : IRegistry
+	[IniSection("Test")]
+	[Description("Test Configuration")]
+	public interface IIniConfigWrongEnumTest : IIniConfigSubInterfaceTest, IIniSection
 	{
-		[RegistryProperty(@"Run")]
-		Dictionary<string, object> CuRun32 { get; set; }
-
-		[RegistryProperty(@"Run", View = RegistryView.Registry64)]
-		Dictionary<string, object> CuRun64 { get; set; }
-
-		[RegistryProperty(@"Run", Hive = RegistryHive.LocalMachine)]
-		Dictionary<string, object> LmRun32 { get; set; }
-
-		[RegistryProperty(@"Run", Hive = RegistryHive.LocalMachine, View = RegistryView.Registry64)]
-		Dictionary<string, object> LmRun64 { get; set; }
-
-		[RegistryProperty(@"\Software\Microsoft\Windows NT\CurrentVersion", "ProductName", Hive = RegistryHive.LocalMachine, View = RegistryView.Default)]
-		string ProductName { get; set; }
+		[Description("Test property for wrong enums"), DefaultValue("Value3")]
+		IniConfigTestEnum TestWithFalseEnum { get; set; }
 	}
 }

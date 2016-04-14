@@ -19,7 +19,7 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-namespace Dapplo.Config.Test.ConverterTests
+namespace Dapplo.Config.Tests.ConverterTests
 {
 	public enum TestEnum
 	{

@@ -31,11 +31,11 @@ using Xunit;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly: AssemblyTitle("Dapplo.Config.Test")]
+[assembly: AssemblyTitle("Dapplo.Config.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Dapplo")]
-[assembly: AssemblyProduct("Dapplo.Config.Test")]
+[assembly: AssemblyProduct("Dapplo.Config.Tests")]
 [assembly: AssemblyCopyright("Copyright © Dapplo 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
