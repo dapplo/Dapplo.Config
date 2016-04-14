@@ -96,7 +96,7 @@ You can assist by specifying converters, and if defaults need to be in the file.
 
 ## Additional functionality
 
-As the framework generates an implementation of your interface, I added the possibility to extended this with additional functionality.
+As the framework generates an implementation of your interface, using Dapplo.InterfaceImpl, I added the possibility to extended this with additional functionality.
 You can use this simply by extending your interface with additional interfaces.
 
 Currently the following is available but can be extended:
