@@ -52,6 +52,8 @@ namespace Dapplo.Config.Tests.ConfigTests
 
 			// assume that the product name is set
 			Assert.NotNull(registryTest.ProductName);
+
+			Assert.Contains("CurrentVersion", registryTest.PathFor(x => x.ProductName));
 		}
 	}
 }
