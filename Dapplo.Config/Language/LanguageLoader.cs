@@ -166,8 +166,8 @@ namespace Dapplo.Config.Language
 			{
 				return;
 			}
-			var baseFileList = Files[baseIetf];
-			foreach (var ietf in Files.Keys)
+			var baseFileList = Files[baseIetf].ToList();
+			foreach (var ietf in Files.Keys.ToList())
 			{
 				if (ietf == baseIetf)
 				{
@@ -208,7 +208,7 @@ namespace Dapplo.Config.Language
 			if (!_allTranslations.TryGetValue(prefix, out sectionTranslations))
 			{
 				// No values, reset all (only available via the PropertyTypes dictionary
-				foreach (var key in interceptor.PropertyTypes.Keys)
+				foreach (var key in interceptor.PropertyTypes.Keys.ToList())
 				{
 					defaultValueInterface.RestoreToDefault(key);
 				}
@@ -231,7 +231,7 @@ namespace Dapplo.Config.Language
 			}
 
 			// Add all unprocessed values
-			foreach (var key in sectionTranslations.Keys)
+			foreach (var key in sectionTranslations.Keys.ToList())
 			{
 				interceptor.Properties.AddOrOverwrite(key, sectionTranslations[key]);
 			}
@@ -328,7 +328,7 @@ namespace Dapplo.Config.Language
 			_allTranslations.Clear();
 			if (Files.ContainsKey(CurrentLanguage))
 			{
-				foreach (var languageFile in Files[CurrentLanguage])
+				foreach (var languageFile in Files[CurrentLanguage].ToList())
 				{
 					IDictionary<string, IDictionary<string, string>> newResources;
 					if (languageFile.EndsWith(".ini"))
@@ -347,7 +347,7 @@ namespace Dapplo.Config.Language
 					{
 						continue;
 					}
-					foreach (var section in newResources.Keys)
+					foreach (var section in newResources.Keys.ToList())
 					{
 						var properties = newResources[section];
 						IDictionary<string, string> sectionTranslations;
@@ -356,7 +356,7 @@ namespace Dapplo.Config.Language
 							sectionTranslations = new Dictionary<string, string>();
 							_allTranslations.Add(section, sectionTranslations);
 						}
-						foreach (var key in properties.Keys)
+						foreach (var key in properties.Keys.ToList())
 						{
 							sectionTranslations.AddOrOverwrite(key, properties[key]);
 						}
@@ -366,7 +366,7 @@ namespace Dapplo.Config.Language
 			_initialReadDone = true;
 
 			// Reset the sections that have already been registered
-			foreach (var language in _languageTypeConfigs.Values)
+			foreach (var language in _languageTypeConfigs.Values.ToList())
 			{
 				FillLanguageConfig(language);
 			}

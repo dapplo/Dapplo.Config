@@ -112,7 +112,7 @@ namespace Dapplo.Config.Ini
 						return;
 					}
 					var needsSave = false;
-					foreach (var iniSection in _iniSections.Values)
+					foreach (var iniSection in _iniSections.Values.ToList())
 					{
 						var hasChangesInterface = iniSection as IHasChanges;
 						if (hasChangesInterface?.HasChanges() == true)
@@ -454,7 +454,7 @@ namespace Dapplo.Config.Ini
 			// Might be null
 			iniSections.TryGetValue(sectionName, out iniProperties);
 
-			var iniValues = from iniValue in iniSection.GetIniValues().Values
+			var iniValues = from iniValue in iniSection.GetIniValues().Values.ToList()
 				where iniValue.Behavior.Read
 				select iniValue;
 
@@ -516,7 +516,7 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		private void FillSections()
 		{
-			foreach (var iniSection in _iniSections.Values)
+			foreach (var iniSection in _iniSections.Values.ToList())
 			{
 				FillSection(iniSection);
 			}
@@ -715,12 +715,12 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		internal void ResetInternal()
 		{
-			foreach (var iniSection in _iniSections.Values)
+			foreach (var iniSection in _iniSections.Values.ToList())
 			{
 				var defaultValueInterface = iniSection as IDefaultValue;
 				if (defaultValueInterface != null)
 				{
-					foreach (var propertyName in iniSection.GetIniValues().Keys)
+					foreach (var propertyName in iniSection.GetIniValues().Keys.ToList())
 					{
 						// TODO: Do we need to skip read/write protected values here?
 						defaultValueInterface.RestoreToDefault(propertyName);
@@ -839,7 +839,7 @@ namespace Dapplo.Config.Ini
 			var sectionProperties = new SortedDictionary<string, string>();
 			var sectionComments = new SortedDictionary<string, string>();
 			// Loop over the ini values, this automatically skips all NonSerialized properties
-			foreach (var iniValue in iniSection.GetIniValues().Values)
+			foreach (var iniValue in iniSection.GetIniValues().Values.ToList())
 			{
 				// Check if we need to write the value, this is not needed when it has the default or if write is disabled
 				if (!iniValue.IsWriteNeeded)
