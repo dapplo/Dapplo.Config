@@ -22,6 +22,7 @@
 #region using
 
 using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapplo.Config.Language;
@@ -40,6 +41,8 @@ namespace Dapplo.Config.Tests.LanguageTests
 	/// </summary>
 	public class LanguageLoaderTest : IDisposable
 	{
+		private static readonly LogSource Log = new LogSource();
+
 		public const string Ok = "Ok";
 		private readonly LanguageLoader _languageLoader;
 
@@ -76,7 +79,28 @@ namespace Dapplo.Config.Tests.LanguageTests
 		[Fact]
 		public async Task TestIllegalInterface()
 		{
-			var ex = await Assert.ThrowsAsync<NotSupportedException>(async () => await _languageLoader.RegisterAndGetAsync<ILanguageLoaderFailTest>());
+			await Assert.ThrowsAsync<NotSupportedException>(async () => await _languageLoader.RegisterAndGetAsync<ILanguageLoaderFailTest>());
+		}
+
+		[Fact]
+		public async Task TestINotifyPropertyChanged()
+		{
+			var language = await _languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
+			bool hasChanges = false;
+			var propChanged = new PropertyChangedEventHandler((sender, eventArgs) =>
+			{
+				Log.Debug().WriteLine($"Change for {eventArgs.PropertyName}");
+				hasChanges = true;
+			});
+
+			// Test event handler
+			language.PropertyChanged += propChanged;
+
+			await _languageLoader.ChangeLanguageAsync("nl-NL");
+
+			// Make sure the events are handled
+			await Task.Yield();
+			Assert.True(hasChanges);
 		}
 
 		[Fact]

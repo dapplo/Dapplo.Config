@@ -39,21 +39,6 @@ namespace Dapplo.Config.Language.Implementation
 		private readonly LanguageAttribute _languageAttribute = typeof (T).GetCustomAttribute<LanguageAttribute>();
 
 		/// <summary>
-		///     Get a translation for a property
-		/// </summary>
-		/// <param name="languageKey"></param>
-		/// <returns>string or null if not available</returns>
-		public string this[string languageKey]
-		{
-			get
-			{
-				object translation;
-				Properties.TryGetValue(languageKey, out translation);
-				return (string) translation;
-			}
-		}
-
-		/// <summary>
 		///     All available keys for the language object
 		/// </summary>
 		/// <returns>collection</returns>

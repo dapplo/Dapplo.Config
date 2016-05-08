@@ -233,7 +233,14 @@ namespace Dapplo.Config.Language
 			// Add all unprocessed values
 			foreach (var key in sectionTranslations.Keys)
 			{
-				interceptor.Properties.AddOrOverwrite(key, sectionTranslations[key]);
+				if (interceptor.PropertyTypes.ContainsKey(key))
+				{
+					interceptor.Set(key, sectionTranslations[key]);
+				}
+				else
+				{
+					interceptor.Properties.AddOrOverwrite(key, sectionTranslations[key]);
+				}
 			}
 		}
 
