@@ -123,7 +123,8 @@ There are also enumerating possiblities, to foreach over all IIniSections and th
 
 Additionally to .ini support, the framework was extended with functionality for translations.
 This was also written for Greenshot, and is already very usuable. Documentation will follow.
-The functionality is in the LanguageLoader, and is very similar to the IniConfig.
+The functionality is in the LanguageLoader, and in general the usage is similar to the IniConfig.
+Your interface needs to extend ILanguage, and only have getters.
 
 
 # Registry access
