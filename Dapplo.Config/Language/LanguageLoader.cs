@@ -233,14 +233,7 @@ namespace Dapplo.Config.Language
 			// Add all unprocessed values
 			foreach (var key in sectionTranslations.Keys.ToList())
 			{
-				if (interceptor.PropertyTypes.ContainsKey(key))
-				{
-					interceptor.Set(key, sectionTranslations[key]);
-				}
-				else
-				{
-					interceptor.Properties.AddOrOverwrite(key, sectionTranslations[key]);
-				}
+				interceptor.Properties.AddOrOverwrite(key, sectionTranslations[key]);
 			}
 		}
 
@@ -360,7 +353,7 @@ namespace Dapplo.Config.Language
 						IDictionary<string, string> sectionTranslations;
 						if (!_allTranslations.TryGetValue(section, out sectionTranslations))
 						{
-							sectionTranslations = new Dictionary<string, string>();
+							sectionTranslations = new Dictionary<string, string>(new AbcComparer());
 							_allTranslations.Add(section, sectionTranslations);
 						}
 						foreach (var key in properties.Keys.ToList())
