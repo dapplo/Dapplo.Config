@@ -844,6 +844,11 @@ namespace Dapplo.Config.Ini
 				// Check if we need to write the value, this is not needed when it has the default or if write is disabled
 				if (!iniValue.IsWriteNeeded)
 				{
+					// Remove the value, if it's still in the cache
+					if (_ini.ContainsKey(sectionName) && _ini[sectionName].ContainsKey(iniValue.PropertyName))
+					{
+						_ini[sectionName].Remove(iniValue.PropertyName);
+					}
 					continue;
 				}
 
