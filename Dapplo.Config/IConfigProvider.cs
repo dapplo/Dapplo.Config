@@ -1,5 +1,5 @@
 ﻿//  Dapplo - building blocks for desktop applications
-//  Copyright (C) 2015-2016 Dapplo
+//  Copyright (C) 2016 Dapplo
 // 
 //  For more information see: http://dapplo.net/
 //  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -19,12 +19,24 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-namespace Dapplo.Config.Tests.ConverterTests
+#region using
+
+using System;
+
+#endregion
+
+namespace Dapplo.Config
 {
-	public enum TestEnum
+	/// <summary>
+	/// This interface is used to make it possible to retrieve a config instance (either ini or language) for a type
+	/// </summary>
+	public interface IConfigProvider
 	{
-		Val1,
-		Val2,
-		Val3
+		/// <summary>
+		/// Locate the instance for the specified type
+		/// </summary>
+		/// <param name="type">Type to look for</param>
+		/// <returns>instance of the type</returns>
+		object Get(Type type);
 	}
 }

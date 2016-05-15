@@ -55,7 +55,7 @@ namespace Dapplo.Config.Tests.ConverterTests
 			Assert.Equal("Robin", decryped);
 
 			var encrypted1 = typeof (string).ConvertOrCastValueToType("Robin", stringEncryptionTypeConverter, convertFrom: false);
-			var decryped2 = typeof (string).ConvertOrCastValueToType(encrypted1, stringEncryptionTypeConverter, convertFrom: true);
+			var decryped2 = typeof (string).ConvertOrCastValueToType(encrypted1, stringEncryptionTypeConverter);
 			Assert.Equal("Robin", decryped2);
 		}
 	}

@@ -46,7 +46,7 @@ namespace Dapplo.Config.Ini
 	/// <summary>
 	///     The IniConfig is used to bind IIniSection proxy objects to an ini file.
 	/// </summary>
-	public class IniConfig
+	public class IniConfig : IConfigProvider
 	{
 		private const string Defaults = "-defaults";
 		private const string Constants = "-constants";
@@ -477,7 +477,7 @@ namespace Dapplo.Config.Ini
 				{
 					try
 					{
-						iniValue.Value = iniValue.ValueType.ConvertOrCastValueToType(value, iniValue.Converter, context, true);
+						iniValue.Value = iniValue.ValueType.ConvertOrCastValueToType(value, iniValue.Converter, context);
 						continue;
 					}
 					catch (Exception ex)
@@ -501,7 +501,7 @@ namespace Dapplo.Config.Ini
 				// convert
 				try
 				{
-					iniValue.Value = iniValue.ValueType.ConvertOrCastValueToType(stringValue, iniValue.Converter, context, true);
+					iniValue.Value = iniValue.ValueType.ConvertOrCastValueToType(stringValue, iniValue.Converter, context);
 				}
 				catch (Exception ex)
 				{
@@ -591,8 +591,8 @@ namespace Dapplo.Config.Ini
 		///     Get the specified ini type
 		/// </summary>
 		/// <param name="type">Type</param>
-		/// <returns>IIniSection</returns>
-		public IIniSection Get(Type type)
+		/// <returns>object (which is a IIniSection)</returns>
+		public object Get(Type type)
 		{
 			return this[type];
 		}

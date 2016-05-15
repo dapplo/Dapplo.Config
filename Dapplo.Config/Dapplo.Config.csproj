@@ -51,6 +51,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IConfigProvider.cs" />
     <Compile Include="Ini\Implementation\IniSection.cs" />
     <Compile Include="Ini\IniRestCommand.cs" />
     <Compile Include="Ini\IniPropertyBehaviorAttribute.cs" />

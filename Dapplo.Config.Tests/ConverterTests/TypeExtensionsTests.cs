@@ -44,8 +44,7 @@ namespace Dapplo.Config.Tests.ConverterTests
 		{
 			var testUri = new Uri("http://test.com/dapplo?name=config");
 
-			var testValues = new Dictionary<string, Uri>();
-			testValues.Add("value1", testUri);
+			var testValues = new Dictionary<string, Uri> {{"value1", testUri}};
 
 			var stringDictionary = typeof (IDictionary<string, string>).ConvertOrCastValueToType(testValues, convertFrom: false) as IDictionary<string, string>;
 			Assert.NotNull(stringDictionary);

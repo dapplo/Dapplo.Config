@@ -47,7 +47,7 @@ namespace Dapplo.Config.Language
 	///     The language loader should be used to fill ILanguage interfaces.
 	///     It is possible to specify the directory locations, in order, where files with certain patterns should be located.
 	/// </summary>
-	public class LanguageLoader
+	public class LanguageLoader : IConfigProvider
 	{
 		private static readonly LogSource Log = new LogSource();
 		private static readonly IDictionary<string, LanguageLoader> LoaderStore = new Dictionary<string, LanguageLoader>(new AbcComparer());
@@ -241,8 +241,8 @@ namespace Dapplo.Config.Language
 		///     Get or register/get Interface to this language loader, this method will return the filled property object
 		/// </summary>
 		/// <param name="type">ILanguage Type</param>
-		/// <returns>ILanguage</returns>
-		public ILanguage Get(Type type)
+		/// <returns>object (which is a ILanguage)</returns>
+		public object Get(Type type)
 		{
 			if (!_initialReadDone)
 			{
@@ -302,8 +302,8 @@ namespace Dapplo.Config.Language
 				from resourceElement in resourcesElement.Elements("resource")
 				group resourceElement by resourcesElement.Attribute("prefix").Value
 				into resourceElementGroup
-				select resourceElementGroup).ToDictionary(group => @group.Key,
-					group => (IDictionary<string, string>) @group.ToDictionary(x => x.Attribute("name").Value, x => x.Value.Trim()));
+				select resourceElementGroup).ToDictionary(group => group.Key,
+					group => (IDictionary<string, string>) group.ToDictionary(x => x.Attribute("name").Value, x => x.Value.Trim()));
 		}
 
 		/// <summary>

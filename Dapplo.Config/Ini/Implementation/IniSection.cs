@@ -112,7 +112,7 @@ namespace Dapplo.Config.Ini.Implementation
 		/// </summary>
 		/// <param name="propertyName"></param>
 		/// <returns></returns>
-		public IniValue this[string propertyName] => GetIniValue(propertyName);
+		public new IniValue this[string propertyName] => GetIniValue(propertyName);
 
 		/// <summary>
 		///     Get a single ini value via the property name

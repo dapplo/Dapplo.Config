@@ -42,6 +42,7 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 	[Extension(typeof (IRegistry))]
 	public class RegistryExtension<T> : AbstractInterceptorExtension
 	{
+		// ReSharper disable once StaticMemberInGenericType
 		private static readonly LogSource Log = new LogSource();
 		private RegistryAttribute _registryAttribute;
 
