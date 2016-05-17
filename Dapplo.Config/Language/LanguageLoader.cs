@@ -251,6 +251,7 @@ namespace Dapplo.Config.Language
 			ILanguage language;
 			if (!_languageTypeConfigs.TryGetValue(type, out language))
 			{
+				// TODO: scan the location of the assembly where the type is, if it hasn't been scanned, for language files.
 				language = (ILanguage) InterceptorFactory.New(type);
 				_languageTypeConfigs.Add(type, language);
 				_languageConfigs.Add(language.PrefixName(), language);
