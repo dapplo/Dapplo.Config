@@ -40,8 +40,8 @@ namespace Dapplo.Config.Language
 		///     Get the translation for a key
 		/// </summary>
 		/// <param name="languageKey">Key for the translation</param>
-		/// <returns>string or null</returns>
-		object this[string languageKey] { get; }
+		/// <returns>string or null for the translation</returns>
+		string this[string languageKey] { get; }
 
 		/// <summary>
 		///     Get all the language keys, this includes also the ones that don't have an access property.

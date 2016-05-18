@@ -39,6 +39,21 @@ namespace Dapplo.Config.Language.Implementation
 		private readonly LanguageAttribute _languageAttribute = typeof (T).GetCustomAttribute<LanguageAttribute>();
 
 		/// <summary>
+		/// Hide the indexer in ExtensibleInterceptorImpl to make it return a string
+		/// </summary>
+		/// <param name="key"></param>
+		/// <returns>translation</returns>
+		public new string this[string key]
+		{
+			get
+			{
+				object value;
+				Properties.TryGetValue(key, out value);
+				return value as string;
+			}
+		}
+
+		/// <summary>
 		///     All available keys for the language object
 		/// </summary>
 		/// <returns>collection</returns>
