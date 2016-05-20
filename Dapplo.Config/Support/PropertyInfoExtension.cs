@@ -23,6 +23,8 @@
 
 using System.Reflection;
 using Dapplo.Config.Ini;
+using System.Runtime.Serialization;
+using System;
 
 #endregion
 
@@ -34,13 +36,25 @@ namespace Dapplo.Config.Support
 	public static class PropertyInfoExtension
 	{
 		/// <summary>
-		///     Check if the property is non serialized (annotated with the NonSerializedAttribute)
+		///     Get the IniPropertyBehaviorAttribute
 		/// </summary>
 		/// <param name="propertyInfo">PropertyInfo</param>
-		/// <returns>true if the NonSerialized attribute is set on the property</returns>
+		/// <returns>IniPropertyBehaviorAttribute</returns>
 		public static IniPropertyBehaviorAttribute GetIniPropertyBehavior(this PropertyInfo propertyInfo)
 		{
 			var iniPropertyBehaviorAttribute = propertyInfo.GetCustomAttribute<IniPropertyBehaviorAttribute>(true) ?? new IniPropertyBehaviorAttribute();
+			// Check if there is a IgnoreDataMember annotation, if this is the case don't read and write
+			if (propertyInfo.GetCustomAttribute<IgnoreDataMemberAttribute>(true) != null)
+			{
+				iniPropertyBehaviorAttribute.Read = false;
+				iniPropertyBehaviorAttribute.Write = false;
+			}
+			// Check if there is a <NonSerialized annotation, if this is the case don't read and write
+			if (propertyInfo.GetCustomAttribute<NonSerializedAttribute>(true) != null)
+			{
+				iniPropertyBehaviorAttribute.Read = false;
+				iniPropertyBehaviorAttribute.Write = false;
+			}
 			return iniPropertyBehaviorAttribute;
 		}
 	}
