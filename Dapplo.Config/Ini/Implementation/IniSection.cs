@@ -108,11 +108,11 @@ namespace Dapplo.Config.Ini.Implementation
 		}
 
 		/// <summary>
-		///     Indexer for this
+		///     Implementation of the indexer of the IIniSection
 		/// </summary>
 		/// <param name="propertyName"></param>
-		/// <returns></returns>
-		public new IniValue this[string propertyName] => GetIniValue(propertyName);
+		/// <returns>IniValue</returns>
+		IniValue IIniSection.this[string propertyName] => GetIniValue(propertyName);
 
 		/// <summary>
 		///     Get a single ini value via the property name

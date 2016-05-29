@@ -39,11 +39,11 @@ namespace Dapplo.Config.Language.Implementation
 		private readonly LanguageAttribute _languageAttribute = typeof (T).GetCustomAttribute<LanguageAttribute>();
 
 		/// <summary>
-		/// Hide the indexer in ExtensibleInterceptorImpl to make it return a string
+		/// Implementation of the ILanguage indexer
 		/// </summary>
-		/// <param name="key"></param>
+		/// <param name="key">Key of the transalation to find</param>
 		/// <returns>translation</returns>
-		public new string this[string key]
+		string ILanguage.this[string key]
 		{
 			get
 			{
