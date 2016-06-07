@@ -112,7 +112,7 @@ namespace Dapplo.Config.Ini
 						return;
 					}
 					var needsSave = false;
-					foreach (var iniSection in _iniSections.Values.ToList())
+					foreach (var iniSection in GetIniSectionValues())
 					{
 						var hasChangesInterface = iniSection as IHasChanges;
 						if (hasChangesInterface?.HasChanges() == true)
@@ -153,8 +153,11 @@ namespace Dapplo.Config.Ini
 				}
 			};
 
-			// Used for lookups
-			ConfigStore.Add($"{applicationName}.{fileName}", this);
+			lock (ConfigStore)
+			{
+				// Used for lookups
+				ConfigStore.Add($"{applicationName}.{fileName}", this);
+			}
 			Log.Debug().WriteLine("Added IniConfig {0}.{1}", applicationName, fileName);
 			if (saveOnExit)
 			{
@@ -167,6 +170,19 @@ namespace Dapplo.Config.Ini
 						await WriteAsync();
 					}
 				}).Wait();
+			}
+		}
+
+		/// <summary>
+		/// Helper method to get the values from the iniSections as list 
+		/// This should be used, as it locks the _iniSections
+		/// </summary>
+		/// <returns>list IIniSection</returns>
+		private IList<IIniSection> GetIniSectionValues()
+		{
+			lock (_iniSections)
+			{
+				return _iniSections.Values.ToList();
 			}
 		}
 
@@ -296,13 +312,18 @@ namespace Dapplo.Config.Ini
 			var identifier = $"{applicationName}.{fileName}";
 			Log.Debug().WriteLine("Deleting IniConfig {0}", identifier);
 			IniConfig iniConfig;
-			if (ConfigStore.TryGetValue(identifier, out iniConfig))
+			lock (ConfigStore)
 			{
-				ConfigStore.Remove(identifier);
-			}
-			else
-			{
-				Log.Warn().WriteLine("IniConfig with identifier {0} not found!", identifier);
+				if (ConfigStore.TryGetValue(identifier, out iniConfig))
+				{
+					// Make sure the AsyncLock is disposed.
+					iniConfig.Dispose();
+					ConfigStore.Remove(identifier);
+				}
+				else
+				{
+					Log.Warn().WriteLine("IniConfig with identifier {0} not found!", identifier);
+				}
 			}
 		}
 
@@ -516,7 +537,7 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		private void FillSections()
 		{
-			foreach (var iniSection in _iniSections.Values.ToList())
+			foreach (var iniSection in GetIniSectionValues())
 			{
 				FillSection(iniSection);
 			}
@@ -552,15 +573,20 @@ namespace Dapplo.Config.Ini
 				}
 				var iniSectionAttribute = type.GetCustomAttribute<IniSectionAttribute>();
 				IIniSection iniSection;
-				if (!_iniSections.TryGetValue(iniSectionAttribute.Name, out iniSection))
+				lock (_iniSections)
 				{
-					iniSection = (IIniSection) InterceptorFactory.New(type);
+					if (_iniSections.TryGetValue(iniSectionAttribute.Name, out iniSection))
+					{
+						// Filled type
+						return iniSection;
+					}
+					iniSection = (IIniSection)InterceptorFactory.New(type);
 
 					var sectionName = iniSection.GetSectionName();
 					// Add before loading, so it will be handled automatically
 					_iniSections.Add(sectionName, iniSection);
-					FillSection(iniSection);
 				}
+				FillSection(iniSection);
 				return iniSection;
 			}
 		}
@@ -573,7 +599,10 @@ namespace Dapplo.Config.Ini
 		/// <returns>bool with true if it worked</returns>
 		public bool TryGet(string sectionName, out IIniSection section)
 		{
-			return _iniSections.TryGetValue(sectionName, out section);
+			lock (_iniSections)
+			{
+				return _iniSections.TryGetValue(sectionName, out section);
+			}
 		}
 
 		/// <summary>
@@ -715,7 +744,7 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		internal void ResetInternal()
 		{
-			foreach (var iniSection in _iniSections.Values.ToList())
+			foreach (var iniSection in GetIniSectionValues())
 			{
 				var defaultValueInterface = iniSection as IDefaultValue;
 				if (defaultValueInterface != null)
@@ -797,7 +826,7 @@ namespace Dapplo.Config.Ini
 			var iniSectionsComments = new SortedDictionary<string, IDictionary<string, string>>();
 
 			// Loop over the "registered" sections
-			foreach (var iniSection in _iniSections.Values.ToList())
+			foreach (var iniSection in GetIniSectionValues())
 			{
 				var intercepted = iniSection as IExtensibleInterceptor;
 				// set the values before save
@@ -941,5 +970,37 @@ namespace Dapplo.Config.Ini
 		}
 
 		#endregion
+
+		#region IDisposable Support
+		private bool _disposedValue = false; // To detect redundant calls
+
+		/// <summary>
+		/// Disposes the lock
+		/// </summary>
+		/// <param name="disposing"></param>
+		protected virtual void Dispose(bool disposing)
+		{
+			if (!_disposedValue)
+			{
+				if (disposing)
+				{
+					if (_asyncLock != null)
+					{
+						_asyncLock.Dispose();
+					}
+				}
+				_disposedValue = true;
+			}
+		}
+
+		/// <summary>
+		/// Dispose implementation
+		/// </summary>
+		public void Dispose()
+		{
+			// Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+			Dispose(true);
+		}
+		#endregion
 	}
-}
+	}

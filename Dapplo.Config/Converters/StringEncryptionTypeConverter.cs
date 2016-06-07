@@ -171,16 +171,13 @@ namespace Dapplo.Config.Converters
 
 			using (var symmetricAlgorithm = SymmetricAlgorithm.Create(Algorithm))
 			{
-				using (var memoryStream = new MemoryStream())
-				{
-					var rgbIv = Encoding.ASCII.GetBytes(RgbIv);
-					var key = Encoding.ASCII.GetBytes(RgbKey);
+				var memoryStream = new MemoryStream();
+				var rgbIv = Encoding.ASCII.GetBytes(RgbIv);
+				var key = Encoding.ASCII.GetBytes(RgbKey);
 
-					var cryptoStream = new CryptoStream(memoryStream, symmetricAlgorithm.CreateDecryptor(key, rgbIv), CryptoStreamMode.Write);
-
+				using (var cryptoStream = new CryptoStream(memoryStream, symmetricAlgorithm.CreateDecryptor(key, rgbIv), CryptoStreamMode.Write)) {
 					cryptoStream.Write(encryptedTextBytes, 0, encryptedTextBytes.Length);
-					cryptoStream.Flush();
-					cryptoStream.Close();
+					cryptoStream.FlushFinalBlock();
 					returnValue = Encoding.ASCII.GetString(memoryStream.ToArray());
 				}
 			}
@@ -199,15 +196,13 @@ namespace Dapplo.Config.Converters
 			var clearTextBytes = Encoding.ASCII.GetBytes(clearText);
 			using (var symmetricAlgorithm = SymmetricAlgorithm.Create(Algorithm))
 			{
-				using (var memoryStream = new MemoryStream())
+				var memoryStream = new MemoryStream();
+				var rgbIv = Encoding.ASCII.GetBytes(RgbIv);
+				var key = Encoding.ASCII.GetBytes(RgbKey);
+				using (var cryptoStream = new CryptoStream(memoryStream, symmetricAlgorithm.CreateEncryptor(key, rgbIv), CryptoStreamMode.Write))
 				{
-					var rgbIv = Encoding.ASCII.GetBytes(RgbIv);
-					var key = Encoding.ASCII.GetBytes(RgbKey);
-					var cryptoStream = new CryptoStream(memoryStream, symmetricAlgorithm.CreateEncryptor(key, rgbIv), CryptoStreamMode.Write);
-
 					cryptoStream.Write(clearTextBytes, 0, clearTextBytes.Length);
-					cryptoStream.Flush();
-					cryptoStream.Close();
+					cryptoStream.FlushFinalBlock();
 					returnValue = Convert.ToBase64String(memoryStream.ToArray());
 				}
 			}

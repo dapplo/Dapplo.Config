@@ -82,16 +82,19 @@ namespace Dapplo.Config.Language
 			string filePatern = @"language(_(?<module>[a-zA-Z0-9]*))?-(?<IETF>[a-zA-Z]{2}(-[a-zA-Z]+)?-[a-zA-Z]+)\.(ini|xml)", bool checkStartupDirectory = true,
 			bool checkAppDataDirectory = true, ICollection<string> specifiedDirectories = null)
 		{
-			if (LoaderStore.ContainsKey(applicationName))
+			lock (LoaderStore)
 			{
-				throw new InvalidOperationException($"{applicationName} was already created!");
+				if (LoaderStore.ContainsKey(applicationName))
+				{
+					throw new InvalidOperationException($"{applicationName} was already created!");
+				}
+				CurrentLanguage = defaultLanguage;
+				_filePattern = new Regex(filePatern, RegexOptions.Compiled);
+				_applicationName = applicationName;
+				ScanFiles(checkStartupDirectory, checkAppDataDirectory, specifiedDirectories);
+				Log.Debug().WriteLine("Adding {0}", applicationName);
+				LoaderStore.AddOrOverwrite(applicationName, this);
 			}
-			CurrentLanguage = defaultLanguage;
-			_filePattern = new Regex(filePatern, RegexOptions.Compiled);
-			_applicationName = applicationName;
-			ScanFiles(checkStartupDirectory, checkAppDataDirectory, specifiedDirectories);
-			Log.Debug().WriteLine("Adding {0}", applicationName);
-			LoaderStore.AddOrOverwrite(applicationName, this);
 		}
 
 		/// <summary>
@@ -249,14 +252,20 @@ namespace Dapplo.Config.Language
 				throw new InvalidOperationException("Please load before retrieving the language");
 			}
 			ILanguage language;
-			if (!_languageTypeConfigs.TryGetValue(type, out language))
+			// Make sure we lock, to prevent double adding
+			lock (_languageTypeConfigs)
 			{
+				if (_languageTypeConfigs.TryGetValue(type, out language))
+				{
+					// Already filled type
+					return language;
+				}
 				// TODO: scan the location of the assembly where the type is, if it hasn't been scanned, for language files.
-				language = (ILanguage) InterceptorFactory.New(type);
+				language = (ILanguage)InterceptorFactory.New(type);
 				_languageTypeConfigs.Add(type, language);
 				_languageConfigs.Add(language.PrefixName(), language);
-				FillLanguageConfig(language);
 			}
+			FillLanguageConfig(language);
 
 			return language;
 		}
@@ -366,8 +375,13 @@ namespace Dapplo.Config.Language
 			}
 			_initialReadDone = true;
 
+			IList<ILanguage> languageObjectsToFill;
+			lock (_languageTypeConfigs)
+			{
+				languageObjectsToFill = _languageTypeConfigs.Values.ToList();
+			}
 			// Reset the sections that have already been registered
-			foreach (var language in _languageTypeConfigs.Values.ToList())
+			foreach (var language in languageObjectsToFill)
 			{
 				FillLanguageConfig(language);
 			}
@@ -442,7 +456,10 @@ namespace Dapplo.Config.Language
 		/// <returns>LanguageLoader</returns>
 		public static LanguageLoader Get(string applicationName)
 		{
-			return LoaderStore[applicationName];
+			lock (LoaderStore)
+			{
+				return LoaderStore[applicationName];
+			}
 		}
 
 		/// <summary>
@@ -458,9 +475,50 @@ namespace Dapplo.Config.Language
 		public static void Delete(string applicationName)
 		{
 			Log.Debug().WriteLine("Removing {0}", applicationName);
-			LoaderStore.Remove(applicationName);
+			lock (LoaderStore)
+			{
+				if (LoaderStore.ContainsKey(applicationName))
+				{
+					var loader = LoaderStore[applicationName];
+					// Make sure the AsyncLock is disposed
+					loader.Dispose();
+					LoaderStore.Remove(applicationName);
+				}
+			}
 		}
 
+		#endregion
+
+		#region IDisposable Support
+		private bool _disposedValue = false; // To detect redundant calls
+
+		/// <summary>
+		/// Disposes the lock
+		/// </summary>
+		/// <param name="disposing"></param>
+		protected virtual void Dispose(bool disposing)
+		{
+			if (!_disposedValue)
+			{
+				if (disposing)
+				{
+					if (_asyncLock != null)
+					{
+						_asyncLock.Dispose();
+					}
+				}
+				_disposedValue = true;
+			}
+		}
+
+		/// <summary>
+		/// Dispose implementation
+		/// </summary>
+		public void Dispose()
+		{
+			// Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+			Dispose(true);
+		}
 		#endregion
 	}
 }

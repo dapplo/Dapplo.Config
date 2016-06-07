@@ -96,7 +96,7 @@ namespace Dapplo.Config.Tests.LanguageTests
 			// Test event handler
 			language.PropertyChanged += propChanged;
 
-			await _languageLoader.ChangeLanguageAsync("nl-NL");
+			await _languageLoader.ChangeLanguageAsync("nl-NL").ConfigureAwait(false);
 
 			// Make sure the events are handled
 			await Task.Yield();

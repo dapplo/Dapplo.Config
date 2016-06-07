@@ -30,7 +30,7 @@ namespace Dapplo.Config
 	/// <summary>
 	/// This interface is used to make it possible to retrieve a config instance (either ini or language) for a type
 	/// </summary>
-	public interface IConfigProvider
+	public interface IConfigProvider : IDisposable
 	{
 		/// <summary>
 		/// Locate the instance for the specified type
