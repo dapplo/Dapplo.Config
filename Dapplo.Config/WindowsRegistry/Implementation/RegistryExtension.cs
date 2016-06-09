@@ -54,17 +54,18 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 		/// <summary>
 		///     Initialize the extension
 		/// </summary>
-		public override void Initialize()
+		public override void Initialize(IExtensibleInterceptor interceptor)
 		{
 			_registryAttribute = typeof (T).GetCustomAttribute<RegistryAttribute>() ?? new RegistryAttribute();
-			Interceptor.RegisterMethod(ExpressionExtensions.GetMemberName<IRegistry, object>(x => x.PathFor("")), PathFor);
+			interceptor.RegisterMethod(ExpressionExtensions.GetMemberName<IRegistry, object>(x => x.PathFor("")), PathFor);
 		}
 
 		/// <summary>
 		///     Process the property, in our case read the registry
 		/// </summary>
+		/// <param name="interceptor">IExtensibleInterceptor which is used to access the base properties</param>
 		/// <param name="propertyInfo"></param>
-		public override void InitProperty(PropertyInfo propertyInfo)
+		public override void InitProperty(IExtensibleInterceptor interceptor, PropertyInfo propertyInfo)
 		{
 			var registryPropertyAttribute = propertyInfo.GetCustomAttribute<RegistryPropertyAttribute>();
 
@@ -107,12 +108,12 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 						{
 							// Read all values, assume IDictionary<string, object>
 							IDictionary<string, object> values;
-							var getInfo = Interceptor.Get(propertyInfo.Name);
+							var getInfo = interceptor.Get(propertyInfo.Name);
 							if (!getInfo.HasValue)
 							{
 								// No value yet, create a new default
 								values = new SortedDictionary<string, object>();
-								Interceptor.Set(propertyInfo.Name, values);
+								interceptor.Set(propertyInfo.Name, values);
 							}
 							else
 							{
@@ -134,7 +135,7 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 						else
 						{
 							// Read a specific value
-							Interceptor.Set(propertyInfo.Name, key.GetValue(registryPropertyAttribute.Value));
+							interceptor.Set(propertyInfo.Name, key.GetValue(registryPropertyAttribute.Value));
 						}
 					}
 					catch (Exception ex)
