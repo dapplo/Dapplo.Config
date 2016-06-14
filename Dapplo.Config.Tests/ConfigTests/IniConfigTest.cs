@@ -30,6 +30,7 @@ using Dapplo.Config.Converters;
 using Dapplo.Config.Ini;
 using Dapplo.Config.Tests.ConfigTests.Interfaces;
 using Dapplo.LogFacade;
+using Dapplo.Log.XUnit;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -45,7 +46,7 @@ namespace Dapplo.Config.Tests.ConfigTests
 
 		public IniConfigTest(ITestOutputHelper testOutputHelper)
 		{
-			XUnitLogger.RegisterLogger(testOutputHelper, LogLevel.Verbose);
+			XUnitLogger.RegisterLogger(testOutputHelper, LogLevels.Verbose);
 			StringEncryptionTypeConverter.RgbIv = "fjr84hF49gp3911fFFg";
 			StringEncryptionTypeConverter.RgbKey = "ljew3lJfrS0rlddlfeelOekfekcvbAwE";
 		}

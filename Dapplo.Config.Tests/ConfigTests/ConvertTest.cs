@@ -24,6 +24,7 @@
 using System.Collections.Generic;
 using Dapplo.LogFacade;
 using Dapplo.Utils.Extensions;
+using Dapplo.Log.XUnit;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -35,7 +36,7 @@ namespace Dapplo.Config.Tests.ConfigTests
 	{
 		public ConvertTest(ITestOutputHelper testOutputHelper)
 		{
-			XUnitLogger.RegisterLogger(testOutputHelper, LogLevel.Verbose);
+			XUnitLogger.RegisterLogger(testOutputHelper, LogLevels.Verbose);
 		}
 
 		[Fact]

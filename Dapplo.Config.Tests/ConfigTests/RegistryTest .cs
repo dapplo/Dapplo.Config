@@ -25,6 +25,7 @@ using Dapplo.Config.Tests.ConfigTests.Interfaces;
 using Dapplo.Config.WindowsRegistry.Implementation;
 using Dapplo.InterfaceImpl;
 using Dapplo.LogFacade;
+using Dapplo.Log.XUnit;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -39,7 +40,7 @@ namespace Dapplo.Config.Tests.ConfigTests
 	{
 		public RegistryTest(ITestOutputHelper testOutputHelper)
 		{
-			XUnitLogger.RegisterLogger(testOutputHelper, LogLevel.Verbose);
+			XUnitLogger.RegisterLogger(testOutputHelper, LogLevels.Verbose);
 		}
 
 		[Fact]

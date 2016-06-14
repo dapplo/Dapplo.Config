@@ -27,6 +27,7 @@ using Dapplo.LogFacade;
 using Dapplo.Utils.Extensions;
 using Xunit;
 using Xunit.Abstractions;
+using Dapplo.Log.XUnit;
 
 #endregion
 
@@ -36,7 +37,7 @@ namespace Dapplo.Config.Tests.ConverterTests
 	{
 		public TypeExtensionsTests(ITestOutputHelper testOutputHelper)
 		{
-			XUnitLogger.RegisterLogger(testOutputHelper, LogLevel.Verbose);
+			XUnitLogger.RegisterLogger(testOutputHelper, LogLevels.Verbose);
 		}
 
 		[Fact]

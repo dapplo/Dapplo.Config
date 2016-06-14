@@ -28,6 +28,7 @@ using Dapplo.LogFacade;
 using Dapplo.Utils.Extensions;
 using Xunit;
 using Xunit.Abstractions;
+using Dapplo.Log.XUnit;
 
 #endregion
 
@@ -37,7 +38,7 @@ namespace Dapplo.Config.Tests.ConverterTests
 	{
 		public TypeConverterTest(ITestOutputHelper testOutputHelper)
 		{
-			XUnitLogger.RegisterLogger(testOutputHelper, LogLevel.Verbose);
+			XUnitLogger.RegisterLogger(testOutputHelper, LogLevels.Verbose);
 			StringEncryptionTypeConverter.RgbIv = "fjr84hF49gp3911fFFg";
 			StringEncryptionTypeConverter.RgbKey = "ljew3lJfrS0rlddlfeelOekfekcvbAwE";
 		}
