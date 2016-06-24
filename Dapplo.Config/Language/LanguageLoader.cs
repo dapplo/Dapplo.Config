@@ -35,7 +35,7 @@ using Dapplo.Config.Ini;
 using Dapplo.Config.Language.Implementation;
 using Dapplo.InterfaceImpl;
 using Dapplo.InterfaceImpl.Extensions;
-using Dapplo.LogFacade;
+using Dapplo.Log.Facade;
 using Dapplo.Utils;
 using Dapplo.Utils.Extensions;
 
@@ -119,7 +119,16 @@ namespace Dapplo.Config.Language
 		/// </summary>
 		/// <param name="prefix">ILanguage prefix to look for</param>
 		/// <returns>ILanguage</returns>
-		public ILanguage this[string prefix] => _languageConfigs[prefix];
+		public ILanguage this[string prefix]
+		{
+			get
+			{
+				lock (_languageConfigs)
+				{
+					return _languageConfigs[prefix];
+				}
+			}
+		} 
 
 		/// <summary>
 		///     Change the language, this will only do something if the language actually changed.

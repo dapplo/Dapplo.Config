@@ -23,7 +23,7 @@
 
 using System;
 using System.Collections.Generic;
-using Dapplo.LogFacade;
+using Dapplo.Log.Facade;
 using Dapplo.Utils.Extensions;
 using Xunit;
 using Xunit.Abstractions;
@@ -37,7 +37,7 @@ namespace Dapplo.Config.Tests.ConverterTests
 	{
 		public TypeExtensionsTests(ITestOutputHelper testOutputHelper)
 		{
-			XUnitLogger.RegisterLogger(testOutputHelper, LogLevels.Verbose);
+			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
 		}
 
 		[Fact]

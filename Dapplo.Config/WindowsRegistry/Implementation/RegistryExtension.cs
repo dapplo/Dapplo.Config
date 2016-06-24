@@ -28,7 +28,7 @@ using System.Reflection;
 using Dapplo.InterfaceImpl;
 using Dapplo.InterfaceImpl.Extensions;
 using Dapplo.InterfaceImpl.Implementation;
-using Dapplo.LogFacade;
+using Dapplo.Log.Facade;
 using Dapplo.Utils.Extensions;
 using Microsoft.Win32;
 

@@ -34,7 +34,7 @@ using Dapplo.Config.Ini.Implementation;
 using Dapplo.Config.Support;
 using Dapplo.InterfaceImpl;
 using Dapplo.InterfaceImpl.Extensions;
-using Dapplo.LogFacade;
+using Dapplo.Log.Facade;
 using Dapplo.Utils;
 using Dapplo.Utils.Extensions;
 using Timer = System.Timers.Timer;
@@ -299,7 +299,16 @@ namespace Dapplo.Config.Ini
 		///     Static helper to retrieve the first IniConfig, the result when multiple IniConfigs are used is undefined!
 		/// </summary>
 		/// <returns>IniConfig or null if none</returns>
-		public static IniConfig Current => ConfigStore.FirstOrDefault().Value;
+		public static IniConfig Current
+		{
+			get
+			{
+				lock (ConfigStore)
+				{
+					return ConfigStore.FirstOrDefault().Value;
+				}
+			}
+		}
 
 		/// <summary>
 		///     Static helper to remove the IniConfig from the store.
@@ -335,7 +344,10 @@ namespace Dapplo.Config.Ini
 		/// <returns>IniConfig</returns>
 		public static IniConfig Get(string applicationName, string fileName)
 		{
-			return ConfigStore[$"{applicationName}.{fileName}"];
+			lock (ConfigStore)
+			{
+				return ConfigStore[$"{applicationName}.{fileName}"];
+			}
 		}
 
 		#endregion
@@ -972,7 +984,7 @@ namespace Dapplo.Config.Ini
 		#endregion
 
 		#region IDisposable Support
-		private bool _disposedValue = false; // To detect redundant calls
+		private bool _disposedValue; // To detect redundant calls
 
 		/// <summary>
 		/// Disposes the lock

@@ -24,7 +24,7 @@
 using System;
 using System.ComponentModel;
 using Dapplo.Config.Converters;
-using Dapplo.LogFacade;
+using Dapplo.Log.Facade;
 using Dapplo.Utils.Extensions;
 using Xunit;
 using Xunit.Abstractions;
@@ -38,7 +38,7 @@ namespace Dapplo.Config.Tests.ConverterTests
 	{
 		public TypeConverterTest(ITestOutputHelper testOutputHelper)
 		{
-			XUnitLogger.RegisterLogger(testOutputHelper, LogLevels.Verbose);
+			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
 			StringEncryptionTypeConverter.RgbIv = "fjr84hF49gp3911fFFg";
 			StringEncryptionTypeConverter.RgbKey = "ljew3lJfrS0rlddlfeelOekfekcvbAwE";
 		}

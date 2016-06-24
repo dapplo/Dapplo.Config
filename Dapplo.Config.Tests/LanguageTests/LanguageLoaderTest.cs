@@ -28,7 +28,7 @@ using System.Threading.Tasks;
 using Dapplo.Config.Language;
 using Dapplo.Config.Support;
 using Dapplo.Config.Tests.LanguageTests.Interfaces;
-using Dapplo.LogFacade;
+using Dapplo.Log.Facade;
 using Dapplo.Log.XUnit;
 using Xunit;
 using Xunit.Abstractions;
@@ -49,7 +49,7 @@ namespace Dapplo.Config.Tests.LanguageTests
 
 		public LanguageLoaderTest(ITestOutputHelper testOutputHelper)
 		{
-			XUnitLogger.RegisterLogger(testOutputHelper, LogLevels.Verbose);
+			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
 			_languageLoader = new LanguageLoader("Dapplo");
 			_languageLoader.CorrectMissingTranslations();
 		}

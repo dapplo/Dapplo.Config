@@ -27,7 +27,7 @@ using Dapplo.Config.Ini;
 using Dapplo.Config.Tests.ConfigTests.Interfaces;
 using Dapplo.HttpExtensions;
 using Dapplo.HttpExtensions.Factory;
-using Dapplo.LogFacade;
+using Dapplo.Log.Facade;
 using Dapplo.Log.XUnit;
 using Xunit;
 using Xunit.Abstractions;
@@ -40,7 +40,7 @@ namespace Dapplo.Config.Tests.ConfigTests
 	{
 		public HttpExtensionSettingsTest(ITestOutputHelper testOutputHelper)
 		{
-			XUnitLogger.RegisterLogger(testOutputHelper, LogLevels.Verbose);
+			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
 		}
 
 		[Fact]

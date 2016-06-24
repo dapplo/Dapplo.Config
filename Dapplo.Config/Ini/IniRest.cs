@@ -25,7 +25,7 @@ using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Dapplo.LogFacade;
+using Dapplo.Log.Facade;
 
 #endregion
 
