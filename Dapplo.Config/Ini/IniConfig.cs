@@ -984,7 +984,8 @@ namespace Dapplo.Config.Ini
 		#endregion
 
 		#region IDisposable Support
-		private bool _disposedValue; // To detect redundant calls
+		// To detect redundant Dispose calls
+		private bool _disposedValue;
 
 		/// <summary>
 		/// Disposes the lock
@@ -996,10 +997,7 @@ namespace Dapplo.Config.Ini
 			{
 				if (disposing)
 				{
-					if (_asyncLock != null)
-					{
-						_asyncLock.Dispose();
-					}
+					_asyncLock?.Dispose();
 				}
 				_disposedValue = true;
 			}

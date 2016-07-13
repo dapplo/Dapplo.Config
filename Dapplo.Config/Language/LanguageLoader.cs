@@ -135,9 +135,9 @@ namespace Dapplo.Config.Language
 		///     All files are reloaded.
 		/// </summary>
 		/// <param name="ietf">The iso code for the language to use</param>
-		/// <param name="token">CancellationToken for the loading</param>
+		/// <param name="cancellationToken">CancellationToken for the loading</param>
 		/// <returns>Task</returns>
-		public async Task ChangeLanguageAsync(string ietf, CancellationToken token = default(CancellationToken))
+		public async Task ChangeLanguageAsync(string ietf, CancellationToken cancellationToken = default(CancellationToken))
 		{
 			if (ietf == CurrentLanguage)
 			{
@@ -147,7 +147,7 @@ namespace Dapplo.Config.Language
 			if (AvailableLanguages.ContainsKey(ietf))
 			{
 				CurrentLanguage = ietf;
-				await ReloadAsync(token).ConfigureAwait(false);
+				await ReloadAsync(cancellationToken).ConfigureAwait(false);
 			}
 			else
 			{
@@ -319,10 +319,10 @@ namespace Dapplo.Config.Language
 			return (from resourcesElement in xElement.Elements("resources")
 				where resourcesElement.Attribute("prefix") != null
 				from resourceElement in resourcesElement.Elements("resource")
-				group resourceElement by resourcesElement.Attribute("prefix").Value
+				group resourceElement by resourcesElement.Attribute("prefix")?.Value ?? "empty"
 				into resourceElementGroup
 				select resourceElementGroup).ToDictionary(group => group.Key,
-					group => (IDictionary<string, string>) group.ToDictionary(x => x.Attribute("name").Value, x => x.Value.Trim()));
+					group => (IDictionary<string, string>) group.ToDictionary(x => x?.Attribute("name")?.Value ?? "empty", x => x.Value.Trim()));
 		}
 
 		/// <summary>
@@ -330,11 +330,11 @@ namespace Dapplo.Config.Language
 		/// </summary>
 		/// <typeparam name="T">Your property interface, which extends IIniSection</typeparam>
 		/// <returns>instance of type T</returns>
-		public async Task<T> RegisterAndGetAsync<T>(CancellationToken token = default(CancellationToken)) where T : ILanguage
+		public async Task<T> RegisterAndGetAsync<T>(CancellationToken cancellationToken = default(CancellationToken)) where T : ILanguage
 		{
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
-				await LoadIfNeededAsync(token);
+				await LoadIfNeededAsync(cancellationToken);
 				return Get<T>();
 			}
 		}
@@ -342,7 +342,8 @@ namespace Dapplo.Config.Language
 		/// <summary>
 		///     This is reloading all the .ini files, and will refill the language objects.
 		/// </summary>
-		public async Task ReloadAsync(CancellationToken token = default(CancellationToken))
+		/// <param name="cancellationToken">CancellationToken</param>
+		public async Task ReloadAsync(CancellationToken cancellationToken = default(CancellationToken))
 		{
 			_allTranslations.Clear();
 			if (Files.ContainsKey(CurrentLanguage))
@@ -352,7 +353,7 @@ namespace Dapplo.Config.Language
 					IDictionary<string, IDictionary<string, string>> newResources;
 					if (languageFile.EndsWith(".ini"))
 					{
-						newResources = await IniFile.ReadAsync(languageFile, Encoding.UTF8, token).ConfigureAwait(false);
+						newResources = await IniFile.ReadAsync(languageFile, Encoding.UTF8, cancellationToken).ConfigureAwait(false);
 					}
 					else if (languageFile.EndsWith(".xml"))
 					{
@@ -499,7 +500,9 @@ namespace Dapplo.Config.Language
 		#endregion
 
 		#region IDisposable Support
-		private bool _disposedValue = false; // To detect redundant calls
+
+		// To detect redundant Dispose calls
+		private bool _disposedValue;
 
 		/// <summary>
 		/// Disposes the lock
@@ -511,10 +514,7 @@ namespace Dapplo.Config.Language
 			{
 				if (disposing)
 				{
-					if (_asyncLock != null)
-					{
-						_asyncLock.Dispose();
-					}
+					_asyncLock?.Dispose();
 				}
 				_disposedValue = true;
 			}
