@@ -30,10 +30,57 @@ using System.Linq.Expressions;
 namespace Dapplo.Config.Ini
 {
 	/// <summary>
+	/// 
+	/// </summary>
+	internal interface IIniSectionInternal
+	{
+		/// <summary>
+		/// Generate the Reset event
+		/// </summary>
+		void OnReset();
+
+		/// <summary>
+		/// Generate the Loaded event
+		/// </summary>
+		void OnLoaded();
+
+		/// <summary>
+		/// Generate the Saving event
+		/// </summary>
+		void OnSaving();
+
+		/// <summary>
+		/// Generate the Saved event
+		/// </summary>
+		void OnSaved();
+
+	}
+
+	/// <summary>
 	///     By making your property proxy interface extend this, you will be able to write the property to an ini file
 	/// </summary>
 	public interface IIniSection
 	{
+		/// <summary>
+		/// The reset event is triggered when the IIniSection was reset
+		/// </summary>
+		event EventHandler<IniSectionEventArgs> Reset;
+
+		/// <summary>
+		/// The loaded event is triggered after the file was changed or reload was called
+		/// </summary>
+		event EventHandler<IniSectionEventArgs> Loaded;
+
+		/// <summary>
+		/// The loaded event is triggered after the file was changed or reload was called
+		/// </summary>
+		event EventHandler<IniSectionEventArgs> Saved;
+
+		/// <summary>
+		/// The loaded event is triggered after the file was changed or reload was called
+		/// </summary>
+		event EventHandler<IniSectionEventArgs> Saving;
+
 		/// <summary>
 		///     Get the IniValue for a property, this is quicker and uses less memory than to iterate over the GetIniValues result
 		/// </summary>

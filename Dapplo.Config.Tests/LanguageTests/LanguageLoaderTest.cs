@@ -122,8 +122,9 @@ namespace Dapplo.Config.Tests.LanguageTests
 		{
 			var language = await _languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
 			var changed = false;
-			language.LanguageChanged += (sender, args) => changed = true;
+			var eventRegistration = language.OnLanguageChanged(sender => changed = true);
 			await _languageLoader.ChangeLanguageAsync("nl-NL");
+			eventRegistration.Dispose();
 			Assert.True(changed);
 		}
 

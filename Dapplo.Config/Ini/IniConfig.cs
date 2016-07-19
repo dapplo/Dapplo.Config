@@ -469,6 +469,11 @@ namespace Dapplo.Config.Ini
 			}
 
 			hasChangesInterface?.ResetHasChanges();
+
+			// Generate loaded event
+			var internalIniSection = iniSection as IIniSectionInternal;
+			internalIniSection?.OnLoaded();
+
 			if (_saveTimer != null)
 			{
 				_saveTimer.Enabled = true;
@@ -774,6 +779,9 @@ namespace Dapplo.Config.Ini
 						afterLoadAction(iniSection);
 					}
 				}
+				// Generate reset event
+				var internalIniSection = iniSection as IIniSectionInternal;
+				internalIniSection?.OnReset();
 			}
 		}
 
@@ -847,6 +855,9 @@ namespace Dapplo.Config.Ini
 				{
 					beforeSaveAction(iniSection);
 				}
+				// Generate Saving event
+				var internalIniSection = iniSection as IIniSectionInternal;
+				internalIniSection?.OnSaving();
 				try
 				{
 					CreateSaveValues(iniSection, iniSectionsComments);
@@ -859,6 +870,8 @@ namespace Dapplo.Config.Ini
 					{
 						afterSaveAction(iniSection);
 					}
+					// Generate Saved event
+					internalIniSection?.OnSaved();
 				}
 			}
 			await IniFile.WriteAsync(stream, Encoding.UTF8, _ini, iniSectionsComments, token).ConfigureAwait(false);

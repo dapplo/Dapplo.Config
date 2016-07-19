@@ -107,6 +107,30 @@ namespace Dapplo.Config.Tests.ConfigTests
 			Assert.True(iniTest.SomeValues["dapplo"] == 2015);
 		}
 
+		/// <summary>
+		///     This method tests IIniSection events
+		/// </summary>
+		[Fact]
+		public async Task Test_IniSectionEvents()
+		{
+			var iniConfig = Create();
+			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
+			var saved = false;
+			var saving = false;
+			iniTest.OnSaved(e =>
+			{
+				saved = true;
+				Assert.True(saving);
+			});
+			iniTest.OnSaving(e => saving = true);
+			using (var writeStream = new MemoryStream())
+			{
+				await iniConfig.WriteToStreamAsync(writeStream).ConfigureAwait(false);
+			}
+			Assert.True(saved);
+			Assert.True(saving);
+		}
+
 		[Fact]
 		public async Task TestIniConfigIndex()
 		{

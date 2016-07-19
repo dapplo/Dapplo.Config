@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="IConfigProvider.cs" />
     <Compile Include="Ini\Implementation\IniSection.cs" />
+    <Compile Include="Ini\IniEventTypes.cs" />
     <Compile Include="Ini\IniRestCommand.cs" />
     <Compile Include="Ini\IniPropertyBehaviorAttribute.cs" />
     <Compile Include="Converters\StringEncryptionTypeConverter.cs" />
@@ -61,9 +62,12 @@
     <Compile Include="Ini\IniFile.cs" />
     <Compile Include="Ini\IniRest.cs" />
     <Compile Include="Ini\IniSectionAttribute.cs" />
+    <Compile Include="Ini\IniSectionEventArgs.cs" />
     <Compile Include="Ini\IniValue.cs" />
     <Compile Include="Ini\IniConfig.cs" />
+    <Compile Include="Ini\IniSectionExtensions.cs" />
     <Compile Include="Language\Implementation\ILanguageInternal.cs" />
+    <Compile Include="Language\LanguageChangedExtensions.cs" />
     <Compile Include="Support\TypeDescriptorContext.cs" />
     <Compile Include="Language\ILanguage.cs" />
     <Compile Include="Language\Implementation\Language.cs" />

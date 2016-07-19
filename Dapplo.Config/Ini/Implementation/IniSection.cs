@@ -41,10 +41,64 @@ namespace Dapplo.Config.Ini.Implementation
 	/// <summary>
 	///     Implementation for IIniSection
 	/// </summary>
-	public class IniSection<T> : ExtensibleInterceptorImpl<T>, IIniSection<T>
+	public class IniSection<T> : ExtensibleInterceptorImpl<T>, IIniSection<T>, IIniSectionInternal
 	{
 		private readonly IniSectionAttribute _iniSectionAttribute = typeof (T).GetCustomAttribute<IniSectionAttribute>();
 		private readonly IDictionary<string, IniValue> _iniValues = new Dictionary<string, IniValue>(new AbcComparer());
+
+		#region Events
+		/// <summary>
+		/// This is the reset event
+		/// </summary>
+		public event EventHandler<IniSectionEventArgs> Reset;
+		/// <summary>
+		/// This is the loaded event
+		/// </summary>
+		public event EventHandler<IniSectionEventArgs> Loaded;
+		/// <summary>
+		/// This is the saved event
+		/// </summary>
+		public event EventHandler<IniSectionEventArgs> Saved;
+		/// <summary>
+		/// This is the saving event
+		/// </summary>
+		public event EventHandler<IniSectionEventArgs> Saving;
+		void IIniSectionInternal.OnReset()
+		{
+			Reset?.Invoke(this, new IniSectionEventArgs
+			{
+				EventType = IniEventTypes.Reset,
+				IniSection = this
+			});
+		}
+
+		void IIniSectionInternal.OnLoaded()
+		{
+			Loaded?.Invoke(this, new IniSectionEventArgs
+			{
+				EventType = IniEventTypes.Loaded,
+				IniSection = this
+			});
+		}
+
+		void IIniSectionInternal.OnSaved()
+		{
+			Saved?.Invoke(this, new IniSectionEventArgs
+			{
+				EventType = IniEventTypes.Saved,
+				IniSection = this
+			});
+		}
+
+		void IIniSectionInternal.OnSaving()
+		{
+			Saving?.Invoke(this, new IniSectionEventArgs
+			{
+				EventType = IniEventTypes.Saving,
+				IniSection = this
+			});
+		}
+		#endregion
 
 		/// <summary>
 		///     This is called by the ExtensibleInterceptorImpl with a list of extensions
@@ -179,5 +233,6 @@ namespace Dapplo.Config.Ini.Implementation
 		}
 
 		#endregion
+
 	}
 }
