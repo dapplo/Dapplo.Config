@@ -247,6 +247,11 @@ namespace Dapplo.Config.Language
 			{
 				interceptor.Properties.AddOrOverwrite(key, sectionTranslations[key]);
 			}
+
+			// Generate the language changed event
+			// Added for Dapplo.Config/issues/10
+			ILanguageInternal languageInternal = language as ILanguageInternal;
+			languageInternal?.OnLanguageChanged();
 		}
 
 		/// <summary>

@@ -118,6 +118,16 @@ namespace Dapplo.Config.Tests.LanguageTests
 		}
 
 		[Fact]
+		public async Task Test_LanguageChanged()
+		{
+			var language = await _languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
+			var changed = false;
+			language.LanguageChanged += (sender, args) => changed = true;
+			await _languageLoader.ChangeLanguageAsync("nl-NL");
+			Assert.True(changed);
+		}
+
+		[Fact]
 		public async Task TestModules()
 		{
 			// Make sure that the module (for testing) is available, we count all file-path which end with the filename 

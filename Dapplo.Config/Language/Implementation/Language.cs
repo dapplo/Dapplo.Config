@@ -34,9 +34,23 @@ namespace Dapplo.Config.Language.Implementation
 	/// <summary>
 	///     Base Language functionality
 	/// </summary>
-	public class Language<T> : ExtensibleInterceptorImpl<T>, ILanguage
+	public class Language<T> : ExtensibleInterceptorImpl<T>, ILanguage, ILanguageInternal
 	{
 		private readonly LanguageAttribute _languageAttribute = typeof (T).GetCustomAttribute<LanguageAttribute>();
+
+		/// <summary>
+		/// This event is triggered after the language has been changed
+		/// </summary>
+		public event EventHandler<EventArgs> LanguageChanged;
+
+		/// <summary>
+		/// Generate a LanguageChanged event, this is from ILanguageInternal
+		/// Added for Dapplo.Config/issues/10
+		/// </summary>
+		public void OnLanguageChanged()
+		{
+			LanguageChanged?.Invoke(this, new EventArgs());
+		}
 
 		/// <summary>
 		/// Implementation of the ILanguage indexer

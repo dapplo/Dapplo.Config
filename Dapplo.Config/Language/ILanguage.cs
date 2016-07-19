@@ -21,6 +21,7 @@
 
 #region using
 
+using System;
 using System.Collections.Generic;
 
 #endregion
@@ -36,6 +37,12 @@ namespace Dapplo.Config.Language
 	/// </summary>
 	public interface ILanguage
 	{
+		/// <summary>
+		/// This event is triggered after the language has been changed
+		/// Added for Dapplo.Config/issues/10
+		/// </summary>
+		event EventHandler<EventArgs> LanguageChanged;
+
 		/// <summary>
 		///     Get the translation for a key
 		/// </summary>
