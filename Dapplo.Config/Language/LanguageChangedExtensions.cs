@@ -44,8 +44,9 @@ namespace Dapplo.Config.Language
 		/// </summary>
 		/// <param name="language">ILanguage</param>
 		/// <param name="updateAction">Action to call on active and update, the argument is the property name</param>
+		/// <param name="run">default the action is run when defining, specify false if this is not wanted</param>
 		/// <returns>an IDisposable, calling Dispose on this will stop everything</returns>
-		public static IDisposable OnLanguageChanged(this ILanguage language, Action<ILanguage> updateAction)
+		public static IDisposable OnLanguageChanged(this ILanguage language, Action<ILanguage> updateAction, bool run = true)
 		{
 			if (language == null)
 			{
@@ -54,6 +55,10 @@ namespace Dapplo.Config.Language
 			if (updateAction == null)
 			{
 				throw new ArgumentNullException(nameof(updateAction));
+			}
+			if (run)
+			{
+				updateAction(language);
 			}
 			return EventObservable.From<EventArgs>(language, nameof(ILanguage.LanguageChanged)).OnEach(pce => updateAction(pce.Sender as ILanguage));
 		}
