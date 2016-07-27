@@ -589,6 +589,10 @@ namespace Dapplo.Config.Ini
 					throw new InvalidOperationException("Please load before retrieving the ini-sections");
 				}
 				var iniSectionAttribute = type.GetCustomAttribute<IniSectionAttribute>();
+				if (iniSectionAttribute == null)
+				{
+					throw new ArgumentException($"{type.Name} doesn't have an IniSectionAttribute.");
+				}
 				IIniSection iniSection;
 				lock (_iniSections)
 				{
