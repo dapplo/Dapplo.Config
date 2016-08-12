@@ -90,7 +90,7 @@ namespace Dapplo.Config.Language.Implementation
 		/// </summary>
 		/// <param name="propertyInfo"></param>
 		/// <param name="extensions"></param>
-		protected override void InitProperty(PropertyInfo propertyInfo, IList<IInterceptorExtension> extensions)
+		protected override void InitProperty(PropertyInfo propertyInfo, IEnumerable<IInterceptorExtension> extensions)
 		{
 			base.InitProperty(propertyInfo, extensions);
 			if (propertyInfo.CanWrite && propertyInfo.GetSetMethod(true).IsPublic)

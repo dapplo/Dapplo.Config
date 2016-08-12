@@ -104,7 +104,7 @@ namespace Dapplo.Config.Ini.Implementation
 		///     This is called by the ExtensibleInterceptorImpl with a list of extensions
 		/// </summary>
 		/// <param name="extensions">list of extensions</param>
-		protected override void AfterInitialization(IList<IInterceptorExtension> extensions)
+		protected override void AfterInitialization(IEnumerable<IInterceptorExtension> extensions)
 		{
 			base.AfterInitialization(extensions);
 			foreach (var propertyName in InitializationErrors.Keys.ToList())
@@ -127,7 +127,7 @@ namespace Dapplo.Config.Ini.Implementation
 		/// </summary>
 		/// <param name="propertyInfo"></param>
 		/// <param name="extensions"></param>
-		protected override void InitProperty(PropertyInfo propertyInfo, IList<IInterceptorExtension> extensions)
+		protected override void InitProperty(PropertyInfo propertyInfo, IEnumerable<IInterceptorExtension> extensions)
 		{
 			base.InitProperty(propertyInfo, extensions);
 			var iniValue = new IniValue(this)
