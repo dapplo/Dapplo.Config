@@ -51,7 +51,7 @@ namespace Dapplo.Config.Ini
 			{
 				if (restCommand.Target == null && restCommand.Values.Count == 0)
 				{
-					var message = "add/remove needs a target";
+					const string message = "add/remove needs a target";
 					Log.Error().WriteLine(message);
 					throw new ArgumentException(message);
 				}
@@ -156,7 +156,7 @@ namespace Dapplo.Config.Ini
 
 			var removeSlash = new Regex(@"\/$");
 			var segments = (from segment in restUri.Segments.Skip(1)
-				select removeSlash.Replace(segment, "")).ToList();
+				select removeSlash.Replace(segment, string.Empty)).ToList();
 
 			if (segments[0] != "IniConfig")
 			{

@@ -92,7 +92,7 @@ namespace Dapplo.Config.Ini
 			_fixedDirectory = fixedDirectory;
 			_watchFileChanges = watchFileChanges;
 			// Look for the ini file, this is only done 1 time.
-			IniLocation = CreateFileLocation(false, "", _fixedDirectory);
+			IniLocation = CreateFileLocation(false, string.Empty, _fixedDirectory);
 
 			Log.Verbose().WriteLine("Created IniConfig for application {0}, filename is {1}", applicationName, fileName);
 			// Configure the auto save
@@ -115,22 +115,24 @@ namespace Dapplo.Config.Ini
 					foreach (var iniSection in GetIniSectionValues())
 					{
 						var hasChangesInterface = iniSection as IHasChanges;
-						if (hasChangesInterface?.HasChanges() == true)
+						if (hasChangesInterface?.HasChanges() != true)
 						{
-							needsSave = true;
-							hasChangesInterface.ResetHasChanges();
+							continue;
 						}
+						needsSave = true;
+						hasChangesInterface.ResetHasChanges();
 					}
-					if (needsSave)
+					if (!needsSave)
 					{
-						try
-						{
-							await WriteAsync();
-						}
-						catch (Exception ex)
-						{
-							Log.Warn().WriteLine(ex.Message);
-						}
+						return;
+					}
+					try
+					{
+						await WriteAsync();
+					}
+					catch (Exception ex)
+					{
+						Log.Warn().WriteLine(ex.Message);
 					}
 				};
 			}
@@ -320,9 +322,9 @@ namespace Dapplo.Config.Ini
 		{
 			var identifier = $"{applicationName}.{fileName}";
 			Log.Debug().WriteLine("Deleting IniConfig {0}", identifier);
-			IniConfig iniConfig;
 			lock (ConfigStore)
 			{
+				IniConfig iniConfig;
 				if (ConfigStore.TryGetValue(identifier, out iniConfig))
 				{
 					// Make sure the AsyncLock is disposed.
@@ -393,7 +395,7 @@ namespace Dapplo.Config.Ini
 		/// <returns></returns>
 		public IniConfig AfterLoad<T>(Action<T> afterLoadAction) where T : IIniSection
 		{
-			_afterLoadActions.AddOrOverwrite(typeof (T), section => afterLoadAction((T) section));
+			_afterLoadActions[typeof (T)] = section => afterLoadAction((T) section);
 			return this;
 		}
 
@@ -406,7 +408,7 @@ namespace Dapplo.Config.Ini
 		/// <returns>this</returns>
 		public IniConfig AfterSave<T>(Action<T> afterSaveAction)
 		{
-			_afterSaveActions.AddOrOverwrite(typeof (T), section => afterSaveAction((T) section));
+			_afterSaveActions[typeof(T)] = section => afterSaveAction((T) section);
 			return this;
 		}
 
@@ -418,7 +420,7 @@ namespace Dapplo.Config.Ini
 		/// <returns></returns>
 		public IniConfig BeforeSave<T>(Action<T> beforeSaveAction)
 		{
-			_beforeSaveActions.AddOrOverwrite(typeof (T), section => beforeSaveAction((T) section));
+			_beforeSaveActions[typeof(T)] = section => beforeSaveAction((T) section);
 			return this;
 		}
 
@@ -652,13 +654,13 @@ namespace Dapplo.Config.Ini
 		/// </summary>
 		/// <typeparam name="T">Your property interface, which extends IIniSection</typeparam>
 		/// <returns>instance of type T</returns>
-		public async Task<T> RegisterAndGetAsync<T>(CancellationToken token = default(CancellationToken)) where T : IIniSection
+		public async Task<T> RegisterAndGetAsync<T>(CancellationToken cancellationToken  = default(CancellationToken)) where T : IIniSection
 		{
 			IIniSection iniSection;
 
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
-				await LoadIfNeededAsync(token).ConfigureAwait(false);
+				await LoadIfNeededAsync(cancellationToken).ConfigureAwait(false);
 
 				iniSection = this[typeof (T)];
 			}
@@ -672,13 +674,13 @@ namespace Dapplo.Config.Ini
 		/// <summary>
 		///     This will do an intial load, if none was made
 		/// </summary>
-		/// <param name="token">CancellationToken</param>
+		/// <param name="cancellationToken">CancellationToken</param>
 		/// <returns>Task</returns>
-		public async Task LoadIfNeededAsync(CancellationToken token = default(CancellationToken))
+		public async Task LoadIfNeededAsync(CancellationToken cancellationToken  = default(CancellationToken))
 		{
 			if (_initialRead == ReadFrom.Nothing)
 			{
-				await ReloadInternalAsync(false, token).ConfigureAwait(false);
+				await ReloadInternalAsync(false, cancellationToken).ConfigureAwait(false);
 			}
 		}
 
@@ -686,13 +688,13 @@ namespace Dapplo.Config.Ini
 		///     Initialize the IniConfig by reading all the properties from the stream
 		///     If this is called directly after construction, no files will be read which is useful for testing!
 		/// </summary>
-		public async Task ReadFromStreamAsync(Stream stream, CancellationToken token = default(CancellationToken))
+		public async Task ReadFromStreamAsync(Stream stream, CancellationToken cancellationToken  = default(CancellationToken))
 		{
 			_initialRead = ReadFrom.Stream;
 			// This is for testing, clear all defaults & constants as the 
 			_defaults = null;
 			_constants = null;
-			_ini = await IniFile.ReadAsync(stream, Encoding.UTF8, token).ConfigureAwait(false);
+			_ini = await IniFile.ReadAsync(stream, Encoding.UTF8, cancellationToken).ConfigureAwait(false);
 
 			// Reset the current sections
 			FillSections();
@@ -705,12 +707,12 @@ namespace Dapplo.Config.Ini
 		///     Usually this should not directly be called, unless you know that the file was changed by an external process.
 		/// </summary>
 		/// <param name="reset">true: ALL setting are lost</param>
-		/// <param name="token">CancellationToken</param>
-		public async Task ReloadAsync(bool reset = true, CancellationToken token = default(CancellationToken))
+		/// <param name="cancellationToken">CancellationToken</param>
+		public async Task ReloadAsync(bool reset = true, CancellationToken cancellationToken  = default(CancellationToken))
 		{
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
-				await ReloadInternalAsync(reset, token).ConfigureAwait(false);
+				await ReloadInternalAsync(reset, cancellationToken).ConfigureAwait(false);
 			}
 		}
 
@@ -721,16 +723,16 @@ namespace Dapplo.Config.Ini
 		///     Usually this should not directly be called, unless you know that the file was changed by an external process.
 		/// </summary>
 		/// <param name="reset">true: ALL setting are lost</param>
-		/// <param name="token">CancellationToken</param>
-		private async Task ReloadInternalAsync(bool reset = true, CancellationToken token = default(CancellationToken))
+		/// <param name="cancellationToken">CancellationToken</param>
+		private async Task ReloadInternalAsync(bool reset = true, CancellationToken cancellationToken  = default(CancellationToken))
 		{
 			if (reset)
 			{
 				ResetInternal();
 			}
-			_defaults = await IniFile.ReadAsync(CreateFileLocation(true, Defaults, _fixedDirectory), Encoding.UTF8, token).ConfigureAwait(false);
-			_constants = await IniFile.ReadAsync(CreateFileLocation(true, Constants, _fixedDirectory), Encoding.UTF8, token).ConfigureAwait(false);
-			var newIni = await IniFile.ReadAsync(IniLocation, Encoding.UTF8, token).ConfigureAwait(false);
+			_defaults = await IniFile.ReadAsync(CreateFileLocation(true, Defaults, _fixedDirectory), Encoding.UTF8, cancellationToken).ConfigureAwait(false);
+			_constants = await IniFile.ReadAsync(CreateFileLocation(true, Constants, _fixedDirectory), Encoding.UTF8, cancellationToken).ConfigureAwait(false);
+			var newIni = await IniFile.ReadAsync(IniLocation, Encoding.UTF8, cancellationToken).ConfigureAwait(false);
 
 			// As we readed the file, make sure we enable the event raising (if the file watcher is wanted)
 			EnableFileWatcher(true);
@@ -751,7 +753,7 @@ namespace Dapplo.Config.Ini
 		/// <summary>
 		///     Reset all the values, in all the registered ini sections, to their defaults
 		/// </summary>
-		public async Task ResetAsync(CancellationToken token = default(CancellationToken))
+		public async Task ResetAsync(CancellationToken cancellationToken  = default(CancellationToken))
 		{
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
@@ -796,7 +798,7 @@ namespace Dapplo.Config.Ini
 		/// <summary>
 		///     Write the ini file
 		/// </summary>
-		public async Task WriteAsync(CancellationToken token = default(CancellationToken))
+		public async Task WriteAsync(CancellationToken cancellationToken  = default(CancellationToken))
 		{
 			// Make sure only one write to file is running, other request will have to wait
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
@@ -817,7 +819,7 @@ namespace Dapplo.Config.Ini
 				using (var stream = new FileStream(IniLocation, FileMode.Create, FileAccess.Write))
 				{
 					// Write the registered ini sections to the stream
-					await WriteToStreamInternalAsync(stream, token).ConfigureAwait(false);
+					await WriteToStreamInternalAsync(stream, cancellationToken).ConfigureAwait(false);
 				}
 
 				// Enable the File-Watcher so we get events again
@@ -829,13 +831,13 @@ namespace Dapplo.Config.Ini
 		///     Write all the IIniSections to the stream, this is also used for testing
 		/// </summary>
 		/// <param name="stream">Stream to write to</param>
-		/// <param name="token"></param>
+		/// <param name="cancellationToken">CancellationToken</param>
 		/// <returns>Task</returns>
-		public async Task WriteToStreamAsync(Stream stream, CancellationToken token = default(CancellationToken))
+		public async Task WriteToStreamAsync(Stream stream, CancellationToken cancellationToken  = default(CancellationToken))
 		{
 			using (await _asyncLock.LockAsync().ConfigureAwait(false))
 			{
-				await WriteToStreamInternalAsync(stream, token);
+				await WriteToStreamInternalAsync(stream, cancellationToken);
 			}
 		}
 
@@ -843,9 +845,9 @@ namespace Dapplo.Config.Ini
 		///     Store the ini to the supplied stream
 		/// </summary>
 		/// <param name="stream"></param>
-		/// <param name="token"></param>
+		/// <param name="cancellationToken">CancellationToken</param>
 		/// <returns>Task to await</returns>
-		private async Task WriteToStreamInternalAsync(Stream stream, CancellationToken token = default(CancellationToken))
+		private async Task WriteToStreamInternalAsync(Stream stream, CancellationToken cancellationToken  = default(CancellationToken))
 		{
 			var iniSectionsComments = new SortedDictionary<string, IDictionary<string, string>>();
 
@@ -878,8 +880,8 @@ namespace Dapplo.Config.Ini
 					internalIniSection?.OnSaved();
 				}
 			}
-			await IniFile.WriteAsync(stream, Encoding.UTF8, _ini, iniSectionsComments, token).ConfigureAwait(false);
-			await stream.FlushAsync(token).ConfigureAwait(false);
+			await IniFile.WriteAsync(stream, Encoding.UTF8, _ini, iniSectionsComments, cancellationToken).ConfigureAwait(false);
+			await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
 		}
 
 		/// <summary>
@@ -1010,14 +1012,15 @@ namespace Dapplo.Config.Ini
 		/// <param name="disposing"></param>
 		protected virtual void Dispose(bool disposing)
 		{
-			if (!_disposedValue)
+			if (_disposedValue)
 			{
-				if (disposing)
-				{
-					_asyncLock?.Dispose();
-				}
-				_disposedValue = true;
+				return;
 			}
+			if (disposing)
+			{
+				_asyncLock?.Dispose();
+			}
+			_disposedValue = true;
 		}
 
 		/// <summary>

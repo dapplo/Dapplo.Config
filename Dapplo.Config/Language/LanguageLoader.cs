@@ -37,7 +37,6 @@ using Dapplo.InterfaceImpl;
 using Dapplo.InterfaceImpl.Extensions;
 using Dapplo.Log.Facade;
 using Dapplo.Utils;
-using Dapplo.Utils.Extensions;
 
 #endregion
 
@@ -93,7 +92,7 @@ namespace Dapplo.Config.Language
 				_applicationName = applicationName;
 				ScanFiles(checkStartupDirectory, checkAppDataDirectory, specifiedDirectories);
 				Log.Debug().WriteLine("Adding {0}", applicationName);
-				LoaderStore.AddOrOverwrite(applicationName, this);
+				LoaderStore[applicationName] = this;
 			}
 		}
 
@@ -191,12 +190,13 @@ namespace Dapplo.Config.Language
 				{
 					var possibleTargetFile = Path.GetFileNameWithoutExtension(file.Replace(baseIetf, ietf));
 
-					if (!comparingFiles.Contains(possibleTargetFile))
+					if (comparingFiles.Contains(possibleTargetFile))
 					{
-						// Add missing translation
-						Log.Verbose().WriteLine("Added missing file {0}", file);
-						Files[ietf].Add(file);
+						continue;
 					}
+					// Add missing translation
+					Log.Verbose().WriteLine("Added missing file {0}", file);
+					Files[ietf].Add(file);
 				}
 			}
 		}
@@ -245,12 +245,12 @@ namespace Dapplo.Config.Language
 			// Add all unprocessed values
 			foreach (var key in sectionTranslations.Keys.ToList())
 			{
-				interceptor.Properties.AddOrOverwrite(key, sectionTranslations[key]);
+				interceptor.Properties[key] = sectionTranslations[key];
 			}
 
 			// Generate the language changed event
 			// Added for Dapplo.Config/issues/10
-			ILanguageInternal languageInternal = language as ILanguageInternal;
+			var languageInternal = language as ILanguageInternal;
 			languageInternal?.OnLanguageChanged();
 		}
 
@@ -278,7 +278,7 @@ namespace Dapplo.Config.Language
 				// TODO: Also scan the embedded resource of the ILanguage containing assembly
 				language = (ILanguage)InterceptorFactory.New(type);
 				_languageTypeConfigs.Add(type, language);
-				_languageConfigs.AddOrOverwrite(language.PrefixName(), language);
+				_languageConfigs[language.PrefixName()] = language;
 			}
 			FillLanguageConfig(language);
 
@@ -300,13 +300,13 @@ namespace Dapplo.Config.Language
 		/// <summary>
 		///     Start the intial load, but if none was made yet
 		/// </summary>
-		/// <param name="token">CancellationToken</param>
+		/// <param name="cancellationToken">CancellationToken</param>
 		/// <returns>Task</returns>
-		public async Task LoadIfNeededAsync(CancellationToken token = default(CancellationToken))
+		public async Task LoadIfNeededAsync(CancellationToken cancellationToken  = default(CancellationToken))
 		{
 			if (!_initialReadDone)
 			{
-				await ReloadAsync(token);
+				await ReloadAsync(cancellationToken);
 			}
 		}
 
@@ -384,7 +384,7 @@ namespace Dapplo.Config.Language
 						}
 						foreach (var key in properties.Keys.ToList())
 						{
-							sectionTranslations.AddOrOverwrite(key, properties[key]);
+							sectionTranslations[key] = properties[key];
 						}
 					}
 				}
@@ -495,13 +495,14 @@ namespace Dapplo.Config.Language
 			Log.Debug().WriteLine("Removing {0}", applicationName);
 			lock (LoaderStore)
 			{
-				if (LoaderStore.ContainsKey(applicationName))
+				if (!LoaderStore.ContainsKey(applicationName))
 				{
-					var loader = LoaderStore[applicationName];
-					// Make sure the AsyncLock is disposed
-					loader.Dispose();
-					LoaderStore.Remove(applicationName);
+					return;
 				}
+				var loader = LoaderStore[applicationName];
+				// Make sure the AsyncLock is disposed
+				loader.Dispose();
+				LoaderStore.Remove(applicationName);
 			}
 		}
 
@@ -518,14 +519,15 @@ namespace Dapplo.Config.Language
 		/// <param name="disposing"></param>
 		protected virtual void Dispose(bool disposing)
 		{
-			if (!_disposedValue)
+			if (_disposedValue)
 			{
-				if (disposing)
-				{
-					_asyncLock?.Dispose();
-				}
-				_disposedValue = true;
+				return;
 			}
+			if (disposing)
+			{
+				_asyncLock?.Dispose();
+			}
+			_disposedValue = true;
 		}
 
 		/// <summary>

@@ -42,15 +42,15 @@ namespace Dapplo.Config.Support
 		///     ILanguageExtendingInterface someInstance = null;
 		///     string defaultTranslation = someInstance.DefaultTranslation(x => x.Ok);
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
+		/// <typeparam name="TLanguage">Type implementing ILanguage</typeparam>
 		/// <typeparam name="TProp"></typeparam>
-		/// <param name="type"></param>
+		/// <param name="language">ILanguage</param>
 		/// <param name="propertyExpression"></param>
 		/// <returns>string with the default translation</returns>
-		public static string DefaultTranslation<T, TProp>(this T type, Expression<Func<T, TProp>> propertyExpression) where T : ILanguage
+		public static string DefaultTranslation<TLanguage, TProp>(this TLanguage language, Expression<Func<TLanguage, TProp>> propertyExpression) where TLanguage : ILanguage
 		{
 			var propertyName = propertyExpression.GetMemberName();
-			return (string) typeof (T).GetProperty(propertyName).GetDefaultValue();
+			return (string) typeof (TLanguage).GetProperty(propertyName).GetDefaultValue();
 		}
 
 		/// <summary>
@@ -60,15 +60,15 @@ namespace Dapplo.Config.Support
 		///     ILanguageExtendingInterface someInstance = .... ;
 		///     string defaultTranslation = someInstance.TranslationOrDefault(x => x.Ok);
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
+		/// <typeparam name="TLanguage">Type implementing ILanguage</typeparam>
 		/// <typeparam name="TProp"></typeparam>
 		/// <param name="type"></param>
 		/// <param name="propertyExpression"></param>
 		/// <returns>string with the translation</returns>
-		public static string TranslationOrDefault<T, TProp>(this T type, Expression<Func<T, TProp>> propertyExpression) where T : ILanguage
+		public static string TranslationOrDefault<TLanguage, TProp>(this TLanguage type, Expression<Func<TLanguage, TProp>> propertyExpression) where TLanguage : ILanguage
 		{
 			var propertyName = propertyExpression.GetMemberName();
-			var propertyInfo = typeof (T).GetProperty(propertyName);
+			var propertyInfo = typeof (TLanguage).GetProperty(propertyName);
 			if (type != null)
 			{
 				return (string) propertyInfo.GetValue(type);

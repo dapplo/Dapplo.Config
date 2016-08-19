@@ -27,6 +27,7 @@
 
 using System;
 using Dapplo.Utils.Events;
+using Dapplo.Utils.Extensions;
 
 #endregion
 

@@ -110,15 +110,15 @@ namespace Dapplo.Config.Ini.Implementation
 			foreach (var propertyName in InitializationErrors.Keys.ToList())
 			{
 				IniValue currentValue;
-				if (_iniValues.TryGetValue(propertyName, out currentValue))
+				if (!_iniValues.TryGetValue(propertyName, out currentValue))
 				{
-					if (currentValue.Behavior.IgnoreErrors)
-					{
-						InitializationErrors.Remove(propertyName);
-						continue;
-					}
+					continue;
+				}
+				if (!currentValue.Behavior.IgnoreErrors)
+				{
 					throw InitializationErrors[propertyName];
 				}
+				InitializationErrors.Remove(propertyName);
 			}
 		}
 

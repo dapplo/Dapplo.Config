@@ -50,11 +50,12 @@ namespace Dapplo.Config.Converters
 			}
 			var currentKeySize = RgbKey.Length*8;
 			var validKeySizes = ValidKeySizes();
-			if (!validKeySizes.Contains(currentKeySize))
+			if (validKeySizes.Contains(currentKeySize))
 			{
-				var keySizes = string.Join(",", validKeySizes);
-				throw new InvalidOperationException($"Bit-Length of StringEncryptionTypeConverter.RgbKey {currentKeySize} is invalid, valid bit sizes are: {keySizes}");
+				return;
 			}
+			var keySizes = string.Join(",", validKeySizes);
+			throw new InvalidOperationException($"Bit-Length of StringEncryptionTypeConverter.RgbKey {currentKeySize} is invalid, valid bit sizes are: {keySizes}");
 		}
 
 		/// <summary>
@@ -146,17 +147,16 @@ namespace Dapplo.Config.Converters
 		/// <returns></returns>
 		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
 		{
-			if (destinationType == typeof (string))
+			if (destinationType != typeof(string))
 			{
-				var plaintext = (string) value;
-				if (string.IsNullOrEmpty(plaintext))
-				{
-					return null;
-				}
-				return Encrypt(plaintext);
+				return base.ConvertTo(context, culture, value, destinationType);
 			}
-
-			return base.ConvertTo(context, culture, value, destinationType);
+			var plaintext = (string) value;
+			if (string.IsNullOrEmpty(plaintext))
+			{
+				return null;
+			}
+			return Encrypt(plaintext);
 		}
 
 		/// <summary>

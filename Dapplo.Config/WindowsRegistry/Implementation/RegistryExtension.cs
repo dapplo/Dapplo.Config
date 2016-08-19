@@ -57,7 +57,7 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 		public override void Initialize(IExtensibleInterceptor interceptor)
 		{
 			_registryAttribute = typeof (T).GetCustomAttribute<RegistryAttribute>() ?? new RegistryAttribute();
-			interceptor.RegisterMethod(ExpressionExtensions.GetMemberName<IRegistry, object>(x => x.PathFor("")), PathFor);
+			interceptor.RegisterMethod(ExpressionExtensions.GetMemberName<IRegistry, object>(x => x.PathFor(string.Empty)), PathFor);
 		}
 
 		/// <summary>
@@ -164,7 +164,7 @@ namespace Dapplo.Config.WindowsRegistry.Implementation
 		/// </summary>
 		/// <param name="propertyInfo"></param>
 		/// <returns></returns>
-		private string PathFor(PropertyInfo propertyInfo)
+		private string PathFor(MemberInfo propertyInfo)
 		{
 			var registryPropertyAttribute = propertyInfo.GetCustomAttribute<RegistryPropertyAttribute>();
 
