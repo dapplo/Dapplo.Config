@@ -27,7 +27,6 @@
 
 using System;
 using Dapplo.Utils.Events;
-using Dapplo.Utils.Extensions;
 
 #endregion
 
@@ -56,7 +55,7 @@ namespace Dapplo.Config.Ini
 			{
 				throw new ArgumentNullException(nameof(eventAction));
 			}
-			return EventObservable.From<IniSectionEventArgs>(iniSection, nameof(IIniSection.Reset)).OnEach(pce => eventAction(pce.Args));
+			return EventObservable.From<IniSectionEventArgs>(iniSection, nameof(IIniSection.Reset)).ForEach(pce => eventAction(pce.Args));
 		}
 
 		/// <summary>
@@ -77,7 +76,7 @@ namespace Dapplo.Config.Ini
 			{
 				throw new ArgumentNullException(nameof(eventAction));
 			}
-			return EventObservable.From<IniSectionEventArgs>(iniSection, nameof(IIniSection.Loaded)).OnEach(pce => eventAction(pce.Args));
+			return EventObservable.From<IniSectionEventArgs>(iniSection, nameof(IIniSection.Loaded)).ForEach(pce => eventAction(pce.Args));
 		}
 
 		/// <summary>
@@ -98,7 +97,7 @@ namespace Dapplo.Config.Ini
 			{
 				throw new ArgumentNullException(nameof(eventAction));
 			}
-			return EventObservable.From<IniSectionEventArgs>(iniSection, nameof(IIniSection.Saved)).OnEach(pce => eventAction(pce.Args));
+			return EventObservable.From<IniSectionEventArgs>(iniSection, nameof(IIniSection.Saved)).ForEach(pce => eventAction(pce.Args));
 		}
 
 		/// <summary>
@@ -119,7 +118,7 @@ namespace Dapplo.Config.Ini
 			{
 				throw new ArgumentNullException(nameof(eventAction));
 			}
-			return EventObservable.From<IniSectionEventArgs>(iniSection, nameof(IIniSection.Saving)).OnEach(pce => eventAction(pce.Args));
+			return EventObservable.From<IniSectionEventArgs>(iniSection, nameof(IIniSection.Saving)).ForEach(pce => eventAction(pce.Args));
 		}
 	}
 }

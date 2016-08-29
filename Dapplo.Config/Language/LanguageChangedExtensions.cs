@@ -27,7 +27,6 @@
 
 using System;
 using Dapplo.Utils.Events;
-using Dapplo.Utils.Extensions;
 
 #endregion
 
@@ -61,7 +60,7 @@ namespace Dapplo.Config.Language
 			{
 				updateAction(language);
 			}
-			return EventObservable.From<EventArgs>(language, nameof(ILanguage.LanguageChanged)).OnEach(pce => updateAction(pce.Sender as ILanguage));
+			return EventObservable.From<EventArgs>(language, nameof(ILanguage.LanguageChanged)).ForEach(pce => updateAction(pce.Sender as ILanguage));
 		}
 	}
 }
