@@ -22,7 +22,7 @@
 #region using
 
 using System.Collections.Generic;
-using Dapplo.Log.Facade;
+using Dapplo.Log;
 using Dapplo.Utils.Extensions;
 using Dapplo.Log.XUnit;
 using Xunit;

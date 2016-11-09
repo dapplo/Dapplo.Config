@@ -34,7 +34,7 @@ using Dapplo.Config.Ini.Implementation;
 using Dapplo.Config.Support;
 using Dapplo.InterfaceImpl;
 using Dapplo.InterfaceImpl.Extensions;
-using Dapplo.Log.Facade;
+using Dapplo.Log;
 using Dapplo.Utils;
 using Dapplo.Utils.Extensions;
 using Timer = System.Timers.Timer;

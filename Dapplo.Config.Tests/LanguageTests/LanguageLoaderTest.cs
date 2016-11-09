@@ -28,7 +28,7 @@ using System.Threading.Tasks;
 using Dapplo.Config.Language;
 using Dapplo.Config.Support;
 using Dapplo.Config.Tests.LanguageTests.Interfaces;
-using Dapplo.Log.Facade;
+using Dapplo.Log;
 using Dapplo.Log.XUnit;
 using Xunit;
 using Xunit.Abstractions;

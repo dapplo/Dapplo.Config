@@ -35,7 +35,7 @@ using Dapplo.Config.Ini;
 using Dapplo.Config.Language.Implementation;
 using Dapplo.InterfaceImpl;
 using Dapplo.InterfaceImpl.Extensions;
-using Dapplo.Log.Facade;
+using Dapplo.Log;
 using Dapplo.Utils;
 
 #endregion

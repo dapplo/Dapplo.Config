@@ -27,7 +27,7 @@ using Dapplo.Config.Ini;
 using Dapplo.Config.Tests.ConfigTests.Interfaces;
 using Dapplo.HttpExtensions;
 using Dapplo.HttpExtensions.Factory;
-using Dapplo.Log.Facade;
+using Dapplo.Log;
 using Dapplo.Log.XUnit;
 using Xunit;
 using Xunit.Abstractions;

@@ -24,7 +24,7 @@
 using Dapplo.Config.Tests.ConfigTests.Interfaces;
 using Dapplo.Config.WindowsRegistry.Implementation;
 using Dapplo.InterfaceImpl;
-using Dapplo.Log.Facade;
+using Dapplo.Log;
 using Dapplo.Log.XUnit;
 using Xunit;
 using Xunit.Abstractions;
