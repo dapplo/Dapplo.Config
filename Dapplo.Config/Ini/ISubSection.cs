@@ -1,5 +1,5 @@
 ﻿//  Dapplo - building blocks for desktop applications
-//  Copyright (C) 2015-2016 Dapplo
+//  Copyright (C) 2016 Dapplo
 // 
 //  For more information see: http://dapplo.net/
 //  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -19,23 +19,12 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-#region using
-
-using System.ComponentModel;
-using Dapplo.Config.Ini;
-
-#endregion
-
-namespace Dapplo.Config.Tests.ConfigTests.Interfaces
+namespace Dapplo.Config.Ini
 {
-	public interface IIniConfigSubInterfaceTest : ISubSection
+	/// <summary>
+	///     Marker interface for sub sections
+	/// </summary>
+	public interface ISubSection
 	{
-		string SubValue { get; set; }
-
-		[DefaultValue("It works!")]
-		string SubValuewithDefault { get; set; }
-
-		[Description("Test property 2 for enums"), DefaultValue(IniConfigTestEnum.Value2)]
-		IniConfigTestEnum TestWithEnumSubValue { get; set; }
 	}
 }

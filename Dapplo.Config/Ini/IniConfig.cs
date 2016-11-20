@@ -640,6 +640,18 @@ namespace Dapplo.Config.Ini
 		}
 
 		/// <summary>
+		///     Get the IniSection which contains the sub section.
+		/// </summary>
+		/// <typeparam name="T">Type which extends ISubSection</typeparam>
+		/// <returns>T</returns>
+		public T GetSubSection<T>() where T : ISubSection
+		{
+			var type = typeof(T);
+
+			return (T)Sections.FirstOrDefault(s => type.IsInstanceOfType(s));
+		}
+
+		/// <summary>
 		///     Get the specified ini type
 		/// </summary>
 		/// <param name="type">Type</param>
@@ -872,7 +884,7 @@ namespace Dapplo.Config.Ini
 				{
 					// Eventually set the values back, after save
 					Action<IIniSection> afterSaveAction;
-					if (intercepted != null && _afterLoadActions.TryGetValue(intercepted.InterceptedType, out afterSaveAction))
+					if (intercepted != null && _afterSaveActions.TryGetValue(intercepted.InterceptedType, out afterSaveAction))
 					{
 						afterSaveAction(iniSection);
 					}

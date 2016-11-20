@@ -108,6 +108,22 @@ namespace Dapplo.Config.Tests.ConfigTests
 		}
 
 		/// <summary>
+		///     This method tests that the initialization of the ini works.
+		///     Including the after load
+		/// </summary>
+		[Fact]
+		public async Task TestSubIni()
+		{
+			var iniConfig = Create();
+			await ConfigureMemoryStreamAsync();
+
+			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
+
+			var subIniTest = iniConfig.GetSubSection<IIniConfigSubInterfaceTest>();
+			Assert.Equal("It works!", subIniTest.SubValuewithDefault);
+		}
+
+		/// <summary>
 		///     This method tests IIniSection events
 		/// </summary>
 		[Fact]
