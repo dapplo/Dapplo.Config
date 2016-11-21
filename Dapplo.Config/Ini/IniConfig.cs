@@ -653,7 +653,7 @@ namespace Dapplo.Config.Ini
 			}
 			lock (_iniSections)
 			{
-				return (T)_iniSections.Where(s => type.IsInstanceOfType(s.Value)).Select(s => s.Value).FirstOrDefault();
+				return (T)_iniSections.Values.FirstOrDefault(s => type.IsInstanceOfType(s));
 			}
 		}
 

@@ -311,7 +311,7 @@ namespace Dapplo.Config.Language
 			}
 			lock (_languageTypeConfigs)
 			{
-				return (T) _languageTypeConfigs.Where(s => type.IsInstanceOfType(s.Value)).Select(l => l.Value).FirstOrDefault();
+				return (T) _languageTypeConfigs.Values.FirstOrDefault(l => type.IsInstanceOfType(l));
 			}
 		}
 
