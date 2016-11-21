@@ -65,7 +65,8 @@
     <Compile Include="Ini\IniSectionEventArgs.cs" />
     <Compile Include="Ini\IniValue.cs" />
     <Compile Include="Ini\IniConfig.cs" />
-    <Compile Include="Ini\ISubSection.cs" />
+    <Compile Include="Ini\IIniSubSection.cs" />
+    <Compile Include="Language\ILanguagePart.cs" />
     <Compile Include="Language\Implementation\ILanguageInternal.cs" />
     <Compile Include="Support\TypeDescriptorContext.cs" />
     <Compile Include="Language\ILanguage.cs" />

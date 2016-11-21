@@ -22,20 +22,15 @@
 #region using
 
 using System.ComponentModel;
-using Dapplo.Config.Ini;
+using Dapplo.Config.Language;
 
 #endregion
 
-namespace Dapplo.Config.Tests.ConfigTests.Interfaces
+namespace Dapplo.Config.Tests.LanguageTests.Interfaces
 {
-	public interface IIniConfigSubInterfaceTest : IIniSubSection
+	public interface ILanguageLoaderPartTest : ILanguagePart
 	{
-		string SubValue { get; set; }
-
-		[DefaultValue("It works!")]
-		string SubValuewithDefault { get; set; }
-
-		[Description("Test property 2 for enums"), DefaultValue(IniConfigTestEnum.Value2)]
-		IniConfigTestEnum TestWithEnumSubValue { get; set; }
+		[DefaultValue(LanguageLoaderTest.Ok)]
+		string Ok2 { get; }
 	}
 }

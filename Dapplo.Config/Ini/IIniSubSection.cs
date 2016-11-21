@@ -24,7 +24,7 @@ namespace Dapplo.Config.Ini
 	/// <summary>
 	///     Marker interface for sub sections
 	/// </summary>
-	public interface ISubSection
+	public interface IIniSubSection
 	{
 	}
 }

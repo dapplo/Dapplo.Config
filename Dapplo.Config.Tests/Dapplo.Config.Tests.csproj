@@ -190,6 +190,7 @@
     <Compile Include="HelperExtensions.cs" />
     <Compile Include="LanguageTests\Interfaces\ILanguageLoaderFailTest.cs" />
     <Compile Include="LanguageTests\Interfaces\ILanguageLoaderMyModule.cs" />
+    <Compile Include="LanguageTests\Interfaces\ILanguageLoaderPartTest.cs" />
     <Compile Include="LanguageTests\Interfaces\ILanguageLoaderTest.cs" />
     <Compile Include="LanguageTests\LanguageLoaderTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

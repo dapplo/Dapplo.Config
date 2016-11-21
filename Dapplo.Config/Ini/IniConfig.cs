@@ -640,15 +640,21 @@ namespace Dapplo.Config.Ini
 		}
 
 		/// <summary>
-		///     Get the IniSection which contains the sub section.
+		///     Get the IniSection which contains the specified sub section.
 		/// </summary>
 		/// <typeparam name="T">Type which extends ISubSection</typeparam>
 		/// <returns>T</returns>
-		public T GetSubSection<T>() where T : ISubSection
+		public T GetSubSection<T>() where T : IIniSubSection
 		{
 			var type = typeof(T);
-
-			return (T)Sections.FirstOrDefault(s => type.IsInstanceOfType(s));
+			if (type.IsInstanceOfType(typeof(IIniSection)))
+			{
+				throw new ArgumentException("Cannot be of type IIniSection", nameof(T));
+			}
+			lock (_iniSections)
+			{
+				return (T)_iniSections.Where(s => type.IsInstanceOfType(s.Value)).Select(s => s.Value).FirstOrDefault();
+			}
 		}
 
 		/// <summary>

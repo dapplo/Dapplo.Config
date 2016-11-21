@@ -298,6 +298,24 @@ namespace Dapplo.Config.Language
 		}
 
 		/// <summary>
+		///     Get the ILanguage which contains the specified ILanguagePart.
+		/// </summary>
+		/// <typeparam name="T">Type which extends ISubSection</typeparam>
+		/// <returns>T</returns>
+		public T GetPart<T>() where T : ILanguagePart
+		{
+			var type = typeof(T);
+			if (type.IsInstanceOfType(typeof(ILanguage)))
+			{
+				throw new ArgumentException("Cannot be of type ILanguage", nameof(T));
+			}
+			lock (_languageTypeConfigs)
+			{
+				return (T) _languageTypeConfigs.Where(s => type.IsInstanceOfType(s.Value)).Select(l => l.Value).FirstOrDefault();
+			}
+		}
+
+		/// <summary>
 		///     Start the intial load, but if none was made yet
 		/// </summary>
 		/// <param name="cancellationToken">CancellationToken</param>
