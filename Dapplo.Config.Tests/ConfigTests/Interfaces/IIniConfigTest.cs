@@ -1,5 +1,5 @@
 ﻿//  Dapplo - building blocks for desktop applications
-//  Copyright (C) 2015-2016 Dapplo
+//  Copyright (C) 2016 Dapplo
 // 
 //  For more information see: http://dapplo.net/
 //  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -26,8 +26,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.Serialization;
-using Dapplo.Config.Converters;
-using Dapplo.Config.Ini;
+using Dapplo.Ini;
+using Dapplo.Ini.Converters;
 using Dapplo.InterfaceImpl.Extensions;
 
 #endregion
@@ -47,16 +47,18 @@ namespace Dapplo.Config.Tests.ConfigTests.Interfaces
 	[Description("Test Configuration")]
 	public interface IIniConfigTest : IIniConfigSubInterfaceTest, IIniSection, IDefaultValue, IHasChanges
 	{
-		[DefaultValue(21), DataMember(EmitDefaultValue = true)]
+		[DefaultValue(21)]
+		[DataMember(EmitDefaultValue = true)]
 		long Age { get; set; }
 
 		[Description("Here are some cool values")]
 		IDictionary<string, IList<int>> DictionaryOfLists { get; set; }
 
-		[TypeConverter(typeof (StringEncryptionTypeConverter))]
+		[TypeConverter(typeof(StringEncryptionTypeConverter))]
 		string FirstName { get; set; }
 
-		[DefaultValue(185), DataMember(EmitDefaultValue = true)]
+		[DefaultValue(185)]
+		[DataMember(EmitDefaultValue = true)]
 		uint Height { get; set; }
 
 		[Description("The URIs for a test")]
@@ -83,7 +85,8 @@ namespace Dapplo.Config.Tests.ConfigTests.Interfaces
 		[Description("List of enums")]
 		IList<IniConfigTestEnum> TestEnums { get; set; }
 
-		[Description("Test property for enums"), DefaultValue(IniConfigTestEnum.Value2)]
+		[Description("Test property for enums")]
+		[DefaultValue(IniConfigTestEnum.Value2)]
 		IniConfigTestEnum TestWithEnum { get; set; }
 
 		[DefaultValue("5,3,2,1,1")]

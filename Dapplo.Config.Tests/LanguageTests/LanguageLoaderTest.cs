@@ -1,5 +1,5 @@
 ﻿//  Dapplo - building blocks for desktop applications
-//  Copyright (C) 2015-2016 Dapplo
+//  Copyright (C) 2016 Dapplo
 // 
 //  For more information see: http://dapplo.net/
 //  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -25,9 +25,8 @@ using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Dapplo.Config.Language;
-using Dapplo.Config.Support;
 using Dapplo.Config.Tests.LanguageTests.Interfaces;
+using Dapplo.Language;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
 using Xunit;
@@ -42,9 +41,8 @@ namespace Dapplo.Config.Tests.LanguageTests
 	/// </summary>
 	public class LanguageLoaderTest : IDisposable
 	{
-		private static readonly LogSource Log = new LogSource();
-
 		public const string Ok = "Ok";
+		private static readonly LogSource Log = new LogSource();
 		private readonly LanguageLoader _languageLoader;
 
 		public LanguageLoaderTest(ITestOutputHelper testOutputHelper)
@@ -57,6 +55,17 @@ namespace Dapplo.Config.Tests.LanguageTests
 		public void Dispose()
 		{
 			LanguageLoader.Delete("Dapplo");
+		}
+
+		[Fact]
+		public async Task Test_LanguageChanged()
+		{
+			var language = await _languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
+			var changed = false;
+			var eventRegistration = language.OnLanguageChanged(sender => changed = true);
+			await _languageLoader.ChangeLanguageAsync("nl-NL");
+			eventRegistration.Dispose();
+			Assert.True(changed);
 		}
 
 		[Fact]
@@ -84,10 +93,23 @@ namespace Dapplo.Config.Tests.LanguageTests
 		}
 
 		[Fact]
+		public async Task TestIndexer()
+		{
+			var language = await _languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
+			await _languageLoader.ChangeLanguageAsync("nl-NL");
+			var afbreken = language["TestValue"];
+			Assert.Equal("Afbreken", afbreken);
+			// Test using the raw property name with the indexer
+			Assert.Equal("Afbreken", _languageLoader["test"]["test_value"]);
+			Assert.Equal("cool", _languageLoader["test"]["dapplo"]);
+			Assert.True(_languageLoader["test"].Keys().Contains("dapplo"));
+		}
+
+		[Fact]
 		public async Task TestINotifyPropertyChanged()
 		{
 			var language = await _languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
-			bool hasChanges = false;
+			var hasChanges = false;
 			var propChanged = new PropertyChangedEventHandler((sender, eventArgs) =>
 			{
 				Log.Debug().WriteLine($"Change for {eventArgs.PropertyName}");
@@ -105,35 +127,11 @@ namespace Dapplo.Config.Tests.LanguageTests
 		}
 
 		[Fact]
-		public async Task TestIndexer()
-		{
-			var language = await _languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
-			await _languageLoader.ChangeLanguageAsync("nl-NL");
-			string afbreken = language["TestValue"];
-			Assert.Equal("Afbreken", afbreken);
-			// Test using the raw property name with the indexer
-			Assert.Equal("Afbreken", _languageLoader["test"]["test_value"]);
-			Assert.Equal("cool", _languageLoader["test"]["dapplo"]);
-			Assert.True(_languageLoader["test"].Keys().Contains("dapplo"));
-		}
-
-		[Fact]
 		public async Task TestLanguagePart()
 		{
 			var language = await _languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
 			var part = _languageLoader.GetPart<ILanguageLoaderPartTest>();
 			Assert.Equal("Ok", part.Ok2);
-		}
-
-		[Fact]
-		public async Task Test_LanguageChanged()
-		{
-			var language = await _languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
-			var changed = false;
-			var eventRegistration = language.OnLanguageChanged(sender => changed = true);
-			await _languageLoader.ChangeLanguageAsync("nl-NL");
-			eventRegistration.Dispose();
-			Assert.True(changed);
 		}
 
 		[Fact]

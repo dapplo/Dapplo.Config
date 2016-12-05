@@ -1,5 +1,5 @@
 ﻿//  Dapplo - building blocks for desktop applications
-//  Copyright (C) 2015-2016 Dapplo
+//  Copyright (C) 2016 Dapplo
 // 
 //  For more information see: http://dapplo.net/
 //  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -22,7 +22,7 @@
 #region using
 
 using System.ComponentModel;
-using Dapplo.Config.Ini;
+using Dapplo.Ini;
 
 #endregion
 
@@ -35,7 +35,8 @@ namespace Dapplo.Config.Tests.ConfigTests.Interfaces
 	[Description("Test Configuration")]
 	public interface IIniConfigWrongEnumTest : IIniConfigSubInterfaceTest, IIniSection
 	{
-		[Description("Test property for wrong enums"), DefaultValue("Value3")]
+		[Description("Test property for wrong enums")]
+		[DefaultValue("Value3")]
 		IniConfigTestEnum TestWithFalseEnum { get; set; }
 	}
 }

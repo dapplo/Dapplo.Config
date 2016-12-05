@@ -1,5 +1,5 @@
 ﻿//  Dapplo - building blocks for desktop applications
-//  Copyright (C) 2015-2016 Dapplo
+//  Copyright (C) 2016 Dapplo
 // 
 //  For more information see: http://dapplo.net/
 //  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -26,9 +26,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
-using Dapplo.Config.Converters;
-using Dapplo.Config.Ini;
 using Dapplo.Config.Tests.ConfigTests.Interfaces;
+using Dapplo.Ini;
+using Dapplo.Ini.Converters;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
 using Xunit;
@@ -55,7 +55,7 @@ namespace Dapplo.Config.Tests.ConfigTests
 		{
 			// Make sure we cleanup any created ini file, as it will influence other tests
 			var location = IniConfig.Current.IniLocation;
-			if (location != null && File.Exists(location))
+			if ((location != null) && File.Exists(location))
 			{
 				File.Delete(location);
 			}
@@ -86,44 +86,6 @@ namespace Dapplo.Config.Tests.ConfigTests
 		}
 
 		/// <summary>
-		///     This method tests that the initialization of the ini works.
-		///     Including the after load
-		/// </summary>
-		[Fact]
-		public async Task TestIniAfterLoad()
-		{
-			var iniConfig = Create();
-			iniConfig.AfterLoad<IIniConfigTest>(x =>
-			{
-				if (!x.SomeValues.ContainsKey("dapplo"))
-				{
-					x.SomeValues.Add("dapplo", 2015);
-				}
-			});
-			await ConfigureMemoryStreamAsync();
-
-			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
-			Assert.True(iniTest.SomeValues.ContainsKey("dapplo"));
-			Assert.True(iniTest.SomeValues["dapplo"] == 2015);
-		}
-
-		/// <summary>
-		///     This method tests that the initialization of the ini works.
-		///     Including the after load
-		/// </summary>
-		[Fact]
-		public async Task TestSubIni()
-		{
-			var iniConfig = Create();
-			await ConfigureMemoryStreamAsync();
-
-			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
-
-			var subIniTest = iniConfig.GetSubSection<IIniConfigSubInterfaceTest>();
-			Assert.Equal("It works!", subIniTest.SubValuewithDefault);
-		}
-
-		/// <summary>
 		///     This method tests IIniSection events
 		/// </summary>
 		[Fact]
@@ -145,6 +107,28 @@ namespace Dapplo.Config.Tests.ConfigTests
 			}
 			Assert.True(saved);
 			Assert.True(saving);
+		}
+
+		/// <summary>
+		///     This method tests that the initialization of the ini works.
+		///     Including the after load
+		/// </summary>
+		[Fact]
+		public async Task TestIniAfterLoad()
+		{
+			var iniConfig = Create();
+			iniConfig.AfterLoad<IIniConfigTest>(x =>
+			{
+				if (!x.SomeValues.ContainsKey("dapplo"))
+				{
+					x.SomeValues.Add("dapplo", 2015);
+				}
+			});
+			await ConfigureMemoryStreamAsync();
+
+			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
+			Assert.True(iniTest.SomeValues.ContainsKey("dapplo"));
+			Assert.True(iniTest.SomeValues["dapplo"] == 2015);
 		}
 
 		[Fact]
@@ -203,7 +187,7 @@ namespace Dapplo.Config.Tests.ConfigTests
 			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 			// Test ini value retrieval, by checking the Type and return value
 			var iniValue = iniTest["WindowCornerCutShape"];
-			Assert.True(iniValue.ValueType == typeof (IList<int>));
+			Assert.True(iniValue.ValueType == typeof(IList<int>));
 			Assert.True(((IList<int>) iniValue.Value).Count > 0);
 		}
 
@@ -297,6 +281,22 @@ namespace Dapplo.Config.Tests.ConfigTests
 			var iniConfig = await InitializeAsync();
 			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigWrongEnumTest>().ConfigureAwait(false);
 			Assert.Equal(IniConfigTestEnum.Value1, iniTest.TestWithFalseEnum);
+		}
+
+		/// <summary>
+		///     This method tests that the initialization of the ini works.
+		///     Including the after load
+		/// </summary>
+		[Fact]
+		public async Task TestSubIni()
+		{
+			var iniConfig = Create();
+			await ConfigureMemoryStreamAsync();
+
+			var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
+
+			var subIniTest = iniConfig.GetSubSection<IIniConfigSubInterfaceTest>();
+			Assert.Equal("It works!", subIniTest.SubValuewithDefault);
 		}
 	}
 }

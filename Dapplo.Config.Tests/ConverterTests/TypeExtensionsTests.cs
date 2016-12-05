@@ -1,5 +1,5 @@
 ﻿//  Dapplo - building blocks for desktop applications
-//  Copyright (C) 2015-2016 Dapplo
+//  Copyright (C) 2016 Dapplo
 // 
 //  For more information see: http://dapplo.net/
 //  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -24,10 +24,10 @@
 using System;
 using System.Collections.Generic;
 using Dapplo.Log;
+using Dapplo.Log.XUnit;
 using Dapplo.Utils.Extensions;
 using Xunit;
 using Xunit.Abstractions;
-using Dapplo.Log.XUnit;
 
 #endregion
 
@@ -47,11 +47,11 @@ namespace Dapplo.Config.Tests.ConverterTests
 
 			var testValues = new Dictionary<string, Uri> {{"value1", testUri}};
 
-			var stringDictionary = typeof (IDictionary<string, string>).ConvertOrCastValueToType(testValues, convertFrom: false) as IDictionary<string, string>;
+			var stringDictionary = typeof(IDictionary<string, string>).ConvertOrCastValueToType(testValues, convertFrom: false) as IDictionary<string, string>;
 			Assert.NotNull(stringDictionary);
 			Assert.Equal(testValues["value1"].AbsoluteUri, stringDictionary["value1"]);
 
-			var uriDictionary = typeof (Dictionary<string, Uri>).ConvertOrCastValueToType(stringDictionary) as IDictionary<string, Uri>;
+			var uriDictionary = typeof(Dictionary<string, Uri>).ConvertOrCastValueToType(stringDictionary) as IDictionary<string, Uri>;
 			Assert.NotNull(uriDictionary);
 			Assert.Equal(testValues["value1"].AbsoluteUri, uriDictionary["value1"].AbsoluteUri);
 		}
@@ -59,7 +59,7 @@ namespace Dapplo.Config.Tests.ConverterTests
 		[Fact]
 		public void TestConvertOrCastValueToType_Enum()
 		{
-			var val1 = typeof (TestEnum).ConvertOrCastValueToType("VAL_NOT");
+			var val1 = typeof(TestEnum).ConvertOrCastValueToType("VAL_NOT");
 			Assert.NotNull(val1);
 		}
 
@@ -68,10 +68,10 @@ namespace Dapplo.Config.Tests.ConverterTests
 		{
 			var testUri = new Uri("http://test.com/dapplo?name=config");
 
-			var stringUri = typeof (string).ConvertOrCastValueToType(testUri, convertFrom: false);
+			var stringUri = typeof(string).ConvertOrCastValueToType(testUri, convertFrom: false);
 			Assert.Equal(testUri.AbsoluteUri, stringUri);
 
-			var convertedUri = typeof (Uri).ConvertOrCastValueToType(stringUri) as Uri;
+			var convertedUri = typeof(Uri).ConvertOrCastValueToType(stringUri) as Uri;
 			Assert.Equal(testUri, convertedUri);
 		}
 	}

@@ -1,5 +1,5 @@
 ﻿//  Dapplo - building blocks for desktop applications
-//  Copyright (C) 2015-2016 Dapplo
+//  Copyright (C) 2016 Dapplo
 // 
 //  For more information see: http://dapplo.net/
 //  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -22,7 +22,7 @@
 #region using
 
 using System.Collections.Generic;
-using Dapplo.Config.WindowsRegistry;
+using Dapplo.Registry;
 using Microsoft.Win32;
 
 #endregion

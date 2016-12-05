@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapplo.Config", "Dapplo.Config\Dapplo.Config.csproj", "{F57325B4-9444-4E68-9485-080A5171E8BC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapplo.Registry", "Dapplo.Config\Dapplo.Registry.csproj", "{F57325B4-9444-4E68-9485-080A5171E8BC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapplo.Config.Tests", "Dapplo.Config.Tests\Dapplo.Config.Tests.csproj", "{2C8817A3-AF0F-40CE-89C3-325BBB9417AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapplo.Ini", "Dapplo.Ini\Dapplo.Ini.csproj", "{18E3C5E8-7EB7-47C3-B84A-8A8459D85052}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapplo.Language", "Dapplo.Language\Dapplo.Language.csproj", "{7FACB328-6B3E-40C9-9A53-F3F2D0E27C64}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{2C8817A3-AF0F-40CE-89C3-325BBB9417AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2C8817A3-AF0F-40CE-89C3-325BBB9417AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2C8817A3-AF0F-40CE-89C3-325BBB9417AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18E3C5E8-7EB7-47C3-B84A-8A8459D85052}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18E3C5E8-7EB7-47C3-B84A-8A8459D85052}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18E3C5E8-7EB7-47C3-B84A-8A8459D85052}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18E3C5E8-7EB7-47C3-B84A-8A8459D85052}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FACB328-6B3E-40C9-9A53-F3F2D0E27C64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FACB328-6B3E-40C9-9A53-F3F2D0E27C64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FACB328-6B3E-40C9-9A53-F3F2D0E27C64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FACB328-6B3E-40C9-9A53-F3F2D0E27C64}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

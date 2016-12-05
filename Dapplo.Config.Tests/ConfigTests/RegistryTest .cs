@@ -1,5 +1,5 @@
 //  Dapplo - building blocks for desktop applications
-//  Copyright (C) 2015-2016 Dapplo
+//  Copyright (C) 2016 Dapplo
 // 
 //  For more information see: http://dapplo.net/
 //  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -22,10 +22,10 @@
 #region using
 
 using Dapplo.Config.Tests.ConfigTests.Interfaces;
-using Dapplo.Config.WindowsRegistry.Implementation;
 using Dapplo.InterfaceImpl;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
+using Dapplo.Registry.Implementation;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -47,7 +47,7 @@ namespace Dapplo.Config.Tests.ConfigTests
 		public void TestRegistryRead()
 		{
 			// TODO: Fix that we need this
-			InterceptorFactory.RegisterExtension(typeof (RegistryExtension<>));
+			InterceptorFactory.RegisterExtension(typeof(RegistryExtension<>));
 
 			var registryTest = InterceptorFactory.New<IRegistryTest>();
 

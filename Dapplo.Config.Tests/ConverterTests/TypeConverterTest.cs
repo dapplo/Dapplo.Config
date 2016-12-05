@@ -1,5 +1,5 @@
 ﻿//  Dapplo - building blocks for desktop applications
-//  Copyright (C) 2015-2016 Dapplo
+//  Copyright (C) 2016 Dapplo
 // 
 //  For more information see: http://dapplo.net/
 //  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -23,12 +23,12 @@
 
 using System;
 using System.ComponentModel;
-using Dapplo.Config.Converters;
+using Dapplo.Ini.Converters;
 using Dapplo.Log;
+using Dapplo.Log.XUnit;
 using Dapplo.Utils.Extensions;
 using Xunit;
 using Xunit.Abstractions;
-using Dapplo.Log.XUnit;
 
 #endregion
 
@@ -46,17 +46,17 @@ namespace Dapplo.Config.Tests.ConverterTests
 		[Fact]
 		public void TestStringEncryptionTypeConverter()
 		{
-			var stringEncryptionTypeConverter = (TypeConverter) Activator.CreateInstance(typeof (StringEncryptionTypeConverter));
-			Assert.True(stringEncryptionTypeConverter.CanConvertFrom(typeof (string)));
-			Assert.True(stringEncryptionTypeConverter.CanConvertTo(typeof (string)));
-			Assert.False(stringEncryptionTypeConverter.CanConvertTo(typeof (int)));
+			var stringEncryptionTypeConverter = (TypeConverter) Activator.CreateInstance(typeof(StringEncryptionTypeConverter));
+			Assert.True(stringEncryptionTypeConverter.CanConvertFrom(typeof(string)));
+			Assert.True(stringEncryptionTypeConverter.CanConvertTo(typeof(string)));
+			Assert.False(stringEncryptionTypeConverter.CanConvertTo(typeof(int)));
 			var encrypted = stringEncryptionTypeConverter.ConvertToString("Robin");
 			var decryped = stringEncryptionTypeConverter.ConvertFromString(encrypted);
 
 			Assert.Equal("Robin", decryped);
 
-			var encrypted1 = typeof (string).ConvertOrCastValueToType("Robin", stringEncryptionTypeConverter, convertFrom: false);
-			var decryped2 = typeof (string).ConvertOrCastValueToType(encrypted1, stringEncryptionTypeConverter);
+			var encrypted1 = typeof(string).ConvertOrCastValueToType("Robin", stringEncryptionTypeConverter, convertFrom: false);
+			var decryped2 = typeof(string).ConvertOrCastValueToType(encrypted1, stringEncryptionTypeConverter);
 			Assert.Equal("Robin", decryped2);
 		}
 	}
