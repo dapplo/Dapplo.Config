@@ -139,7 +139,15 @@ namespace Dapplo.Language
 		/// </returns>
 		public object GetService(Type languageType)
 		{
-			return typeof(ILanguagePart).IsAssignableFrom(languageType) ? GetPart(languageType) : Get(languageType);
+			if (typeof(ILanguagePart).IsAssignableFrom(languageType))
+			{
+				return GetPart(languageType);
+			}
+			if (typeof(ILanguage).IsAssignableFrom(languageType))
+			{
+				Get(languageType);
+			}
+			return null;
 		}
 
 		/// <summary>

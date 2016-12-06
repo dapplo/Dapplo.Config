@@ -185,7 +185,15 @@ namespace Dapplo.Ini
 		/// </returns>
 		public object GetService(Type configType)
 		{
-			return typeof(IIniSubSection).IsAssignableFrom(configType) ? GetSubSection(configType) : Get(configType);
+			if (typeof(IIniSubSection).IsAssignableFrom(configType))
+			{
+				return GetSubSection(configType);
+			}
+			if (typeof(IIniSection).IsAssignableFrom(configType))
+			{
+				Get(configType);
+			}
+			return null;
 		}
 
 		/// <summary>
