@@ -130,8 +130,14 @@ namespace Dapplo.Config.Tests.LanguageTests
 		public async Task TestLanguagePart()
 		{
 			var language = await _languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
-			var part = _languageLoader.GetPart<ILanguageLoaderPartTest>();
-			Assert.Equal("Ok", part.Ok2);
+			var partGeneric = _languageLoader.GetPart<ILanguageLoaderPartTest>();
+			Assert.Equal("Ok", partGeneric.Ok2);
+
+			var partType = _languageLoader.GetPart(typeof(ILanguageLoaderPartTest)) as ILanguageLoaderPartTest;
+			Assert.Equal("Ok", partType.Ok2);
+
+			var partServiceLocator = _languageLoader.GetService(typeof(ILanguageLoaderPartTest)) as ILanguageLoaderPartTest;
+			Assert.Equal("Ok", partServiceLocator.Ok2);
 		}
 
 		[Fact]

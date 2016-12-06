@@ -185,7 +185,7 @@ namespace Dapplo.Ini
 		/// </returns>
 		public object GetService(Type configType)
 		{
-			return Get(configType);
+			return typeof(IIniSubSection).IsAssignableFrom(configType) ? GetSubSection(configType) : Get(configType);
 		}
 
 		/// <summary>
@@ -660,13 +660,22 @@ namespace Dapplo.Ini
 		public T GetSubSection<T>() where T : IIniSubSection
 		{
 			var type = typeof(T);
-			if (type.IsInstanceOfType(typeof(IIniSection)))
+			return (T)GetSubSection(type);
+		}
+
+		/// <summary>
+		///     Get the IniSection which contains the specified sub section.
+		/// </summary>
+		/// <returns>IIniSection</returns>
+		public IIniSection GetSubSection(Type subsectionType)
+		{
+			if (subsectionType.IsInstanceOfType(typeof(IIniSection)))
 			{
-				throw new ArgumentException("Cannot be of type IIniSection", nameof(T));
+				throw new ArgumentException("Cannot be of type IIniSection", nameof(subsectionType));
 			}
 			lock (_iniSections)
 			{
-				return (T) _iniSections.Values.FirstOrDefault(s => type.IsInstanceOfType(s));
+				return _iniSections.Values.FirstOrDefault(subsectionType.IsInstanceOfType);
 			}
 		}
 
@@ -675,7 +684,7 @@ namespace Dapplo.Ini
 		/// </summary>
 		/// <param name="type">Type</param>
 		/// <returns>object (which is a IIniSection)</returns>
-		public object Get(Type type)
+		public IIniSection Get(Type type)
 		{
 			return this[type];
 		}

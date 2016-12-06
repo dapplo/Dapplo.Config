@@ -128,19 +128,18 @@ namespace Dapplo.Language
 			}
 		}
 
-
 		/// <summary>
 		///     IServiceProvider implementation
 		///     Gets the language object of the specified language type.
 		/// </summary>
-		/// <param name="languageType">An object that specifies the type of language object to get. </param>
+		/// <param name="languageType">An object that specifies the type of language  or languagePart object to get. </param>
 		/// <returns>
 		///     A IniConfig of type <paramref name="languageType" />.-or- null if there is no service object of type
 		///     <paramref name="languageType" />.
 		/// </returns>
 		public object GetService(Type languageType)
 		{
-			return Get(languageType);
+			return typeof(ILanguagePart).IsAssignableFrom(languageType) ? GetPart(languageType) : Get(languageType);
 		}
 
 		/// <summary>
@@ -314,19 +313,28 @@ namespace Dapplo.Language
 		/// <summary>
 		///     Get the ILanguage which contains the specified ILanguagePart.
 		/// </summary>
+		/// <returns>ILanguage</returns>
+		public ILanguage GetPart(Type type)
+		{
+			if (type.IsInstanceOfType(typeof(ILanguage)))
+			{
+				throw new ArgumentException("Cannot be of type ILanguage", nameof(type));
+			}
+			lock (_languageTypeConfigs)
+			{
+				return _languageTypeConfigs.Values.FirstOrDefault(type.IsInstanceOfType);
+			}
+		}
+
+		/// <summary>
+		///     Get the ILanguage which contains the specified ILanguagePart.
+		/// </summary>
 		/// <typeparam name="T">Type which extends ISubSection</typeparam>
 		/// <returns>T</returns>
 		public T GetPart<T>() where T : ILanguagePart
 		{
 			var type = typeof(T);
-			if (type.IsInstanceOfType(typeof(ILanguage)))
-			{
-				throw new ArgumentException("Cannot be of type ILanguage", nameof(T));
-			}
-			lock (_languageTypeConfigs)
-			{
-				return (T) _languageTypeConfigs.Values.FirstOrDefault(l => type.IsInstanceOfType(l));
-			}
+			return (T)GetPart(type);
 		}
 
 		/// <summary>
