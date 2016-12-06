@@ -5,14 +5,14 @@
         <version>$version$</version>
         <authors>$author$</authors>
         <licenseUrl>http://www.gnu.org/licenses/lgpl-3.0.en.html</licenseUrl>
-        <projectUrl>http://www.dapplo.net/blocks/Dapplo.Config</projectUrl>
+        <projectUrl>http://www.dapplo.net/blocks/Dapplo.Registry</projectUrl>
         <iconUrl>http://www.dapplo.net/favicon.ico</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>Dapplo.Config makes it easy to add a configuration to your project.</description>
-		<summary>A library with code to quickly add a configuration to your application.</summary>
+        <description>Dapplo.Registry provides statically typed registry access via an interface.</description>
+		<summary>Dapplo.Registry provides statically typed registry access via an interface.</summary>
         <language>en-us</language>
 		<copyright>$author$</copyright>
-		<tags>config ini language translations</tags>
+		<tags>registry configuration</tags>
     </metadata>
 	<files>
 		<file src="bin\release\$id$.pdb" target="lib\net45" />

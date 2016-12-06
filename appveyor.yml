@@ -1,4 +1,4 @@
-version: 0.4.{build}
+version: 0.5.{build}
 skip_tags: true
 configuration: Release
 platform: Any CPU
@@ -46,16 +46,6 @@ deploy:
   skip_symbols: false
   api_key:
     secure: xkDQ385+smLqdzhESsXBJvnUjK4FZ4Djjrqi9tFR29dwESIvPYOrQAqgri5Nf/fA
-  on:
-    branch: master
-    is_not_pr: true
-    appveyor_repo_commit_message_extended: /\[release\]/
-- provider: GitHub
-  release: Dapplo.Config-v$(appveyor_build_version)
-  auth_token:
-    secure: eBQPtXg53XgcvdcVY3wQAw6kkwNh+QhcsTDwzyQLLh6IOPyiePEaEhJR0D2YBjAj
-  artifact: /.*\.nupkg/
-  draft: false
   on:
     branch: master
     is_not_pr: true
