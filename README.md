@@ -136,7 +136,7 @@ More to come...
 # Managed Extension Framework (MEF) Support
 
 There is another Dapplo repository (Dapplo.Addons](https://github.com/dapplo/Dapplo.Addons) which makes it possible to import IIniSection interfaces into your MEF controlled classes. The idea of that project is making it easy to add extensions to your application. In this case MEF can really help...
-
+For this you will need to add an ServiceProviderExportProvider with the LanguageLoader or IniConfig to the Mef bootstrapper.
 
 Notice:
 **This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.**
