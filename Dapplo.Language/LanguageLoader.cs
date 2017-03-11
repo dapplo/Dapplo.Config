@@ -1,5 +1,5 @@
 ﻿//  Dapplo - building blocks for desktop applications
-//  Copyright (C) 2016 Dapplo
+//  Copyright (C) 2016-2017 Dapplo
 // 
 //  For more information see: http://dapplo.net/
 //  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -45,7 +45,7 @@ namespace Dapplo.Language
 	///     The language loader should be used to fill ILanguage interfaces.
 	///     It is possible to specify the directory locations, in order, where files with certain patterns should be located.
 	/// </summary>
-	public class LanguageLoader : IServiceProvider
+	public sealed class LanguageLoader : IServiceProvider
 	{
 		private static readonly LogSource Log = new LogSource();
 		private static readonly IDictionary<string, LanguageLoader> LoaderStore = new Dictionary<string, LanguageLoader>(new AbcComparer());
@@ -393,7 +393,7 @@ namespace Dapplo.Language
 		/// <returns>instance of type T</returns>
 		public async Task<T> RegisterAndGetAsync<T>(CancellationToken cancellationToken = default(CancellationToken)) where T : ILanguage
 		{
-			using (await _asyncLock.LockAsync().ConfigureAwait(false))
+			using (await _asyncLock.LockAsync(cancellationToken).ConfigureAwait(false))
 			{
 				await LoadIfNeededAsync(cancellationToken);
 				return Get<T>();
@@ -572,7 +572,7 @@ namespace Dapplo.Language
 		///     Disposes the lock
 		/// </summary>
 		/// <param name="disposing"></param>
-		protected virtual void Dispose(bool disposing)
+		private void Dispose(bool disposing)
 		{
 			if (_disposedValue)
 			{

@@ -1,5 +1,5 @@
 ﻿//  Dapplo - building blocks for desktop applications
-//  Copyright (C) 2016 Dapplo
+//  Copyright (C) 2016-2017 Dapplo
 // 
 //  For more information see: http://dapplo.net/
 //  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -45,7 +45,7 @@ namespace Dapplo.Ini
 	/// <summary>
 	///     The IniConfig is used to bind IIniSection proxy objects to an ini file.
 	/// </summary>
-	public class IniConfig : IServiceProvider, IDisposable
+	public sealed class IniConfig : IServiceProvider, IDisposable
 	{
 		private const string Defaults = "-defaults";
 		private const string Constants = "-constants";
@@ -713,7 +713,7 @@ namespace Dapplo.Ini
 		{
 			IIniSection iniSection;
 
-			using (await _asyncLock.LockAsync().ConfigureAwait(false))
+			using (await _asyncLock.LockAsync(cancellationToken).ConfigureAwait(false))
 			{
 				await LoadIfNeededAsync(cancellationToken).ConfigureAwait(false);
 
@@ -765,7 +765,7 @@ namespace Dapplo.Ini
 		/// <param name="cancellationToken">CancellationToken</param>
 		public async Task ReloadAsync(bool reset = true, CancellationToken cancellationToken = default(CancellationToken))
 		{
-			using (await _asyncLock.LockAsync().ConfigureAwait(false))
+			using (await _asyncLock.LockAsync(cancellationToken).ConfigureAwait(false))
 			{
 				await ReloadInternalAsync(reset, cancellationToken).ConfigureAwait(false);
 			}
@@ -810,7 +810,7 @@ namespace Dapplo.Ini
 		/// </summary>
 		public async Task ResetAsync(CancellationToken cancellationToken = default(CancellationToken))
 		{
-			using (await _asyncLock.LockAsync().ConfigureAwait(false))
+			using (await _asyncLock.LockAsync(cancellationToken).ConfigureAwait(false))
 			{
 				ResetInternal();
 			}
@@ -856,7 +856,7 @@ namespace Dapplo.Ini
 		public async Task WriteAsync(CancellationToken cancellationToken = default(CancellationToken))
 		{
 			// Make sure only one write to file is running, other request will have to wait
-			using (await _asyncLock.LockAsync().ConfigureAwait(false))
+			using (await _asyncLock.LockAsync(cancellationToken).ConfigureAwait(false))
 			{
 				var path = Path.GetDirectoryName(IniLocation);
 
@@ -890,7 +890,7 @@ namespace Dapplo.Ini
 		/// <returns>Task</returns>
 		public async Task WriteToStreamAsync(Stream stream, CancellationToken cancellationToken = default(CancellationToken))
 		{
-			using (await _asyncLock.LockAsync().ConfigureAwait(false))
+			using (await _asyncLock.LockAsync(cancellationToken).ConfigureAwait(false))
 			{
 				await WriteToStreamInternalAsync(stream, cancellationToken);
 			}
@@ -1066,17 +1066,30 @@ namespace Dapplo.Ini
 		///     Disposes the lock
 		/// </summary>
 		/// <param name="disposing"></param>
-		protected virtual void Dispose(bool disposing)
+		private void Dispose(bool disposing)
 		{
 			if (_disposedValue)
 			{
 				return;
 			}
-			if (disposing)
+			if (!disposing)
+			{
+				return;
+			}
+			try
 			{
 				_asyncLock?.Dispose();
+				_saveTimer?.Dispose();
+				_configFileWatcher?.Dispose();
 			}
-			_disposedValue = true;
+			catch (Exception)
+			{
+				// Ignore all, during dispose
+			}
+			finally
+			{
+				_disposedValue = true;
+			}
 		}
 
 		/// <summary>
