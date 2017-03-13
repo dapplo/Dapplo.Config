@@ -55,7 +55,7 @@ namespace Dapplo.Config.Tests.ConfigTests
 		{
 			// Make sure we cleanup any created ini file, as it will influence other tests
 			var location = IniConfig.Current.IniLocation;
-			if ((location != null) && File.Exists(location))
+			if (location != null && File.Exists(location))
 			{
 				File.Delete(location);
 			}
@@ -64,7 +64,7 @@ namespace Dapplo.Config.Tests.ConfigTests
 			IniConfig.Delete("Dapplo", "dapplo");
 		}
 
-		private async Task ConfigureMemoryStreamAsync()
+		private static async Task ConfigureMemoryStreamAsync()
 		{
 			using (var testMemoryStream = new MemoryStream())
 			{
@@ -72,13 +72,13 @@ namespace Dapplo.Config.Tests.ConfigTests
 			}
 		}
 
-		private IniConfig Create()
+		private static IniConfig Create()
 		{
 			// Important to disable the auto-save, otherwise we get test issues
 			return new IniConfig("Dapplo", "dapplo", autoSaveInterval: 0, saveOnExit: false);
 		}
 
-		private async Task<IniConfig> InitializeAsync()
+		private static async Task<IniConfig> InitializeAsync()
 		{
 			var iniConfig = Create();
 			await ConfigureMemoryStreamAsync();

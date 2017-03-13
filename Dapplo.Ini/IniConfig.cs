@@ -227,7 +227,7 @@ namespace Dapplo.Ini
 						file = Path.Combine(startPath, $"{_fileName}{postfix}.{IniExtension}");
 					}
 				}
-				if ((file == null) || !File.Exists(file))
+				if (file == null || !File.Exists(file))
 				{
 					var appDataDirectory = FileLocations.RoamingAppDataDirectory(_applicationName);
 					file = Path.Combine(appDataDirectory, $"{_fileName}{postfix}.{IniExtension}");
@@ -263,7 +263,7 @@ namespace Dapplo.Ini
 
 			// If the ini-location directory is not yet created, we can't watch as this would cause an exception
 			var watchPath = Path.GetDirectoryName(IniLocation);
-			if ((watchPath == null) || !Directory.Exists(watchPath))
+			if (watchPath == null || !Directory.Exists(watchPath))
 			{
 				return;
 			}
@@ -304,7 +304,7 @@ namespace Dapplo.Ini
 		///     This should be used, as it locks the _iniSections
 		/// </summary>
 		/// <returns>list IIniSection</returns>
-		private IList<IIniSection> GetIniSectionValues()
+		private IEnumerable<IIniSection> GetIniSectionValues()
 		{
 			lock (_iniSections)
 			{
@@ -493,7 +493,7 @@ namespace Dapplo.Ini
 
 			// After load
 			Action<IIniSection> afterLoadAction;
-			if ((interceptor != null) && _afterLoadActions.TryGetValue(interceptor.InterceptedType, out afterLoadAction))
+			if (interceptor != null && _afterLoadActions.TryGetValue(interceptor.InterceptedType, out afterLoadAction))
 			{
 				afterLoadAction(iniSection);
 			}
@@ -555,7 +555,7 @@ namespace Dapplo.Ini
 					}
 				}
 				// Skip if the iniProperties doesn't have anything
-				if ((iniProperties == null) || (iniProperties.Count == 0))
+				if (iniProperties == null || iniProperties.Count == 0)
 				{
 					continue;
 				}
@@ -835,7 +835,7 @@ namespace Dapplo.Ini
 					var intercepted = iniSection as IExtensibleInterceptor;
 					// Call the after load action
 					Action<IIniSection> afterLoadAction;
-					if ((intercepted != null) && _afterLoadActions.TryGetValue(intercepted.InterceptedType, out afterLoadAction))
+					if (intercepted != null && _afterLoadActions.TryGetValue(intercepted.InterceptedType, out afterLoadAction))
 					{
 						afterLoadAction(iniSection);
 					}
@@ -861,7 +861,7 @@ namespace Dapplo.Ini
 				var path = Path.GetDirectoryName(IniLocation);
 
 				// Create the directory to write to, if it doesn't exist yet
-				if ((path != null) && !Directory.Exists(path))
+				if (path != null && !Directory.Exists(path))
 				{
 					Directory.CreateDirectory(path);
 				}
@@ -912,7 +912,7 @@ namespace Dapplo.Ini
 				var intercepted = iniSection as IExtensibleInterceptor;
 				// set the values before save
 				Action<IIniSection> beforeSaveAction;
-				if ((intercepted != null) && _beforeSaveActions.TryGetValue(intercepted.InterceptedType, out beforeSaveAction))
+				if (intercepted != null && _beforeSaveActions.TryGetValue(intercepted.InterceptedType, out beforeSaveAction))
 				{
 					beforeSaveAction(iniSection);
 				}
@@ -927,7 +927,7 @@ namespace Dapplo.Ini
 				{
 					// Eventually set the values back, after save
 					Action<IIniSection> afterSaveAction;
-					if ((intercepted != null) && _afterSaveActions.TryGetValue(intercepted.InterceptedType, out afterSaveAction))
+					if (intercepted != null && _afterSaveActions.TryGetValue(intercepted.InterceptedType, out afterSaveAction))
 					{
 						afterSaveAction(iniSection);
 					}
@@ -1008,7 +1008,7 @@ namespace Dapplo.Ini
 				var converter = iniValue.Converter;
 
 				// Special case, for idictionary derrivated types
-				if (iniValue.ValueType.IsGenericType && (iniValue.ValueType.GetGenericTypeDefinition() == typeof(IDictionary<,>)))
+				if (iniValue.ValueType.IsGenericType && iniValue.ValueType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
 				{
 					var subSection = TypeExtensions.ConvertOrCastValueToType<IDictionary<string, string>>(iniValue.Value, converter, context, false);
 					if (subSection != null)

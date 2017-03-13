@@ -191,7 +191,7 @@ namespace Dapplo.Language
 		/// </summary>
 		public void CorrectMissingTranslations()
 		{
-			if ((Files == null) || (Files.Count == 0))
+			if (Files == null || Files.Count == 0)
 			{
 				return;
 			}
@@ -241,7 +241,7 @@ namespace Dapplo.Language
 			// ReSharper disable once SuspiciousTypeConversion.Global
 			var defaultValueInterface = language as IDefaultValue;
 			var interceptor = language as IExtensibleInterceptor;
-			if ((interceptor == null) || (defaultValueInterface == null))
+			if (interceptor == null || defaultValueInterface == null)
 			{
 				throw new NullReferenceException("Should not happen.");
 			}
@@ -370,7 +370,7 @@ namespace Dapplo.Language
 		/// </summary>
 		/// <param name="languageFile"></param>
 		/// <returns>name - values sorted to module</returns>
-		private IDictionary<string, IDictionary<string, string>> ReadXmlResources(string languageFile)
+		private static IDictionary<string, IDictionary<string, string>> ReadXmlResources(string languageFile)
 		{
 			var xElement = XDocument.Load(languageFile).Root;
 			if (xElement == null)

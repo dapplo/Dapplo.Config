@@ -56,7 +56,7 @@ namespace Dapplo.Config.Tests.ConfigTests
 			IniConfig.Delete("Dapplo", "dapplo");
 		}
 
-		private async Task ConfigureMemoryStreamAsync()
+		private static async Task ConfigureMemoryStreamAsync()
 		{
 			using (var testMemoryStream = new MemoryStream())
 			{
@@ -68,14 +68,14 @@ namespace Dapplo.Config.Tests.ConfigTests
 		///     Create an ini-config, but delete it first
 		/// </summary>
 		/// <returns></returns>
-		private IniConfig Create()
+		private static IniConfig Create()
 		{
 			IniConfig.Delete("Dapplo", "dapplo");
 			// Important to disable the auto-save, otherwise we get test issues
 			return new IniConfig("Dapplo", "dapplo", autoSaveInterval: 0, saveOnExit: false);
 		}
 
-		private async Task<IniConfig> InitializeAsync()
+		private static async Task<IniConfig> InitializeAsync()
 		{
 			var iniConfig = Create();
 			await ConfigureMemoryStreamAsync();

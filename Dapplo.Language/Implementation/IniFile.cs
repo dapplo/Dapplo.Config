@@ -93,7 +93,7 @@ namespace Dapplo.Language.Implementation
 					continue;
 				}
 				var cleanLine = line.Trim();
-				if ((cleanLine.Length == 0) || cleanLine.StartsWith(Comment))
+				if (cleanLine.Length == 0 || cleanLine.StartsWith(Comment))
 				{
 					continue;
 				}
@@ -195,7 +195,7 @@ namespace Dapplo.Language.Implementation
 						sectionsComments.TryGetValue(sectionKey, out comments);
 						string sectionDescription;
 						// Section comment is stored with the sectionKey
-						if ((comments != null) && comments.TryGetValue(sectionKey, out sectionDescription))
+						if (comments != null && comments.TryGetValue(sectionKey, out sectionDescription))
 						{
 							if (!string.IsNullOrEmpty(sectionDescription))
 							{
@@ -211,7 +211,7 @@ namespace Dapplo.Language.Implementation
 							break;
 						}
 						string propertyComment;
-						if ((comments != null) && comments.TryGetValue(propertyName, out propertyComment))
+						if (comments != null && comments.TryGetValue(propertyName, out propertyComment))
 						{
 							if (!string.IsNullOrEmpty(propertyComment))
 							{

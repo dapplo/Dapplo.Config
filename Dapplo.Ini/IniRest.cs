@@ -47,9 +47,9 @@ namespace Dapplo.Ini
 			var iniConfig = IniConfig.Get(restCommand.Application, restCommand.File);
 			var iniSection = iniConfig[restCommand.Section];
 
-			if ((restCommand.Command == IniRestCommands.Add) || (restCommand.Command == IniRestCommands.Remove))
+			if (restCommand.Command == IniRestCommands.Add || restCommand.Command == IniRestCommands.Remove)
 			{
-				if ((restCommand.Target == null) && (restCommand.Values.Count == 0))
+				if (restCommand.Target == null && restCommand.Values.Count == 0)
 				{
 					const string message = "add/remove needs a target";
 					Log.Error().WriteLine(message);

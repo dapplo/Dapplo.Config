@@ -44,7 +44,7 @@ namespace Dapplo.Ini.Converters
 		/// </summary>
 		public StringEncryptionTypeConverter()
 		{
-			if ((RgbKey == null) || (RgbIv == null))
+			if (RgbKey == null || RgbIv == null)
 			{
 				throw new InvalidOperationException("Please make sure the StringEncryptionTypeConverter.RgbKey & RgbIv are set!");
 			}

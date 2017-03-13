@@ -88,7 +88,7 @@ namespace Dapplo.Ini.Implementation
 				Behavior = propertyInfo.GetIniPropertyBehavior(),
 				DefaultValue = propertyInfo.GetDefaultValue()
 			};
-			if (!iniValue.Behavior.IsIgnoreErrorsSet && (_iniSectionAttribute != null))
+			if (!iniValue.Behavior.IsIgnoreErrorsSet && _iniSectionAttribute != null)
 			{
 				iniValue.Behavior.IgnoreErrors = _iniSectionAttribute.IgnoreErrors;
 			}
