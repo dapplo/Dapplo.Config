@@ -37,6 +37,6 @@ namespace Dapplo.Config.Tests.ConfigTests.Interfaces
 	{
 		[Description("Test property for wrong enums")]
 		[DefaultValue("Value3")]
-		IniConfigTestEnum TestWithFalseEnum { get; set; }
+		IniConfigTestValues TestWithFalseEnum { get; set; }
 	}
 }

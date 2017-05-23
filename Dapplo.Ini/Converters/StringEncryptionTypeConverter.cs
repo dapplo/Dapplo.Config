@@ -76,9 +76,9 @@ namespace Dapplo.Ini.Converters
 		/// <summary>
 		///     Can we convert from? As we decrypt from a string, the sourceType needs to be string
 		/// </summary>
-		/// <param name="context"></param>
-		/// <param name="sourceType"></param>
-		/// <returns></returns>
+		/// <param name="context">ITypeDescriptorContext</param>
+		/// <param name="sourceType">Type</param>
+		/// <returns>bool</returns>
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
 			if (sourceType == typeof(string))
@@ -91,9 +91,9 @@ namespace Dapplo.Ini.Converters
 		/// <summary>
 		///     Can we convert to? As we create a string, the destinationType needs to be string
 		/// </summary>
-		/// <param name="context"></param>
-		/// <param name="destinationType"></param>
-		/// <returns></returns>
+		/// <param name="context">ITypeDescriptorContext</param>
+		/// <param name="destinationType">Type</param>
+		/// <returns>bool</returns>
 		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
 		{
 			if (destinationType == typeof(string))
@@ -106,10 +106,10 @@ namespace Dapplo.Ini.Converters
 		/// <summary>
 		///     To decrypt call this
 		/// </summary>
-		/// <param name="context"></param>
-		/// <param name="culture"></param>
-		/// <param name="value"></param>
-		/// <returns></returns>
+		/// <param name="context">ITypeDescriptorContext</param>
+		/// <param name="culture">CultureInfo</param>
+		/// <param name="value">object</param>
+		/// <returns>object</returns>
 		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
 			if (value == null)
