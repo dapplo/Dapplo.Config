@@ -167,13 +167,13 @@ namespace Dapplo.Config.Tests.ConfigTests
 
             Assert.Contains(new Uri("http://1.dapplo.net"), iniTest.MyUris);
 
-            Assert.Equal(iniTest.Height, 185u);
+            Assert.Equal(185u, iniTest.Height);
             iniTest.Height++;
-            Assert.Equal(iniTest.Height, 186u);
+            Assert.Equal(186u, iniTest.Height);
             iniTest.Height = 185;
-            Assert.Equal(iniTest.Height, 185u);
-            Assert.Equal(iniTest.PropertySize.Width, 16);
-            Assert.Equal(iniTest.PropertyArea.Width, 100);
+            Assert.Equal(185u, iniTest.Height);
+            Assert.Equal(16, iniTest.PropertySize.Width);
+            Assert.Equal(100, iniTest.PropertyArea.Width);
             Assert.True(iniTest.WindowCornerCutShape.Count > 0);
             Assert.Equal("It works!", iniTest.SubValuewithDefault);
             Assert.Equal(IniConfigTestValues.Value2, iniTest.TestWithEnum);
@@ -200,11 +200,9 @@ namespace Dapplo.Config.Tests.ConfigTests
             var iniConfig = await InitializeAsync();
             await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
             // Test try get
-            IIniSection section;
-            Assert.True(iniConfig.TryGet("Test", out section));
-            IniValue tryGetValue;
+            Assert.True(iniConfig.TryGet("Test", out var section));
             // TODO: The generated code doesn't support out parameters
-            Assert.True(section.TryGetIniValue("WindowCornerCutShape", out tryGetValue));
+            Assert.True(section.TryGetIniValue("WindowCornerCutShape", out var tryGetValue));
             Assert.True(((IList<int>) tryGetValue.Value).Count > 0);
             Assert.False(section.TryGetIniValue("DoesNotExist", out tryGetValue));
         }
