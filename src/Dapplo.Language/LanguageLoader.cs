@@ -164,7 +164,7 @@ namespace Dapplo.Language
         /// <param name="ietf">The iso code for the language to use</param>
         /// <param name="cancellationToken">CancellationToken for the loading</param>
         /// <returns>Task</returns>
-        public async Task ChangeLanguageAsync(string ietf, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task ChangeLanguageAsync(string ietf, CancellationToken cancellationToken = default)
         {
             if (ietf == CurrentLanguage)
             {
@@ -237,16 +237,14 @@ namespace Dapplo.Language
         private void FillLanguageConfig(ILanguage language)
         {
             var prefix = language.PrefixName();
-            IDictionary<string, string> sectionTranslations;
             // ReSharper disable once SuspiciousTypeConversion.Global
             var defaultValueInterface = language as IDefaultValue;
-            var interceptor = language as IExtensibleInterceptor;
 
-            if (interceptor == null || defaultValueInterface == null)
+            if (!(language is IExtensibleInterceptor interceptor) || defaultValueInterface == null)
             {
-                throw new NullReferenceException("Should not happen.");
+                throw new InvalidOperationException("Should not happen.");
             }
-            if (!_allTranslations.TryGetValue(prefix, out sectionTranslations))
+            if (!_allTranslations.TryGetValue(prefix, out var sectionTranslations))
             {
                 // No values, reset all (only available via the PropertyTypes dictionary
                 foreach (var key in interceptor.PropertyTypes.Keys.ToList())
@@ -259,8 +257,7 @@ namespace Dapplo.Language
             // Use PropertyTypes.Keys to get ALL possible properties.
             foreach (var key in interceptor.PropertyTypes.Keys.ToList())
             {
-                string translation;
-                if (sectionTranslations.TryGetValue(key, out translation))
+                if (sectionTranslations.TryGetValue(key, out var translation))
                 {
                     interceptor.Set(key, translation);
                     sectionTranslations.Remove(key);
@@ -358,7 +355,7 @@ namespace Dapplo.Language
         /// </summary>
         /// <param name="cancellationToken">CancellationToken</param>
         /// <returns>Task</returns>
-        public async Task LoadIfNeededAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task LoadIfNeededAsync(CancellationToken cancellationToken = default)
         {
             if (!_initialReadDone)
             {
@@ -392,7 +389,7 @@ namespace Dapplo.Language
         /// </summary>
         /// <typeparam name="T">Your property interface, which extends IIniSection</typeparam>
         /// <returns>instance of type T</returns>
-        public async Task<T> RegisterAndGetAsync<T>(CancellationToken cancellationToken = default(CancellationToken)) where T : ILanguage
+        public async Task<T> RegisterAndGetAsync<T>(CancellationToken cancellationToken = default) where T : ILanguage
         {
             using (await _asyncLock.LockAsync(cancellationToken).ConfigureAwait(false))
             {
@@ -405,7 +402,7 @@ namespace Dapplo.Language
         ///     This is reloading all the .ini files, and will refill the language objects.
         /// </summary>
         /// <param name="cancellationToken">CancellationToken</param>
-        public async Task ReloadAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task ReloadAsync(CancellationToken cancellationToken = default)
         {
             _allTranslations.Clear();
             if (Files.ContainsKey(CurrentLanguage))
@@ -455,8 +452,7 @@ namespace Dapplo.Language
                 foreach (var section in newResources.Keys.ToList())
                 {
                     var properties = newResources[section];
-                    IDictionary<string, string> sectionTranslations;
-                    if (!_allTranslations.TryGetValue(section, out sectionTranslations))
+                    if (!_allTranslations.TryGetValue(section, out var sectionTranslations))
                     {
                         sectionTranslations = new Dictionary<string, string>(new AbcComparer());
                         _allTranslations.Add(section, sectionTranslations);

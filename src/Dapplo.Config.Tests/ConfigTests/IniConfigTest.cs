@@ -294,7 +294,7 @@ namespace Dapplo.Config.Tests.ConfigTests
             var iniConfig = Create();
             await ConfigureMemoryStreamAsync();
 
-            var iniTest = await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
+            await iniConfig.RegisterAndGetAsync<IIniConfigTest>().ConfigureAwait(false);
 
             var subIniTest = iniConfig.GetSubSection<IIniConfigSubInterfaceTest>();
             Assert.Equal("It works!", subIniTest.SubValuewithDefault);

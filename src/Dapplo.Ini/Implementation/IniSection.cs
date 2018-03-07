@@ -55,8 +55,7 @@ namespace Dapplo.Ini.Implementation
 			base.AfterInitialization(extensions);
 			foreach (var propertyName in InitializationErrors.Keys.ToList())
 			{
-				IniValue currentValue;
-				if (!_iniValues.TryGetValue(propertyName, out currentValue))
+				if (!_iniValues.TryGetValue(propertyName, out var currentValue))
 				{
 					continue;
 				}
@@ -181,8 +180,7 @@ namespace Dapplo.Ini.Implementation
 		/// <returns>IniValue</returns>
 		public IniValue GetIniValue(string propertyName)
 		{
-			IniValue outIniValue;
-			_iniValues.TryGetValue(propertyName, out outIniValue);
+			_iniValues.TryGetValue(propertyName, out var outIniValue);
 			return outIniValue;
 		}
 

@@ -56,7 +56,7 @@ namespace Dapplo.Ini.Implementation
 		/// <param name="cancellationToken">CancellationToken</param>
 		/// <returns>dictionary of sections - dictionaries with the properties</returns>
 		public static async Task<IDictionary<string, IDictionary<string, string>>> ReadAsync(string path, Encoding encoding,
-			CancellationToken cancellationToken = default(CancellationToken))
+			CancellationToken cancellationToken = default)
 		{
 			if (!File.Exists(path))
 			{
@@ -78,7 +78,7 @@ namespace Dapplo.Ini.Implementation
 		/// <param name="encoding">Encoding</param>
 		/// <param name="cancellationToken">CancellationToken</param>
 		/// <returns>dictionary of sections - dictionaries with the properties</returns>
-		public static async Task<IDictionary<string, IDictionary<string, string>>> ReadAsync(Stream stream, Encoding encoding, CancellationToken cancellationToken = default(CancellationToken))
+		public static async Task<IDictionary<string, IDictionary<string, string>>> ReadAsync(Stream stream, Encoding encoding, CancellationToken cancellationToken = default)
 		{
 			IDictionary<string, IDictionary<string, string>> ini = new Dictionary<string, IDictionary<string, string>>();
 
@@ -145,7 +145,7 @@ namespace Dapplo.Ini.Implementation
 		/// <param name="sectionComments">A dictionary with the optional comments for the file</param>
 		/// <param name="cancellationToken">CancellationToken</param>
 		public static async Task WriteAsync(string path, Encoding encoding, IDictionary<string, IDictionary<string, string>> sections,
-			IDictionary<string, IDictionary<string, string>> sectionComments = null, CancellationToken cancellationToken = default(CancellationToken))
+			IDictionary<string, IDictionary<string, string>> sectionComments = null, CancellationToken cancellationToken = default)
 		{
 			Log.Verbose().WriteLine("Writing ini values to {0}", path);
 			using (var fileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write, 1024))
@@ -163,7 +163,7 @@ namespace Dapplo.Ini.Implementation
 		/// <param name="sectionsComments">Optional IDictionary for comments</param>
 		/// <param name="cancellationToken">CancellationToken</param>
 		public static async Task WriteAsync(Stream stream, Encoding encoding, IDictionary<string, IDictionary<string, string>> sections,
-			IDictionary<string, IDictionary<string, string>> sectionsComments = null, CancellationToken cancellationToken = default(CancellationToken))
+			IDictionary<string, IDictionary<string, string>> sectionsComments = null, CancellationToken cancellationToken = default)
 		{
 			var isFirstLine = true;
 			var writer = new StreamWriter(stream, encoding);
@@ -193,14 +193,10 @@ namespace Dapplo.Ini.Implementation
 					if (sectionsComments != null)
 					{
 						sectionsComments.TryGetValue(sectionKey, out comments);
-						string sectionDescription;
 						// Section comment is stored with the sectionKey
-						if (comments != null && comments.TryGetValue(sectionKey, out sectionDescription))
+						if (comments != null && comments.TryGetValue(sectionKey, out var sectionDescription) && !string.IsNullOrEmpty(sectionDescription))
 						{
-							if (!string.IsNullOrEmpty(sectionDescription))
-							{
-								await writer.WriteLineAsync($";{sectionDescription}").ConfigureAwait(false);
-							}
+							await writer.WriteLineAsync($";{sectionDescription}").ConfigureAwait(false);
 						}
 					}
 					await writer.WriteLineAsync($"[{sectionKey}]").ConfigureAwait(false);
@@ -210,8 +206,8 @@ namespace Dapplo.Ini.Implementation
 						{
 							break;
 						}
-						string propertyComment;
-						if (comments != null && comments.TryGetValue(propertyName, out propertyComment))
+
+						if (comments != null && comments.TryGetValue(propertyName, out var propertyComment))
 						{
 							if (!string.IsNullOrEmpty(propertyComment))
 							{

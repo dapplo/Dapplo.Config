@@ -46,6 +46,7 @@ namespace Dapplo.Language
 		/// <param name="language">ILanguage</param>
 		/// <param name="propertyExpression"></param>
 		/// <returns>string with the default translation</returns>
+		// ReSharper disable once UnusedParameter.Global
 		public static string DefaultTranslation<TLanguage, TProp>(this TLanguage language, Expression<Func<TLanguage, TProp>> propertyExpression) where TLanguage : ILanguage
 		{
 			var propertyName = propertyExpression.GetMemberName();
@@ -70,9 +71,9 @@ namespace Dapplo.Language
 			var propertyInfo = typeof(TLanguage).GetProperty(propertyName);
 			if (type != null)
 			{
-				return (string) propertyInfo.GetValue(type);
+				return (string) propertyInfo?.GetValue(type);
 			}
-			return (string) propertyInfo.GetDefaultValue();
+			return (string) propertyInfo?.GetDefaultValue();
 		}
 	}
 }

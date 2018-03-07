@@ -72,14 +72,22 @@ namespace Dapplo.Ini
 							valueConverter = TypeDescriptor.GetConverter(genericArguments[1]);
 						}
 						var addMethodInfo = iniValueType.GetMethod("Add");
-
+						if (addMethodInfo == null)
+						{
+							Log.Error().WriteLine("The ini-value doesn't have an add method");
+							return;
+						}
 						foreach (var valueKey in restCommand.Values.Keys)
 						{
 							var key = keyConverter.ConvertFromInvariantString(valueKey);
 							if (valueConverter != null)
 							{
 								var value = valueConverter.ConvertFromInvariantString(restCommand.Values[valueKey]);
-
+								if (removeMethodInfo == null)
+								{
+									Log.Error().WriteLine("The ini-value doesn't have a remove method");
+									return;
+								}
 								// IDictionary, remove the value for the key first, so we don't need to check if it's there
 								removeMethodInfo.Invoke(iniValue.Value, new[] {key});
 								// Now add it
@@ -93,6 +101,11 @@ namespace Dapplo.Ini
 						}
 						return;
 					case IniRestCommands.Remove:
+						if (removeMethodInfo == null)
+						{
+							Log.Error().WriteLine("The ini-value doesn't have a remove method");
+							return;
+						}
 						var itemType = iniValueType.GetGenericArguments()[0];
 						var converter = TypeDescriptor.GetConverter(itemType);
 						// TODO: Fix IList<T>.Remove not found!
@@ -163,8 +176,7 @@ namespace Dapplo.Ini
 				return null;
 			}
 			segments.RemoveAt(0);
-			IniRestCommands command;
-			if (!Enum.TryParse(segments[0], true, out command))
+			if (!Enum.TryParse(segments[0], true, out IniRestCommands command))
 			{
 				var message = $"{segments[0]} is not a valid command: get/set/reset/add/remove";
 				Log.Error().WriteLine(message);

@@ -43,34 +43,23 @@ namespace Dapplo.Language.Implementation
 		/// </summary>
 		public event EventHandler<EventArgs> LanguageChanged;
 
-		/// <summary>
-		///     Implementation of the ILanguage indexer
-		/// </summary>
-		/// <param name="key">Key of the transalation to find</param>
-		/// <returns>translation</returns>
+		/// <inheritdoc />
 		string ILanguage.this[string key]
 		{
 			get
 			{
-				object value;
-				Properties.TryGetValue(key, out value);
+				Properties.TryGetValue(key, out var value);
 				return value as string;
 			}
 		}
 
-		/// <summary>
-		///     All available keys for the language object
-		/// </summary>
-		/// <returns>collection</returns>
+		/// <inheritdoc />
 		public ICollection<string> Keys()
 		{
 			return Properties.Keys;
 		}
 
-		/// <summary>
-		///     The prefix
-		/// </summary>
-		/// <returns>string</returns>
+		/// <inheritdoc />
 		public string PrefixName()
 		{
 			return _languageAttribute?.Prefix ?? typeof(T).Name;
@@ -85,11 +74,7 @@ namespace Dapplo.Language.Implementation
 			LanguageChanged?.Invoke(this, new EventArgs());
 		}
 
-		/// <summary>
-		///     Logic to check every property for read only
-		/// </summary>
-		/// <param name="propertyInfo"></param>
-		/// <param name="extensions"></param>
+		/// <inheritdoc />
 		protected override void InitProperty(PropertyInfo propertyInfo, IEnumerable<IInterceptorExtension> extensions)
 		{
 			base.InitProperty(propertyInfo, extensions);

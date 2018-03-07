@@ -373,8 +373,7 @@ namespace Dapplo.Ini
             Log.Debug().WriteLine("Deleting IniConfig {0}", identifier);
             lock (ConfigStore)
             {
-                IniConfig iniConfig;
-                if (ConfigStore.TryGetValue(identifier, out iniConfig))
+                if (ConfigStore.TryGetValue(identifier, out var iniConfig))
                 {
                     // Make sure the AsyncLock is disposed.
                     iniConfig.Dispose();
@@ -414,13 +413,30 @@ namespace Dapplo.Ini
         ///     Get all the names (from the IniSection annotation) for the sections
         /// </summary>
         /// <returns>all keys</returns>
-        public ICollection<string> SectionNames => _iniSections.Keys;
+        public ICollection<string> SectionNames {
+            get
+            {
+                lock (_iniSections)
+                {
+                    return _iniSections.Keys.ToList();
+                }
+            }
+        }
 
         /// <summary>
         ///     Get all sections
         /// </summary>
         /// <returns>all keys</returns>
-        public IEnumerable<IIniSection> Sections => _iniSections.Values;
+        public IEnumerable<IIniSection> Sections
+        {
+            get
+            {
+                lock (_iniSections)
+                {
+                    return _iniSections.Values.ToList();
+                }
+            }
+        }
 
         /// <summary>
         ///     Assign your own error handler to get all the write errors
@@ -513,8 +529,7 @@ namespace Dapplo.Ini
             }
 
             // After load
-            Action<IIniSection> afterLoadAction;
-            if (interceptor != null && _afterLoadActions.TryGetValue(interceptor.InterceptedType, out afterLoadAction))
+            if (interceptor != null && _afterLoadActions.TryGetValue(interceptor.InterceptedType, out var afterLoadAction))
             {
                 afterLoadAction(iniSection);
             }
@@ -538,10 +553,9 @@ namespace Dapplo.Ini
         /// <param name="iniSection"></param>
         private void FillSection(IDictionary<string, IDictionary<string, string>> iniSections, IIniSection iniSection)
         {
-            IDictionary<string, string> iniProperties;
             var sectionName = iniSection.GetSectionName();
             // Might be null
-            iniSections.TryGetValue(sectionName, out iniProperties);
+            iniSections.TryGetValue(sectionName, out var iniProperties);
 
             var iniValues = from iniValue in iniSection.GetIniValues().Values.ToList()
                 where iniValue.Behavior.Read
@@ -561,8 +575,7 @@ namespace Dapplo.Ini
                 }
 
                 // Test if there is a separate section for this inivalue, this is used for Dictionaries
-                IDictionary<string, string> value;
-                if (iniSections.TryGetValue($"{sectionName}-{iniValue.IniPropertyName}", out value))
+                if (iniSections.TryGetValue($"{sectionName}-{iniValue.IniPropertyName}", out var value))
                 {
                     try
                     {
@@ -580,9 +593,9 @@ namespace Dapplo.Ini
                 {
                     continue;
                 }
-                string stringValue;
+
                 // Skip values that don't have a property
-                if (!iniProperties.TryGetValue(iniValue.IniPropertyName, out stringValue))
+                if (!iniProperties.TryGetValue(iniValue.IniPropertyName, out var stringValue))
                 {
                     continue;
                 }
@@ -620,7 +633,16 @@ namespace Dapplo.Ini
         /// </summary>
         /// <param name="sectionName"></param>
         /// <returns>IIniSection</returns>
-        public IIniSection this[string sectionName] => _iniSections[sectionName];
+        public IIniSection this[string sectionName]
+        {
+            get
+            {
+                lock (_iniSections)
+                {
+                    return _iniSections[sectionName];
+                }
+            }
+        }
 
         /// <summary>
         ///     Get the specified IIniSection type
@@ -730,7 +752,7 @@ namespace Dapplo.Ini
         /// </summary>
         /// <typeparam name="T">Your property interface, which extends IIniSection</typeparam>
         /// <returns>instance of type T</returns>
-        public async Task<T> RegisterAndGetAsync<T>(CancellationToken cancellationToken = default(CancellationToken)) where T : IIniSection
+        public async Task<T> RegisterAndGetAsync<T>(CancellationToken cancellationToken = default) where T : IIniSection
         {
             IIniSection iniSection;
 
@@ -752,7 +774,7 @@ namespace Dapplo.Ini
         /// </summary>
         /// <param name="cancellationToken">CancellationToken</param>
         /// <returns>Task</returns>
-        public async Task LoadIfNeededAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task LoadIfNeededAsync(CancellationToken cancellationToken = default)
         {
             if (_initialRead == ReadFrom.Nothing)
             {
@@ -764,7 +786,7 @@ namespace Dapplo.Ini
         ///     Initialize the IniConfig by reading all the properties from the stream
         ///     If this is called directly after construction, no files will be read which is useful for testing!
         /// </summary>
-        public async Task ReadFromStreamAsync(Stream stream, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task ReadFromStreamAsync(Stream stream, CancellationToken cancellationToken = default)
         {
             _initialRead = ReadFrom.Stream;
             // This is for testing, clear all defaults & constants as the 
@@ -784,7 +806,7 @@ namespace Dapplo.Ini
         /// </summary>
         /// <param name="reset">true: ALL setting are lost</param>
         /// <param name="cancellationToken">CancellationToken</param>
-        public async Task ReloadAsync(bool reset = true, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task ReloadAsync(bool reset = true, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync(cancellationToken).ConfigureAwait(false))
             {
@@ -800,7 +822,7 @@ namespace Dapplo.Ini
         /// </summary>
         /// <param name="reset">true: ALL setting are lost</param>
         /// <param name="cancellationToken">CancellationToken</param>
-        private async Task ReloadInternalAsync(bool reset = true, CancellationToken cancellationToken = default(CancellationToken))
+        private async Task ReloadInternalAsync(bool reset = true, CancellationToken cancellationToken = default)
         {
             if (reset)
             {
@@ -829,7 +851,7 @@ namespace Dapplo.Ini
         /// <summary>
         ///     Reset all the values, in all the registered ini sections, to their defaults
         /// </summary>
-        public async Task ResetAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task ResetAsync(CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync(cancellationToken).ConfigureAwait(false))
             {
@@ -845,18 +867,16 @@ namespace Dapplo.Ini
         {
             foreach (var iniSection in GetIniSectionValues())
             {
-                var defaultValueInterface = iniSection as IDefaultValue;
-                if (defaultValueInterface != null)
+                if (iniSection is IDefaultValue defaultValueInterface)
                 {
                     foreach (var propertyName in iniSection.GetIniValues().Keys.ToList())
                     {
                         // TODO: Do we need to skip read/write protected values here?
                         defaultValueInterface.RestoreToDefault(propertyName);
                     }
-                    var intercepted = iniSection as IExtensibleInterceptor;
+
                     // Call the after load action
-                    Action<IIniSection> afterLoadAction;
-                    if (intercepted != null && _afterLoadActions.TryGetValue(intercepted.InterceptedType, out afterLoadAction))
+                    if (iniSection is IExtensibleInterceptor intercepted && _afterLoadActions.TryGetValue(intercepted.InterceptedType, out var afterLoadAction))
                     {
                         afterLoadAction(iniSection);
                     }
@@ -874,7 +894,7 @@ namespace Dapplo.Ini
         /// <summary>
         ///     Write the ini file
         /// </summary>
-        public async Task WriteAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task WriteAsync(CancellationToken cancellationToken = default)
         {
             // Make sure only one write to file is running, other request will have to wait
             using (await _asyncLock.LockAsync(cancellationToken).ConfigureAwait(false))
@@ -909,7 +929,7 @@ namespace Dapplo.Ini
         /// <param name="stream">Stream to write to</param>
         /// <param name="cancellationToken">CancellationToken</param>
         /// <returns>Task</returns>
-        public async Task WriteToStreamAsync(Stream stream, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task WriteToStreamAsync(Stream stream, CancellationToken cancellationToken = default)
         {
             using (await _asyncLock.LockAsync(cancellationToken).ConfigureAwait(false))
             {
@@ -923,7 +943,7 @@ namespace Dapplo.Ini
         /// <param name="stream"></param>
         /// <param name="cancellationToken">CancellationToken</param>
         /// <returns>Task to await</returns>
-        private async Task WriteToStreamInternalAsync(Stream stream, CancellationToken cancellationToken = default(CancellationToken))
+        private async Task WriteToStreamInternalAsync(Stream stream, CancellationToken cancellationToken = default)
         {
             var iniSectionsComments = new SortedDictionary<string, IDictionary<string, string>>();
 
@@ -932,8 +952,7 @@ namespace Dapplo.Ini
             {
                 var intercepted = iniSection as IExtensibleInterceptor;
                 // set the values before save
-                Action<IIniSection> beforeSaveAction;
-                if (intercepted != null && _beforeSaveActions.TryGetValue(intercepted.InterceptedType, out beforeSaveAction))
+                if (intercepted != null && _beforeSaveActions.TryGetValue(intercepted.InterceptedType, out var beforeSaveAction))
                 {
                     beforeSaveAction(iniSection);
                 }
@@ -947,8 +966,7 @@ namespace Dapplo.Ini
                 finally
                 {
                     // Eventually set the values back, after save
-                    Action<IIniSection> afterSaveAction;
-                    if (intercepted != null && _afterSaveActions.TryGetValue(intercepted.InterceptedType, out afterSaveAction))
+                    if (intercepted != null && _afterSaveActions.TryGetValue(intercepted.InterceptedType, out var afterSaveAction))
                     {
                         afterSaveAction(iniSection);
                     }

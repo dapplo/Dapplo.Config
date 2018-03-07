@@ -138,7 +138,7 @@ namespace Dapplo.Language.Implementation
                     if (!string.IsNullOrEmpty(assemblyLocation) && File.Exists(assemblyLocation))
                     {
                         var exeDirectory = Path.GetDirectoryName(assemblyLocation);
-                        if (!string.IsNullOrEmpty(exeDirectory) && (exeDirectory != Environment.CurrentDirectory))
+                        if (!string.IsNullOrEmpty(exeDirectory) && exeDirectory != Environment.CurrentDirectory)
                         {
                             var relativeToExe = Path.GetFullPath(Path.Combine(exeDirectory, directory))
                                 .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
