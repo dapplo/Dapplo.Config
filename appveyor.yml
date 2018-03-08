@@ -1,6 +1,6 @@
 version: 0.5.{build}
-skip_tags: true
 os: Visual Studio 2017
+skip_tags: true
 configuration: Release
 platform: Any CPU
 clone_depth: 2
@@ -9,7 +9,7 @@ branches:
   only:
   - master
 environment:
-  COVERALLS_REPO_TOKEN:
+  CoverallsRepoToken:
     secure: Rbs5lhh1vnIkleZR7LR5bq/EdRst4drUHr78SBrNjxIDf/KhH9S4sAn7xF4Q/LrZ
   NuGetApiKey:
     secure: xkDQ385+smLqdzhESsXBJvnUjK4FZ4Djjrqi9tFR29dwESIvPYOrQAqgri5Nf/fA

@@ -129,8 +129,8 @@ namespace Dapplo.Ini
 		/// </summary>
 		public object Value
 		{
-			get { return _interceptor.Get(PropertyName).Value; }
-			set { _interceptor.Set(PropertyName, value); }
+			get => _interceptor.Get(PropertyName).Value;
+			set => _interceptor.Set(PropertyName, value);
 		}
 
 		/// <summary>
