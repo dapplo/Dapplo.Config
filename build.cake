@@ -39,21 +39,7 @@ Task("Default")
 // Publish the Artifact of the Package Task to the Nexus Pro
 Task("Publish")
 	.IsDependentOn("PublishPackages")
-	.IsDependentOn("PublishCoverage")
-    .WithCriteria(() => !BuildSystem.IsLocalBuild)
-    .WithCriteria(() => !string.IsNullOrEmpty(nugetApiKey))
-    .WithCriteria(() => !isPullRequest)
-    .WithCriteria(() => isRelease)
-    .Does(()=>
-{
-    var settings = new NuGetPushSettings {
-        Source = "https://www.nuget.org/api/v2/package",
-        ApiKey = nugetApiKey
-    };
-
-    var packages = GetFiles("./artifacts/*.nupkg").Where(p => !p.FullPath.Contains("symbols"));
-    NuGetPush(packages, settings);
-});
+	.IsDependentOn("PublishCoverage");
 
 // Publish the coveralls report to Coveralls.NET
 Task("PublishCoverage")
