@@ -1,4 +1,4 @@
-﻿//  Dapplo - building blocks for desktop applications
+//  Dapplo - building blocks for desktop applications
 //  Copyright (C) 2016-2017 Dapplo
 // 
 //  For more information see: http://dapplo.net/
@@ -63,7 +63,7 @@ using Xunit;
 //
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
+// [assembly: AssemblyVersion("1.0.0")]
 
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.0.0")]
+[assembly: AssemblyFileVersion("1.0.0")]

@@ -235,26 +235,10 @@ Task("RestoreNuGetPackages")
 Task("Versioning")
     .Does(() =>
 {
-    foreach(var assemblyInfoFile in  GetFiles("./**/AssemblyInfo.cs").Where(p => p.FullPath.Contains(solutionName))) {
-        var assemblyInfo = ParseAssemblyInfo(assemblyInfoFile.FullPath);
-        CreateAssemblyInfo(assemblyInfoFile.FullPath, new AssemblyInfoSettings {
-            Version = version,
-            InformationalVersion = version,
-            FileVersion = version,
-
-            CLSCompliant = assemblyInfo.ClsCompliant,
-            Company = assemblyInfo.Company,
-            ComVisible = assemblyInfo.ComVisible,
-            Configuration = assemblyInfo.Configuration,
-            Copyright = assemblyInfo.Copyright,
-            //CustomAttributes = assemblyInfo.CustomAttributes,
-            Description = assemblyInfo.Description,
-            //Guid = assemblyInfo.Guid,
-            InternalsVisibleTo = assemblyInfo.InternalsVisibleTo,
-            Product = assemblyInfo.Product,
-            Title = assemblyInfo.Title,
-            Trademark = assemblyInfo.Trademark
-        });
+    foreach(var assemblyInfoFile in  GetFiles("./**/AssemblyInfo.cs").Where(p => p.FullPath.ToLower().Contains(solutionName))) {
+		ReplaceRegexInFiles(assemblyInfoFile.FullPath, "(?<=AssemblyInformationalVersion\\(\")(.+?)(?=\"\\))", version);
+		ReplaceRegexInFiles(assemblyInfoFile.FullPath, "(?<=AssemblyFileVersion\\(\")(.+?)(?=\"\\))", version);
+		ReplaceRegexInFiles(assemblyInfoFile.FullPath, "(?<=AssemblyVersion\\(\")(.+?)(?=\"\\))", version);
     }
 });
 
