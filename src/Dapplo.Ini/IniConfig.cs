@@ -657,10 +657,6 @@ namespace Dapplo.Ini
                 {
                     throw new ArgumentException("type is not a IIniSection");
                 }
-                if (_initialRead == ReadFrom.Nothing)
-                {
-                    throw new InvalidOperationException("Please load before retrieving the ini-sections");
-                }
                 var iniSectionAttribute = type.GetCustomAttribute<IniSectionAttribute>();
                 if (iniSectionAttribute == null)
                 {
@@ -680,7 +676,10 @@ namespace Dapplo.Ini
                     // Add before loading, so it will be handled automatically
                     _iniSections.Add(sectionName, iniSection);
                 }
-                FillSection(iniSection);
+                if (_initialRead != ReadFrom.Nothing)
+                {
+                    FillSection(iniSection);
+                }
                 return iniSection;
             }
         }
