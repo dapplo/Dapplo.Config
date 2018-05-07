@@ -287,10 +287,7 @@ namespace Dapplo.Language
         /// <returns>object (which is a ILanguage)</returns>
         public object Get(Type type)
         {
-            if (!_initialReadDone)
-            {
-                throw new InvalidOperationException("Please load before retrieving the language");
-            }
+            
             ILanguage language;
             // Make sure we lock, to prevent double adding
             lock (_languageTypeConfigs)
@@ -306,7 +303,10 @@ namespace Dapplo.Language
                 _languageTypeConfigs.Add(type, language);
                 _languageConfigs[language.PrefixName()] = language;
             }
-            FillLanguageConfig(language);
+            if (_initialReadDone)
+            {
+                FillLanguageConfig(language);
+            }
 
             return language;
         }
