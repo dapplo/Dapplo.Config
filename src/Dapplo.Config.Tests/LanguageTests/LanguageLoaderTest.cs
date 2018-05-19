@@ -68,7 +68,17 @@ namespace Dapplo.Config.Tests.LanguageTests
 			Assert.True(changed);
 		}
 
-		[Fact]
+	    [Fact]
+	    public async Task Test_Enumerable()
+	    {
+	        await _languageLoader.RegisterAndGetAsync<ILanguageLoaderTest>();
+	        await _languageLoader.RegisterAndGetAsync<ILanguageLoaderMyModuleTest>();
+            var prefixes = _languageLoader.Select(l => l.PrefixName()).ToList();
+            Assert.Contains("Test", prefixes);
+	        Assert.Contains("MyModule", prefixes);
+        }
+
+        [Fact]
 		public async Task TestExtension()
 		{
 			ILanguageLoaderTest test = null;

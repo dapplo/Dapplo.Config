@@ -22,6 +22,7 @@
 #region using
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -45,7 +46,7 @@ namespace Dapplo.Language
     ///     The language loader should be used to fill ILanguage interfaces.
     ///     It is possible to specify the directory locations, in order, where files with certain patterns should be located.
     /// </summary>
-    public sealed class LanguageLoader : IServiceProvider, IDisposable
+    public sealed class LanguageLoader : IServiceProvider, IDisposable, IEnumerable<ILanguage>
     {
         private static readonly LogSource Log = new LogSource();
         private static readonly IDictionary<string, LanguageLoader> LoaderStore = new Dictionary<string, LanguageLoader>(new AbcComparer());
@@ -589,5 +590,19 @@ namespace Dapplo.Language
         }
 
         #endregion
+        
+        /// <inheritdoc />
+        public IEnumerator<ILanguage> GetEnumerator()
+        {
+            lock (_languageConfigs)
+            {
+                return _languageConfigs.Values.ToList().GetEnumerator();
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

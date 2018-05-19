@@ -52,6 +52,6 @@ namespace Dapplo.Ini
 		/// <summary>
 		///     Name of the section in the ini file
 		/// </summary>
-		public string Name { get; private set; }
+		public string Name { get; }
 	}
 }

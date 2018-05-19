@@ -45,6 +45,6 @@ namespace Dapplo.Language
 		/// <summary>
 		///     Name of the section in the ini file
 		/// </summary>
-		public string Prefix { get; private set; }
+		public string Prefix { get; }
 	}
 }
