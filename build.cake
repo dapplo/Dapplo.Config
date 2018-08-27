@@ -2,14 +2,13 @@
 #tool "OpenCover"
 #tool "GitVersion.CommandLine"
 #tool "docfx.console"
-#tool "coveralls.net"
+//#tool "coveralls.net"
+#tool nuget:?package=coveralls.net&version=0.7.0
 #tool "PdbGit"
 // Needed for Cake.Compression, as described here: https://github.com/akordowski/Cake.Compression/issues/3
-#addin "SharpZipLib"
 #addin "Cake.FileHelpers"
 #addin "Cake.DocFx"
 #addin "Cake.Coveralls"
-#addin "Cake.Compression"
 
 var target = Argument("target", "Build");
 var configuration = Argument("configuration", "release");
@@ -119,7 +118,7 @@ Task("Documentation")
 
     CreateDirectory("artifacts");
     // Archive the generated site
-    ZipCompress("./doc/_site", "./artifacts/site.zip");
+    Zip("./doc/_site", "./artifacts/site.zip");
 });
 
 // Run the XUnit tests via OpenCover, so be get an coverage.xml report

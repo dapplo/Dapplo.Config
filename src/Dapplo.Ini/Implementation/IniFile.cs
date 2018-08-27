@@ -28,6 +28,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapplo.Log;
+using Dapplo.Utils;
 
 #endregion
 
@@ -80,11 +81,11 @@ namespace Dapplo.Ini.Implementation
 		/// <returns>dictionary of sections - dictionaries with the properties</returns>
 		public static async Task<IDictionary<string, IDictionary<string, string>>> ReadAsync(Stream stream, Encoding encoding, CancellationToken cancellationToken = default)
 		{
-			IDictionary<string, IDictionary<string, string>> ini = new Dictionary<string, IDictionary<string, string>>();
+			IDictionary<string, IDictionary<string, string>> ini = new Dictionary<string, IDictionary<string, string>>(AbcComparer.Instance);
 
 			// Do not dispose the reader, this will close the supplied stream and that is not our job!
 			var reader = new StreamReader(stream, encoding);
-			var nameValues = new Dictionary<string, string>();
+			var nameValues = new Dictionary<string, string>(AbcComparer.Instance);
 			while (!reader.EndOfStream && !cancellationToken.IsCancellationRequested)
 			{
 				var line = await reader.ReadLineAsync().ConfigureAwait(false);
@@ -100,7 +101,7 @@ namespace Dapplo.Ini.Implementation
 				if (cleanLine.StartsWith(SectionStart))
 				{
 					var section = line.Replace(SectionStart, string.Empty).Replace(SectionEnd, string.Empty).Trim();
-					nameValues = new Dictionary<string, string>();
+					nameValues = new Dictionary<string, string>(AbcComparer.Instance);
 					ini.Add(section, nameValues);
 				}
 				else

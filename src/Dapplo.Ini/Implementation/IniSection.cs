@@ -44,7 +44,7 @@ namespace Dapplo.Ini.Implementation
 	public class IniSection<T> : ExtensibleInterceptorImpl<T>, IIniSection<T>, IIniSectionInternal
 	{
 		private readonly IniSectionAttribute _iniSectionAttribute = typeof(T).GetCustomAttribute<IniSectionAttribute>();
-		private readonly IDictionary<string, IniValue> _iniValues = new Dictionary<string, IniValue>(new AbcComparer());
+		private readonly IDictionary<string, IniValue> _iniValues = new Dictionary<string, IniValue>(AbcComparer.Instance);
 
 		/// <summary>
 		///     This is called by the ExtensibleInterceptorImpl with a list of extensions

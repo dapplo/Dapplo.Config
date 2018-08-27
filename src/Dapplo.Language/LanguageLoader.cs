@@ -49,12 +49,12 @@ namespace Dapplo.Language
     public sealed class LanguageLoader : IServiceProvider, IDisposable, IEnumerable<ILanguage>
     {
         private static readonly LogSource Log = new LogSource();
-        private static readonly IDictionary<string, LanguageLoader> LoaderStore = new Dictionary<string, LanguageLoader>(new AbcComparer());
-        private readonly IDictionary<string, IDictionary<string, string>> _allTranslations = new Dictionary<string, IDictionary<string, string>>(new AbcComparer());
+        private static readonly IDictionary<string, LanguageLoader> LoaderStore = new Dictionary<string, LanguageLoader>(AbcComparer.Instance);
+        private readonly IDictionary<string, IDictionary<string, string>> _allTranslations = new Dictionary<string, IDictionary<string, string>>(AbcComparer.Instance);
         private readonly string _applicationName;
         private readonly AsyncLock _asyncLock = new AsyncLock();
         private readonly Regex _filePattern;
-        private readonly IDictionary<string, ILanguage> _languageConfigs = new Dictionary<string, ILanguage>(new AbcComparer());
+        private readonly IDictionary<string, ILanguage> _languageConfigs = new Dictionary<string, ILanguage>(AbcComparer.Instance);
         private readonly IDictionary<Type, ILanguage> _languageTypeConfigs = new Dictionary<Type, ILanguage>();
         private bool _initialReadDone;
 
@@ -455,7 +455,7 @@ namespace Dapplo.Language
                     var properties = newResources[section];
                     if (!_allTranslations.TryGetValue(section, out var sectionTranslations))
                     {
-                        sectionTranslations = new Dictionary<string, string>(new AbcComparer());
+                        sectionTranslations = new Dictionary<string, string>(AbcComparer.Instance);
                         _allTranslations.Add(section, sectionTranslations);
                     }
                     foreach (var key in properties.Keys.ToList())
