@@ -85,7 +85,7 @@ namespace Dapplo.Ini.Implementation
 
 			// Do not dispose the reader, this will close the supplied stream and that is not our job!
 			var reader = new StreamReader(stream, encoding);
-			var nameValues = new Dictionary<string, string>(AbcComparer.Instance);
+			IDictionary<string, string> nameValues = new Dictionary<string, string>(AbcComparer.Instance);
 			while (!reader.EndOfStream && !cancellationToken.IsCancellationRequested)
 			{
 				var line = await reader.ReadLineAsync().ConfigureAwait(false);
@@ -100,7 +100,15 @@ namespace Dapplo.Ini.Implementation
 				}
 				if (cleanLine.StartsWith(SectionStart))
 				{
-					var section = line.Replace(SectionStart, string.Empty).Replace(SectionEnd, string.Empty).Trim();
+					var section = line
+					    .Replace(SectionStart, string.Empty)
+					    .Replace(SectionEnd, string.Empty)
+					    .Trim();
+				    if (ini.TryGetValue(section, out nameValues))
+				    {
+                        // A section was already available, just take it and continue filling it
+				        continue;
+				    }
 					nameValues = new Dictionary<string, string>(AbcComparer.Instance);
 					ini.Add(section, nameValues);
 				}
