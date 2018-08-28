@@ -841,6 +841,7 @@ namespace Dapplo.Ini
 
             // Reset the sections that have already been registered
             FillSections();
+            Log.Verbose().WriteLine("Finished reading and filling sections.");
         }
 
         #endregion

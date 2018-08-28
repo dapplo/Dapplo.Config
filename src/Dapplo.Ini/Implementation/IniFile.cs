@@ -67,7 +67,9 @@ namespace Dapplo.Ini.Implementation
 			Log.Verbose().WriteLine("Reading ini file from {0}", path);
 			using (var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 1024))
 			{
-				return await ReadAsync(fileStream, encoding, cancellationToken).ConfigureAwait(false);
+				var result = await ReadAsync(fileStream, encoding, cancellationToken).ConfigureAwait(false);
+			    Log.Verbose().WriteLine("Finished reading ini file from {0}", path);
+			    return result;
 			}
 		}
 
