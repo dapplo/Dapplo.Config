@@ -47,21 +47,15 @@ namespace Dapplo.Ini
     /// </summary>
     public sealed class IniConfig : IServiceProvider, IDisposable
     {
-        private const string Defaults = "-defaults";
-        private const string Constants = "-constants";
-        private const string IniExtension = "ini";
         private static readonly LogSource Log = new LogSource();
         private static readonly IDictionary<string, IniConfig> ConfigStore = new Dictionary<string, IniConfig>();
         private readonly IDictionary<Type, Action<IIniSection>> _afterLoadActions = new Dictionary<Type, Action<IIniSection>>();
         private readonly IDictionary<Type, Action<IIniSection>> _afterSaveActions = new Dictionary<Type, Action<IIniSection>>();
-        private readonly string _applicationName;
         private readonly AsyncLock _asyncLock = new AsyncLock();
         private readonly IDictionary<Type, Action<IIniSection>> _beforeSaveActions = new Dictionary<Type, Action<IIniSection>>();
-        private readonly string _fileName;
-        private readonly string _fixedDirectory;
         private readonly IDictionary<string, IIniSection> _iniSections = new SortedDictionary<string, IIniSection>();
         private readonly Timer _saveTimer;
-        private readonly bool _watchFileChanges;
+        private readonly IniFileConfig _iniFileConfig;
         private FileSystemWatcher _configFileWatcher;
         private IDictionary<string, IDictionary<string, string>> _constants;
         private IDictionary<string, IDictionary<string, string>> _defaults;
@@ -78,26 +72,19 @@ namespace Dapplo.Ini
         /// <summary>
         ///     Setup the management of an .ini file location
         /// </summary>
-        /// <param name="applicationName"></param>
-        /// <param name="fileName"></param>
-        /// <param name="fixedDirectory">Specify a path if you don't want to use the default loading</param>
-        /// <param name="autoSaveInterval">0 to disable or the amount of milliseconds that pending changes are written</param>
-        /// <param name="watchFileChanges">True to enable file system watching</param>
-        /// <param name="saveOnExit">True to enable file system watching</param>
-        public IniConfig(string applicationName, string fileName, string fixedDirectory = null, uint autoSaveInterval = 1000, bool watchFileChanges = true, bool saveOnExit = true)
+        /// <param name="iniFileConfig">IniFileConfig</param>
+         public IniConfig(IniFileConfig iniFileConfig)
         {
-            _applicationName = applicationName;
-            _fileName = fileName;
-            _fixedDirectory = fixedDirectory;
-            _watchFileChanges = watchFileChanges;
-            // Look for the ini file, this is only done 1 time.
-            IniLocation = CreateFileLocation(false, string.Empty, _fixedDirectory);
+            _iniFileConfig = iniFileConfig;
 
-            Log.Verbose().WriteLine("Created IniConfig for application {0}, filename is {1}", applicationName, fileName);
+            // Look for the ini file, this is only done 1 time.
+            IniLocation = CreateFileLocation(false, string.Empty, iniFileConfig.FixedDirectory);
+
+            Log.Verbose().WriteLine("Created IniConfig for application {0}, filename is {1}", iniFileConfig.ApplicationName, iniFileConfig.FileName);
             // Configure the auto save
-            if (autoSaveInterval > 0)
+            if (iniFileConfig.AutoSaveInterval > 0)
             {
-                _saveTimer = CreateAutosaveTimer(autoSaveInterval);
+                _saveTimer = CreateAutosaveTimer(iniFileConfig.AutoSaveInterval);
             }
 
             // Add error handlers for writing
@@ -121,10 +108,10 @@ namespace Dapplo.Ini
             lock (ConfigStore)
             {
                 // Used for lookups
-                ConfigStore.Add($"{applicationName}.{fileName}", this);
+                ConfigStore.Add($"{iniFileConfig.ApplicationName}.{iniFileConfig.FileName}", this);
             }
-            Log.Debug().WriteLine("Added IniConfig {0}.{1}", applicationName, fileName);
-            if (saveOnExit)
+            Log.Debug().WriteLine("Added IniConfig {0}.{1}", iniFileConfig.ApplicationName, _iniFileConfig.FileName);
+            if (iniFileConfig.SaveOnExit)
             {
                 // Make sure the configuration is save when the domain is exited
                 AppDomain.CurrentDomain.ProcessExit += (sender, eventArgs) => Task.Run(async () =>
@@ -236,7 +223,7 @@ namespace Dapplo.Ini
             string file = null;
             if (specifiedDirectory != null)
             {
-                file = Path.Combine(specifiedDirectory, $"{_fileName}{postfix}.{IniExtension}");
+                file = Path.Combine(specifiedDirectory, $"{_iniFileConfig.FileName}{postfix}.{_iniFileConfig.IniExtension}");
             }
             else
             {
@@ -245,13 +232,13 @@ namespace Dapplo.Ini
                     var startPath = FileLocations.StartupDirectory;
                     if (startPath != null)
                     {
-                        file = Path.Combine(startPath, $"{_fileName}{postfix}.{IniExtension}");
+                        file = Path.Combine(startPath, $"{_iniFileConfig.FileName}{postfix}.{_iniFileConfig.IniExtension}");
                     }
                 }
                 if (file == null || !File.Exists(file))
                 {
-                    var appDataDirectory = FileLocations.RoamingAppDataDirectory(_applicationName);
-                    file = Path.Combine(appDataDirectory, $"{_fileName}{postfix}.{IniExtension}");
+                    var appDataDirectory = FileLocations.RoamingAppDataDirectory(_iniFileConfig.ApplicationName);
+                    file = Path.Combine(appDataDirectory, $"{_iniFileConfig.FileName}{postfix}.{_iniFileConfig.IniExtension}");
                 }
             }
             Log.Verbose().WriteLine("File location: {0}", file);
@@ -264,7 +251,7 @@ namespace Dapplo.Ini
         /// <param name="enable">true to enable the watcher</param>
         private void EnableFileWatcher(bool enable)
         {
-            if (!_watchFileChanges)
+            if (!_iniFileConfig.WatchFileChanges)
             {
                 return;
             }
@@ -655,9 +642,9 @@ namespace Dapplo.Ini
             {
                 if (!typeof(IIniSection).IsAssignableFrom(type))
                 {
-                    throw new ArgumentException("type is not a IIniSection");
+                    throw new ArgumentException($"{type.Name} is not a IIniSection");
                 }
-                var iniSectionAttribute = type.GetCustomAttribute<IniSectionAttribute>();
+                var iniSectionAttribute = type.GetAttribute<IniSectionAttribute>();
                 if (iniSectionAttribute == null)
                 {
                     throw new ArgumentException($"{type.Name} doesn't have an IniSectionAttribute.");
@@ -791,7 +778,7 @@ namespace Dapplo.Ini
             // This is for testing, clear all defaults & constants as the 
             _defaults = null;
             _constants = null;
-            _ini = await IniFile.ReadAsync(stream, Encoding.UTF8, cancellationToken).ConfigureAwait(false);
+            _ini = await IniFile.ReadAsync(stream, _iniFileConfig.FileEncoding, cancellationToken).ConfigureAwait(false);
 
             // Reset the current sections
             FillSections();
@@ -827,9 +814,9 @@ namespace Dapplo.Ini
             {
                 ResetInternal();
             }
-            _defaults = await IniFile.ReadAsync(CreateFileLocation(true, Defaults, _fixedDirectory), Encoding.UTF8, cancellationToken).ConfigureAwait(false);
-            _constants = await IniFile.ReadAsync(CreateFileLocation(true, Constants, _fixedDirectory), Encoding.UTF8, cancellationToken).ConfigureAwait(false);
-            var newIni = await IniFile.ReadAsync(IniLocation, Encoding.UTF8, cancellationToken).ConfigureAwait(false);
+            _defaults = await IniFile.ReadAsync(CreateFileLocation(true, _iniFileConfig.DefaultsPostfix, _iniFileConfig.FixedDirectory), _iniFileConfig.FileEncoding, cancellationToken).ConfigureAwait(false);
+            _constants = await IniFile.ReadAsync(CreateFileLocation(true, _iniFileConfig.ContantsPostfix, _iniFileConfig.FixedDirectory), _iniFileConfig.FileEncoding, cancellationToken).ConfigureAwait(false);
+            var newIni = await IniFile.ReadAsync(IniLocation, _iniFileConfig.FileEncoding, cancellationToken).ConfigureAwait(false);
 
             // As we readed the file, make sure we enable the event raising (if the file watcher is wanted)
             EnableFileWatcher(true);
@@ -974,7 +961,7 @@ namespace Dapplo.Ini
                     internalIniSection?.OnSaved();
                 }
             }
-            await IniFile.WriteAsync(stream, Encoding.UTF8, _ini, iniSectionsComments, cancellationToken).ConfigureAwait(false);
+            await IniFile.WriteAsync(stream, _iniFileConfig.FileEncoding, _ini, iniSectionsComments, cancellationToken).ConfigureAwait(false);
             await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
         }
 

@@ -46,8 +46,14 @@ namespace Dapplo.Config.Tests.ConfigTests
 		[Fact]
 		public async Task TestHttpExtensionsDefaultReadWrite()
 		{
-			// Important to disable the auto-save, otherwise we get test issues
-			var iniConfig = new IniConfig("Dapplo", "dapplo.httpextensions", autoSaveInterval: 0, saveOnExit: false);
+            var iniFileConfig = IniFileConfigBuilder.Create()
+                .WithApplicationName("Dapplo")
+                .WithFilename("dapplo.httpextensions")
+                .WithoutSaveOnExit()
+                .BuildApplicationConfig();
+
+            // Important to disable the auto-save, otherwise we get test issues
+            var iniConfig = new IniConfig(iniFileConfig);
 			using (var testMemoryStream = new MemoryStream())
 			{
 				await IniConfig.Current.ReadFromStreamAsync(testMemoryStream).ConfigureAwait(false);

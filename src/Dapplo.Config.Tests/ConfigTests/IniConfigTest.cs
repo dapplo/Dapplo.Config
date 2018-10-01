@@ -74,8 +74,14 @@ namespace Dapplo.Config.Tests.ConfigTests
 
         private static IniConfig Create()
         {
+            var iniFileConfig = IniFileConfigBuilder.Create()
+                .WithApplicationName("Dapplo")
+                .WithFilename("dapplo")
+                .WithoutSaveOnExit()
+                .BuildApplicationConfig();
+
             // Important to disable the auto-save, otherwise we get test issues
-            return new IniConfig("Dapplo", "dapplo", autoSaveInterval: 0, saveOnExit: false);
+            return new IniConfig(iniFileConfig);
         }
 
         private static async Task<IniConfig> InitializeAsync()

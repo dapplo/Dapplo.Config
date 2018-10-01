@@ -43,7 +43,7 @@ namespace Dapplo.Ini.Implementation
 	/// </summary>
 	public class IniSection<T> : ExtensibleInterceptorImpl<T>, IIniSection<T>, IIniSectionInternal
 	{
-		private readonly IniSectionAttribute _iniSectionAttribute = typeof(T).GetCustomAttribute<IniSectionAttribute>();
+		private readonly IniSectionAttribute _iniSectionAttribute = typeof(T).GetAttribute<IniSectionAttribute>();
 		private readonly IDictionary<string, IniValue> _iniValues = new Dictionary<string, IniValue>(AbcComparer.Instance);
 
 		/// <summary>
