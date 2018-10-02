@@ -61,6 +61,7 @@ namespace Dapplo.Config.Tests
 
 			return observable.Subscribe(pce => updateAction(pce.Sender as ILanguage));
 		}
+/*
 
 		/// <summary>
 		///     Automatically call the update action when the Saved fires
@@ -108,6 +109,6 @@ namespace Dapplo.Config.Tests
 				h => iniSection.Saving += h,
 				h => iniSection.Saving -= h);
 			return observable.Subscribe(pce => eventAction(pce.EventArgs));
-		}
+		}*/
 	}
 }

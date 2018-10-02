@@ -20,6 +20,7 @@
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -32,6 +33,7 @@ using Dapplo.Log;
 using Dapplo.Utils;
 using Dapplo.Utils.Extensions;
 
+
 namespace Dapplo.Config
 {
     /// <summary>
@@ -40,7 +42,8 @@ namespace Dapplo.Config
     /// <typeparam name="T">The type of the configuration interface this class implements</typeparam>
     public abstract class ConfigurationBase<T> : IConfiguration<T>
     {
-        private static readonly LogSource Log = new LogSource();
+        // ReSharper disable once StaticMemberInGenericType
+        protected static readonly LogSource Log = new LogSource();
         private IDictionary<string, object> _properties;
         private readonly IDictionary<string, PropertyInfo> _propertyInfos = new Dictionary<string, PropertyInfo>(AbcComparer.Instance);
 
@@ -56,39 +59,57 @@ namespace Dapplo.Config
         /// (Re)Initialize this class with new properties
         /// </summary>
         /// <param name="properties">IDictionary with the properties, or null for empty</param>
-        public void Initialize(IDictionary<string, object> properties = null)
+        private void Initialize(IDictionary<string, object> properties = null)
         {
-            _properties = properties ?? new Dictionary<string, object>(AbcComparer.Instance);
+            _properties = properties != null ? new ConcurrentDictionary<string, object>(properties, AbcComparer.Instance) : new ConcurrentDictionary<string, object>(AbcComparer.Instance);
             if (_propertyInfos.Count == 0)
             {
-                var allPropertyInfos = GetAllProperties(typeof(T));
-                foreach (var propertyInfo in allPropertyInfos)
+                foreach (var propertyInfo in GetAllProperties(typeof(T)))
                 {
-                    if (_propertyInfos.ContainsKey(propertyInfo.Name))
-                    {
-                        continue;
-                    }
                     if (propertyInfo.Name == "Item")
                     {
-                        continue;
+                        return;
                     }
-                    // Cache values
-                    _propertyInfos[propertyInfo.Name] = propertyInfo;
-                    // Retrieve the tags
-                    InitTagProperty(propertyInfo);
+                    OneTimePropertyInitializer(propertyInfo);
                 }
             }
 
             // Reset to defaults if no value specified
             foreach (var propertyInfo in _propertyInfos.Values)
             {
-                if (_properties.ContainsKey(propertyInfo.Name))
-                {
-                    continue;
-                }
-                // Set a default, if available
-                RestoreToDefault(propertyInfo.Name);
+                PropertyInitializer(propertyInfo);
             }
+        }
+
+        /// <summary>
+        /// This is only called when the type is initially created, per property
+        /// </summary>
+        /// <param name="propertyInfo">PropertyInfo</param>
+        protected virtual void OneTimePropertyInitializer(PropertyInfo propertyInfo)
+        {
+            if (_propertyInfos.ContainsKey(propertyInfo.Name))
+            {
+                return;
+            }
+            // Cache values
+            _propertyInfos[propertyInfo.Name] = propertyInfo;
+            // Retrieve the tags
+            InitTagProperty(propertyInfo);
+        }
+
+        /// <summary>
+        /// This is called when the type is initially created or cloned, per property
+        /// </summary>
+        /// <param name="propertyInfo">PropertyInfo</param>
+        protected virtual void PropertyInitializer(PropertyInfo propertyInfo)
+        {
+            // Do not set a default when there is a value
+            if (_propertyInfos.ContainsKey(propertyInfo.Name))
+            {
+                return;
+            }
+            // Set a default
+            RestoreToDefault(propertyInfo.Name);
         }
 
         /// <summary>
@@ -100,7 +121,7 @@ namespace Dapplo.Config
         public virtual object this[string key]
         {
             get => GetValue(key);
-            set => SetValue(PropertyInfoFor(key), value);
+            set => Setter(PropertyInfoFor(key), value);
         }
 
         /// <inheritdoc />
@@ -138,12 +159,11 @@ namespace Dapplo.Config
         #region Interceptor
 
         /// <summary>
-        /// Get the backing value for the specified property
+        /// This is the internal way of getting information for a property
         /// </summary>
         /// <param name="propertyName">string</param>
-        /// <returns>TProperty</returns>
-        [GetInterceptor]
-        protected object GetValue(string propertyName)
+        /// <returns></returns>
+        protected GetInfo GetValue(string propertyName)
         {
             var propertyInfo = PropertyInfoFor(propertyName);
 
@@ -159,7 +179,18 @@ namespace Dapplo.Config
             TransactionalGetter(getInfo);
             // If more getters need to be called, check getInfo.CanContinue before calling them
 
-            return getInfo.Value;
+            return getInfo;
+        }
+
+        /// <summary>
+        /// Get the backing value for the specified property
+        /// </summary>
+        /// <param name="propertyName">string</param>
+        /// <returns>TProperty</returns>
+        [GetInterceptor]
+        protected object Getter(string propertyName)
+        {
+            return GetValue(propertyName).Value;
         }
 
         /// <summary>
@@ -168,7 +199,7 @@ namespace Dapplo.Config
         /// <param name="propertyInfo">PropertyInfo</param>
         /// <param name="newValue">object</param>
         [SetInterceptor]
-        protected void SetValue(PropertyInfo propertyInfo, object newValue)
+        protected void Setter(PropertyInfo propertyInfo, object newValue)
         {
             var hasOldValue = _properties.TryGetValue(propertyInfo.Name, out var oldValue);
 
@@ -379,13 +410,13 @@ namespace Dapplo.Config
 
             if (defaultValue != null)
             {
-                SetValue(propertyInfo, defaultValue);
+                Setter(propertyInfo, defaultValue);
                 return;
             }
             try
             {
                 defaultValue = propertyInfo.PropertyType.CreateInstance();
-                SetValue(propertyInfo, defaultValue);
+                Setter(propertyInfo, defaultValue);
             }
             catch (Exception ex)
             {
@@ -577,7 +608,7 @@ namespace Dapplo.Config
                 // Call the set for every property, this will invoke every setter (NPC etc)
                 foreach (var transactionProperty in _transactionProperties)
                 {
-                    SetValue(PropertyInfoFor(transactionProperty.Key), transactionProperty.Value);
+                    Setter(PropertyInfoFor(transactionProperty.Key), transactionProperty.Value);
                 }
                 // Clear all the properties, so the transaction is clean
                 _transactionProperties.Clear();
@@ -687,7 +718,7 @@ namespace Dapplo.Config
         /// <inheritdoc />
         public object ShallowClone()
         {
-            var clonedValue = Activator.CreateInstance(GetType()) as IConfiguration;
+            var clonedValue = Activator.CreateInstance(GetType()) as ConfigurationBase<T>;
             clonedValue?.Initialize(new Dictionary<string, object>(_properties, AbcComparer.Instance));
             return clonedValue;
         }

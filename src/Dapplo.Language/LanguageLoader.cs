@@ -32,8 +32,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Dapplo.InterfaceImpl;
-using Dapplo.InterfaceImpl.Extensions;
+using Dapplo.Config.Interfaces;
 using Dapplo.Language.Implementation;
 using Dapplo.Log;
 using Dapplo.Utils;
@@ -57,15 +56,6 @@ namespace Dapplo.Language
         private readonly IDictionary<string, ILanguage> _languageConfigs = new Dictionary<string, ILanguage>(AbcComparer.Instance);
         private readonly IDictionary<Type, ILanguage> _languageTypeConfigs = new Dictionary<Type, ILanguage>();
         private bool _initialReadDone;
-
-        /// <summary>
-        ///     Define some static constants which could not be assigned directly
-        /// </summary>
-        static LanguageLoader()
-        {
-            InterceptorFactory.DefineBaseTypeForInterface(typeof(ILanguage), typeof(Language<>));
-            InterceptorFactory.DefineDefaultInterfaces(typeof(ILanguage), new[] {typeof(IDefaultValue), typeof(IHasChanges)});
-        }
 
         /// <summary>
         ///     Create a LanguageLoader, this is your container for all the ILanguage implementing interfaces.

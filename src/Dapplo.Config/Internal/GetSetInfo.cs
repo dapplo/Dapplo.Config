@@ -26,7 +26,7 @@ namespace Dapplo.Config.Internal
     /// <summary>
     /// Information for a Get or Set invocation
     /// </summary>
-    internal class GetSetInfo
+    public class GetSetInfo
     {
         /// <summary>
         ///     Can the proxy continue with other getter/setters?

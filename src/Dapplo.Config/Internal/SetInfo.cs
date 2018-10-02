@@ -21,7 +21,7 @@
 
 namespace Dapplo.Config.Internal
 {
-    internal class SetInfo : GetSetInfo
+    public class SetInfo : GetSetInfo
     {
         /// <summary>
         ///     Does property have an old value?

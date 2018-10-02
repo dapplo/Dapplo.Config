@@ -26,13 +26,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapplo.Ini.Implementation;
-using Dapplo.InterfaceImpl;
-using Dapplo.InterfaceImpl.Extensions;
+using Dapplo.Config.Interfaces;
 using Dapplo.Log;
 using Dapplo.Utils;
 using Dapplo.Utils.Extensions;
@@ -61,13 +58,6 @@ namespace Dapplo.Ini
         private IDictionary<string, IDictionary<string, string>> _defaults;
         private IDictionary<string, IDictionary<string, string>> _ini = new SortedDictionary<string, IDictionary<string, string>>();
         private ReadFrom _initialRead = ReadFrom.Nothing;
-
-        static IniConfig()
-        {
-            InterceptorFactory.DefineBaseTypeForInterface(typeof(IIniSection), typeof(IniSection<>));
-            // Make sure every IIniSection gets IDefaultValue and IHasChanges
-            InterceptorFactory.DefineDefaultInterfaces(typeof(IIniSection), new[] {typeof(IDefaultValue), typeof(IHasChanges)});
-        }
 
         /// <summary>
         ///     Setup the management of an .ini file location

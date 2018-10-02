@@ -23,7 +23,6 @@
 
 using System;
 using System.ComponentModel;
-using Dapplo.InterfaceImpl;
 
 #endregion
 
@@ -34,15 +33,15 @@ namespace Dapplo.Ini
 	/// </summary>
 	public class IniValue
 	{
-		private readonly IExtensibleInterceptor _interceptor;
+		private readonly IIniSection _iniSection;
 
-		/// <summary>
-		///     The constructor of an IniValue
-		/// </summary>
-		/// <param name="interceptor"></param>
-		public IniValue(IExtensibleInterceptor interceptor)
+        /// <summary>
+        ///     The constructor of an IniValue
+        /// </summary>
+        /// <param name="iniSection">IIniSection</param>
+        public IniValue(IIniSection iniSection)
 		{
-			_interceptor = interceptor;
+			_iniSection = iniSection;
 		}
 
 		/// <summary>
@@ -79,7 +78,7 @@ namespace Dapplo.Ini
 		/// <summary>
 		///     Check if this IniValue has a value
 		/// </summary>
-		public bool HasValue => _interceptor.Properties.ContainsKey(PropertyName);
+		public bool HasValue => _iniSection.TryGetIniValue(PropertyName, out var _);
 
 		/// <summary>
 		///     Name of the property in the file, this could be different
@@ -106,15 +105,13 @@ namespace Dapplo.Ini
 				}
 
 				// Don't write if there is no value
-				if (!_interceptor.Properties.ContainsKey(PropertyName))
+				if (!_iniSection.TryGetIniValue(PropertyName, out var iniValue))
 				{
 					return false;
-				}
-
-				var value = _interceptor.Properties[PropertyName];
+                }
 
 				// Check if our value is default
-				var isDefault = Equals(value, DefaultValue);
+				var isDefault = Equals(iniValue.Value, DefaultValue);
 				return !isDefault;
 			}
 		}
@@ -129,8 +126,8 @@ namespace Dapplo.Ini
 		/// </summary>
 		public object Value
 		{
-			get => _interceptor.Get(PropertyName).Value;
-			set => _interceptor.Set(PropertyName, value);
+			get;
+			set;
 		}
 
 		/// <summary>
@@ -143,7 +140,7 @@ namespace Dapplo.Ini
 		/// </summary>
 		public void ResetToDefault()
 		{
-			_interceptor.Set(PropertyName, DefaultValue);
+			_iniSection.RestoreToDefault(PropertyName);
 		}
 	}
 }

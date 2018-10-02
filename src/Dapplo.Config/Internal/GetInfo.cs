@@ -24,7 +24,7 @@ namespace Dapplo.Config.Internal
     /// <summary>
     ///     This class contains all the information for the getter actions
     /// </summary>
-    internal class GetInfo : GetSetInfo
+    public class GetInfo : GetSetInfo
     {
         /// <summary>
         ///     The value of the property

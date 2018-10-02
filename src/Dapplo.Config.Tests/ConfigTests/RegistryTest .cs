@@ -21,11 +21,9 @@
 
 #region using
 
-using Dapplo.Config.Tests.ConfigTests.Interfaces;
-using Dapplo.InterfaceImpl;
+using Dapplo.Config.Tests.ConfigTests.Entities;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
-using Dapplo.Registry.Implementation;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -46,10 +44,7 @@ namespace Dapplo.Config.Tests.ConfigTests
 		[Fact]
 		public void TestRegistryRead()
 		{
-			// TODO: Fix that we need this
-			InterceptorFactory.RegisterExtension(typeof(RegistryExtension<>));
-
-			var registryTest = InterceptorFactory.New<IRegistryTest>();
+			var registryTest = new RegistryTestImpl();
 
 			// assume that the product name is set
 			Assert.NotNull(registryTest.ProductName);
