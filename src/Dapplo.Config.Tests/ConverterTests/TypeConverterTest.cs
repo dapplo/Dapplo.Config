@@ -51,13 +51,13 @@ namespace Dapplo.Config.Tests.ConverterTests
 			Assert.True(stringEncryptionTypeConverter.CanConvertTo(typeof(string)));
 			Assert.False(stringEncryptionTypeConverter.CanConvertTo(typeof(int)));
 			var encrypted = stringEncryptionTypeConverter.ConvertToString("Robin");
-			var decryped = stringEncryptionTypeConverter.ConvertFromString(encrypted);
+			var decrypted = stringEncryptionTypeConverter.ConvertFromString(encrypted);
 
-			Assert.Equal("Robin", decryped);
+			Assert.Equal("Robin", decrypted);
 
 			var encrypted1 = typeof(string).ConvertOrCastValueToType("Robin", stringEncryptionTypeConverter, convertFrom: false);
-			var decryped2 = typeof(string).ConvertOrCastValueToType(encrypted1, stringEncryptionTypeConverter);
-			Assert.Equal("Robin", decryped2);
+			var decrypted2 = typeof(string).ConvertOrCastValueToType(encrypted1, stringEncryptionTypeConverter);
+			Assert.Equal("Robin", decrypted2);
 		}
 	}
 }

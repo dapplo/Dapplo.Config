@@ -35,19 +35,19 @@ namespace Dapplo.Config.Tests.ConfigTests.Interfaces
 	[Registry(@"Software\Microsoft\Windows\CurrentVersion", Hive = RegistryHive.CurrentUser, View = RegistryView.Registry32)]
 	public interface IRegistryTest : IRegistry<IRegistryTest>
 	{
-		[RegistryProperty(@"Run")]
-		Dictionary<string, object> CuRun32 { get; set; }
+		[Registry(@"Run")]
+		IDictionary<string, object> CuRun32 { get; set; }
 
-		[RegistryProperty(@"Run", View = RegistryView.Registry64)]
-		Dictionary<string, object> CuRun64 { get; set; }
+		[Registry(@"Run", View = RegistryView.Registry64)]
+		IDictionary<string, object> CuRun64 { get; set; }
 
-		[RegistryProperty(@"Run", Hive = RegistryHive.LocalMachine)]
-		Dictionary<string, object> LmRun32 { get; set; }
+		[Registry(@"Run", Hive = RegistryHive.LocalMachine)]
+		IDictionary<string, object> LmRun32 { get; set; }
 
-		[RegistryProperty(@"Run", Hive = RegistryHive.LocalMachine, View = RegistryView.Registry64)]
-		Dictionary<string, object> LmRun64 { get; set; }
+		[Registry(@"Run", Hive = RegistryHive.LocalMachine, View = RegistryView.Registry64)]
+		IDictionary<string, object> LmRun64 { get; set; }
 
-		[RegistryProperty(@"\Software\Microsoft\Windows NT\CurrentVersion", "ProductName", Hive = RegistryHive.LocalMachine, View = RegistryView.Default)]
+		[Registry(@"\Software\Microsoft\Windows NT\CurrentVersion", "ProductName", IgnoreBasePath = true, Hive = RegistryHive.LocalMachine, View = RegistryView.Default)]
 		string ProductName { get; set; }
 	}
 }

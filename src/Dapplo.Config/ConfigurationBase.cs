@@ -33,17 +33,25 @@ using Dapplo.Log;
 using Dapplo.Utils;
 using Dapplo.Utils.Extensions;
 
-
 namespace Dapplo.Config
 {
     /// <summary>
-    /// ConfigBase is an abstract configuration class
+    /// Non generic ConfigurationBase
+    /// </summary>
+    public abstract class ConfigurationBase
+    {
+        /// <summary>
+        /// The base logged for all the Configuration classes
+        /// </summary>
+        protected static readonly LogSource Log = new LogSource();
+    }
+
+    /// <summary>
+    /// ConfigBase is a generic abstract configuration class
     /// </summary>
     /// <typeparam name="T">The type of the configuration interface this class implements</typeparam>
-    public abstract class ConfigurationBase<T> : IConfiguration<T>
+    public abstract class ConfigurationBase<T> : ConfigurationBase, IConfiguration<T>
     {
-        // ReSharper disable once StaticMemberInGenericType
-        protected static readonly LogSource Log = new LogSource();
         private IDictionary<string, object> _properties;
         private readonly IDictionary<string, PropertyInfo> _propertyInfos = new Dictionary<string, PropertyInfo>(AbcComparer.Instance);
 
@@ -59,7 +67,7 @@ namespace Dapplo.Config
         /// (Re)Initialize this class with new properties
         /// </summary>
         /// <param name="properties">IDictionary with the properties, or null for empty</param>
-        private void Initialize(IDictionary<string, object> properties = null)
+        protected void Initialize(IDictionary<string, object> properties = null)
         {
             _properties = properties != null ? new ConcurrentDictionary<string, object>(properties, AbcComparer.Instance) : new ConcurrentDictionary<string, object>(AbcComparer.Instance);
             if (_propertyInfos.Count == 0)
@@ -68,7 +76,7 @@ namespace Dapplo.Config
                 {
                     if (propertyInfo.Name == "Item")
                     {
-                        return;
+                        continue;
                     }
                     OneTimePropertyInitializer(propertyInfo);
                 }
@@ -82,7 +90,8 @@ namespace Dapplo.Config
         }
 
         /// <summary>
-        /// This is only called when the type is initially created, per property
+        /// This is only called when the type is initially created, per property.
+        /// The main use case for this, is to build caches or process attributes on properties
         /// </summary>
         /// <param name="propertyInfo">PropertyInfo</param>
         protected virtual void OneTimePropertyInitializer(PropertyInfo propertyInfo)
@@ -98,7 +107,8 @@ namespace Dapplo.Config
         }
 
         /// <summary>
-        /// This is called when the type is initially created or cloned, per property
+        /// This is called when the type is initially created or cloned, per property.
+        /// The main use case for this, is setting defaults
         /// </summary>
         /// <param name="propertyInfo">PropertyInfo</param>
         protected virtual void PropertyInitializer(PropertyInfo propertyInfo)
@@ -120,7 +130,7 @@ namespace Dapplo.Config
         /// <returns>object or null if not available</returns>
         public virtual object this[string key]
         {
-            get => GetValue(key);
+            get => Getter(key);
             set => Setter(PropertyInfoFor(key), value);
         }
 
@@ -188,7 +198,7 @@ namespace Dapplo.Config
         /// <param name="propertyName">string</param>
         /// <returns>TProperty</returns>
         [GetInterceptor]
-        protected object Getter(string propertyName)
+        protected virtual object Getter(string propertyName)
         {
             return GetValue(propertyName).Value;
         }
@@ -198,7 +208,6 @@ namespace Dapplo.Config
         /// </summary>
         /// <param name="propertyInfo">PropertyInfo</param>
         /// <param name="newValue">object</param>
-        [SetInterceptor]
         protected void Setter(PropertyInfo propertyInfo, object newValue)
         {
             var hasOldValue = _properties.TryGetValue(propertyInfo.Name, out var oldValue);
@@ -235,6 +244,16 @@ namespace Dapplo.Config
                 _properties[propertyInfo.Name] = setInfo.NewValue;
                 NotifyPropertyChangedSetter(setInfo);
             }
+        }
+        /// <summary>
+        /// Set the backing value for the specified property
+        /// </summary>
+        /// <param name="propertyName">string</param>
+        /// <param name="newValue">object</param>
+        [SetInterceptor]
+        protected virtual void Setter(string propertyName, object newValue)
+        {
+            Setter(PropertyInfoFor(propertyName), newValue);
         }
         #endregion
 

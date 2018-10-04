@@ -1,4 +1,25 @@
-﻿using System;
+﻿//  Dapplo - building blocks for desktop applications
+//  Copyright (C) 2016-2017 Dapplo
+// 
+//  For more information see: http://dapplo.net/
+//  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
+// 
+//  This file is part of Dapplo.Config
+// 
+//  Dapplo.Config is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU Lesser General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+// 
+//  Dapplo.Config is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU Lesser General Public License for more details.
+// 
+//  You should have a copy of the GNU Lesser General Public License
+//  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq.Expressions;
@@ -7,6 +28,7 @@ using Dapplo.Config;
 using Dapplo.Log;
 using Dapplo.Utils.Extensions;
 using Microsoft.Win32;
+using AutoProperties;
 
 namespace Dapplo.Registry
 {
@@ -16,30 +38,39 @@ namespace Dapplo.Registry
     /// <typeparam name="T"></typeparam>
     public class RegistryBase<T> : ConfigurationBase<T>, IRegistry
     {
-        private readonly RegistryAttribute _registryAttribute;
-        private readonly IDictionary<string, RegistryPropertyAttribute> _registryAttributes = new Dictionary<string, RegistryPropertyAttribute>();
+        private readonly RegistryAttribute _registryAttribute = typeof(T).GetAttribute<RegistryAttribute>() ?? new RegistryAttribute();
+        private readonly IDictionary<string, RegistryAttribute> _registryAttributes = new Dictionary<string, RegistryAttribute>();
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public RegistryBase()
+        #region Needed as workaround for a bug in Autoproperties
+
+        /// <inheritdoc />
+        [GetInterceptor]
+        protected override object Getter(string propertyName)
         {
-            _registryAttribute = typeof(T).GetAttribute<RegistryAttribute>() ?? new RegistryAttribute();
+            return base.Getter(propertyName);
         }
+
+        /// <inheritdoc />
+        [SetInterceptor]
+        protected override void Setter(string propertyName, object newValue)
+        {
+            base.Setter(propertyName, newValue);
+        }
+        #endregion
 
         /// <inheritdoc />
         protected override void OneTimePropertyInitializer(PropertyInfo propertyInfo)
         {
             base.OneTimePropertyInitializer(propertyInfo);
 
-            var registryPropertyAttribute = propertyInfo.GetAttribute<RegistryPropertyAttribute>();
-            if (registryPropertyAttribute == null)
+            var registryAttribute = propertyInfo.GetAttribute<RegistryAttribute>();
+            if (registryAttribute == null)
             {
                 throw new ArgumentException($"{propertyInfo.Name} doesn't have a path mapping");
             }
 
-            var path = registryPropertyAttribute.Path;
-            if (_registryAttribute.Path != null)
+            var path = registryAttribute.Path;
+            if (_registryAttribute.Path != null && !registryAttribute.IgnoreBasePath)
             {
                 path = Path.Combine(_registryAttribute.Path, path);
             }
@@ -54,10 +85,10 @@ namespace Dapplo.Registry
                 path = path.Remove(0, 1);
             }
 
-            registryPropertyAttribute.Path = path;
+            registryAttribute.Path = path;
 
             // Store for retrieval
-            _registryAttributes[propertyInfo.Name] = registryPropertyAttribute;
+            _registryAttributes[propertyInfo.Name] = registryAttribute;
         }
 
         /// <summary>
@@ -87,7 +118,7 @@ namespace Dapplo.Registry
 
             using (var baseKey = RegistryKey.OpenBaseKey(hive, view))
             {
-                var path = _registryAttribute.Path;
+                var path = registryPropertyAttribute.Path;
                 using (var key = baseKey.OpenSubKey(path))
                 {
                     try
@@ -97,7 +128,7 @@ namespace Dapplo.Registry
                             throw new ArgumentException($"No registry entry in {hive}/{path} for {view}");
                         }
 
-                        if (registryPropertyAttribute.Value == null)
+                        if (registryPropertyAttribute.ValueName == null)
                         {
                             // Read all values, assume IDictionary<string, object>
                             IDictionary<string, object> values;
@@ -129,7 +160,7 @@ namespace Dapplo.Registry
                         else
                         {
                             // Read a specific value
-                            Setter(propertyInfo, key.GetValue(registryPropertyAttribute.Value));
+                            Setter(propertyInfo, key.GetValue(registryPropertyAttribute.ValueName));
                         }
                     }
                     catch (Exception ex)

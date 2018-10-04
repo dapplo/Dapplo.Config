@@ -38,6 +38,7 @@ namespace Dapplo.Ini.NewImpl
 
         #region Overrides of ConfigurationBase<T>
 
+        /// <inheritdoc />
         protected override void OneTimePropertyInitializer(PropertyInfo propertyInfo)
         {
             base.OneTimePropertyInitializer(propertyInfo);
@@ -80,26 +81,31 @@ namespace Dapplo.Ini.NewImpl
 
         public IniValue this[string propertyName] => throw new System.NotImplementedException();
 
+        /// <inheritdoc />
         public IniValue GetIniValue(string propertyName)
         {
             throw new System.NotImplementedException();
         }
 
+        /// <inheritdoc />
         public IReadOnlyDictionary<string, IniValue> GetIniValues()
         {
             throw new System.NotImplementedException();
         }
 
+        /// <inheritdoc />
         public string GetSectionDescription()
         {
             throw new System.NotImplementedException();
         }
 
+        /// <inheritdoc />
         public string GetSectionName()
         {
             throw new System.NotImplementedException();
         }
 
+        /// <inheritdoc />
         public bool TryGetIniValue(string propertyName, out IniValue value)
         {
             throw new System.NotImplementedException();
