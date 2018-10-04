@@ -1,5 +1,5 @@
 ﻿//  Dapplo - building blocks for desktop applications
-//  Copyright (C) 2016-2017 Dapplo
+//  Copyright (C) 2016-2018 Dapplo
 // 
 //  For more information see: http://dapplo.net/
 //  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -28,7 +28,7 @@ using System;
 namespace Dapplo.Config.Internal
 {
     /// <summary>
-    ///     This attribute should be used to mark a method as a getter
+    ///     This attribute should be used to mark a method as a getter, which in fact needs to be protected (or public)
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
 	public class GetterAttribute : Attribute
