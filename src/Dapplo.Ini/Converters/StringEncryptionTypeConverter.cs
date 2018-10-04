@@ -44,7 +44,7 @@ namespace Dapplo.Ini.Converters
 		/// </summary>
 		public StringEncryptionTypeConverter()
 		{
-			if (RgbKey == null || RgbIv == null)
+			if (RgbKey is null || RgbIv is null)
 			{
 				throw new InvalidOperationException("Please make sure the StringEncryptionTypeConverter.RgbKey & RgbIv are set!");
 			}
@@ -112,7 +112,7 @@ namespace Dapplo.Ini.Converters
 		/// <returns>object</returns>
 		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
-			if (value == null)
+			if (value is null)
 			{
 				return null;
 			}

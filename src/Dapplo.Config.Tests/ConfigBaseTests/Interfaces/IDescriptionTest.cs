@@ -31,7 +31,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests.Interfaces
 	/// <summary>
 	///     This is the interface under test
 	/// </summary>
-	public interface IDescriptionTest : IDescription<IDescriptionTest>
+	public interface IDescriptionTest : IDescription
     {
 		[Description(DescriptionTest.TestDescription)]
 		string Name { get; set; }

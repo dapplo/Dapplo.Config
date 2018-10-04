@@ -22,6 +22,7 @@
 #region using
 
 using Dapplo.Config.Tests.ConfigTests.Entities;
+using Dapplo.Config.Tests.ConfigTests.Interfaces;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
 using Xunit;
@@ -44,12 +45,12 @@ namespace Dapplo.Config.Tests.ConfigTests
 		[Fact]
 		public void TestRegistryRead()
 		{
-			var registryTest = new RegistryTestImpl();
+            IRegistryTest registryTest = new RegistryTestImpl();
 
 			// assume that the product name is set
 			Assert.NotNull(registryTest.ProductName);
 			Assert.NotNull(registryTest.CuRun64);
-            Assert.Contains("CurrentVersion", registryTest.PathFor(x => x.ProductName));
+            Assert.Contains("CurrentVersion", registryTest.PathFor(nameof(IRegistryTest.ProductName)));
 		}
 	}
 }

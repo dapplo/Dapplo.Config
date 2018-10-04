@@ -88,7 +88,7 @@ namespace Dapplo.Language.Implementation
 			while (!reader.EndOfStream && !cancellationToken.IsCancellationRequested)
 			{
 				var line = await reader.ReadLineAsync().ConfigureAwait(false);
-				if (line == null)
+				if (line is null)
 				{
 					continue;
 				}

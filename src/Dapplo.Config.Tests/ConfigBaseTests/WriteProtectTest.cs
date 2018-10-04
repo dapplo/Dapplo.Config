@@ -50,8 +50,8 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		[Fact]
 		public void TestAccessViolation()
 		{
-			_writeProtectTest.WriteProtect(x => x.Name);
-			Assert.True(_writeProtectTest.IsWriteProtected(x => x.Name));
+			_writeProtectTest.WriteProtect(nameof(IWriteProtectTest.Name));
+			Assert.True(_writeProtectTest.IsWriteProtected(nameof(IWriteProtectTest.Name)));
 
 			Assert.Throws<AccessViolationException>(() => _writeProtectTest.Name = TestValue1);
 		}
@@ -62,11 +62,11 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 			_writeProtectTest.StartWriteProtecting();
 			_writeProtectTest.Age = 30;
 			Assert.True(_writeProtectTest.IsWriteProtected(nameof(IWriteProtectTest.Age)));
-			Assert.True(_writeProtectTest.IsWriteProtected(x => x.Age));
+			Assert.True(_writeProtectTest.IsWriteProtected(nameof(IWriteProtectTest.Age)));
 			_writeProtectTest.StopWriteProtecting();
-			Assert.True(_writeProtectTest.IsWriteProtected(x => x.Age));
-			_writeProtectTest.DisableWriteProtect(x => x.Age);
-			Assert.False(_writeProtectTest.IsWriteProtected(x => x.Age));
+			Assert.True(_writeProtectTest.IsWriteProtected(nameof(IWriteProtectTest.Age)));
+			_writeProtectTest.DisableWriteProtect(nameof(IWriteProtectTest.Age));
+			Assert.False(_writeProtectTest.IsWriteProtected(nameof(IWriteProtectTest.Age)));
 		}
 
 		[Fact]
@@ -74,10 +74,10 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		{
 			_writeProtectTest.StartWriteProtecting();
 			_writeProtectTest.Age = 30;
-			Assert.True(_writeProtectTest.IsWriteProtected(x => x.Age));
+			Assert.True(_writeProtectTest.IsWriteProtected(nameof(IWriteProtectTest.Age)));
 
 			_writeProtectTest.RemoveWriteProtection();
-			Assert.False(_writeProtectTest.IsWriteProtected(x => x.Age));
+			Assert.False(_writeProtectTest.IsWriteProtected(nameof(IWriteProtectTest.Age)));
 		}
 
 		[Fact]
@@ -85,11 +85,11 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		{
 			_writeProtectTest.StartWriteProtecting();
 			_writeProtectTest.Age = 30;
-			Assert.True(_writeProtectTest.IsWriteProtected(x => x.Age));
+			Assert.True(_writeProtectTest.IsWriteProtected(nameof(IWriteProtectTest.Age)));
 			_writeProtectTest.StopWriteProtecting();
-			Assert.True(_writeProtectTest.IsWriteProtected(x => x.Age));
+			Assert.True(_writeProtectTest.IsWriteProtected(nameof(IWriteProtectTest.Age)));
 			_writeProtectTest.Name = TestValue1;
-			Assert.False(_writeProtectTest.IsWriteProtected(x => x.Name));
+			Assert.False(_writeProtectTest.IsWriteProtected(nameof(IWriteProtectTest.Name)));
 		}
 	}
 }

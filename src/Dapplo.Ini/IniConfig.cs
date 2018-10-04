@@ -225,7 +225,7 @@ namespace Dapplo.Ini
                         file = Path.Combine(startPath, $"{_iniFileConfig.FileName}{postfix}.{_iniFileConfig.IniExtension}");
                     }
                 }
-                if (file == null || !File.Exists(file))
+                if (file is null || !File.Exists(file))
                 {
                     var appDataDirectory = FileLocations.RoamingAppDataDirectory(_iniFileConfig.ApplicationName);
                     file = Path.Combine(appDataDirectory, $"{_iniFileConfig.FileName}{postfix}.{_iniFileConfig.IniExtension}");
@@ -261,7 +261,7 @@ namespace Dapplo.Ini
 
             // If the ini-location directory is not yet created, we can't watch as this would cause an exception
             var watchPath = Path.GetDirectoryName(IniLocation);
-            if (watchPath == null || !Directory.Exists(watchPath))
+            if (watchPath is null || !Directory.Exists(watchPath))
             {
                 return;
             }
@@ -566,7 +566,7 @@ namespace Dapplo.Ini
                     }
                 }
                 // Skip if the iniProperties doesn't have anything
-                if (iniProperties == null || iniProperties.Count == 0)
+                if (iniProperties is null || iniProperties.Count == 0)
                 {
                     continue;
                 }
@@ -635,7 +635,7 @@ namespace Dapplo.Ini
                     throw new ArgumentException($"{type.Name} is not a IIniSection");
                 }
                 var iniSectionAttribute = type.GetAttribute<IniSectionAttribute>();
-                if (iniSectionAttribute == null)
+                if (iniSectionAttribute is null)
                 {
                     throw new ArgumentException($"{type.Name} doesn't have an IniSectionAttribute.");
                 }

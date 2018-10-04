@@ -182,7 +182,7 @@ namespace Dapplo.Language
         /// </summary>
         public void CorrectMissingTranslations()
         {
-            if (Files == null || Files.Count == 0)
+            if (Files is null || Files.Count == 0)
             {
                 return;
             }
@@ -192,7 +192,7 @@ namespace Dapplo.Language
                     ietf,
                     Files[ietf].Count
                 }).OrderByDescending(x => x.Count).FirstOrDefault()?.ietf;
-            if (baseIetf == null)
+            if (baseIetf is null)
             {
                 return;
             }
@@ -231,7 +231,7 @@ namespace Dapplo.Language
             // ReSharper disable once SuspiciousTypeConversion.Global
             var defaultValueInterface = language as IDefaultValue;
 
-            if (!(language is IExtensibleInterceptor interceptor) || defaultValueInterface == null)
+            if (!(language is IExtensibleInterceptor interceptor) || defaultValueInterface is null)
             {
                 throw new InvalidOperationException("Should not happen.");
             }
@@ -362,7 +362,7 @@ namespace Dapplo.Language
         private static IDictionary<string, IDictionary<string, string>> ReadXmlResources(string languageFile)
         {
             var xElement = XDocument.Load(languageFile).Root;
-            if (xElement == null)
+            if (xElement is null)
             {
                 return null;
             }
@@ -436,7 +436,7 @@ namespace Dapplo.Language
                 {
                     throw new NotSupportedException($"Can't read the file format for {languageFile}");
                 }
-                if (newResources == null)
+                if (newResources is null)
                 {
                     continue;
                 }

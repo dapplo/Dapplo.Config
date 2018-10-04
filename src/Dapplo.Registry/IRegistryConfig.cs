@@ -40,19 +40,4 @@ namespace Dapplo.Registry
 		/// <returns>string with the path</returns>
 		string PathFor(string propertyName);
 	}
-
-	/// <summary>
-	///     Generic version of the IRegistry interface
-	/// </summary>
-	/// <typeparam name="T"></typeparam>
-	public interface IRegistry<T> : IRegistry
-	{
-		/// <summary>
-		///     Return the registry path for a property
-		/// </summary>
-		/// <typeparam name="TProp"></typeparam>
-		/// <param name="propertyExpression"></param>
-		/// <returns>the path to a property</returns>
-		string PathFor<TProp>(Expression<Func<T, TProp>> propertyExpression);
-	}
 }

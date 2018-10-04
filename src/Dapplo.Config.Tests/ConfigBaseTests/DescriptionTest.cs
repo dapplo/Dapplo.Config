@@ -46,7 +46,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		[Fact]
 		public void TestDescriptionAttribute()
 		{
-			var description = _descriptionTest.DescriptionFor(x => x.Name);
+			var description = _descriptionTest.DescriptionFor(nameof(IDescriptionTest.Name));
 			Assert.Equal(TestDescription, description);
 			description = _descriptionTest.DescriptionFor("Name");
 			Assert.Equal(TestDescription, description);

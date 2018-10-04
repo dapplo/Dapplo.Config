@@ -40,18 +40,4 @@ namespace Dapplo.Config.Interfaces
 		/// <returns>the description, null if none</returns>
 		string DescriptionFor(string propertyName);
 	}
-
-	/// <summary>
-	///     Extend your property interface with this, and you can read the DescriptionAttribute
-	/// </summary>
-	public interface IDescription<T> : IDescription
-	{
-		/// <summary>
-		///     Return the description of the property
-		/// </summary>
-		/// <typeparam name="TProp"></typeparam>
-		/// <param name="propertyExpression"></param>
-		/// <returns>the description, null if none</returns>
-		string DescriptionFor<TProp>(Expression<Func<T, TProp>> propertyExpression);
-	}
 }

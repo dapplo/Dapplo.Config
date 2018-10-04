@@ -42,11 +42,11 @@ namespace Dapplo.Config.Tests
 		/// <returns>an IDisposable, calling Dispose on this will stop everything</returns>
 		public static IDisposable OnLanguageChanged(this ILanguage language, Action<ILanguage> updateAction, bool run = true)
 		{
-			if (language == null)
+			if (language is null)
 			{
 				throw new ArgumentNullException(nameof(language));
 			}
-			if (updateAction == null)
+			if (updateAction is null)
 			{
 				throw new ArgumentNullException(nameof(updateAction));
 			}
@@ -72,11 +72,11 @@ namespace Dapplo.Config.Tests
 		/// <returns>an IDisposable, calling Dispose on this will stop everything</returns>
 		public static IDisposable OnSaved(this IIniSection iniSection, Action<IniSectionEventArgs> eventAction)
 		{
-			if (iniSection == null)
+			if (iniSection is null)
 			{
 				throw new ArgumentNullException(nameof(iniSection));
 			}
-			if (eventAction == null)
+			if (eventAction is null)
 			{
 				throw new ArgumentNullException(nameof(eventAction));
 			}
@@ -96,11 +96,11 @@ namespace Dapplo.Config.Tests
 		/// <returns>an IDisposable, calling Dispose on this will stop everything</returns>
 		public static IDisposable OnSaving(this IIniSection iniSection, Action<IniSectionEventArgs> eventAction)
 		{
-			if (iniSection == null)
+			if (iniSection is null)
 			{
 				throw new ArgumentNullException(nameof(iniSection));
 			}
-			if (eventAction == null)
+			if (eventAction is null)
 			{
 				throw new ArgumentNullException(nameof(eventAction));
 			}

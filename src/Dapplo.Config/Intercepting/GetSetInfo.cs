@@ -19,21 +19,25 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-namespace Dapplo.Config.Internal
+using System.Reflection;
+
+namespace Dapplo.Config.Intercepting
 {
     /// <summary>
-    /// This provides the value for a get interceptor
+    /// Information for a Get or Set invocation
     /// </summary>
-    public class GetInfo : GetSetInfo
+    public class GetSetInfo
     {
         /// <summary>
-        ///     The value of the property
+        ///     Can the proxy continue with other getter/setters?
+        ///     This should be set to false if a getter/setter implementation wants to throw an exception or thinks there should be
+        ///     no more others.
         /// </summary>
-        public bool HasValue { get; set; }
+        public bool CanContinue { get; set; } = true;
 
         /// <summary>
-        ///     The value of the property
+        ///    PropertyInfo of the property that is being get/set
         /// </summary>
-        public object Value { get; set; }
+        public PropertyInfo PropertyInfo { get; set; }
     }
 }

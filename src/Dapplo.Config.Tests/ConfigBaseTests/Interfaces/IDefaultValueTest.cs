@@ -30,7 +30,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests.Interfaces
 	/// <summary>
 	///     This is the interface under test
 	/// </summary>
-	public interface IDefaultValueTest : IDefaultValueBase, IDefaultValue<IDefaultValueTest>
+	public interface IDefaultValueTest : IDefaultValueBase, IDefaultValue
     {
 		
     }

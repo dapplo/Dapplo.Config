@@ -25,26 +25,41 @@ using System;
 
 #endregion
 
-namespace Dapplo.Config.Internal
+namespace Dapplo.Config.Attributes
 {
-	/// <summary>
-	///     This attribute should be used to mark a method as a setter, which in fact needs to be protected (or public)
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Method)]
-	public class SetterAttribute : Attribute
+    /// <summary>
+    ///     Attribute to "Tag" properties as with certain information
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
+	public class TagAttribute : Attribute
 	{
-        /// <summary>
-        ///     Constructor
-        /// </summary>
-        /// <param name="order">The order of the setter method</param>
-        public SetterAttribute(object order)
-        {
-	        Order = Convert.ToInt32(order);
-        }
+		/// <summary>
+		/// Constructor for the TagAttribute
+		/// </summary>
+		/// <param name="tag">object with value for the tag</param>
+		public TagAttribute(object tag)
+		{
+			Tag = tag;
+		}
 
 		/// <summary>
-		///     Order for the setter
+		/// Constructor for the TagAttribute
 		/// </summary>
-		public int Order { get; private set; }
+		/// <param name="tag">object with value for the tag</param>
+		/// <param name="tagValue">object with value for the tag value</param>
+		public TagAttribute(object tag, object tagValue) : this(tag)
+		{
+			TagValue = tagValue;
+		}
+
+		/// <summary>
+		/// The tag
+		/// </summary>
+		public object Tag { get; set; }
+
+		/// <summary>
+		/// Get (or set) the value of the tag
+		/// </summary>
+		public object TagValue { get; set; }
 	}
 }

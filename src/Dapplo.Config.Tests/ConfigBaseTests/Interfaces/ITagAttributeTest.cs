@@ -20,13 +20,14 @@
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 using Dapplo.Config.Interfaces;
+using Dapplo.Config.Attributes;
 
 namespace Dapplo.Config.Tests.ConfigBaseTests.Interfaces
 {
 	/// <summary>
 	///     This is the interface under test
 	/// </summary>
-	public interface ITagAttributeTest : ITagging<ITagAttributeTest>
+	public interface ITagAttributeTest : ITagging
 	{
 		[Tag("Expert")]
 		int Age { get; set; }

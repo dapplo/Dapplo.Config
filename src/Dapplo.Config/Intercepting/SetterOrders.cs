@@ -19,25 +19,36 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-using System.Reflection;
-
-namespace Dapplo.Config.Internal
+namespace Dapplo.Config.Intercepting
 {
     /// <summary>
-    /// Information for a Get or Set invocation
+    /// This defines the order in which the setters are called
     /// </summary>
-    public class GetSetInfo
+    public enum SetterOrders
     {
         /// <summary>
-        ///     Can the proxy continue with other getter/setters?
-        ///     This should be set to false if a getter/setter implementation wants to throw an exception or thinks there should be
-        ///     no more others.
+        /// This is the order for the setter which implements the IWriteProtectProperties
         /// </summary>
-        public bool CanContinue { get; set; } = true;
-
+        WriteProtect = int.MinValue,
         /// <summary>
-        ///    PropertyInfo of the property that is being get/set
+        /// This is the order for the setter which implements the ITransactionalProperties
         /// </summary>
-        public PropertyInfo PropertyInfo { get; set; }
+        Transaction = 0,
+        /// <summary>
+        /// This is the order for the setter which implements the IHasChanges
+        /// </summary>
+        HasChanges = 1000,
+        /// <summary>
+        /// This is the order for the setter which implements the INotifyPropertyChanging
+        /// </summary>
+        NotifyPropertyChanging = 2000,
+        /// <summary>
+        /// This is the order for the setter which places the value into the dictionary
+        /// </summary>
+        Dictionary = 3000,
+        /// <summary>
+        /// This is the order for the setter which implements the INotifyPropertyChanged
+        /// </summary>
+        NotifyPropertyChanged = 4000
     }
 }

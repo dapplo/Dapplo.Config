@@ -26,7 +26,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests.Interfaces
 	/// <summary>
 	///     This is the interface under test
 	/// </summary>
-	public interface IHasChangesTest : IHasChanges<IHasChangesTest>
+	public interface IHasChangesTest : IHasChanges
 	{
 		string SayMyName { get; set; }
 	}

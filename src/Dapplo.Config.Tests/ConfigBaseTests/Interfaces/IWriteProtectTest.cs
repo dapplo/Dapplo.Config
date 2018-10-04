@@ -26,7 +26,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests.Interfaces
 	/// <summary>
 	///     This is the interface under test
 	/// </summary>
-	public interface IWriteProtectTest : IWriteProtectProperties<IWriteProtectTest>
+	public interface IWriteProtectTest : IWriteProtectProperties
 	{
 		int Age { get; set; }
 

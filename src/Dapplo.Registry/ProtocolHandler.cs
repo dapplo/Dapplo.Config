@@ -50,14 +50,14 @@ namespace Dapplo.Registry
 			using (var softwareClassesKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Classes", true))
 			{
 				// Apply protocol name
-				if (softwareClassesKey == null)
+				if (softwareClassesKey is null)
 				{
 					return;
 				}
 				using (var protocolKey = softwareClassesKey.CreateSubKey(protocolName))
 				{
 					// Assign protocol
-					if (protocolKey == null)
+					if (protocolKey is null)
 					{
 						return;
 					}
@@ -67,14 +67,14 @@ namespace Dapplo.Registry
 					using (var shellKey = protocolKey.CreateSubKey("Shell"))
 					{
 						// Create open
-						if (shellKey == null)
+						if (shellKey is null)
 						{
 							return;
 						}
 						using (var openKey = shellKey.CreateSubKey("open"))
 						{
 							// Create command
-							if (openKey == null)
+							if (openKey is null)
 							{
 								return;
 							}

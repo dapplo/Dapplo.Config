@@ -21,10 +21,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
+using Dapplo.Config.Attributes;
 using Dapplo.Config.Interfaces;
-using Dapplo.Config.Internal;
+using Dapplo.Config.Intercepting;
 using Dapplo.Log;
 using Dapplo.Utils;
 using Dapplo.Utils.Extensions;
@@ -35,26 +35,18 @@ namespace Dapplo.Config
     /// An abstract non generic ConfigurationBase.
     /// This defines the API for the configuration based implementations
     /// </summary>
-    public abstract class ConfigurationBase : ITransactionalProperties //IDescription, , ITagging, IShallowCloneable
+    public abstract class ConfigurationBase : IShallowCloneable, ITransactionalProperties, IDescription, ITagging
     {
+        private static readonly IDictionary<Type, ConfigurationInformation> _typeInformations = new Dictionary<Type, ConfigurationInformation>();
         /// <summary>
         /// The base logged for all the Configuration classes
         /// </summary>
         protected static readonly LogSource Log = new LogSource();
-        /// <summary>
-        /// Store of PropertyInfos for every property
-        /// </summary>
-        protected readonly IDictionary<string, PropertyInfo> PropertyInfos = new Dictionary<string, PropertyInfo>(AbcComparer.Instance);
 
         /// <summary>
-        /// Store of setter methods
+        /// This is the information
         /// </summary>
-        private readonly IDictionary<Type, MethodInfo[]> _setterMethods = new Dictionary<Type, MethodInfo[]>();
-
-        /// <summary>
-        /// Store of setter methods
-        /// </summary>
-        private readonly IDictionary<Type, MethodInfo[]> _getterMethods = new Dictionary<Type, MethodInfo[]>();
+        protected ConfigurationInformation Information;
 
         /// <summary>
         /// Initialize the whole thing, this should be called from the final class
@@ -62,67 +54,19 @@ namespace Dapplo.Config
         /// <param name="typeToInitializeFor">Type to analyze the properties on</param>
         protected void Initialize(Type typeToInitializeFor)
         {
-            var thisType = GetType(); //.BaseType;
-            var methods = thisType.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
-            if (!_setterMethods.ContainsKey(thisType))
+            var thisType = GetType();
+            if (!_typeInformations.TryGetValue(thisType, out Information))
             {
-                _setterMethods[thisType] = methods
-                    .Select(methodInfo => new Tuple<MethodInfo, SetterAttribute>(methodInfo, methodInfo.GetAttribute<SetterAttribute>()))
-                    .Where(tuple => tuple.Item2 != null)
-                    .OrderBy(tuple => tuple.Item2.Order)
-                    .Select(tuple => tuple.Item1).ToArray();
+                _typeInformations[thisType] = Information = new ConfigurationInformation(thisType, typeToInitializeFor);
             }
-            if (!_getterMethods.ContainsKey(thisType))
-            {
-                _getterMethods[thisType] = methods
-                    .Select(methodInfo => new Tuple<MethodInfo, GetterAttribute>(methodInfo, methodInfo.GetAttribute<GetterAttribute>()))
-                    .Where(tuple => tuple.Item2 != null)
-                    .OrderBy(tuple => tuple.Item2.Order)
-                    .Select(tuple => tuple.Item1).ToArray();
-            }
-
-            var typeToAnalyze = typeToInitializeFor ?? GetType();
-            var types = new[] { typeToAnalyze }.Concat(typeToAnalyze.GetInterfaces());
-
-            foreach (var type in types)
-            {
-                foreach (var propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
-                {
-                    var propertyName = propertyInfo.Name;
-                    if (PropertyInfos.ContainsKey(propertyName))
-                    {
-                        continue;
-                    }
-                    if (propertyName == "Item")
-                    {
-                        continue;
-                    }
-
-                    PropertyInfos[propertyName] = propertyInfo;
-                }
-            }
-
+ 
             // Give extended classes a way to initialize
-            foreach (var propertyInfo in PropertyInfos.Values)
+            foreach (var propertyInfo in Information.PropertyInfos.Values)
             {
+                // In theory we could check if the typeToInitializeFor extends ITagging
+                InitTagProperty(propertyInfo);
                 PropertyInitializer(propertyInfo);
             }
-
-        }
-
-        /// <summary>
-        /// Helper method to find the PropertyInfo
-        /// </summary>
-        /// <param name="propertyName">string</param>
-        /// <returns>PropertyInfo</returns>
-        protected PropertyInfo PropertyInfoFor(string propertyName)
-        {
-            if (!PropertyInfos.TryGetValue(propertyName, out var propertyInfo))
-            {
-                throw new NotSupportedException($"Property {propertyName} doesn't exist.");
-            }
-
-            return propertyInfo;
         }
 
         /// <summary>
@@ -134,15 +78,13 @@ namespace Dapplo.Config
 
         }
 
-        /// <inheritdoc />
-        public virtual object ShallowClone()
-        {
-            var clonedValue = Activator.CreateInstance(GetType()) as ConfigurationBase;
-            clonedValue?.Initialize(GetType());
-            return clonedValue;
-        }
-
-
+        /// <summary>
+        /// Helper method to get the property info for a property
+        /// </summary>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        protected PropertyInfo PropertyInfoFor(string propertyName) => Information.PropertyInfoFor(propertyName);
+        
         /// <summary>
         /// This is the internal way of getting information for a property
         /// </summary>
@@ -157,8 +99,7 @@ namespace Dapplo.Config
                 PropertyInfo = propertyInfo
             };
 
-            var getters = _getterMethods[GetType()];
-            foreach (var methodInfo in getters)
+            foreach (var methodInfo in Information.GetterMethods)
             {
                 methodInfo.Invoke(this, new object[] {getInfo});
                 if (!getInfo.CanContinue)
@@ -168,7 +109,6 @@ namespace Dapplo.Config
             }
             return getInfo;
         }
-
 
         /// <summary>
         /// Set the backing value for the specified property
@@ -185,10 +125,9 @@ namespace Dapplo.Config
                 NewValue = propertyInfo.PropertyType.ConvertOrCastValueToType(newValue)
             };
 
-            var setters = _setterMethods[GetType()];
             try
             {
-                foreach (var methodInfo in setters)
+                foreach (var methodInfo in Information.SetterMethods)
                 {
                     methodInfo.Invoke(this, new object[] {setInfo});
                     if (!setInfo.CanContinue)
@@ -290,7 +229,7 @@ namespace Dapplo.Config
                 // Call the set for every property, this will invoke every setter (NPC etc)
                 foreach (var transactionProperty in _transactionProperties)
                 {
-                    SetValue(PropertyInfoFor(transactionProperty.Key), transactionProperty.Value);
+                    SetValue(Information.PropertyInfoFor(transactionProperty.Key), transactionProperty.Value);
                 }
                 // Clear all the properties, so the transaction is clean
                 _transactionProperties.Clear();
@@ -333,5 +272,130 @@ namespace Dapplo.Config
 
         #endregion
 
+        #region Implementation of ITagging
+        // The set of tagged properties
+        private readonly IDictionary<string, IDictionary<object, object>> _taggedProperties = new Dictionary<string, IDictionary<object, object>>(new AbcComparer());
+
+        /// <summary>
+        ///     Process the property, in our case get the tags
+        /// </summary>
+        /// <param name="propertyInfo">PropertyInfo</param>
+        private void InitTagProperty(PropertyInfo propertyInfo)
+        {
+            foreach (var tagAttribute in propertyInfo.GetAttributes<TagAttribute>())
+            {
+                if (!_taggedProperties.TryGetValue(propertyInfo.Name, out var tags))
+                {
+                    tags = new Dictionary<object, object>();
+                    _taggedProperties.Add(propertyInfo.Name, tags);
+                }
+                tags[tagAttribute.Tag] = tagAttribute.TagValue;
+            }
+        }
+
+        /// <inheritdoc />
+        public object GetTagValue(string propertyName, object tag)
+        {
+            if (!_taggedProperties.TryGetValue(propertyName, out var tags))
+            {
+                return null;
+            }
+            var hasTag = tags.ContainsKey(tag);
+            object returnValue = null;
+            if (hasTag)
+            {
+                returnValue = tags[tag];
+            }
+            return returnValue;
+        }
+
+        /// <inheritdoc />
+        public bool IsTaggedWith(string propertyName, object tag)
+        {
+            if (_taggedProperties.TryGetValue(propertyName, out var tags))
+            {
+                return tags.ContainsKey(tag);
+            }
+
+            return false;
+        }
+
+        #endregion
+
+        #region Implementation of IDescription
+        /// <summary>
+        ///     Return the description for a property
+        /// </summary>
+        public string DescriptionFor(string propertyName)
+        {
+            return PropertyInfoFor(propertyName).GetDescription();
+        }
+
+        #endregion
+        #region Implementation of IDefaultValue
+
+        /// <inheritdoc />
+        public object DefaultValueFor(string propertyName)
+        {
+            return GetConvertedDefaultValue(PropertyInfoFor(propertyName));
+        }
+
+        /// <inheritdoc />
+        public void RestoreToDefault(string propertyName)
+        {
+            var propertyInfo = PropertyInfoFor(propertyName);
+            object defaultValue;
+            try
+            {
+                defaultValue = GetConvertedDefaultValue(propertyInfo);
+            }
+            catch (Exception ex)
+            {
+                Log.Warn().WriteLine(ex.Message);
+                throw;
+            }
+
+            if (defaultValue != null)
+            {
+                SetValue(propertyInfo, defaultValue);
+                return;
+            }
+            try
+            {
+                defaultValue = propertyInfo.PropertyType.CreateInstance();
+                SetValue(propertyInfo, defaultValue);
+            }
+            catch (Exception ex)
+            {
+                // Ignore creating the default type, this might happen if there is no default constructor.
+                Log.Warn().WriteLine(ex.Message);
+            }
+        }
+
+        /// <summary>
+        ///     Retrieve the default value, using the TypeConverter
+        /// </summary>
+        /// <param name="propertyInfo">Property to get the default value for</param>
+        /// <returns>object with the type converted default value</returns>
+        protected static object GetConvertedDefaultValue(PropertyInfo propertyInfo)
+        {
+            var defaultValue = propertyInfo.GetDefaultValue();
+            if (defaultValue != null)
+            {
+                var typeConverter = propertyInfo.GetTypeConverter();
+                var targetType = propertyInfo.PropertyType;
+                defaultValue = targetType.ConvertOrCastValueToType(defaultValue, typeConverter);
+            }
+            return defaultValue;
+        }
+
+        #endregion
+        /// <inheritdoc />
+        public virtual object ShallowClone()
+        {
+            var clonedValue = Activator.CreateInstance(GetType()) as ConfigurationBase;
+            clonedValue?.Initialize(GetType());
+            return clonedValue;
+        }
     }
 }

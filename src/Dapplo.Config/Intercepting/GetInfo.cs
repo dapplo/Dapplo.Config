@@ -19,14 +19,21 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-namespace Dapplo.Config.Internal
+namespace Dapplo.Config.Intercepting
 {
     /// <summary>
-    /// This defines the order in which the setters are called
+    /// This provides the value for a get interceptor
     /// </summary>
-    public enum GetterOrders
+    public class GetInfo : GetSetInfo
     {
-        Transaction = 0,
-        Dictionary = 2000
+        /// <summary>
+        ///     The value of the property
+        /// </summary>
+        public bool HasValue { get; set; }
+
+        /// <summary>
+        ///     The value of the property
+        /// </summary>
+        public object Value { get; set; }
     }
 }

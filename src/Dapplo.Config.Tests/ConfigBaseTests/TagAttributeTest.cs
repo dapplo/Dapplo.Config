@@ -55,25 +55,19 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		[Fact]
 		public void TestTagging()
 		{
-			Assert.False(_tagAttributeTest.IsTaggedWith(x => x.Name, "Expert"));
-			Assert.False(_tagAttributeTest.IsTaggedWith("Name", "Expert"));
+			Assert.False(_tagAttributeTest.IsTaggedWith(nameof(ITagAttributeTest.Name), "Expert"));
 
-			Assert.True(_tagAttributeTest.IsTaggedWith(x => x.Age, "Expert"));
-			Assert.True(_tagAttributeTest.IsTaggedWith("Age", "Expert"));
+			Assert.True(_tagAttributeTest.IsTaggedWith(nameof(ITagAttributeTest.Age), "Expert"));
 
-			Assert.False(_tagAttributeTest.IsTaggedWith(x => x.Age, "Expert2"));
-			Assert.False(_tagAttributeTest.IsTaggedWith("Age", "Expert2"));
+			Assert.False(_tagAttributeTest.IsTaggedWith(nameof(ITagAttributeTest.Age), "Expert2"));
 
-			Assert.True(_tagAttributeTest.IsTaggedWith(x => x.FirstName, TestTags.Tag2));
-			Assert.True(_tagAttributeTest.IsTaggedWith("FirstName", TestTags.Tag2));
+			Assert.True(_tagAttributeTest.IsTaggedWith(nameof(ITagAttributeTest.FirstName), TestTags.Tag2));
 
-			Assert.True(_tagAttributeTest.IsTaggedWith(x => x.FirstName, TestTags.Tag1));
-			Assert.True(_tagAttributeTest.IsTaggedWith("FirstName", TestTags.Tag1));
+			Assert.True(_tagAttributeTest.IsTaggedWith(nameof(ITagAttributeTest.FirstName), TestTags.Tag1));
 			// Test if we can access the value of a tag
-			Assert.Equal("Robin", _tagAttributeTest.GetTagValue("FirstName", TestTags.Tag1));
+			Assert.Equal("Robin", _tagAttributeTest.GetTagValue(nameof(ITagAttributeTest.FirstName), TestTags.Tag1));
 
-			Assert.False(_tagAttributeTest.IsTaggedWith(x => x.FirstName, TestTags.Expert));
-			Assert.False(_tagAttributeTest.IsTaggedWith("FirstName", TestTags.Expert));
+			Assert.False(_tagAttributeTest.IsTaggedWith(nameof(ITagAttributeTest.FirstName), TestTags.Expert));
 		}
 	}
 }

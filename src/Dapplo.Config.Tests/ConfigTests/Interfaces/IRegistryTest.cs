@@ -33,7 +33,7 @@ namespace Dapplo.Config.Tests.ConfigTests.Interfaces
 	///     This is the interface under test
 	/// </summary>
 	[Registry(@"Software\Microsoft\Windows\CurrentVersion", Hive = RegistryHive.CurrentUser, View = RegistryView.Registry32)]
-	public interface IRegistryTest : IRegistry<IRegistryTest>
+	public interface IRegistryTest : IRegistry
 	{
 		[Registry(@"Run")]
 		IDictionary<string, object> CuRun32 { get; set; }

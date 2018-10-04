@@ -55,19 +55,4 @@ namespace Dapplo.Config.Interfaces
 		/// <returns>bool</returns>
 		bool IsChanged(string propertyName);
 	}
-
-	/// <summary>
-	/// This is the generic version of IHasChanges, which supports property expressions
-	/// </summary>
-	/// <typeparam name="T"></typeparam>
-	public interface IHasChanges<T> : IHasChanges
-	{
-		/// <summary>
-		/// Generic version of IsChanged which supports property expressions
-		/// </summary>
-		/// <typeparam name="TProp">Expression which supplies the property name</typeparam>
-		/// <param name="propertyExpression"></param>
-		/// <returns>bool</returns>
-		bool IsChanged<TProp>(Expression<Func<T, TProp>> propertyExpression);
-	}
 }

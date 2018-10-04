@@ -30,21 +30,9 @@ namespace Dapplo.Config.Interfaces
     /// </summary>
     public interface IConfiguration : IDescription, IWriteProtectProperties, IHasChanges, IDefaultValue, INotifyPropertyChanged, INotifyPropertyChanging, ITransactionalProperties, ITagging, IShallowCloneable
     {
-
         /// <summary>
         /// Return all properties with their current value
         /// </summary>
         IEnumerable<KeyValuePair<string, object>> GetProperties();
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public interface IConfiguration<T> : IConfiguration, IDescription<T>,
-        IWriteProtectProperties<T>,
-        IHasChanges<T>,
-        IDefaultValue<T>,
-        ITagging<T>
-    {
     }
 }

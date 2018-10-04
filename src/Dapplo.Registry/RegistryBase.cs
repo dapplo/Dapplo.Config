@@ -22,7 +22,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq.Expressions;
 using System.Reflection;
 using Dapplo.Config;
 using Dapplo.Log;
@@ -41,7 +40,8 @@ namespace Dapplo.Registry
         private readonly RegistryAttribute _registryAttribute = typeof(T).GetAttribute<RegistryAttribute>() ?? new RegistryAttribute();
         private readonly IDictionary<string, RegistryAttribute> _registryAttributes = new Dictionary<string, RegistryAttribute>();
 
-        #region Needed as workaround for a bug in Autoproperties
+        // TODO: Add registry monitoring?
+        // RegistryMonitor.ObserveChanges(RegistryHive.LocalMachine, InternetSettingsKey)
 
         /// <inheritdoc />
         public RegistryBase()
@@ -49,6 +49,7 @@ namespace Dapplo.Registry
             Initialize(typeof(T));
         }
 
+        #region Defining the [GetInterceptor] and [SetInterceptor] is needed as workaround for a bug in Autoproperties.Fody
         /// <summary>
         /// This retrieves the registry value
         /// </summary>
@@ -57,7 +58,7 @@ namespace Dapplo.Registry
         [GetInterceptor]
         protected object Getter(string propertyName)
         {
-            if (!_registryAttributes.TryGetValue(propertyName, out var registryPropertyAttribute) || registryPropertyAttribute == null)
+            if (!_registryAttributes.TryGetValue(propertyName, out var registryPropertyAttribute) || registryPropertyAttribute is null)
             {
                 throw new ArgumentException($"{propertyName} isn't correctly configured");
             }
@@ -79,13 +80,13 @@ namespace Dapplo.Registry
                 var path = registryPropertyAttribute.Path;
                 using (var key = baseKey.OpenSubKey(path))
                 {
-                    if (key == null)
+                    if (key is null)
                     {
                         throw new ArgumentException($"No registry entry in {hive}/{path} for {view}");
                     }
 
                     // TODO: Convert the returned value to the correct property type
-                    if (registryPropertyAttribute.ValueName == null)
+                    if (registryPropertyAttribute.ValueName is null)
                     {
                         // Read all values, assume IDictionary<string, object>
                         IDictionary<string, object> values = new SortedDictionary<string, object>();
@@ -110,10 +111,15 @@ namespace Dapplo.Registry
             }
         }
 
+        /// <summary>
+        /// This implements the Setter for the registry
+        /// </summary>
+        /// <param name="propertyName">string</param>
+        /// <param name="newValue">object</param>
         [SetInterceptor]
         protected void Setter(string propertyName, object newValue)
         {
-            if (!_registryAttributes.TryGetValue(propertyName, out var registryPropertyAttribute) || registryPropertyAttribute == null)
+            if (!_registryAttributes.TryGetValue(propertyName, out var registryPropertyAttribute) || registryPropertyAttribute is null)
             {
                 throw new ArgumentException($"{propertyName} isn't correctly configured");
             }
@@ -137,12 +143,12 @@ namespace Dapplo.Registry
                 {
                     try
                     {
-                        if (key == null)
+                        if (key is null)
                         {
                             throw new ArgumentException($"No registry entry in {hive}/{path} for {view}");
                         }
                         // TODO: Convert the  property type to the correct registry value
-                        if (registryPropertyAttribute.ValueName == null)
+                        if (registryPropertyAttribute.ValueName is null)
                         {
                             if (!(newValue is IDictionary<string, object> newValues))
                             {
@@ -178,7 +184,7 @@ namespace Dapplo.Registry
             base.PropertyInitializer(propertyInfo);
 
             var registryAttribute = propertyInfo.GetAttribute<RegistryAttribute>();
-            if (registryAttribute == null)
+            if (registryAttribute is null)
             {
                 throw new ArgumentException($"{propertyInfo.Name} doesn't have a path mapping");
             }
@@ -217,16 +223,6 @@ namespace Dapplo.Registry
                 return registryPropertyAttribute.Path;
             }
             return null;
-        }
-
-        /// <summary>
-        ///     The path in the registry for a property
-        /// </summary>
-        /// <param name="propertyExpression">expression to identify the property</param>
-        /// <returns>string</returns>
-        public string PathFor<TProp>(Expression<Func<T, TProp>> propertyExpression)
-        {
-            return PathFor(propertyExpression.GetMemberName());
         }
     }
 }

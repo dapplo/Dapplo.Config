@@ -19,27 +19,20 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-#region using
-
-using System.ComponentModel;
-using Dapplo.Config.Interfaces;
-
-#endregion
-
-namespace Dapplo.Config.Tests.ConfigBaseTests.Interfaces
+namespace Dapplo.Config.Intercepting
 {
-	/// <summary>
-	///     This is the interface under test
-	/// </summary>
-	public interface IDefaultValueWithErrorTest : IDefaultValue
-	{
-		[Description("Test property for enums"), DefaultValue("Value3")]
-		SimpleEnum MyEnum { get; set; }
-	}
-
-	public enum SimpleEnum
-	{
-		Value1,
-		Value2
-	}
+    /// <summary>
+    /// This defines the order in which the setters are called
+    /// </summary>
+    public enum GetterOrders
+    {
+        /// <summary>
+        /// This is the order for the getter which implements the ITransactionalProperties
+        /// </summary>
+        Transaction = 0,
+        /// <summary>
+        /// This is the order for the setter which places the value into the dictionary
+        /// </summary>
+        Dictionary = 2000
+    }
 }

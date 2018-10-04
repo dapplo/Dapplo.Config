@@ -19,18 +19,32 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-namespace Dapplo.Config.Internal
+#region using
+
+using System;
+
+#endregion
+
+namespace Dapplo.Config.Attributes
 {
     /// <summary>
-    /// This defines the order in which the setters are called
+    ///     This attribute should be used to mark a method as a getter, which in fact needs to be protected (or public)
     /// </summary>
-    public enum SetterOrders
-    {
-        WriteProtect = int.MinValue,
-        Transaction = 0,
-        HasChanges = 1000,
-        NotifyPropertyChanging = 2000,
-        Dictionary = 3000,
-        NotifyPropertyChanged = 4000
-    }
+    [AttributeUsage(AttributeTargets.Method)]
+	public class GetterAttribute : Attribute
+	{
+        /// <summary>
+        ///     Constructor
+        /// </summary>
+        /// <param name="order">The order of the getter method</param>
+        public GetterAttribute(object order)
+		{
+			Order = Convert.ToInt32(order);
+		}
+
+		/// <summary>
+		///     Order for the getter
+		/// </summary>
+		public int Order { get; private set; }
+	}
 }

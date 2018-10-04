@@ -49,7 +49,7 @@ namespace Dapplo.Ini
 
 			if (restCommand.Command == IniRestCommands.Add || restCommand.Command == IniRestCommands.Remove)
 			{
-				if (restCommand.Target == null && restCommand.Values.Count == 0)
+				if (restCommand.Target is null && restCommand.Values.Count == 0)
 				{
 					const string message = "add/remove needs a target";
 					Log.Error().WriteLine(message);
@@ -72,7 +72,7 @@ namespace Dapplo.Ini
 							valueConverter = TypeDescriptor.GetConverter(genericArguments[1]);
 						}
 						var addMethodInfo = iniValueType.GetMethod("Add");
-						if (addMethodInfo == null)
+						if (addMethodInfo is null)
 						{
 							Log.Error().WriteLine("The ini-value doesn't have an add method");
 							return;
@@ -83,7 +83,7 @@ namespace Dapplo.Ini
 							if (valueConverter != null)
 							{
 								var value = valueConverter.ConvertFromInvariantString(restCommand.Values[valueKey]);
-								if (removeMethodInfo == null)
+								if (removeMethodInfo is null)
 								{
 									Log.Error().WriteLine("The ini-value doesn't have a remove method");
 									return;
@@ -101,7 +101,7 @@ namespace Dapplo.Ini
 						}
 						return;
 					case IniRestCommands.Remove:
-						if (removeMethodInfo == null)
+						if (removeMethodInfo is null)
 						{
 							Log.Error().WriteLine("The ini-value doesn't have a remove method");
 							return;
@@ -121,7 +121,7 @@ namespace Dapplo.Ini
 			foreach (var key in restCommand.Target != null ? new[] {restCommand.Target} : restCommand.Values.Keys)
 			{
 				var iniValue = iniSection[key];
-				if (iniValue == null)
+				if (iniValue is null)
 				{
 					continue;
 				}

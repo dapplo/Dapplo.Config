@@ -67,32 +67,4 @@ namespace Dapplo.Config.Interfaces
 		/// <param name="propertyName">Name of the property to write protect</param>
 		void WriteProtect(string propertyName);
 	}
-
-	/// <summary>
-	///     Extending the to be property interface with this, adds write protection
-	/// </summary>
-	public interface IWriteProtectProperties<T> : IWriteProtectProperties
-	{
-		/// <summary>
-		///     Disable the write protection of the supplied property (by lamdba)
-		/// </summary>
-		/// <typeparam name="TProp">will be automatically set by the expression</typeparam>
-		/// <param name="propertyExpression">Property to disable the write protect</param>
-		void DisableWriteProtect<TProp>(Expression<Func<T, TProp>> propertyExpression);
-
-		/// <summary>
-		///     Test if the supplied property (by lamdba) is write protected
-		/// </summary>
-		/// <typeparam name="TProp">will be automatically set by the expression</typeparam>
-		/// <param name="propertyExpression">Property to test</param>
-		/// <returns>true if the property is protected</returns>
-		bool IsWriteProtected<TProp>(Expression<Func<T, TProp>> propertyExpression);
-
-		/// <summary>
-		///     Write protect the supplied property (by lamdba)
-		/// </summary>
-		/// <typeparam name="TProp">will be automatically set by the expression</typeparam>
-		/// <param name="propertyExpression">Property to write protect</param>
-		void WriteProtect<TProp>(Expression<Func<T, TProp>> propertyExpression);
-	}
 }

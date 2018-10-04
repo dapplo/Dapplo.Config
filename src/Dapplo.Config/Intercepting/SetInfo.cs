@@ -19,32 +19,26 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-#region using
-
-using System;
-
-#endregion
-
-namespace Dapplo.Config.Internal
+namespace Dapplo.Config.Intercepting
 {
     /// <summary>
-    ///     This attribute should be used to mark a method as a getter, which in fact needs to be protected (or public)
+    /// This provides the value for a set interceptor
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method)]
-	public class GetterAttribute : Attribute
-	{
+    public class SetInfo : GetSetInfo
+    {
         /// <summary>
-        ///     Constructor
+        ///     Does property have an old value?
         /// </summary>
-        /// <param name="order">The order of the getter method</param>
-        public GetterAttribute(object order)
-		{
-			Order = Convert.ToInt32(order);
-		}
+        public bool HasOldValue { get; set; }
 
-		/// <summary>
-		///     Order for the getter
-		/// </summary>
-		public int Order { get; private set; }
-	}
+        /// <summary>
+        ///     The new value for the property
+        /// </summary>
+        public object NewValue { get; set; }
+
+        /// <summary>
+        ///     The old value of the property, if any (see HasOldValue)
+        /// </summary>
+        public object OldValue { get; set; }
+    }
 }

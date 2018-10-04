@@ -63,7 +63,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
         [Fact]
         public void TestDefaultValueAtrribute()
         {
-            var defaultValue = _defaultValueTest.DefaultValueFor(x => x.Age);
+            var defaultValue = _defaultValueTest.DefaultValueFor(nameof(IDefaultValueTest.Age));
             Assert.Equal(21, defaultValue);
             defaultValue = _defaultValueTest.DefaultValueFor("Age");
             Assert.Equal(21, defaultValue);
@@ -74,7 +74,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
         {
             _defaultValueTest.Age = 22;
             Assert.Equal(22, _defaultValueTest.Age);
-            _defaultValueTest.RestoreToDefault(x => x.Age);
+            _defaultValueTest.RestoreToDefault(nameof(IDefaultValueTest.Age));
             Assert.Equal(21, _defaultValueTest.Age);
         }
 

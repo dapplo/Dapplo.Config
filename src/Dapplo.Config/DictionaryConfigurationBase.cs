@@ -26,8 +26,9 @@ using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Reflection;
 using AutoProperties;
+using Dapplo.Config.Attributes;
 using Dapplo.Config.Interfaces;
-using Dapplo.Config.Internal;
+using Dapplo.Config.Intercepting;
 using Dapplo.Log;
 using Dapplo.Utils;
 using Dapplo.Utils.Extensions;
@@ -38,7 +39,7 @@ namespace Dapplo.Config
     /// ConfigBase is a generic abstract configuration class
     /// </summary>
     /// <typeparam name="T">The type of the configuration interface this class implements</typeparam>
-    public abstract class DictionaryConfigurationBase<T> : ConfigurationBase, IConfiguration<T>
+    public abstract class DictionaryConfigurationBase<T> : ConfigurationBase, IConfiguration
     {
         private IDictionary<string, object> _properties;
 
@@ -66,7 +67,7 @@ namespace Dapplo.Config
         protected void SetProperties(IDictionary<string, object> properties)
         {
             _properties = new ConcurrentDictionary<string, object>(properties, AbcComparer.Instance);
-            foreach (var propertyInfo in PropertyInfos.Values)
+            foreach (var propertyInfo in Information.PropertyInfos.Values)
             {
                 if (_properties.TryGetValue(propertyInfo.Name, out var value) && value != null)
                 {
@@ -84,9 +85,6 @@ namespace Dapplo.Config
         /// <param name="propertyInfo">PropertyInfo</param>
         protected override void PropertyInitializer(PropertyInfo propertyInfo)
         {
-            // Retrieve the tags
-            InitTagProperty(propertyInfo);
-
             // Set a default
             RestoreToDefault(propertyInfo.Name);
         }
@@ -100,7 +98,7 @@ namespace Dapplo.Config
         public virtual object this[string key]
         {
             get => Getter(key);
-            set => SetValue(PropertyInfoFor(key), value);
+            set => Setter(key, value);
         }
 
         /// <inheritdoc />
@@ -151,25 +149,6 @@ namespace Dapplo.Config
         {
             SetValue(PropertyInfoFor(propertyName), newValue);
         }
-        #endregion
-
-        #region Implementation of IDescription
-        /// <summary>
-        ///     Return the description for a property
-        /// </summary>
-        public string DescriptionFor(string propertyName)
-        {
-            return PropertyInfoFor(propertyName).GetDescription();
-        }
-
-        /// <summary>
-        ///     Return the description for a property
-        /// </summary>
-        public string DescriptionFor<TProp>(Expression<Func<T, TProp>> propertyExpression)
-        {
-            return DescriptionFor(propertyExpression.GetMemberName());
-        }
-
         #endregion
 
         #region Implementation of IWriteProtectProperties
@@ -306,76 +285,7 @@ namespace Dapplo.Config
 
         #endregion
 
-        #region Implementation of IDefaultValue
 
-        /// <inheritdoc />
-        public object DefaultValueFor(string propertyName)
-        {
-            return GetConvertedDefaultValue(PropertyInfoFor(propertyName));
-        }
-
-        /// <inheritdoc />
-        public void RestoreToDefault(string propertyName)
-        {
-            var propertyInfo = PropertyInfoFor(propertyName);
-            object defaultValue;
-            try
-            {
-                defaultValue = GetConvertedDefaultValue(propertyInfo);
-            }
-            catch (Exception ex)
-            {
-                Log.Warn().WriteLine(ex.Message);
-                throw;
-            }
-
-            if (defaultValue != null)
-            {
-                SetValue(propertyInfo, defaultValue);
-                return;
-            }
-            try
-            {
-                defaultValue = propertyInfo.PropertyType.CreateInstance();
-                SetValue(propertyInfo, defaultValue);
-            }
-            catch (Exception ex)
-            {
-                // Ignore creating the default type, this might happen if there is no default constructor.
-                Log.Warn().WriteLine(ex.Message);
-            }
-        }
-
-        /// <inheritdoc />
-        public object DefaultValueFor<TProp>(Expression<Func<T, TProp>> propertyExpression)
-        {
-            return DefaultValueFor(propertyExpression.GetMemberName());
-        }
-
-        /// <inheritdoc />
-        public void RestoreToDefault<TProp>(Expression<Func<T, TProp>> propertyExpression)
-        {
-            RestoreToDefault(propertyExpression.GetMemberName());
-        }
-
-        /// <summary>
-        ///     Retrieve the default value, using the TypeConverter
-        /// </summary>
-        /// <param name="propertyInfo">Property to get the default value for</param>
-        /// <returns>object with the type converted default value</returns>
-        private static object GetConvertedDefaultValue(PropertyInfo propertyInfo)
-        {
-            var defaultValue = propertyInfo.GetDefaultValue();
-            if (defaultValue != null)
-            {
-                var typeConverter = propertyInfo.GetTypeConverter();
-                var targetType = propertyInfo.PropertyType;
-                defaultValue = targetType.ConvertOrCastValueToType(defaultValue, typeConverter);
-            }
-            return defaultValue;
-        }
-
-        #endregion
 
         #region Implementation of INotifyPropertyChanged
 
@@ -400,7 +310,7 @@ namespace Dapplo.Config
         protected void NotifyPropertyChangedSetter(SetInfo setInfo)
         {
             // Fast exit when no listeners.
-            if (PropertyChanged == null)
+            if (PropertyChanged is null)
             {
                 return;
             }
@@ -438,7 +348,7 @@ namespace Dapplo.Config
         [Setter(SetterOrders.NotifyPropertyChanging)]
         protected void NotifyPropertyChangingSetter(SetInfo setInfo)
         {
-            if (PropertyChanging == null)
+            if (PropertyChanging is null)
             {
                 return;
             }
@@ -450,68 +360,6 @@ namespace Dapplo.Config
             var propertyChangingEventArgs = new PropertyChangingEventArgs(setInfo.PropertyInfo.Name);
             InvokePropertyChanging(this, propertyChangingEventArgs);
         }
-        #endregion
-
-        #region Implementation of ITagging
-        // The set of tagged properties
-        private readonly IDictionary<string, IDictionary<object, object>> _taggedProperties = new Dictionary<string, IDictionary<object, object>>(new AbcComparer());
-
-        /// <summary>
-        ///     Process the property, in our case get the tags
-        /// </summary>
-        /// <param name="propertyInfo">PropertyInfo</param>
-        private void InitTagProperty(PropertyInfo propertyInfo)
-        {
-            foreach (var tagAttribute in propertyInfo.GetAttributes<TagAttribute>())
-            {
-                if (!_taggedProperties.TryGetValue(propertyInfo.Name, out var tags))
-                {
-                    tags = new Dictionary<object, object>();
-                    _taggedProperties.Add(propertyInfo.Name, tags);
-                }
-                tags[tagAttribute.Tag] = tagAttribute.TagValue;
-            }
-        }
-
-        /// <inheritdoc />
-        public object GetTagValue(string propertyName, object tag)
-        {
-            if (!_taggedProperties.TryGetValue(propertyName, out var tags))
-            {
-                return null;
-            }
-            var hasTag = tags.ContainsKey(tag);
-            object returnValue = null;
-            if (hasTag)
-            {
-                returnValue = tags[tag];
-            }
-            return returnValue;
-        }
-
-        /// <inheritdoc />
-        public bool IsTaggedWith(string propertyName, object tag)
-        {
-            if (_taggedProperties.TryGetValue(propertyName, out var tags))
-            {
-                return tags.ContainsKey(tag);
-            }
-
-            return false;
-        }
-
-        /// <inheritdoc />
-        public object GetTagValue<TProp>(Expression<Func<T, TProp>> propertyExpression, object tag)
-        {
-            return GetTagValue(propertyExpression.GetMemberName(), tag);
-        }
-
-        /// <inheritdoc />
-        public bool IsTaggedWith<TProp>(Expression<Func<T, TProp>> propertyExpression, object tag)
-        {
-            return IsTaggedWith(propertyExpression.GetMemberName(), tag);
-        }
-
         #endregion
 
         #region Implementation of IShallowCloneable

@@ -31,7 +31,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests.Interfaces
 	/// <summary>
 	///     This is the interface under test
 	/// </summary>
-	public interface IDefaultValueOverwriteTest : IDefaultValueBase, IDefaultValue<IDefaultValueOverwriteTest>
+	public interface IDefaultValueOverwriteTest : IDefaultValueBase, IDefaultValue
     {
 		[DefaultValue(42)]
 		new int Age { get; set; }

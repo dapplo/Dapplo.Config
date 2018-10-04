@@ -46,27 +46,5 @@ namespace Dapplo.Config.Interfaces
 		/// </summary>
 		/// <param name="propertyName"></param>
 		void RestoreToDefault(string propertyName);
-	}
-
-	/// <summary>
-	///     Extend your property interface with this, and all default values specified with the DefaultValueAttribute will be
-	///     applied
-	/// </summary>
-	public interface IDefaultValue<T> : IDefaultValue
-	{
-		/// <summary>
-		///     Return the default value of the property
-		/// </summary>
-		/// <typeparam name="TProp"></typeparam>
-		/// <param name="propertyExpression"></param>
-		/// <returns>the default value, null if none</returns>
-		object DefaultValueFor<TProp>(Expression<Func<T, TProp>> propertyExpression);
-
-		/// <summary>
-		///     Restore the property value back to its default
-		/// </summary>
-		/// <typeparam name="TProp"></typeparam>
-		/// <param name="propertyExpression"></param>
-		void RestoreToDefault<TProp>(Expression<Func<T, TProp>> propertyExpression);
-	}
+    }
 }
