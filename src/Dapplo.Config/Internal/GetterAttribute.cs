@@ -19,26 +19,32 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
+#region using
+
 using System;
-using System.Reflection;
+
+#endregion
 
 namespace Dapplo.Config.Internal
 {
     /// <summary>
-    /// Information for a Get or Set invocation
+    ///     This attribute should be used to mark a method as a getter
     /// </summary>
-    public class GetSetInfo
-    {
+    [AttributeUsage(AttributeTargets.Method)]
+	public class GetterAttribute : Attribute
+	{
         /// <summary>
-        ///     Can the proxy continue with other getter/setters?
-        ///     This should be set to false if a getter/setter implementation wants to throw an exception or thinks there should be
-        ///     no more others.
+        ///     Constructor
         /// </summary>
-        public bool CanContinue { get; set; } = true;
+        /// <param name="order">The order of the getter method</param>
+        public GetterAttribute(object order)
+		{
+			Order = Convert.ToInt32(order);
+		}
 
-        /// <summary>
-        ///    PropertyInfo of the property that is being get/set
-        /// </summary>
-        public PropertyInfo PropertyInfo { get; set; }
-    }
+		/// <summary>
+		///     Order for the getter
+		/// </summary>
+		public int Order { get; private set; }
+	}
 }

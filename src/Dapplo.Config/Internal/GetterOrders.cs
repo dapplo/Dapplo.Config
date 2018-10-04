@@ -19,26 +19,14 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-using System;
-using System.Reflection;
-
 namespace Dapplo.Config.Internal
 {
     /// <summary>
-    /// Information for a Get or Set invocation
+    /// This defines the order in which the setters are called
     /// </summary>
-    public class GetSetInfo
+    public enum GetterOrders
     {
-        /// <summary>
-        ///     Can the proxy continue with other getter/setters?
-        ///     This should be set to false if a getter/setter implementation wants to throw an exception or thinks there should be
-        ///     no more others.
-        /// </summary>
-        public bool CanContinue { get; set; } = true;
-
-        /// <summary>
-        ///    PropertyInfo of the property that is being get/set
-        /// </summary>
-        public PropertyInfo PropertyInfo { get; set; }
+        Transaction = 0,
+        Dictionary = 2000
     }
 }

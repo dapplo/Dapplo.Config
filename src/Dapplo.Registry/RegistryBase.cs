@@ -36,7 +36,7 @@ namespace Dapplo.Registry
     /// This implements a window into the registry based on an interface
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class RegistryBase<T> : ConfigurationBase, IRegistry
+    public abstract class RegistryBase<T> : ConfigurationBase, IRegistry
     {
         private readonly RegistryAttribute _registryAttribute = typeof(T).GetAttribute<RegistryAttribute>() ?? new RegistryAttribute();
         private readonly IDictionary<string, RegistryAttribute> _registryAttributes = new Dictionary<string, RegistryAttribute>();

@@ -100,37 +100,35 @@ namespace Dapplo.Config
         public virtual object this[string key]
         {
             get => Getter(key);
-            set => Setter(PropertyInfoFor(key), value);
+            set => SetValue(PropertyInfoFor(key), value);
         }
 
         /// <inheritdoc />
         public IEnumerable<KeyValuePair<string, object>> GetProperties() => _properties;
 
-        #region Interceptor
+        /// <summary>
+        /// Retrieves the value from the dictionary
+        /// </summary>
+        /// <param name="getInfo">GetInfo</param>
+        [Getter(GetterOrders.Dictionary)]
+        protected void ValueFromDictionary(GetInfo getInfo)
+        {
+            var hasValue = _properties.TryGetValue(getInfo.PropertyInfo.Name, out var value);
+            getInfo.Value = hasValue ? value : GetConvertedDefaultValue(getInfo.PropertyInfo);
+            getInfo.HasValue = hasValue;
+        }
 
         /// <summary>
-        /// This is the internal way of getting information for a property
+        /// Retrieves the value from the dictionary
         /// </summary>
-        /// <param name="propertyName">string</param>
-        /// <returns></returns>
-        protected GetInfo GetValue(string propertyName)
+        /// <param name="setInfo">GetInfo</param>
+        [Setter(SetterOrders.Dictionary)]
+        protected void ValueToDictionary(SetInfo setInfo)
         {
-            var propertyInfo = PropertyInfoFor(propertyName);
-
-            var hasValue = _properties.TryGetValue(propertyName, out var value);
-            var getInfo = new GetInfo
-            {
-                PropertyName = propertyName,
-                PropertyType = propertyInfo.PropertyType,
-                Value = hasValue ? value : GetConvertedDefaultValue(propertyInfo),
-                HasValue = hasValue
-            };
-
-            TransactionalGetter(getInfo);
-            // If more getters need to be called, check getInfo.CanContinue before calling them
-
-            return getInfo;
+            _properties[setInfo.PropertyInfo.Name] = setInfo.NewValue;
         }
+
+        #region Interceptor
 
         /// <summary>
         /// Get the backing value for the specified property
@@ -146,55 +144,12 @@ namespace Dapplo.Config
         /// <summary>
         /// Set the backing value for the specified property
         /// </summary>
-        /// <param name="propertyInfo">PropertyInfo</param>
-        /// <param name="newValue">object</param>
-        protected void Setter(PropertyInfo propertyInfo, object newValue)
-        {
-            var hasOldValue = _properties.TryGetValue(propertyInfo.Name, out var oldValue);
-
-            propertyInfo.PropertyType.ConvertOrCastValueToType(newValue);
-
-            var setInfo = new SetInfo
-            {
-                PropertyName = propertyInfo.Name,
-                PropertyType = propertyInfo.PropertyType,
-                NewValue = propertyInfo.PropertyType.ConvertOrCastValueToType(newValue),
-                HasOldValue = hasOldValue,
-                OldValue = oldValue
-            };
-
-            // Handle write protection
-            WriteProtectSetter(setInfo);
-            // Handle transactions
-            if (setInfo.CanContinue)
-            {
-                TransactionalSetter(setInfo);
-            }
-
-            // Handle changes
-            if (setInfo.CanContinue)
-            {
-                HasChangesSetter(setInfo);
-            }
-
-            // Handle NotifyPropertyChang(ed/ing) and set the value
-            if (setInfo.CanContinue)
-            {
-                NotifyPropertyChangingSetter(setInfo);
-                _properties[propertyInfo.Name] = setInfo.NewValue;
-                NotifyPropertyChangedSetter(setInfo);
-            }
-        }
-
-        /// <summary>
-        /// Set the backing value for the specified property
-        /// </summary>
         /// <param name="propertyName">string</param>
         /// <param name="newValue">object</param>
         [SetInterceptor]
         protected virtual void Setter(string propertyName, object newValue)
         {
-            Setter(PropertyInfoFor(propertyName), newValue);
+            SetValue(PropertyInfoFor(propertyName), newValue);
         }
         #endregion
 
@@ -223,16 +178,17 @@ namespace Dapplo.Config
         ///     This is the implementation of the set logic
         /// </summary>
         /// <param name="setInfo">SetInfo with all the information on the set call</param>
-        private void WriteProtectSetter(SetInfo setInfo)
+        [Setter(SetterOrders.WriteProtect)]
+        protected void WriteProtectSetter(SetInfo setInfo)
         {
-            if (_writeProtectedProperties.Contains(setInfo.PropertyName))
+            if (_writeProtectedProperties.Contains(setInfo.PropertyInfo.Name))
             {
                 setInfo.CanContinue = false;
-                throw new AccessViolationException($"Property {setInfo.PropertyName} is write protected");
+                throw new AccessViolationException($"Property {setInfo.PropertyInfo.Name} is write protected");
             }
             if (_isProtecting)
             {
-                _writeProtectedProperties.Add(setInfo.PropertyName);
+                _writeProtectedProperties.Add(setInfo.PropertyInfo.Name);
             }
         }
 
@@ -305,11 +261,16 @@ namespace Dapplo.Config
         ///     This is the implementation of the set logic
         /// </summary>
         /// <param name="setInfo">SetInfo with all the information on the set call</param>
-        private void HasChangesSetter(SetInfo setInfo)
+        [Setter(SetterOrders.HasChanges)]
+        protected void HasChangesSetter(SetInfo setInfo)
         {
+            var hasOldValue = _properties.TryGetValue(setInfo.PropertyInfo.Name, out var oldValue);
+            setInfo.HasOldValue = hasOldValue;
+            setInfo.OldValue = oldValue;
+
             if (!setInfo.HasOldValue || !Equals(setInfo.NewValue, setInfo.OldValue))
             {
-                _changedValues.Add(setInfo.PropertyName.ToLowerInvariant());
+                _changedValues.Add(setInfo.PropertyInfo.Name.ToLowerInvariant());
             }
         }
 
@@ -370,13 +331,13 @@ namespace Dapplo.Config
 
             if (defaultValue != null)
             {
-                Setter(propertyInfo, defaultValue);
+                SetValue(propertyInfo, defaultValue);
                 return;
             }
             try
             {
                 defaultValue = propertyInfo.PropertyType.CreateInstance();
-                Setter(propertyInfo, defaultValue);
+                SetValue(propertyInfo, defaultValue);
             }
             catch (Exception ex)
             {
@@ -435,7 +396,8 @@ namespace Dapplo.Config
         ///     This creates a NPC event if the values are changed
         /// </summary>
         /// <param name="setInfo">SetInfo with all the set call information</param>
-        private void NotifyPropertyChangedSetter(SetInfo setInfo)
+        [Setter(SetterOrders.NotifyPropertyChanged)]
+        protected void NotifyPropertyChangedSetter(SetInfo setInfo)
         {
             // Fast exit when no listeners.
             if (PropertyChanged == null)
@@ -447,7 +409,7 @@ namespace Dapplo.Config
             {
                 return;
             }
-            var propertyChangedEventArgs = new PropertyChangedEventArgs(setInfo.PropertyName);
+            var propertyChangedEventArgs = new PropertyChangedEventArgs(setInfo.PropertyInfo.Name);
             InvokePropertyChanged(this, propertyChangedEventArgs);
         }
 
@@ -473,7 +435,8 @@ namespace Dapplo.Config
         ///     This creates a NPC event if the values are changing
         /// </summary>
         /// <param name="setInfo">SetInfo with all the set call information</param>
-        private void NotifyPropertyChangingSetter(SetInfo setInfo)
+        [Setter(SetterOrders.NotifyPropertyChanging)]
+        protected void NotifyPropertyChangingSetter(SetInfo setInfo)
         {
             if (PropertyChanging == null)
             {
@@ -484,131 +447,9 @@ namespace Dapplo.Config
             {
                 return;
             }
-            var propertyChangingEventArgs = new PropertyChangingEventArgs(setInfo.PropertyName);
+            var propertyChangingEventArgs = new PropertyChangingEventArgs(setInfo.PropertyInfo.Name);
             InvokePropertyChanging(this, propertyChangingEventArgs);
         }
-        #endregion
-
-        #region Implementation of ITransactionalProperties
-        // A store for the values that are set during the transaction
-        private readonly IDictionary<string, object> _transactionProperties = new Dictionary<string, object>(new AbcComparer());
-        // This boolean has the value true if we are currently in a transaction
-        private bool _inTransaction;
-
-        /// <summary>
-        ///     This is the implementation of the getter logic for a transactional proxy
-        /// </summary>
-        /// <param name="getInfo">GetInfo with all the information on the get call</param>
-        private void TransactionalGetter(GetInfo getInfo)
-        {
-            // Lock to prevent rollback etc to run parallel
-            lock (_transactionProperties)
-            {
-                if (!_inTransaction)
-                {
-                    return;
-                }
-
-                // Get the value from the dictionary
-                if (!_transactionProperties.TryGetValue(getInfo.PropertyName, out var value))
-                {
-                    return;
-                }
-
-                getInfo.Value = value;
-                getInfo.CanContinue = false;
-            }
-        }
-
-        /// <summary>
-        ///     This is the implementation of the set logic
-        /// </summary>
-        /// <param name="setInfo">SetInfo with all the information on the set call</param>
-        private void TransactionalSetter(SetInfo setInfo)
-        {
-            // Lock to prevent rollback etc to run parallel
-            lock (_transactionProperties)
-            {
-                if (!_inTransaction)
-                {
-                    return;
-                }
-
-                if (_transactionProperties.TryGetValue(setInfo.PropertyName, out var oldValue))
-                {
-                    _transactionProperties[setInfo.PropertyName] = setInfo.NewValue;
-                    setInfo.OldValue = oldValue;
-                    setInfo.HasOldValue = true;
-                }
-                else
-                {
-                    _transactionProperties.Add(setInfo.PropertyName, setInfo.NewValue);
-                    setInfo.OldValue = null;
-                    setInfo.HasOldValue = false;
-                }
-
-                // No more (prevents NPC)
-                setInfo.CanContinue = false;
-            }
-        }
-
-        /// <inheritdoc />
-        public void CommitTransaction()
-        {
-            // Lock to prevent rollback etc to run parallel
-            lock (_transactionProperties)
-            {
-                // Only when we have started a transaction
-                if (!_inTransaction)
-                {
-                    return;
-                }
-                // Disable the transaction, otherwise the set will only overwrite the value in _transactionProperties
-                _inTransaction = false;
-                // Call the set for every property, this will invoke every setter (NPC etc)
-                foreach (var transactionProperty in _transactionProperties)
-                {
-                    Setter(PropertyInfoFor(transactionProperty.Key), transactionProperty.Value);
-                }
-                // Clear all the properties, so the transaction is clean
-                _transactionProperties.Clear();
-            }
-        }
-
-        /// <inheritdoc />
-        public bool IsTransactionDirty()
-        {
-            lock (_transactionProperties)
-            {
-                return _inTransaction && _transactionProperties.Count > 0;
-            }
-        }
-
-        /// <inheritdoc />
-        public void RollbackTransaction()
-        {
-            // Lock to prevent commit etc to run parallel
-            lock (_transactionProperties)
-            {
-                // Only when we have started a transaction, it can be cleared
-                if (!_inTransaction)
-                {
-                    return;
-                }
-                _transactionProperties.Clear();
-                _inTransaction = false;
-            }
-        }
-
-        /// <inheritdoc />
-        public void StartTransaction()
-        {
-            lock (_transactionProperties)
-            {
-                _inTransaction = true;
-            }
-        }
-
         #endregion
 
         #region Implementation of ITagging
