@@ -37,7 +37,7 @@ namespace Dapplo.Ini.NewImpl
         /// <summary>
         /// All the ini sections for this file
         /// </summary>
-        protected readonly IDictionary<string, IIniSection> _iniSections = new Dictionary<string, IIniSection>(AbcComparer.Instance);
+        protected readonly IDictionary<string, IIniSection> IniSections = new Dictionary<string, IIniSection>(AbcComparer.Instance);
 
         /// <summary>
         /// Register IIniSection
@@ -45,7 +45,7 @@ namespace Dapplo.Ini.NewImpl
         /// <param name="iniSection">IIniSection</param>
         public void Register(IIniSection iniSection)
         {
-            _iniSections[iniSection.GetSectionName()] = iniSection;
+            IniSections[iniSection.GetSectionName()] = iniSection;
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace Dapplo.Ini.NewImpl
         {
             var iniValues = await IniFile.ReadAsync(stream, Encoding.UTF8, cancellationToken).ConfigureAwait(false);
 
-            foreach (var iniSection in _iniSections.Values)
+            foreach (var iniSection in IniSections.Values)
             {
                 iniSection.AfterLoad();
             }

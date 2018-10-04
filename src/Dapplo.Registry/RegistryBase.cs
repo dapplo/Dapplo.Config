@@ -49,6 +49,11 @@ namespace Dapplo.Registry
             Initialize(typeof(T));
         }
 
+        /// <summary>
+        /// This retrieves the registry value
+        /// </summary>
+        /// <param name="propertyName">string</param>
+        /// <returns>object with the value</returns>
         [GetInterceptor]
         protected object Getter(string propertyName)
         {
@@ -79,10 +84,11 @@ namespace Dapplo.Registry
                         throw new ArgumentException($"No registry entry in {hive}/{path} for {view}");
                     }
 
+                    // TODO: Convert the returned value to the correct property type
                     if (registryPropertyAttribute.ValueName == null)
                     {
                         // Read all values, assume IDictionary<string, object>
-                        IDictionary<string, object> values = new SortedDictionary<string, object>(); ;
+                        IDictionary<string, object> values = new SortedDictionary<string, object>();
                         foreach (var valueName in key.GetValueNames())
                         {
                             var value = key.GetValue(valueName);
@@ -135,7 +141,7 @@ namespace Dapplo.Registry
                         {
                             throw new ArgumentException($"No registry entry in {hive}/{path} for {view}");
                         }
-
+                        // TODO: Convert the  property type to the correct registry value
                         if (registryPropertyAttribute.ValueName == null)
                         {
                             if (!(newValue is IDictionary<string, object> newValues))

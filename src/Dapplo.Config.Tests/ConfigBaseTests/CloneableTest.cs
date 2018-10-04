@@ -50,7 +50,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		{
 			const string testValue = "Robin";
 			_cloneableTest.Name = testValue;
-			var cloned = _cloneableTest.ShallowClone() as ICloneableTest;
+			var cloned = (ICloneableTest) _cloneableTest.ShallowClone();
 			Assert.Equal(testValue, cloned.Name);
 			cloned.Name = "Dapplo";
 			// The old instance should still have the previous value

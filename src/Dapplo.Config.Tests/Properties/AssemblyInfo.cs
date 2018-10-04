@@ -21,8 +21,6 @@
 
 #region using
 
-using System.Reflection;
-using System.Runtime.InteropServices;
 using Xunit;
 
 #endregion

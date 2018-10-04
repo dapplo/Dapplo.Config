@@ -520,7 +520,7 @@ namespace Dapplo.Config
         public override object ShallowClone()
         {
             var type = GetType();
-            var clonedValue = Activator.CreateInstance(type) as DictionaryConfigurationBase<T>;
+            var clonedValue = (DictionaryConfigurationBase<T>) Activator.CreateInstance(type);
             clonedValue.SetProperties(_properties);
             return clonedValue;
         }
