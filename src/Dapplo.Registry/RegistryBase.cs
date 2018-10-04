@@ -36,7 +36,7 @@ namespace Dapplo.Registry
     /// This implements a window into the registry based on an interface
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class RegistryBase<T> : ConfigurationBase<T>, IRegistry
+    public class RegistryBase<T> : ConfigurationBase, IRegistry
     {
         private readonly RegistryAttribute _registryAttribute = typeof(T).GetAttribute<RegistryAttribute>() ?? new RegistryAttribute();
         private readonly IDictionary<string, RegistryAttribute> _registryAttributes = new Dictionary<string, RegistryAttribute>();
@@ -44,64 +44,72 @@ namespace Dapplo.Registry
         #region Needed as workaround for a bug in Autoproperties
 
         /// <inheritdoc />
+        public RegistryBase()
+        {
+            Initialize(typeof(T));
+        }
+
         [GetInterceptor]
-        protected override object Getter(string propertyName)
+        protected object Getter(string propertyName)
         {
-            return base.Getter(propertyName);
+            if (!_registryAttributes.TryGetValue(propertyName, out var registryPropertyAttribute) || registryPropertyAttribute == null)
+            {
+                throw new ArgumentException($"{propertyName} isn't correctly configured");
+            }
+
+            var hive = _registryAttribute.Hive;
+            if (registryPropertyAttribute.HasHive)
+            {
+                hive = registryPropertyAttribute.Hive;
+            }
+
+            var view = _registryAttribute.View;
+            if (registryPropertyAttribute.HasView)
+            {
+                view = registryPropertyAttribute.View;
+            }
+
+            using (var baseKey = RegistryKey.OpenBaseKey(hive, view))
+            {
+                var path = registryPropertyAttribute.Path;
+                using (var key = baseKey.OpenSubKey(path))
+                {
+                    if (key == null)
+                    {
+                        throw new ArgumentException($"No registry entry in {hive}/{path} for {view}");
+                    }
+
+                    if (registryPropertyAttribute.ValueName == null)
+                    {
+                        // Read all values, assume IDictionary<string, object>
+                        IDictionary<string, object> values = new SortedDictionary<string, object>(); ;
+                        foreach (var valueName in key.GetValueNames())
+                        {
+                            var value = key.GetValue(valueName);
+                            if (!values.ContainsKey(valueName))
+                            {
+                                values.Add(valueName, value);
+                            }
+                            else
+                            {
+                                values[valueName] = value;
+                            }
+                        }
+
+                        return values;
+                    }
+                    // Read a specific value
+                    return key.GetValue(registryPropertyAttribute.ValueName);
+                }
+            }
         }
 
-        /// <inheritdoc />
         [SetInterceptor]
-        protected override void Setter(string propertyName, object newValue)
+        protected void Setter(string propertyName, object newValue)
         {
-            base.Setter(propertyName, newValue);
-        }
-        #endregion
-
-        /// <inheritdoc />
-        protected override void OneTimePropertyInitializer(PropertyInfo propertyInfo)
-        {
-            base.OneTimePropertyInitializer(propertyInfo);
-
-            var registryAttribute = propertyInfo.GetAttribute<RegistryAttribute>();
-            if (registryAttribute == null)
+            if (!_registryAttributes.TryGetValue(propertyName, out var registryPropertyAttribute) || registryPropertyAttribute == null)
             {
-                throw new ArgumentException($"{propertyInfo.Name} doesn't have a path mapping");
-            }
-
-            var path = registryAttribute.Path;
-            if (_registryAttribute.Path != null && !registryAttribute.IgnoreBasePath)
-            {
-                path = Path.Combine(_registryAttribute.Path, path);
-            }
-
-            if (string.IsNullOrEmpty(path))
-            {
-                throw new ArgumentException($"{propertyInfo.Name} doesn't have a path mapping");
-            }
-
-            if (path.StartsWith(@"\"))
-            {
-                path = path.Remove(0, 1);
-            }
-
-            registryAttribute.Path = path;
-
-            // Store for retrieval
-            _registryAttributes[propertyInfo.Name] = registryAttribute;
-        }
-
-        /// <summary>
-        /// Initialize the property
-        /// </summary>
-        /// <param name="propertyInfo">PropertyInfo</param>
-        protected override void PropertyInitializer(PropertyInfo propertyInfo)
-        {
-            base.PropertyInitializer(propertyInfo);
-
-            if (!_registryAttributes.TryGetValue(propertyInfo.Name, out var registryPropertyAttribute) || registryPropertyAttribute == null)
-            {
-                throw new ArgumentException($"{propertyInfo.Name} isn't correctly configured");
+                throw new ArgumentException($"{propertyName} isn't correctly configured");
             }
 
             var hive = _registryAttribute.Hive;
@@ -130,37 +138,19 @@ namespace Dapplo.Registry
 
                         if (registryPropertyAttribute.ValueName == null)
                         {
-                            // Read all values, assume IDictionary<string, object>
-                            IDictionary<string, object> values;
-                            var getInfo = GetValue(propertyInfo.Name);
-                            if (!getInfo.HasValue)
+                            if (!(newValue is IDictionary<string, object> newValues))
                             {
-                                // No value yet, create a new default
-                                values = new SortedDictionary<string, object>();
-                                Setter(propertyInfo, values);
-                            }
-                            else
-                            {
-                                values = (IDictionary<string, object>)getInfo.Value;
+                                return;
                             }
 
-                            foreach (var valueName in key.GetValueNames())
+                            foreach (var valueName in newValues.Keys)
                             {
-                                var value = key.GetValue(valueName);
-                                if (!values.ContainsKey(valueName))
-                                {
-                                    values.Add(valueName, value);
-                                }
-                                else
-                                {
-                                    values[valueName] = value;
-                                }
+                                key.SetValue(valueName, newValues[valueName]);
                             }
                         }
                         else
                         {
-                            // Read a specific value
-                            Setter(propertyInfo, key.GetValue(registryPropertyAttribute.ValueName));
+                            key.SetValue(registryPropertyAttribute.ValueName, newValue);
                         }
                     }
                     catch (Exception ex)
@@ -173,6 +163,40 @@ namespace Dapplo.Registry
                     }
                 }
             }
+        }
+        #endregion
+
+        /// <inheritdoc />
+        protected override void PropertyInitializer(PropertyInfo propertyInfo)
+        {
+            base.PropertyInitializer(propertyInfo);
+
+            var registryAttribute = propertyInfo.GetAttribute<RegistryAttribute>();
+            if (registryAttribute == null)
+            {
+                throw new ArgumentException($"{propertyInfo.Name} doesn't have a path mapping");
+            }
+
+            var path = registryAttribute.Path;
+            if (_registryAttribute.Path != null && !registryAttribute.IgnoreBasePath)
+            {
+                path = Path.Combine(_registryAttribute.Path, path);
+            }
+
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentException($"{propertyInfo.Name} doesn't have a path mapping");
+            }
+
+            if (path.StartsWith(@"\"))
+            {
+                path = path.Remove(0, 1);
+            }
+
+            registryAttribute.Path = path;
+
+            // Store for retrieval
+            _registryAttributes[propertyInfo.Name] = registryAttribute;
         }
 
         /// <summary>

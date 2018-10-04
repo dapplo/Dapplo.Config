@@ -2,7 +2,7 @@
 
 namespace Dapplo.Config.Tests.ConfigBaseTests.Entities
 {
-    public class CloneableImpl : ConfigurationBase<CloneableImpl>, ICloneableTest
+    public class CloneableImpl : DictionaryConfigurationBase<ICloneableTest>, ICloneableTest
     {
         #region Implementation of ICloneableTest
 

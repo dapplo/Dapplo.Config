@@ -32,16 +32,16 @@ namespace Dapplo.Ini.NewImpl
     /// This is the base class for an IniSection, it bases on the ConfigurationBase and should be used as the base for an ini-section.
     /// </summary>
     /// <typeparam name="T">The interface which this configuration implements</typeparam>
-    public class IniSectionBase<T> : ConfigurationBase<T>, IIniSection
+    public class IniSectionBase<T> : DictionaryConfigurationBase<T>, IIniSection
     {
         private readonly IDictionary<string, IniValue> _iniValues = new Dictionary<string, IniValue>(AbcComparer.Instance);
 
         #region Overrides of ConfigurationBase<T>
 
         /// <inheritdoc />
-        protected override void OneTimePropertyInitializer(PropertyInfo propertyInfo)
+        protected override void PropertyInitializer(PropertyInfo propertyInfo)
         {
-            base.OneTimePropertyInitializer(propertyInfo);
+            base.PropertyInitializer(propertyInfo);
 
             var iniValue = new IniValue(this)
             {

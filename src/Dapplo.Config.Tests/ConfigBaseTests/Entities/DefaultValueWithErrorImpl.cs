@@ -2,12 +2,8 @@
 
 namespace Dapplo.Config.Tests.ConfigBaseTests.Entities
 {
-    public class DefaultValueWithErrorImpl : ConfigurationBase<IDefaultValueWithErrorTest>, IDefaultValueWithErrorTest
+    public class DefaultValueWithErrorImpl : DictionaryConfigurationBase<IDefaultValueWithErrorTest>, IDefaultValueWithErrorTest
     {
-        #region Implementation of IDefaultValueWithErrorTest
-
         public SimpleEnum MyEnum { get; set; }
-
-        #endregion
     }
 }

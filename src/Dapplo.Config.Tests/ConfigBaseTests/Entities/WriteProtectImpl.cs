@@ -2,13 +2,9 @@
 
 namespace Dapplo.Config.Tests.ConfigBaseTests.Entities
 {
-    public class WriteProtectImpl : ConfigurationBase<IWriteProtectTest>, IWriteProtectTest
+    public class WriteProtectImpl : DictionaryConfigurationBase<IWriteProtectTest>, IWriteProtectTest
     {
-        #region Implementation of IWriteProtectTest
-
         public int Age { get; set; }
         public string Name { get; set; }
-
-        #endregion
     }
 }

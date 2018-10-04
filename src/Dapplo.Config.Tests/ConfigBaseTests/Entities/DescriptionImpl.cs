@@ -2,12 +2,8 @@
 
 namespace Dapplo.Config.Tests.ConfigBaseTests.Entities
 {
-    public class DescriptionImpl : ConfigurationBase<IDescriptionTest>, IDescriptionTest
+    public class DescriptionImpl : DictionaryConfigurationBase<IDescriptionTest>, IDescriptionTest
     {
-        #region Implementation of IDescriptionTest
-
         public string Name { get; set; }
-
-        #endregion
     }
 }

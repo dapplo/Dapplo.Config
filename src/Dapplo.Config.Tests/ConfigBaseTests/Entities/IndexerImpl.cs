@@ -2,7 +2,7 @@
 
 namespace Dapplo.Config.Tests.ConfigBaseTests.Entities
 {
-    public class IndexerImpl : ConfigurationBase<IIndexerTest>, IIndexerTest
+    public class IndexerImpl : DictionaryConfigurationBase<IIndexerTest>, IIndexerTest
     {
         public string Name { get; set; }
     }

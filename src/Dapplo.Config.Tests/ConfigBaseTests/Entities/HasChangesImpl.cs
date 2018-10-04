@@ -2,12 +2,8 @@
 
 namespace Dapplo.Config.Tests.ConfigBaseTests.Entities
 {
-    public class HasChangesImpl : ConfigurationBase<IHasChangesTest>, IHasChangesTest
+    public class HasChangesImpl : DictionaryConfigurationBase<IHasChangesTest>, IHasChangesTest
     {
-        #region Implementation of IHasChangesTest
-
         public string SayMyName { get; set; }
-
-        #endregion
     }
 }

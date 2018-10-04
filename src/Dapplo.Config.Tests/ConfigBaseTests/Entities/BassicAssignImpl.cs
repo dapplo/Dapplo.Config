@@ -2,7 +2,7 @@
 
 namespace Dapplo.Config.Tests.ConfigBaseTests.Entities
 {
-    public class BassicAssignImpl : ConfigurationBase<IBassicAssignTest>, IBassicAssignTest
+    public class BassicAssignImpl : DictionaryConfigurationBase<IBassicAssignTest>, IBassicAssignTest
     {
         public string Name { get; set; }
     }

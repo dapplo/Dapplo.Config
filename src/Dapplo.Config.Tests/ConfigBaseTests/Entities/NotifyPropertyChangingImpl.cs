@@ -2,12 +2,8 @@
 
 namespace Dapplo.Config.Tests.ConfigBaseTests.Entities
 {
-    public class NotifyPropertyChangingImpl : ConfigurationBase<INotifyPropertyChangingTest>, INotifyPropertyChangingTest
+    public class NotifyPropertyChangingImpl : DictionaryConfigurationBase<INotifyPropertyChangingTest>, INotifyPropertyChangingTest
     {
-        #region Implementation of INotifyPropertyChangingTest
-
         public string Name { get; set; }
-
-        #endregion
     }
 }

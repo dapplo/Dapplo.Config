@@ -32,7 +32,7 @@ namespace Dapplo.Registry
 	/// <summary>
 	///     Interface for a registry object
 	/// </summary>
-	public interface IRegistry : IDefaultValue, IWriteProtectProperties
+	public interface IRegistry
 	{
 		/// <summary>
 		///     The path for the property
@@ -46,7 +46,7 @@ namespace Dapplo.Registry
 	///     Generic version of the IRegistry interface
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public interface IRegistry<T> : IRegistry, IDefaultValue<T>, IWriteProtectProperties<T>
+	public interface IRegistry<T> : IRegistry
 	{
 		/// <summary>
 		///     Return the registry path for a property

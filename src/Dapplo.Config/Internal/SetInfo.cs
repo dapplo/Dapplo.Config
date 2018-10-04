@@ -21,6 +21,9 @@
 
 namespace Dapplo.Config.Internal
 {
+    /// <summary>
+    /// This provides the value for a set interceptor
+    /// </summary>
     public class SetInfo : GetSetInfo
     {
         /// <summary>

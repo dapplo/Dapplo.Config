@@ -22,7 +22,7 @@
 namespace Dapplo.Config.Internal
 {
     /// <summary>
-    ///     This class contains all the information for the getter actions
+    /// This provides the value for a get interceptor
     /// </summary>
     public class GetInfo : GetSetInfo
     {
