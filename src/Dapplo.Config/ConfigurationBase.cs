@@ -95,7 +95,7 @@ namespace Dapplo.Config
         /// <summary>
         /// Get all the property names
         /// </summary>
-        public IEnumerable<string> PropertyNames => PropertiesInformation.PropertyInfos.Keys;
+        public IEnumerable<string> PropertyNames() => PropertiesInformation.PropertyInfos.Keys;
 
         /// <summary>
         /// Helper method to get the property info for a property

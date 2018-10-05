@@ -50,13 +50,6 @@ namespace Dapplo.Ini
 		/// </summary>
 		void BeforeSave();
 
-        /// <summary>
-        ///     Get the IniValue for a property, this is quicker and uses less memory than to iterate over the GetIniValues result
-        /// </summary>
-        /// <param name="propertyName">Name of the property</param>
-        /// <returns>IniValue</returns>
-        IniValue this[string propertyName] { get; }
-
 		/// <summary>
 		///     Get the IniValue for a property, this is quicker and uses less memory than to iterate over the GetIniValues result
 		/// </summary>
@@ -88,29 +81,5 @@ namespace Dapplo.Ini
 		/// <param name="value">out IniValue</param>
 		/// <returns>bool with true if found</returns>
 		bool TryGetIniValue(string propertyName, out IniValue value);
-	}
-
-	/// <summary>
-	///     Generic version of IIniSection
-	/// </summary>
-	public interface IIniSection<T> : IIniSection
-	{
-		/// <summary>
-		///     Get the IniValue for a property, this is quicker and uses less memory than to iterate over the GetIniValues result
-		/// </summary>
-		/// <typeparam name="TProp">Your interface</typeparam>
-		/// <param name="propertyExpression">expression for the property name</param>
-		/// <returns>IniValue</returns>
-		IniValue GetIniValue<TProp>(Expression<Func<T, TProp>> propertyExpression);
-
-		/// <summary>
-		///     Try to get the IniValue for a property, this is quicker and uses less memory than to iterate over the GetIniValues
-		///     result
-		/// </summary>
-		/// <typeparam name="TProp">Your interface</typeparam>
-		/// <param name="propertyExpression">expression for the property name</param>
-		/// <param name="value">out IniValue</param>
-		/// <returns>bool with true if found</returns>
-		bool TryGetIniValue<TProp>(Expression<Func<T, TProp>> propertyExpression, out IniValue value);
 	}
 }

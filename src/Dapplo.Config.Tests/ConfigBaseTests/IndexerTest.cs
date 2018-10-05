@@ -54,9 +54,9 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
         [Fact]
         public void TestIndexer_NoItemProperty()
         {
-            Assert.Single(_indexerImpl.PropertyNames);
+            Assert.Single(_indexerImpl.PropertyNames());
             // We should only have one property
-            Assert.Equal(new []{ "Name"}, _indexerImpl.PropertyNames);
+            Assert.Equal(new []{ "Name"}, _indexerImpl.PropertyNames());
         }
     }
 }

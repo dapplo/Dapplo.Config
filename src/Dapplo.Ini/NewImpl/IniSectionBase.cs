@@ -20,6 +20,8 @@
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Reflection;
 using Dapplo.Config;
 using Dapplo.Ini.Extensions;
@@ -35,6 +37,18 @@ namespace Dapplo.Ini.NewImpl
     public class IniSectionBase<T> : DictionaryConfigurationBase<T>, IIniSection
     {
         private readonly IDictionary<string, IniValue> _iniValues = new Dictionary<string, IniValue>(AbcComparer.Instance);
+        private readonly IniSectionAttribute _iniSectionAttribute;
+        private readonly DescriptionAttribute _descriptionAttribute;
+
+        /// <summary>
+        /// Constructor for the IniSection based objects
+        /// </summary>
+        public IniSectionBase()
+        {
+            var thisType = GetType();
+            _iniSectionAttribute = thisType.GetAttribute<IniSectionAttribute>();
+            _descriptionAttribute = thisType.GetAttribute<DescriptionAttribute>();
+        }
 
         #region Overrides of ConfigurationBase<T>
 
@@ -55,10 +69,10 @@ namespace Dapplo.Ini.NewImpl
                 Behavior = propertyInfo.GetIniPropertyBehavior(),
                 DefaultValue = propertyInfo.GetDefaultValue()
             };
-            /*if (!iniValue.Behavior.IsIgnoreErrorsSet && _iniSectionAttribute != null)
+            if (!iniValue.Behavior.IsIgnoreErrorsSet && _iniSectionAttribute != null)
             {
                 iniValue.Behavior.IgnoreErrors = _iniSectionAttribute.IgnoreErrors;
-            }*/
+            }
             _iniValues[iniValue.PropertyName] = iniValue;
         }
 
@@ -79,36 +93,32 @@ namespace Dapplo.Ini.NewImpl
         /// </summary>
         public virtual void BeforeSave() { }
 
-        public IniValue this[string propertyName] => throw new System.NotImplementedException();
-
         /// <inheritdoc />
         public IniValue GetIniValue(string propertyName)
         {
-            throw new System.NotImplementedException();
+            if (_iniValues.TryGetValue(propertyName, out var value))
+            {
+                return value;
+            }
+            return null;
         }
 
         /// <inheritdoc />
         public IReadOnlyDictionary<string, IniValue> GetIniValues()
         {
-            throw new System.NotImplementedException();
+            return new ReadOnlyDictionary<string, IniValue>(_iniValues);
         }
 
         /// <inheritdoc />
-        public string GetSectionDescription()
-        {
-            throw new System.NotImplementedException();
-        }
+        public string GetSectionDescription() => _descriptionAttribute?.Description;
 
         /// <inheritdoc />
-        public string GetSectionName()
-        {
-            throw new System.NotImplementedException();
-        }
+        public string GetSectionName() => _iniSectionAttribute?.Name;
 
         /// <inheritdoc />
         public bool TryGetIniValue(string propertyName, out IniValue value)
         {
-            throw new System.NotImplementedException();
+            return _iniValues.TryGetValue(propertyName, out value);
         }
     }
 }

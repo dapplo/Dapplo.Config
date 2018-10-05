@@ -35,7 +35,7 @@ namespace Dapplo.Config.Tests.ConfigTests.Interfaces
 	/// </summary>
 	[IniSection("Http")]
 	[Description("Test Configuration")]
-	public interface IHttpConfiguration : IHttpSettings, IIniSection<IHttpConfiguration>, INotifyPropertyChanged, ITagging
+	public interface IHttpConfiguration : IHttpSettings, IIniSection
 	{
 	}
 }

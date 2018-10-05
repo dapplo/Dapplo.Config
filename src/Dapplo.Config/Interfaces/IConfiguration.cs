@@ -33,6 +33,12 @@ namespace Dapplo.Config.Interfaces
         /// <summary>
         /// Return all properties with their current value
         /// </summary>
-        IEnumerable<KeyValuePair<string, object>> GetProperties();
+        IEnumerable<KeyValuePair<string, object>> Properties();
+
+        /// <summary>
+        /// Returns all the property names
+        /// </summary>
+        /// <returns>IEnumerable with string</returns>
+        IEnumerable<string> PropertyNames();
     }
 }

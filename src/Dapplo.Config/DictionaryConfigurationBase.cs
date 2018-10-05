@@ -101,7 +101,7 @@ namespace Dapplo.Config
         }
 
         /// <inheritdoc />
-        public IEnumerable<KeyValuePair<string, object>> GetProperties() => _properties;
+        public IEnumerable<KeyValuePair<string, object>> Properties() => _properties;
 
         /// <summary>
         /// Retrieves the value from the dictionary
@@ -232,6 +232,8 @@ namespace Dapplo.Config
         #endregion
 
         #region Implementation of IHasChanges
+
+        private bool _trackChanges = false;
         // This boolean has the value true if we have changes since the last "reset"
         private readonly ISet<string> _changedValues = new HashSet<string>(new AbcComparer());
 
@@ -242,6 +244,10 @@ namespace Dapplo.Config
         [InterceptOrder(SetterOrders.HasChanges)]
         private void HasChangesSetter(SetInfo setInfo)
         {
+            if (!_trackChanges)
+            {
+                return;
+            }
             var hasOldValue = _properties.TryGetValue(setInfo.PropertyInfo.Name, out var oldValue);
             setInfo.HasOldValue = hasOldValue;
             setInfo.OldValue = oldValue;
@@ -250,6 +256,18 @@ namespace Dapplo.Config
             {
                 _changedValues.Add(setInfo.PropertyInfo.Name.ToLowerInvariant());
             }
+        }
+
+        /// <inheritdoc />
+        public void TrackChanges()
+        {
+            _trackChanges = true;
+        }
+
+        /// <inheritdoc />
+        public void DoNotTrackChanges()
+        {
+            _trackChanges = false;
         }
 
         /// <inheritdoc />
