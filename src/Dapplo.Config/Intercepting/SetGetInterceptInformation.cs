@@ -20,7 +20,6 @@
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
 using Dapplo.Config.Attributes;
@@ -31,7 +30,7 @@ namespace Dapplo.Config.Intercepting
     /// <summary>
     /// This is the type information for configuration types.
     /// </summary>
-    public class ConfigurationInformation
+    public class SetGetInterceptInformation
     {
         /// <summary>
         /// Store of setter methods
@@ -44,16 +43,10 @@ namespace Dapplo.Config.Intercepting
         public MethodInfo[] GetterMethods { get; }
 
         /// <summary>
-        /// Store of PropertyInfos for every property
-        /// </summary>
-        public IReadOnlyDictionary<string, PropertyInfo> PropertyInfos { get; }
-
-        /// <summary>
         /// Fill all the values
         /// </summary>
         /// <param name="containingType">Type</param>
-        /// <param name="interfaceType">Type</param>
-        public ConfigurationInformation(Type containingType, Type interfaceType)
+        public SetGetInterceptInformation(Type containingType)
         {
             var methods = containingType
                 .GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
@@ -68,43 +61,6 @@ namespace Dapplo.Config.Intercepting
                 .OrderBy(tuple => tuple.Item2.Order)
                 .Select(tuple => tuple.Item1).ToArray();
 
-            var typeToAnalyze = interfaceType ?? containingType;
-            var types = new[] { typeToAnalyze }.Concat(typeToAnalyze.GetInterfaces());
-
-            var propertyInfos = new Dictionary<string, PropertyInfo>();
-            foreach (var type in types)
-            {
-                foreach (var propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
-                {
-                    var propertyName = propertyInfo.Name;
-                    if (propertyInfos.ContainsKey(propertyName))
-                    {
-                        continue;
-                    }
-                    if ("Item".Equals(propertyName))
-                    {
-                        continue;
-                    }
-
-                    propertyInfos[propertyName] = propertyInfo;
-                }
-            }
-            PropertyInfos = propertyInfos;
-        }
-
-        /// <summary>
-        /// Helper method to find the PropertyInfo
-        /// </summary>
-        /// <param name="propertyName">string</param>
-        /// <returns>PropertyInfo</returns>
-        public PropertyInfo PropertyInfoFor(string propertyName)
-        {
-            if (!PropertyInfos.TryGetValue(propertyName, out var propertyInfo))
-            {
-                throw new NotSupportedException($"Property {propertyName} doesn't exist.");
-            }
-
-            return propertyInfo;
         }
     }
 }

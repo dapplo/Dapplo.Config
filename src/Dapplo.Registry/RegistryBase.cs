@@ -40,8 +40,8 @@ namespace Dapplo.Registry
         private readonly RegistryAttribute _registryAttribute = typeof(T).GetAttribute<RegistryAttribute>() ?? new RegistryAttribute();
         private readonly IDictionary<string, RegistryAttribute> _registryAttributes = new Dictionary<string, RegistryAttribute>();
 
-        // TODO: Add registry monitoring?
-        // RegistryMonitor.ObserveChanges(RegistryHive.LocalMachine, InternetSettingsKey)
+        // TODO: Add registry monitoring from Dapplo.Windows.Advapi32
+        // RegistryMonitor.ObserveChanges(RegistryHive.LocalMachine, subkey)
 
         /// <inheritdoc />
         public RegistryBase()
