@@ -21,17 +21,15 @@
 
 #region using
 
-using System;
-using System.Linq.Expressions;
 
 #endregion
 
 namespace Dapplo.Config.Interfaces
 {
-	/// <summary>
-	///     Extend your property interface with this, and you can read the DescriptionAttribute
-	/// </summary>
-	public interface IDescription
+    /// <summary>
+    ///     Extend your property interface with this, and you can read the DescriptionAttribute
+    /// </summary>
+    public interface IDescription
 	{
 		/// <summary>
 		///     Return the description of the property

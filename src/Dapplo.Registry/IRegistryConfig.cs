@@ -21,17 +21,15 @@
 
 #region using
 
-using System;
-using System.Linq.Expressions;
 
 #endregion
 
 namespace Dapplo.Registry
 {
-	/// <summary>
-	///     Interface for a registry object
-	/// </summary>
-	public interface IRegistry
+    /// <summary>
+    ///     Interface for a registry object
+    /// </summary>
+    public interface IRegistry
 	{
 		/// <summary>
 		///     The path for the property

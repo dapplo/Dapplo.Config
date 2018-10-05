@@ -19,17 +19,15 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 
 namespace Dapplo.Config.Interfaces
 {
-	/// <summary>
-	///     Extending the to be property interface with this, adds a way of know if there were changes sind the last reset
-	///     Is used internally in the IniConfig to detect if a write is needed
-	/// </summary>
-	public interface IHasChanges
+    /// <summary>
+    ///     Extending the to be property interface with this, adds a way of know if there were changes sind the last reset
+    ///     Is used internally in the IniConfig to detect if a write is needed
+    /// </summary>
+    public interface IHasChanges
 	{
 		/// <summary>
 		///     Check if there are changes pending

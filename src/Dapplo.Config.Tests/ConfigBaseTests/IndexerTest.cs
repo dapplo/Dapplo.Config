@@ -32,14 +32,15 @@ using Xunit.Abstractions;
 
 namespace Dapplo.Config.Tests.ConfigBaseTests
 {
-	public class IndexerTest
+    public class IndexerTest
 	{
 		private readonly IIndexerTest _indexerTest;
+        private readonly IndexerImpl _indexerImpl;
 
-		public IndexerTest(ITestOutputHelper testOutputHelper)
+        public IndexerTest(ITestOutputHelper testOutputHelper)
 		{
 			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-			_indexerTest =  new IndexerImpl();
+			_indexerTest = _indexerImpl = new IndexerImpl();
 		}
 
 		[Fact]
@@ -49,5 +50,13 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 			_indexerTest.Name = testValue;
 			Assert.Equal(testValue, _indexerTest["Name"]);
 		}
-	}
+
+        [Fact]
+        public void TestIndexer_NoItemProperty()
+        {
+            Assert.Single(_indexerImpl.PropertyNames);
+            // We should only have one property
+            Assert.Equal(new []{ "Name"}, _indexerImpl.PropertyNames);
+        }
+    }
 }

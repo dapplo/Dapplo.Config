@@ -21,18 +21,16 @@
 
 #region using
 
-using System;
-using System.Linq.Expressions;
 
 #endregion
 
 namespace Dapplo.Config.Interfaces
 {
-	/// <summary>
-	///     Extend your property interface with this, and all default values specified with the DefaultValueAttribute will be
-	///     applied
-	/// </summary>
-	public interface IDefaultValue
+    /// <summary>
+    ///     Extend your property interface with this, and all default values specified with the DefaultValueAttribute will be
+    ///     applied
+    /// </summary>
+    public interface IDefaultValue
 	{
 		/// <summary>
 		///     Return the default value of the property

@@ -21,17 +21,15 @@
 
 #region using
 
-using System;
-using System.Linq.Expressions;
 
 #endregion
 
 namespace Dapplo.Config.Interfaces
 {
-	/// <summary>
-	///     Extending the to be property interface with this, adds write protection
-	/// </summary>
-	public interface IWriteProtectProperties
+    /// <summary>
+    ///     Extending the to be property interface with this, adds write protection
+    /// </summary>
+    public interface IWriteProtectProperties
 	{
 		/// <summary>
 		///     Disable the write protection of the supplied property

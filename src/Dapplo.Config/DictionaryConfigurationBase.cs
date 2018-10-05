@@ -29,7 +29,6 @@ using AutoProperties;
 using Dapplo.Config.Attributes;
 using Dapplo.Config.Interfaces;
 using Dapplo.Config.Intercepting;
-using Dapplo.Log;
 using Dapplo.Utils;
 using Dapplo.Utils.Extensions;
 
@@ -67,7 +66,7 @@ namespace Dapplo.Config
         protected void SetProperties(IDictionary<string, object> properties)
         {
             _properties = new ConcurrentDictionary<string, object>(properties, AbcComparer.Instance);
-            foreach (var propertyInfo in Information.PropertyInfos.Values)
+            foreach (var propertyInfo in PropertiesInformation.PropertyInfos.Values)
             {
                 if (_properties.TryGetValue(propertyInfo.Name, out var value) && value != null)
                 {
@@ -108,8 +107,8 @@ namespace Dapplo.Config
         /// Retrieves the value from the dictionary
         /// </summary>
         /// <param name="getInfo">GetInfo</param>
-        [Getter(GetterOrders.Dictionary)]
-        protected void ValueFromDictionary(GetInfo getInfo)
+        [InterceptOrder(GetterOrders.Dictionary)]
+        private void FromDictionaryGetter(GetInfo getInfo)
         {
             var hasValue = _properties.TryGetValue(getInfo.PropertyInfo.Name, out var value);
             getInfo.Value = hasValue ? value : GetConvertedDefaultValue(getInfo.PropertyInfo);
@@ -120,8 +119,8 @@ namespace Dapplo.Config
         /// Retrieves the value from the dictionary
         /// </summary>
         /// <param name="setInfo">GetInfo</param>
-        [Setter(SetterOrders.Dictionary)]
-        protected void ValueToDictionary(SetInfo setInfo)
+        [InterceptOrder(SetterOrders.Dictionary)]
+        private void ToDictionarySetter(SetInfo setInfo)
         {
             _properties[setInfo.PropertyInfo.Name] = setInfo.NewValue;
         }
@@ -157,8 +156,8 @@ namespace Dapplo.Config
         ///     This is the implementation of the set logic
         /// </summary>
         /// <param name="setInfo">SetInfo with all the information on the set call</param>
-        [Setter(SetterOrders.WriteProtect)]
-        protected void WriteProtectSetter(SetInfo setInfo)
+        [InterceptOrder(SetterOrders.WriteProtect)]
+        private void WriteProtectSetter(SetInfo setInfo)
         {
             if (_writeProtectedProperties.Contains(setInfo.PropertyInfo.Name))
             {
@@ -240,8 +239,8 @@ namespace Dapplo.Config
         ///     This is the implementation of the set logic
         /// </summary>
         /// <param name="setInfo">SetInfo with all the information on the set call</param>
-        [Setter(SetterOrders.HasChanges)]
-        protected void HasChangesSetter(SetInfo setInfo)
+        [InterceptOrder(SetterOrders.HasChanges)]
+        private void HasChangesSetter(SetInfo setInfo)
         {
             var hasOldValue = _properties.TryGetValue(setInfo.PropertyInfo.Name, out var oldValue);
             setInfo.HasOldValue = hasOldValue;
@@ -285,8 +284,6 @@ namespace Dapplo.Config
 
         #endregion
 
-
-
         #region Implementation of INotifyPropertyChanged
 
         /// <inheritdoc />
@@ -306,8 +303,8 @@ namespace Dapplo.Config
         ///     This creates a NPC event if the values are changed
         /// </summary>
         /// <param name="setInfo">SetInfo with all the set call information</param>
-        [Setter(SetterOrders.NotifyPropertyChanged)]
-        protected void NotifyPropertyChangedSetter(SetInfo setInfo)
+        [InterceptOrder(SetterOrders.NotifyPropertyChanged)]
+        private void NotifyPropertyChangedSetter(SetInfo setInfo)
         {
             // Fast exit when no listeners.
             if (PropertyChanged is null)
@@ -345,8 +342,8 @@ namespace Dapplo.Config
         ///     This creates a NPC event if the values are changing
         /// </summary>
         /// <param name="setInfo">SetInfo with all the set call information</param>
-        [Setter(SetterOrders.NotifyPropertyChanging)]
-        protected void NotifyPropertyChangingSetter(SetInfo setInfo)
+        [InterceptOrder(SetterOrders.NotifyPropertyChanging)]
+        private void NotifyPropertyChangingSetter(SetInfo setInfo)
         {
             if (PropertyChanging is null)
             {

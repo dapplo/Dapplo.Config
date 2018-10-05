@@ -33,20 +33,30 @@ namespace Dapplo.Config
 {
     /// <summary>
     /// An abstract non generic ConfigurationBase.
-    /// This defines the API for the configuration based implementations
+    /// This defines the API for the configuration based implementations.
+    /// If you want to extend the functionality, extend this (or other classes) and implement
+    /// a void xxxxxxxGetter(GetInfo) or void xxxxxxxxSetter(SetInfo) which has a InterceptOrderAttribute
     /// </summary>
     public abstract class ConfigurationBase : IShallowCloneable, ITransactionalProperties, IDescription, ITagging
     {
-        private static readonly IDictionary<Type, ConfigurationInformation> _typeInformations = new Dictionary<Type, ConfigurationInformation>();
         /// <summary>
         /// The base logged for all the Configuration classes
         /// </summary>
         protected static readonly LogSource Log = new LogSource();
 
+        // Cached values so this only needs to be calculated once
+        private static readonly IDictionary<Type, GetSetInterceptInformation> _interceptInformations = new Dictionary<Type, GetSetInterceptInformation>();
+        private static readonly IDictionary<Type, PropertiesInformation> _propertiesInformation = new Dictionary<Type, PropertiesInformation>();
+
         /// <summary>
-        /// This is the information
+        /// This is the information for the properties, so we don't need a IDictionary lookup each time
         /// </summary>
-        protected ConfigurationInformation Information;
+        protected PropertiesInformation PropertiesInformation;
+
+        /// <summary>
+        /// Information for the interceptors, so we don't need a IDictionary lookup each time
+        /// </summary>
+        protected GetSetInterceptInformation InterceptInformation;
 
         /// <summary>
         /// Initialize the whole thing, this should be called from the final class
@@ -55,13 +65,17 @@ namespace Dapplo.Config
         protected void Initialize(Type typeToInitializeFor)
         {
             var thisType = GetType();
-            if (!_typeInformations.TryGetValue(thisType, out Information))
+            if (!_interceptInformations.TryGetValue(thisType, out InterceptInformation))
             {
-                _typeInformations[thisType] = Information = new ConfigurationInformation(thisType, typeToInitializeFor);
+                _interceptInformations[thisType] = InterceptInformation = new GetSetInterceptInformation(thisType);
             }
- 
+            
+            if (!_propertiesInformation.TryGetValue(typeToInitializeFor, out PropertiesInformation))
+            {
+                _propertiesInformation[thisType] = PropertiesInformation = new PropertiesInformation(typeToInitializeFor);
+            }
             // Give extended classes a way to initialize
-            foreach (var propertyInfo in Information.PropertyInfos.Values)
+            foreach (var propertyInfo in PropertiesInformation.PropertyInfos.Values)
             {
                 // In theory we could check if the typeToInitializeFor extends ITagging
                 InitTagProperty(propertyInfo);
@@ -79,17 +93,22 @@ namespace Dapplo.Config
         }
 
         /// <summary>
+        /// Get all the property names
+        /// </summary>
+        public IEnumerable<string> PropertyNames => PropertiesInformation.PropertyInfos.Keys;
+
+        /// <summary>
         /// Helper method to get the property info for a property
         /// </summary>
         /// <param name="propertyName"></param>
         /// <returns></returns>
-        protected PropertyInfo PropertyInfoFor(string propertyName) => Information.PropertyInfoFor(propertyName);
-        
+        protected PropertyInfo PropertyInfoFor(string propertyName) => PropertiesInformation.PropertyInfoFor(propertyName);
+
         /// <summary>
         /// This is the internal way of getting information for a property
         /// </summary>
         /// <param name="propertyName">string</param>
-        /// <returns></returns>
+        /// <returns>GetInfo</returns>
         protected GetInfo GetValue(string propertyName)
         {
             var propertyInfo = PropertyInfoFor(propertyName);
@@ -99,7 +118,8 @@ namespace Dapplo.Config
                 PropertyInfo = propertyInfo
             };
 
-            foreach (var methodInfo in Information.GetterMethods)
+            // Call all defined Getter methods the the correct order
+            foreach (var methodInfo in InterceptInformation.GetterMethods)
             {
                 methodInfo.Invoke(this, new object[] {getInfo});
                 if (!getInfo.CanContinue)
@@ -127,7 +147,8 @@ namespace Dapplo.Config
 
             try
             {
-                foreach (var methodInfo in Information.SetterMethods)
+                // Call all the defined Setter methods in the correct order
+                foreach (var methodInfo in InterceptInformation.SetterMethods)
                 {
                     methodInfo.Invoke(this, new object[] {setInfo});
                     if (!setInfo.CanContinue)
@@ -157,8 +178,8 @@ namespace Dapplo.Config
         ///     This is the implementation of the getter logic for a transactional proxy
         /// </summary>
         /// <param name="getInfo">GetInfo with all the information on the get call</param>
-        [Getter(GetterOrders.Transaction)]
-        protected void TransactionalGetter(GetInfo getInfo)
+        [InterceptOrder(GetterOrders.Transaction)]
+        private void TransactionalGetter(GetInfo getInfo)
         {
             // Lock to prevent rollback etc to run parallel
             lock (_transactionProperties)
@@ -184,8 +205,8 @@ namespace Dapplo.Config
         ///     This is the implementation of the set logic
         /// </summary>
         /// <param name="setInfo">SetInfo with all the information on the set call</param>
-        [Setter(SetterOrders.Transaction)]
-        protected void TransactionalSetter(SetInfo setInfo)
+        [InterceptOrder(SetterOrders.Transaction)]
+        private void TransactionalSetter(SetInfo setInfo)
         {
             // Lock to prevent rollback etc to run parallel
             lock (_transactionProperties)
@@ -229,7 +250,7 @@ namespace Dapplo.Config
                 // Call the set for every property, this will invoke every setter (NPC etc)
                 foreach (var transactionProperty in _transactionProperties)
                 {
-                    SetValue(Information.PropertyInfoFor(transactionProperty.Key), transactionProperty.Value);
+                    SetValue(PropertiesInformation.PropertyInfoFor(transactionProperty.Key), transactionProperty.Value);
                 }
                 // Clear all the properties, so the transaction is clean
                 _transactionProperties.Clear();

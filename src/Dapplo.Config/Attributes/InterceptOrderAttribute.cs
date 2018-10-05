@@ -31,13 +31,13 @@ namespace Dapplo.Config.Attributes
     ///     This attribute should be used to mark a method as a getter, which in fact needs to be protected (or public)
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
-	public class GetterAttribute : Attribute
+	public class InterceptOrderAttribute : Attribute
 	{
         /// <summary>
         ///     Constructor
         /// </summary>
         /// <param name="order">The order of the getter method</param>
-        public GetterAttribute(object order)
+        public InterceptOrderAttribute(object order)
 		{
 			Order = Convert.ToInt32(order);
 		}

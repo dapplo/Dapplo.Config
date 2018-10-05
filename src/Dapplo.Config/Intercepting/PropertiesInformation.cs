@@ -23,26 +23,14 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
-using Dapplo.Config.Attributes;
-using Dapplo.Utils.Extensions;
 
 namespace Dapplo.Config.Intercepting
 {
     /// <summary>
     /// This is the type information for configuration types.
     /// </summary>
-    public class ConfigurationInformation
+    public class PropertiesInformation
     {
-        /// <summary>
-        /// Store of setter methods
-        /// </summary>
-        public MethodInfo[] SetterMethods { get; }
-
-        /// <summary>
-        /// Store of setter methods
-        /// </summary>
-        public MethodInfo[] GetterMethods { get; }
-
         /// <summary>
         /// Store of PropertyInfos for every property
         /// </summary>
@@ -51,25 +39,10 @@ namespace Dapplo.Config.Intercepting
         /// <summary>
         /// Fill all the values
         /// </summary>
-        /// <param name="containingType">Type</param>
         /// <param name="interfaceType">Type</param>
-        public ConfigurationInformation(Type containingType, Type interfaceType)
+        public PropertiesInformation(Type interfaceType)
         {
-            var methods = containingType
-                .GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
-            SetterMethods = methods
-                .Select(methodInfo => new Tuple<MethodInfo, SetterAttribute>(methodInfo, methodInfo.GetAttribute<SetterAttribute>()))
-                .Where(tuple => tuple.Item2 != null)
-                .OrderBy(tuple => tuple.Item2.Order)
-                .Select(tuple => tuple.Item1).ToArray();
-            GetterMethods = methods
-                .Select(methodInfo => new Tuple<MethodInfo, GetterAttribute>(methodInfo, methodInfo.GetAttribute<GetterAttribute>()))
-                .Where(tuple => tuple.Item2 != null)
-                .OrderBy(tuple => tuple.Item2.Order)
-                .Select(tuple => tuple.Item1).ToArray();
-
-            var typeToAnalyze = interfaceType ?? containingType;
-            var types = new[] { typeToAnalyze }.Concat(typeToAnalyze.GetInterfaces());
+            var types = new[] { interfaceType }.Concat(interfaceType.GetInterfaces());
 
             var propertyInfos = new Dictionary<string, PropertyInfo>();
             foreach (var type in types)
@@ -77,11 +50,13 @@ namespace Dapplo.Config.Intercepting
                 foreach (var propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
                 {
                     var propertyName = propertyInfo.Name;
+                    // We already have the property, skip it
                     if (propertyInfos.ContainsKey(propertyName))
                     {
                         continue;
                     }
-                    if ("Item".Equals(propertyName))
+                    // Skip indexer
+                    if (propertyInfo.GetIndexParameters().Any())
                     {
                         continue;
                     }
