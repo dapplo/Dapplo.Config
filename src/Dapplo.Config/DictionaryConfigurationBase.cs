@@ -244,13 +244,14 @@ namespace Dapplo.Config
         [InterceptOrder(SetterOrders.HasChanges)]
         private void HasChangesSetter(SetInfo setInfo)
         {
+            var hasOldValue = _properties.TryGetValue(setInfo.PropertyInfo.Name, out var oldValue);
+            setInfo.HasOldValue = hasOldValue;
+            setInfo.OldValue = oldValue;
+
             if (!_trackChanges)
             {
                 return;
             }
-            var hasOldValue = _properties.TryGetValue(setInfo.PropertyInfo.Name, out var oldValue);
-            setInfo.HasOldValue = hasOldValue;
-            setInfo.OldValue = oldValue;
 
             if (!setInfo.HasOldValue || !Equals(setInfo.NewValue, setInfo.OldValue))
             {

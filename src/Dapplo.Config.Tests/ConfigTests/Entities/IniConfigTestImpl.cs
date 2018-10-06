@@ -1,70 +1,38 @@
-﻿using Dapplo.Config.Tests.ConfigTests.Interfaces;
-using Dapplo.Ini;
+﻿using AutoProperties;
+using Dapplo.Config.Tests.ConfigTests.Interfaces;
+using Dapplo.Ini.NewImpl;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 
 namespace Dapplo.Config.Tests.ConfigTests.Entities
 {
-    public class IniConfigTestImpl : DictionaryConfigurationBase<IIniConfigTest>, IIniConfigTest
+    public class IniConfigTestImpl : IniSectionBase<IIniConfigTest>, IIniConfigTest
     {
-        public long Age { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public IDictionary<string, IList<int>> DictionaryOfLists { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public string FirstName { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public uint Height { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public IDictionary<string, Uri> ListOfUris { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public Size MySize { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public string Name { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public string NotWritten { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public Rectangle PropertyArea { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public Size PropertySize { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public IDictionary<string, int> SomeValues { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public IList<IniConfigTestValues> TestEnums { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public IniConfigTestValues TestWithEnum { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public IList<int> WindowCornerCutShape { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public Uri[] MyUris { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public string SubValue { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public string SubValuewithDefault { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public IniConfigTestValues TestWithEnumSubValue { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public long Age { get; set; }
+        public IDictionary<string, IList<int>> DictionaryOfLists { get; set; }
+        public string FirstName { get; set; }
+        public uint Height { get; set; }
+        public IDictionary<string, Uri> ListOfUris { get; set; }
+        public Size MySize { get; set; }
+        public string Name { get; set; }
+        public string NotWritten { get; set; }
+        public Rectangle PropertyArea { get; set; }
+        public Size PropertySize { get; set; }
+        public IDictionary<string, int> SomeValues { get; set; }
+        public IList<IniConfigTestValues> TestEnums { get; set; }
+        public IniConfigTestValues TestWithEnum { get; set; }
+        public IList<int> WindowCornerCutShape { get; set; }
+        public Uri[] MyUris { get; set; }
+        public string SubValue { get; set; }
+        public string SubValuewithDefault { get; set; }
+        public IniConfigTestValues TestWithEnumSubValue { get; set; }
 
-        public void AfterLoad()
+        [InterceptIgnore]
+        public Action<IIniConfigTest> OnLoad { get; set; }
+        public override void AfterLoad()
         {
-            throw new NotImplementedException();
-        }
-
-        public void AfterSave()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void BeforeSave()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IniValue GetIniValue(string propertyName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IReadOnlyDictionary<string, IniValue> GetIniValues()
-        {
-            throw new NotImplementedException();
-        }
-
-        public string GetSectionDescription()
-        {
-            throw new NotImplementedException();
-        }
-
-        public string GetSectionName()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool TryGetIniValue(string propertyName, out IniValue value)
-        {
-            throw new NotImplementedException();
+            OnLoad?.Invoke(this);
         }
     }
 }

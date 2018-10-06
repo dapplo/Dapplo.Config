@@ -72,10 +72,10 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 				changedPropertyName = eventArgs.PropertyName;
 				Log.Debug().WriteLine("Property change notification for {0}", eventArgs.PropertyName);
 			});
+            _notifyPropertyChangedTest.PropertyChanged += propChanged;
 
-			// Test event handler
-			_notifyPropertyChangedTest.PropertyChanged += propChanged;
-			_notifyPropertyChangedTest.Name = TestValue1;
+            // Test event handler
+            _notifyPropertyChangedTest.Name = TestValue1;
 			Assert.Equal("Name", changedPropertyName);
 
 			// Ensure that if the value is the same, we don't get an event

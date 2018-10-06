@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
+using AutoProperties;
 using Dapplo.Config;
 using Dapplo.Ini.Extensions;
 using Dapplo.Utils;
@@ -49,6 +50,31 @@ namespace Dapplo.Ini.NewImpl
             _iniSectionAttribute = thisType.GetAttribute<IniSectionAttribute>();
             _descriptionAttribute = thisType.GetAttribute<DescriptionAttribute>();
         }
+
+        #region Interceptor
+
+        /// <summary>
+        /// Get the backing value for the specified property
+        /// </summary>
+        /// <param name="propertyName">string</param>
+        /// <returns>TProperty</returns>
+        [GetInterceptor]
+        protected override object Getter(string propertyName)
+        {
+            return base.Getter(propertyName);
+        }
+
+        /// <summary>
+        /// Set the backing value for the specified property
+        /// </summary>
+        /// <param name="propertyName">string</param>
+        /// <param name="newValue">object</param>
+        [SetInterceptor]
+        protected override void Setter(string propertyName, object newValue)
+        {
+            base.Getter(propertyName);
+        }
+        #endregion
 
         #region Overrides of ConfigurationBase<T>
 
