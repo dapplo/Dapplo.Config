@@ -21,7 +21,7 @@
 
 using System.Collections.Generic;
 using Dapplo.Config.Tests.ConfigTests.Interfaces;
-using Dapplo.Registry;
+using Dapplo.Config.Registry;
 
 namespace Dapplo.Config.Tests.ConfigTests.Entities
 {

@@ -25,7 +25,7 @@ using System;
 
 #endregion
 
-namespace Dapplo.Ini.Attributes
+namespace Dapplo.Config.Ini.Attributes
 {
 	/// <summary>
 	///     This attribute should be used to mark a class as IniSection

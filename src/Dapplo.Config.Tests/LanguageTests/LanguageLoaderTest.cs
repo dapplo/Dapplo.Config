@@ -26,7 +26,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapplo.Config.Tests.LanguageTests.Interfaces;
-using Dapplo.Language;
+using Dapplo.Config.Language;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
 using Xunit;

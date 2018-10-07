@@ -19,7 +19,7 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-namespace Dapplo.Language
+namespace Dapplo.Config.Language
 {
 	/// <summary>
 	///     Marker interface which allows a ILanguage interface to be devided, which allows more modular code.

@@ -33,13 +33,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Dapplo.Config.Interfaces;
-using Dapplo.Language.Implementation;
+using Dapplo.Config.Language.Implementation;
 using Dapplo.Log;
 using Dapplo.Utils;
 
 #endregion
 
-namespace Dapplo.Language
+namespace Dapplo.Config.Language
 {
     /// <summary>
     ///     The language loader should be used to fill ILanguage interfaces.

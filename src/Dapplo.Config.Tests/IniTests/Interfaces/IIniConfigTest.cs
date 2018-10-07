@@ -26,10 +26,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Runtime.Serialization;
-using Dapplo.Ini;
-using Dapplo.Ini.Converters;
+using Dapplo.Config.Ini;
+using Dapplo.Config.Ini.Converters;
 using Dapplo.Config.Interfaces;
-using Dapplo.Ini.Attributes;
+using Dapplo.Config.Ini.Attributes;
 using Dapplo.Windows.Common.Structs;
 
 #endregion

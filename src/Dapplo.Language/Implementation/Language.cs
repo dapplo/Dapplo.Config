@@ -29,7 +29,7 @@ using Dapplo.InterfaceImpl.Implementation;
 
 #endregion
 
-namespace Dapplo.Language.Implementation
+namespace Dapplo.Config.Language.Implementation
 {
 	/// <summary>
 	///     Base Language functionality

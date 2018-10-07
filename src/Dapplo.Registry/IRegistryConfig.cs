@@ -24,7 +24,7 @@
 
 #endregion
 
-namespace Dapplo.Registry
+namespace Dapplo.Config.Registry
 {
     /// <summary>
     ///     Interface for a registry object

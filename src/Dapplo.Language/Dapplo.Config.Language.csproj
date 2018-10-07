@@ -1,15 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Description>Dapplo.Registry brings strongly typed interfaces over your registry.</Description>
-    <AssemblyTitle>Dapplo.Registry</AssemblyTitle>
+    <Description>Dapplo.Language uses xml or ini translations which are accessible via an interface (with NPC).</Description>
+    <AssemblyTitle>Dapplo.Language</AssemblyTitle>
     <TargetFrameworks>net461</TargetFrameworks>
-    <AssemblyName>Dapplo.Registry</AssemblyName>
-    <PackageId>Dapplo.Registry</PackageId>
-	<PackageTags>dapplo registry config</PackageTags>
+    <AssemblyName>Dapplo.Config.Language</AssemblyName>
+    <PackageId>Dapplo.Language</PackageId>
+	<PackageTags>dapplo language config</PackageTags>
 	<Version>1.0.0</Version>
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <FileVersion>1.0.0</FileVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Implementation\Language.cs" />
+    <Compile Remove="LanguageLoader.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Implementation\Language.cs" />
+    <None Include="LanguageLoader.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoProperties.Fody" Version="1.15.0">
@@ -28,6 +36,8 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
 
   <ItemGroup>

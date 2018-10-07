@@ -31,7 +31,7 @@ using Dapplo.Log;
 
 #endregion
 
-namespace Dapplo.Language.Implementation
+namespace Dapplo.Config.Language.Implementation
 {
 	/// <summary>
 	///     Functionality to read/write a .ini file

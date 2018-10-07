@@ -26,7 +26,7 @@ using Microsoft.Win32;
 
 #endregion
 
-namespace Dapplo.Registry
+namespace Dapplo.Config.Registry
 {
 	/// <summary>
 	///     Attribute to lay a connection to the registry

@@ -21,7 +21,7 @@
 
 using System.Text;
 
-namespace Dapplo.Ini
+namespace Dapplo.Config.Ini
 {
     /// <summary>
     /// This specifies the configuration for the IniFile

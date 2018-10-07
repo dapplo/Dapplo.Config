@@ -27,7 +27,7 @@ using Dapplo.Utils.Extensions;
 
 #endregion
 
-namespace Dapplo.Language
+namespace Dapplo.Config.Language
 {
 	/// <summary>
 	///     All ILanguage Extension methods go here.

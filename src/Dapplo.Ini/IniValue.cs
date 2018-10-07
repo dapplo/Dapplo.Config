@@ -21,14 +21,14 @@
 
 #region using
 
-using Dapplo.Ini.Attributes;
+using Dapplo.Config.Ini.Attributes;
 using System;
 using System.ComponentModel;
 using System.Reflection;
 
 #endregion
 
-namespace Dapplo.Ini
+namespace Dapplo.Config.Ini
 {
 	/// <summary>
 	///     Container for supplying the properties to the Ini file

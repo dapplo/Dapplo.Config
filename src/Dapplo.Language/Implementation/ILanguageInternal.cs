@@ -19,7 +19,7 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-namespace Dapplo.Language.Implementation
+namespace Dapplo.Config.Language.Implementation
 {
 	/// <summary>
 	///     Interface which is used by the language loader

@@ -21,9 +21,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dapplo.Config\Dapplo.Config.csproj" />
-    <ProjectReference Include="..\Dapplo.Language\Dapplo.Language.csproj" />
-	<ProjectReference Include="..\Dapplo.Ini\Dapplo.Ini.csproj" />
-	<ProjectReference Include="..\Dapplo.Registry\Dapplo.Registry.csproj" />
+    <ProjectReference Include="..\Dapplo.Ini\Dapplo.Config.Ini.csproj" />
+    <ProjectReference Include="..\Dapplo.Language\Dapplo.Config.Language.csproj" />
+    <ProjectReference Include="..\Dapplo.Registry\Dapplo.Config.Registry.csproj" />
   </ItemGroup>
   
   <ItemGroup>

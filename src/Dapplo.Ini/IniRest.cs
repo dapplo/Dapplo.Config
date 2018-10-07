@@ -29,7 +29,7 @@ using Dapplo.Log;
 
 #endregion
 
-namespace Dapplo.Ini
+namespace Dapplo.Config.Ini
 {
 	/// <summary>
 	///     This class implements a "REST" API for the Ini configuration

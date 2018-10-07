@@ -21,7 +21,7 @@
 
 using AutoProperties;
 using Dapplo.Config.Tests.IniTests.Interfaces;
-using Dapplo.Ini;
+using Dapplo.Config.Ini;
 using Dapplo.Windows.Common.Structs;
 using System;
 using System.Collections.Generic;

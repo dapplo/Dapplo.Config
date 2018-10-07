@@ -26,7 +26,7 @@ using System.ComponentModel;
 
 #endregion
 
-namespace Dapplo.Ini.Implementation
+namespace Dapplo.Config.Ini.Implementation
 {
 	/// <summary>
 	///     Used internally for type conversion

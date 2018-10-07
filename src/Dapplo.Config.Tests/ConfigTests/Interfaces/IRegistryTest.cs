@@ -22,7 +22,7 @@
 #region using
 
 using System.Collections.Generic;
-using Dapplo.Registry;
+using Dapplo.Config.Registry;
 using Microsoft.Win32;
 
 #endregion

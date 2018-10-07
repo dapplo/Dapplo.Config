@@ -16,7 +16,7 @@
     <PackageReference Include="Dapplo.Utils" Version="1.1.9" />
     <PackageReference Include="AutoProperties.Fody" Version="1.15.0">
       <PrivateAssets>all</PrivateAssets>
-      <!--IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets-->
+      <IncludeAssets>all</IncludeAssets>
     </PackageReference>
   </ItemGroup>
 

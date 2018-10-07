@@ -23,7 +23,7 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 
-namespace Dapplo.Ini
+namespace Dapplo.Config.Ini
 {
     /// <summary>
     /// This is a builder for the IniFileConfig

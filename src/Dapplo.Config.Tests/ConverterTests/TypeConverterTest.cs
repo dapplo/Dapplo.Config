@@ -23,7 +23,7 @@
 
 using System;
 using System.ComponentModel;
-using Dapplo.Ini.Converters;
+using Dapplo.Config.Ini.Converters;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
 using Dapplo.Utils.Extensions;

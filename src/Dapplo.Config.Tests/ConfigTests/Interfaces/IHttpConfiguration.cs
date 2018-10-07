@@ -22,10 +22,9 @@
 #region using
 
 using System.ComponentModel;
-using Dapplo.Config.Interfaces;
 using Dapplo.HttpExtensions;
-using Dapplo.Ini;
-using Dapplo.Ini.Attributes;
+using Dapplo.Config.Ini;
+using Dapplo.Config.Ini.Attributes;
 
 #endregion
 

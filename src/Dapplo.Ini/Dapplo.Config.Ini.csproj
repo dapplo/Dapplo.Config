@@ -1,22 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Description>Dapplo.Language uses xml or ini translations which are accessible via an interface (with NPC).</Description>
-    <AssemblyTitle>Dapplo.Language</AssemblyTitle>
+    <Description>Dapplo.Ini adds ini configuration with static type support to your project.</Description>
+    <AssemblyTitle>Dapplo.Ini</AssemblyTitle>
     <TargetFrameworks>net461</TargetFrameworks>
-    <AssemblyName>Dapplo.Language</AssemblyName>
-    <PackageId>Dapplo.Language</PackageId>
-	<PackageTags>dapplo language config</PackageTags>
+    <AssemblyName>Dapplo.Config.Ini</AssemblyName>
+    <PackageId>Dapplo.Ini</PackageId>
+	<PackageTags>dapplo ini config</PackageTags>
 	<Version>1.0.0</Version>
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <FileVersion>1.0.0</FileVersion>
+    <RootNamespace>Dapplo.Config.Ini</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Implementation\Language.cs" />
-    <Compile Remove="LanguageLoader.cs" />
+    <Compile Remove="IniRest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Implementation\Language.cs" />
-    <None Include="LanguageLoader.cs" />
+    <None Include="IniRest.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -36,8 +35,6 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
 
   <ItemGroup>

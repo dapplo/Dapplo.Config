@@ -31,7 +31,7 @@ using System.Text;
 
 #endregion
 
-namespace Dapplo.Ini.Converters
+namespace Dapplo.Config.Ini.Converters
 {
 	/// <summary>
 	///     This converter makes it possible to store values in an ini file, somewhat secure.

@@ -25,7 +25,7 @@
 
 #endregion
 
-namespace Dapplo.Registry
+namespace Dapplo.Config.Registry
 {
 	/// <summary>
 	///     This is the handler for a custom protocol

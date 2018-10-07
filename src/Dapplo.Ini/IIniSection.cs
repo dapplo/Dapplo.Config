@@ -28,7 +28,7 @@ using Dapplo.Config.Interfaces;
 
 #endregion
 
-namespace Dapplo.Ini
+namespace Dapplo.Config.Ini
 {
 	/// <summary>
 	///     By making your property proxy interface extend this, you will be able to write the property to an ini file

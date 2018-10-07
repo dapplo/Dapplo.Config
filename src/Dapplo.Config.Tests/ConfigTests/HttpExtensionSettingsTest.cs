@@ -26,7 +26,7 @@ using System.Threading.Tasks;
 using Dapplo.Config.Tests.ConfigTests.Interfaces;
 using Dapplo.HttpExtensions;
 using Dapplo.HttpExtensions.Factory;
-using Dapplo.Ini;
+using Dapplo.Config.Ini;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
 using Xunit;

@@ -1,7 +1,7 @@
-﻿#region Dapplo 2016 - GNU Lesser General Public License
+﻿#region Dapplo 2016 - 2018 - GNU Lesser General Public License
 
 // Dapplo - building blocks for .NET applications
-// Copyright (C) 2016 Dapplo
+// Copyright (C) 2016-2018 Dapplo
 // 
 // For more information see: http://dapplo.net/
 // Dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -34,7 +34,7 @@ using System.Text.RegularExpressions;
 
 #endregion
 
-namespace Dapplo.Ini.Implementation
+namespace Dapplo.Config.Ini.Implementation
 {
     /// <summary>
     ///     Some utils for managing the location of files

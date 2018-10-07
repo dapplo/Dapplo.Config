@@ -20,7 +20,7 @@
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 using Dapplo.Config.Interfaces;
-using Dapplo.Ini.Implementation;
+using Dapplo.Config.Ini.Implementation;
 using Dapplo.Log;
 using Dapplo.Utils;
 using Dapplo.Utils.Extensions;
@@ -33,7 +33,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Timer = System.Timers.Timer;
 
-namespace Dapplo.Ini
+namespace Dapplo.Config.Ini
 {
     /// <summary>
     /// This contains all the ini sections in one ini file

@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 #endregion
 
-namespace Dapplo.Ini
+namespace Dapplo.Config.Ini
 {
 	/// <summary>
 	///     The supported commands for the ini-REST api

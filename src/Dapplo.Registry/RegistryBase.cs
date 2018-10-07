@@ -31,7 +31,7 @@ using AutoProperties;
 using Dapplo.Config.Attributes;
 using Dapplo.Config.Intercepting;
 
-namespace Dapplo.Registry
+namespace Dapplo.Config.Registry
 {
     /// <summary>
     /// This implements a window into the registry based on an interface

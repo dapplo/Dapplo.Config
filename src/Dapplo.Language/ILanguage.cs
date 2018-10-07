@@ -26,7 +26,7 @@ using System.Collections.Generic;
 
 #endregion
 
-namespace Dapplo.Language
+namespace Dapplo.Config.Language
 {
 	/// <summary>
 	///     The base interface for all language objects.

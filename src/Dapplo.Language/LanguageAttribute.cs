@@ -25,7 +25,7 @@ using System;
 
 #endregion
 
-namespace Dapplo.Language
+namespace Dapplo.Config.Language
 {
 	/// <summary>
 	///     Use this attribute to mark a language object, and the prefix

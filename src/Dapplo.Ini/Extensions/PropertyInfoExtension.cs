@@ -21,14 +21,14 @@
 
 #region using
 
-using Dapplo.Ini.Attributes;
+using Dapplo.Config.Ini.Attributes;
 using System;
 using System.Reflection;
 using System.Runtime.Serialization;
 
 #endregion
 
-namespace Dapplo.Ini.Extensions
+namespace Dapplo.Config.Ini.Extensions
 {
 	/// <summary>
 	///     Extensions for PropertyInfo

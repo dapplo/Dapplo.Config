@@ -25,12 +25,12 @@ using System.ComponentModel;
 using System.Reflection;
 using AutoProperties;
 using Dapplo.Config;
-using Dapplo.Ini.Attributes;
-using Dapplo.Ini.Extensions;
+using Dapplo.Config.Ini.Attributes;
+using Dapplo.Config.Ini.Extensions;
 using Dapplo.Utils;
 using Dapplo.Utils.Extensions;
 
-namespace Dapplo.Ini
+namespace Dapplo.Config.Ini
 {
     /// <summary>
     /// This is the base class for an IniSection, it bases on the ConfigurationBase and should be used as the base for an ini-section.

@@ -32,7 +32,7 @@ using Dapplo.Utils;
 
 #endregion
 
-namespace Dapplo.Ini.Implementation
+namespace Dapplo.Config.Ini.Implementation
 {
 	/// <summary>
 	///     Functionality to read/write a .ini file

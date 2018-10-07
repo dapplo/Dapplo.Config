@@ -25,7 +25,7 @@ using System;
 
 #endregion
 
-namespace Dapplo.Ini.Attributes
+namespace Dapplo.Config.Ini.Attributes
 {
 	/// <summary>
 	///     Specify the 
