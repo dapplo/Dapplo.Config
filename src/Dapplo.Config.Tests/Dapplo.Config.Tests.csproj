@@ -97,4 +97,10 @@
     <None Include="LanguageTests\Interfaces\ILanguageLoaderTest.cs" />
     <None Include="LanguageTests\LanguageLoaderTest.cs" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="IniTestFiles\testfile.ini">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

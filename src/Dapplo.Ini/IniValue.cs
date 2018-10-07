@@ -23,6 +23,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Reflection;
 
 #endregion
 
@@ -34,15 +35,18 @@ namespace Dapplo.Ini
 	public class IniValue
 	{
 		private readonly IIniSection _iniSection;
+        private readonly PropertyInfo _propertyInfo;
 
         /// <summary>
         ///     The constructor of an IniValue
         /// </summary>
         /// <param name="iniSection">IIniSection</param>
-        public IniValue(IIniSection iniSection)
+        /// <param name="propertyInfo">PropertyInfo</param>
+        public IniValue(IIniSection iniSection, PropertyInfo propertyInfo)
 		{
 			_iniSection = iniSection;
-		}
+            _propertyInfo = propertyInfo;
+        }
 
 		/// <summary>
 		///     Specific behavior of the ini-value
@@ -104,41 +108,35 @@ namespace Dapplo.Ini
 					return true;
 				}
 
-				// Don't write if there is no value
-				if (!_iniSection.TryGetIniValue(PropertyName, out var iniValue))
-				{
-					return false;
-                }
-
 				// Check if our value is default
-				var isDefault = Equals(iniValue.Value, DefaultValue);
+				var isDefault = Equals(Value, DefaultValue);
 				return !isDefault;
 			}
 		}
 
-		/// <summary>
-		///     Name of the property in the interface
-		/// </summary>
-		public string PropertyName { get; set; }
+        /// <summary>
+        ///     Name of the property in the interface
+        /// </summary>
+        public string PropertyName => _propertyInfo.Name;
 
-		/// <summary>
-		///     Current value
-		/// </summary>
-		public object Value
+        /// <summary>
+        ///     Current value
+        /// </summary>
+        public object Value
 		{
-			get;
-			set;
+            get => _iniSection.Getter(_propertyInfo.Name);
+			set => _iniSection.Setter(_propertyInfo.Name, value);
 		}
 
-		/// <summary>
-		///     Type for the value, needed for conversion when reading.
-		/// </summary>
-		public Type ValueType { get; set; }
+        /// <summary>
+        ///     Type for the value, needed for conversion when reading.
+        /// </summary>
+        public Type ValueType => _propertyInfo.PropertyType;
 
-		/// <summary>
-		///     Reset the value to a default
-		/// </summary>
-		public void ResetToDefault()
+        /// <summary>
+        ///     Reset the value to a default
+        /// </summary>
+        public void ResetToDefault()
 		{
 			_iniSection.RestoreToDefault(PropertyName);
 		}

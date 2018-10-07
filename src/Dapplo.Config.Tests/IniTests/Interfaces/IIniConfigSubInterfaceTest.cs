@@ -26,7 +26,7 @@ using Dapplo.Ini;
 
 #endregion
 
-namespace Dapplo.Config.Tests.ConfigTests.Interfaces
+namespace Dapplo.Config.Tests.IniTests.Interfaces
 {
 	public interface IIniConfigSubInterfaceTest : IIniSubSection
 	{

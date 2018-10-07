@@ -21,13 +21,9 @@
 
 #region using
 
-using System;
-using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
-using Dapplo.Config.Tests.ConfigTests.Entities;
-using Dapplo.Config.Tests.ConfigTests.Interfaces;
+using Dapplo.Config.Tests.IniTests.Entities;
 using Dapplo.Ini;
 using Dapplo.Ini.Converters;
 using Dapplo.Ini.NewImpl;
@@ -38,43 +34,39 @@ using Xunit.Abstractions;
 
 #endregion
 
-namespace Dapplo.Config.Tests.ConfigTests
+namespace Dapplo.Config.Tests.IniTests
 {
     public sealed class IniContainerTests
     {
         private const string Name = "Dapplo";
         private const string FirstName = "Robin";
         private const string TestValueForNonSerialized = "Hello!";
-        private readonly IniConfigTestImpl _iniConfigTest;
-
-        private readonly IniFileContainer _iniFileContainer;
 
         public IniContainerTests(ITestOutputHelper testOutputHelper)
         {
             LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
             StringEncryptionTypeConverter.RgbIv = "fjr84hF49gp3911fFFg";
             StringEncryptionTypeConverter.RgbKey = "ljew3lJfrS0rlddlfeelOekfekcvbAwE";
-            _iniConfigTest = new IniConfigTestImpl();
-            _iniFileContainer = Create();
         }
 
-        private async Task ConfigureMemoryStreamAsync()
+        private async Task ConfigureMemoryStreamAsync(IniFileContainer iniFileContainer)
         {
             using (var testMemoryStream = new MemoryStream())
             {
-                await _iniFileContainer.ReadFromStreamAsync(testMemoryStream).ConfigureAwait(false);
+                await iniFileContainer.ReadFromStreamAsync(testMemoryStream).ConfigureAwait(false);
             }
         }
 
-        private IniFileContainer Create()
+        private IniFileContainer CreateContainer(IIniSection iniSection)
         {
             var iniFileConfig = IniFileConfigBuilder.Create()
                 .WithApplicationName("Dapplo")
-                .WithFilename("dapplo")
+                .WithFilename("testfile")
                 .WithoutSaveOnExit()
+                .WithFixedDirectory("IniTestFiles")
                 .BuildApplicationConfig();
 
-            return new IniFileContainer(iniFileConfig, new []{ _iniConfigTest });
+            return new IniFileContainer(iniFileConfig, new []{ iniSection });
         }
 
         /// <summary>
@@ -84,19 +76,33 @@ namespace Dapplo.Config.Tests.ConfigTests
         [Fact]
         public async Task TestIniAfterLoad()
         {
-            var iniContainer = Create();
+            var iniConfigTest = new IniConfigTestImpl();
+            var iniContainer = CreateContainer(iniConfigTest);
 
-            _iniConfigTest.OnLoad = x =>
+            iniConfigTest.OnLoad = x =>
             {
                 if (!x.SomeValues.ContainsKey("dapplo"))
                 {
                     x.SomeValues.Add("dapplo", 2015);
                 }
             };
-            await ConfigureMemoryStreamAsync();
+            await ConfigureMemoryStreamAsync(iniContainer);
 
-            Assert.True(_iniConfigTest.SomeValues.ContainsKey("dapplo"));
-            Assert.True(_iniConfigTest.SomeValues["dapplo"] == 2015);
+            Assert.True(iniConfigTest.SomeValues.ContainsKey("dapplo"));
+            Assert.True(iniConfigTest.SomeValues["dapplo"] == 2015);
+        }
+
+        /// <summary>
+        ///     Test if the loading worked
+        /// </summary>
+        [Fact]
+        public async Task TestIniFromFile()
+        {
+            var iniConfigTest = new IniConfigTestImpl();
+            var iniContainer = CreateContainer(iniConfigTest);
+            await iniContainer.ReloadAsync();
+
+            Assert.Equal(210u, iniConfigTest.Height);
         }
     }
 }

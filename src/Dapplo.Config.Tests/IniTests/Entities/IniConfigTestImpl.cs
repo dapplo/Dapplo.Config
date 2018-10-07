@@ -1,11 +1,11 @@
 ﻿using AutoProperties;
-using Dapplo.Config.Tests.ConfigTests.Interfaces;
+using Dapplo.Config.Tests.IniTests.Interfaces;
 using Dapplo.Ini.NewImpl;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 
-namespace Dapplo.Config.Tests.ConfigTests.Entities
+namespace Dapplo.Config.Tests.IniTests.Entities
 {
     public class IniConfigTestImpl : IniSectionBase<IIniConfigTest>, IIniConfigTest
     {

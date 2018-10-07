@@ -81,5 +81,8 @@ namespace Dapplo.Ini
 		/// <param name="value">out IniValue</param>
 		/// <returns>bool with true if found</returns>
 		bool TryGetIniValue(string propertyName, out IniValue value);
-	}
+
+        void Setter(string propertyName, object value);
+        object Getter(string propertyName);
+    }
 }

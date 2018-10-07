@@ -59,7 +59,7 @@ namespace Dapplo.Ini.NewImpl
         /// <param name="propertyName">string</param>
         /// <returns>TProperty</returns>
         [GetInterceptor]
-        protected override object Getter(string propertyName)
+        public new object Getter(string propertyName)
         {
             return base.Getter(propertyName);
         }
@@ -70,9 +70,9 @@ namespace Dapplo.Ini.NewImpl
         /// <param name="propertyName">string</param>
         /// <param name="newValue">object</param>
         [SetInterceptor]
-        protected override void Setter(string propertyName, object newValue)
+        public new void Setter(string propertyName, object newValue)
         {
-            base.Getter(propertyName);
+            base.Setter(propertyName, newValue);
         }
         #endregion
 
@@ -83,10 +83,8 @@ namespace Dapplo.Ini.NewImpl
         {
             base.PropertyInitializer(propertyInfo);
 
-            var iniValue = new IniValue(this)
+            var iniValue = new IniValue(this, propertyInfo)
             {
-                PropertyName = propertyInfo.Name,
-                ValueType = propertyInfo.PropertyType,
                 IniPropertyName = propertyInfo.GetDataMemberName() ?? propertyInfo.Name,
                 EmitDefaultValue = propertyInfo.GetEmitDefaultValue(),
                 Description = propertyInfo.GetDescription(),
