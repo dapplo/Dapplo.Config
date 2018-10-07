@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapplo.Config.Registry", "Dapplo.Registry\Dapplo.Config.Registry.csproj", "{F57325B4-9444-4E68-9485-080A5171E8BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapplo.Config.Registry", "Dapplo.Config.Registry\Dapplo.Config.Registry.csproj", "{F57325B4-9444-4E68-9485-080A5171E8BC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapplo.Config.Tests", "Dapplo.Config.Tests\Dapplo.Config.Tests.csproj", "{2C8817A3-AF0F-40CE-89C3-325BBB9417AB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapplo.Config.Ini", "Dapplo.Ini\Dapplo.Config.Ini.csproj", "{18E3C5E8-7EB7-47C3-B84A-8A8459D85052}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapplo.Config.Ini", "Dapplo.Config.Ini\Dapplo.Config.Ini.csproj", "{18E3C5E8-7EB7-47C3-B84A-8A8459D85052}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapplo.Config.Language", "Dapplo.Language\Dapplo.Config.Language.csproj", "{7FACB328-6B3E-40C9-9A53-F3F2D0E27C64}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapplo.Config.Language", "Dapplo.Config.Language\Dapplo.Config.Language.csproj", "{7FACB328-6B3E-40C9-9A53-F3F2D0E27C64}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapplo.Config", "Dapplo.Config\Dapplo.Config.csproj", "{AE237020-0D96-43D7-AE50-A4CAA6BF89F2}"
 EndProject
