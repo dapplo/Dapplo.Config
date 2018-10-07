@@ -21,6 +21,7 @@
 
 #region using
 
+using Dapplo.Ini.Attributes;
 using System;
 using System.ComponentModel;
 using System.Reflection;

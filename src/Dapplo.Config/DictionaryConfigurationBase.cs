@@ -25,7 +25,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Reflection;
-using AutoProperties;
 using Dapplo.Config.Attributes;
 using Dapplo.Config.Interfaces;
 using Dapplo.Config.Intercepting;
@@ -124,31 +123,6 @@ namespace Dapplo.Config
         {
             _properties[setInfo.PropertyInfo.Name] = setInfo.NewValue;
         }
-
-        #region Interceptor
-
-        /// <summary>
-        /// Get the backing value for the specified property
-        /// </summary>
-        /// <param name="propertyName">string</param>
-        /// <returns>TProperty</returns>
-        [GetInterceptor]
-        protected virtual object Getter(string propertyName)
-        {
-            return GetValue(propertyName).Value;
-        }
-
-        /// <summary>
-        /// Set the backing value for the specified property
-        /// </summary>
-        /// <param name="propertyName">string</param>
-        /// <param name="newValue">object</param>
-        [SetInterceptor]
-        protected virtual void Setter(string propertyName, object newValue)
-        {
-            SetValue(PropertyInfoFor(propertyName), newValue);
-        }
-        #endregion
 
         #region Implementation of IWriteProtectProperties
 

@@ -28,7 +28,7 @@ using Dapplo.Ini;
 
 namespace Dapplo.Config.Tests.IniTests.Interfaces
 {
-	public interface IIniConfigSubInterfaceTest : IIniSubSection
+	public interface IIniConfigSubInterfaceTest
 	{
 		string SubValue { get; set; }
 

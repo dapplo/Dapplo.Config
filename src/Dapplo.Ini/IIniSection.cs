@@ -82,7 +82,18 @@ namespace Dapplo.Ini
 		/// <returns>bool with true if found</returns>
 		bool TryGetIniValue(string propertyName, out IniValue value);
 
+        /// <summary>
+        /// This is the setter of the configuration base, made public
+        /// </summary>
+        /// <param name="propertyName">string</param>
+        /// <param name="value">object</param>
         void Setter(string propertyName, object value);
+
+        /// <summary>
+        /// This is the getter of the configuration base, made public
+        /// </summary>
+        /// <param name="propertyName">string</param>
+        /// <returns>object</returns>
         object Getter(string propertyName);
     }
 }

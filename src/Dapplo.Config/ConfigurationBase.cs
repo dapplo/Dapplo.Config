@@ -28,6 +28,7 @@ using Dapplo.Config.Intercepting;
 using Dapplo.Log;
 using Dapplo.Utils;
 using Dapplo.Utils.Extensions;
+using AutoProperties;
 
 namespace Dapplo.Config
 {
@@ -57,6 +58,31 @@ namespace Dapplo.Config
         /// Information for the interceptors, so we don't need a IDictionary lookup each time
         /// </summary>
         protected GetSetInterceptInformation InterceptInformation;
+
+        #region Interceptor
+
+        /// <summary>
+        /// Get the backing value for the specified property
+        /// </summary>
+        /// <param name="propertyName">string</param>
+        /// <returns>TProperty</returns>
+        [GetInterceptor]
+        public virtual object Getter(string propertyName)
+        {
+            return GetValue(propertyName).Value;
+        }
+
+        /// <summary>
+        /// Set the backing value for the specified property
+        /// </summary>
+        /// <param name="propertyName">string</param>
+        /// <param name="newValue">object</param>
+        [SetInterceptor]
+        public virtual void Setter(string propertyName, object newValue)
+        {
+            SetValue(PropertyInfoFor(propertyName), newValue);
+        }
+        #endregion
 
         /// <summary>
         /// Initialize the whole thing, this should be called from the final class

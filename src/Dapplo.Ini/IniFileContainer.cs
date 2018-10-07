@@ -33,7 +33,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Timer = System.Timers.Timer;
 
-namespace Dapplo.Ini.NewImpl
+namespace Dapplo.Ini
 {
     /// <summary>
     /// This contains all the ini sections in one ini file
@@ -282,7 +282,6 @@ namespace Dapplo.Ini.NewImpl
                     catch (Exception ex)
                     {
                         Log.Warn().WriteLine(ex.Message);
-                        //WriteErrorHandler(iniSection, iniValue, ex);
                     }
                 }
                 // Skip if the iniProperties doesn't have anything
@@ -305,7 +304,6 @@ namespace Dapplo.Ini.NewImpl
                 catch (Exception ex)
                 {
                     Log.Warn().WriteLine(ex.Message);
-                    //WriteErrorHandler(iniSection, iniValue, ex);
                 }
             }
         }

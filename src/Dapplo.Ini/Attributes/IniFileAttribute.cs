@@ -19,12 +19,39 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-namespace Dapplo.Ini
+#region using
+
+using System;
+
+#endregion
+
+namespace Dapplo.Ini.Attributes
 {
 	/// <summary>
-	///     Marker interface for sub sections
+	///     Specify the 
 	/// </summary>
-	public interface IIniSubSection
+	[AttributeUsage(AttributeTargets.Interface)]
+	public class IniFileAttribute : Attribute
 	{
+		/// <summary>
+		///     Constructor
+		/// </summary>
+		/// <param name="name">Name of the ini-section</param>
+		public IniFileAttribute(string name)
+		{
+			Name = name;
+			IgnoreErrors = true;
+		}
+
+		/// <summary>
+		///     Set ignore errors to false, if you want an exception when a parse error occurs.
+		///     Default this is set to true, which will cause the property to have the "default" value.
+		/// </summary>
+		public bool IgnoreErrors { get; set; }
+
+		/// <summary>
+		///     Name of the section in the ini file
+		/// </summary>
+		public string Name { get; }
 	}
 }

@@ -25,21 +25,33 @@ using System;
 
 #endregion
 
-namespace Dapplo.Ini
+namespace Dapplo.Ini.Attributes
 {
 	/// <summary>
-	///     IniSectionEventArgs has all the information on the Loaded, Saving or Saved events from a IniSection
+	///     This attribute should be used to mark a class as IniSection
 	/// </summary>
-	public class IniSectionEventArgs : EventArgs
+	[AttributeUsage(AttributeTargets.Interface)]
+	public class IniSectionAttribute : Attribute
 	{
 		/// <summary>
-		///     IniEventTypes specifies what kind of event was created: Loaded, Saving or Saved
+		///     Constructor
 		/// </summary>
-		public IniEventTypes EventType { get; set; }
+		/// <param name="name">Name of the ini-section</param>
+		public IniSectionAttribute(string name)
+		{
+			Name = name;
+			IgnoreErrors = true;
+		}
 
 		/// <summary>
-		///     The initiating IIniSection
+		///     Set ignore errors to false, if you want an exception when a parse error occurs.
+		///     Default this is set to true, which will cause the property to have the "default" value.
 		/// </summary>
-		public IIniSection IniSection { get; set; }
+		public bool IgnoreErrors { get; set; }
+
+		/// <summary>
+		///     Name of the section in the ini file
+		/// </summary>
+		public string Name { get; }
 	}
 }

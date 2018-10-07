@@ -28,6 +28,8 @@ using Dapplo.Log;
 using Dapplo.Utils.Extensions;
 using Microsoft.Win32;
 using AutoProperties;
+using Dapplo.Config.Attributes;
+using Dapplo.Config.Intercepting;
 
 namespace Dapplo.Registry
 {
@@ -49,15 +51,14 @@ namespace Dapplo.Registry
             Initialize(typeof(T));
         }
 
-        #region Defining the [GetInterceptor] and [SetInterceptor] is needed as workaround for a bug in Autoproperties.Fody
         /// <summary>
-        /// This retrieves the registry value
+        /// Retrieves the value from the registry
         /// </summary>
-        /// <param name="propertyName">string</param>
-        /// <returns>object with the value</returns>
-        [GetInterceptor]
-        protected object Getter(string propertyName)
+        /// <param name="getInfo">GetInfo</param>
+        [InterceptOrder(GetterOrders.Dictionary)]
+        private void FromRegistryGetter(GetInfo getInfo)
         {
+            var propertyName = getInfo.PropertyInfo.Name;
             if (!_registryAttributes.TryGetValue(propertyName, out var registryPropertyAttribute) || registryPropertyAttribute is null)
             {
                 throw new ArgumentException($"{propertyName} isn't correctly configured");
@@ -102,23 +103,25 @@ namespace Dapplo.Registry
                                 values[valueName] = value;
                             }
                         }
-
-                        return values;
+                        getInfo.Value = values;
+                        getInfo.HasValue = true;
+                        return;
                     }
-                    // Read a specific value
-                    return key.GetValue(registryPropertyAttribute.ValueName);
+                    getInfo.Value = key.GetValue(registryPropertyAttribute.ValueName);
+                    getInfo.HasValue = true;
                 }
             }
         }
 
         /// <summary>
-        /// This implements the Setter for the registry
+        /// Retrieves the value from the dictionary
         /// </summary>
-        /// <param name="propertyName">string</param>
-        /// <param name="newValue">object</param>
-        [SetInterceptor]
-        protected void Setter(string propertyName, object newValue)
+        /// <param name="setInfo">GetInfo</param>
+        [InterceptOrder(SetterOrders.Dictionary)]
+        private void ToDictionarySetter(SetInfo setInfo)
         {
+            var propertyName = setInfo.PropertyInfo.Name;
+            var newValue = setInfo.NewValue;
             if (!_registryAttributes.TryGetValue(propertyName, out var registryPropertyAttribute) || registryPropertyAttribute is null)
             {
                 throw new ArgumentException($"{propertyName} isn't correctly configured");
@@ -176,7 +179,6 @@ namespace Dapplo.Registry
                 }
             }
         }
-        #endregion
 
         /// <inheritdoc />
         protected override void PropertyInitializer(PropertyInfo propertyInfo)

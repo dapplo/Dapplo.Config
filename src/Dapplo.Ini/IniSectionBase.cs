@@ -25,11 +25,12 @@ using System.ComponentModel;
 using System.Reflection;
 using AutoProperties;
 using Dapplo.Config;
+using Dapplo.Ini.Attributes;
 using Dapplo.Ini.Extensions;
 using Dapplo.Utils;
 using Dapplo.Utils.Extensions;
 
-namespace Dapplo.Ini.NewImpl
+namespace Dapplo.Ini
 {
     /// <summary>
     /// This is the base class for an IniSection, it bases on the ConfigurationBase and should be used as the base for an ini-section.
@@ -50,31 +51,6 @@ namespace Dapplo.Ini.NewImpl
             _iniSectionAttribute = thisType.GetAttribute<IniSectionAttribute>();
             _descriptionAttribute = thisType.GetAttribute<DescriptionAttribute>();
         }
-
-        #region Interceptor
-
-        /// <summary>
-        /// Get the backing value for the specified property
-        /// </summary>
-        /// <param name="propertyName">string</param>
-        /// <returns>TProperty</returns>
-        [GetInterceptor]
-        public new object Getter(string propertyName)
-        {
-            return base.Getter(propertyName);
-        }
-
-        /// <summary>
-        /// Set the backing value for the specified property
-        /// </summary>
-        /// <param name="propertyName">string</param>
-        /// <param name="newValue">object</param>
-        [SetInterceptor]
-        public new void Setter(string propertyName, object newValue)
-        {
-            base.Setter(propertyName, newValue);
-        }
-        #endregion
 
         #region Overrides of ConfigurationBase<T>
 

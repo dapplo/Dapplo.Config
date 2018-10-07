@@ -23,6 +23,7 @@
 
 using System.ComponentModel;
 using Dapplo.Ini;
+using Dapplo.Ini.Attributes;
 
 #endregion
 

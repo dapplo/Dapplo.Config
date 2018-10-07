@@ -25,33 +25,51 @@ using System;
 
 #endregion
 
-namespace Dapplo.Ini
+namespace Dapplo.Ini.Attributes
 {
 	/// <summary>
-	///     This attribute should be used to mark a class as IniSection
+	///     Use this attribute on Properties where you want to influence the ini config behavior.
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Interface)]
-	public class IniSectionAttribute : Attribute
+	[AttributeUsage(AttributeTargets.Property)]
+	public class IniPropertyBehaviorAttribute : Attribute
 	{
+		private bool? _ignoreErrors;
+
 		/// <summary>
 		///     Constructor
 		/// </summary>
-		/// <param name="name">Name of the ini-section</param>
-		public IniSectionAttribute(string name)
+		public IniPropertyBehaviorAttribute()
 		{
-			Name = name;
-			IgnoreErrors = true;
+			Read = true;
+			Write = true;
 		}
 
 		/// <summary>
 		///     Set ignore errors to false, if you want an exception when a parse error occurs.
 		///     Default this is set to true, which will cause the property to have the "default" value.
 		/// </summary>
-		public bool IgnoreErrors { get; set; }
+		public bool IgnoreErrors
+		{
+			get { return _ignoreErrors ?? true; }
+			set { _ignoreErrors = value; }
+		}
 
 		/// <summary>
-		///     Name of the section in the ini file
+		///     Specifies if the IgnoreErrors was specified or is default
 		/// </summary>
-		public string Name { get; }
+		public bool IsIgnoreErrorsSet => _ignoreErrors.HasValue;
+
+		/// <summary>
+		///     Default is true, set read to false to skip reading.
+		///     Although this might be unlikely, examples are:
+		///     1 A property with the last changed date, which might not be the date of the file
+		///     2 A property with the application or component version which "processed" the configuration
+		/// </summary>
+		public bool Read { get; set; }
+
+		/// <summary>
+		///     Default is true, set write to false to skip serializing.
+		/// </summary>
+		public bool Write { get; set; }
 	}
 }

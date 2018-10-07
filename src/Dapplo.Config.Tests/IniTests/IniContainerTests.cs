@@ -24,9 +24,9 @@
 using System.IO;
 using System.Threading.Tasks;
 using Dapplo.Config.Tests.IniTests.Entities;
+using Dapplo.Config.Tests.IniTests.Interfaces;
 using Dapplo.Ini;
 using Dapplo.Ini.Converters;
-using Dapplo.Ini.NewImpl;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
 using Xunit;
@@ -57,11 +57,11 @@ namespace Dapplo.Config.Tests.IniTests
             }
         }
 
-        private IniFileContainer CreateContainer(IIniSection iniSection)
+        private IniFileContainer CreateContainer(string iniFileName, IIniSection iniSection)
         {
             var iniFileConfig = IniFileConfigBuilder.Create()
                 .WithApplicationName("Dapplo")
-                .WithFilename("testfile")
+                .WithFilename(iniFileName)
                 .WithoutSaveOnExit()
                 .WithFixedDirectory("IniTestFiles")
                 .BuildApplicationConfig();
@@ -77,7 +77,7 @@ namespace Dapplo.Config.Tests.IniTests
         public async Task TestIniAfterLoad()
         {
             var iniConfigTest = new IniConfigTestImpl();
-            var iniContainer = CreateContainer(iniConfigTest);
+            var iniContainer = CreateContainer("TestIniAfterLoad", iniConfigTest);
 
             iniConfigTest.OnLoad = x =>
             {
@@ -99,10 +99,36 @@ namespace Dapplo.Config.Tests.IniTests
         public async Task TestIniFromFile()
         {
             var iniConfigTest = new IniConfigTestImpl();
-            var iniContainer = CreateContainer(iniConfigTest);
+            var iniContainer = CreateContainer("TestIniFromFile", iniConfigTest);
             await iniContainer.ReloadAsync();
 
             Assert.Equal(210u, iniConfigTest.Height);
+
+            await iniContainer.WriteAsync();
+        }
+
+        [Fact]
+        public async Task TestIniGeneral()
+        {
+            var iniConfigTest = new IniConfigTestImpl();
+            var iniContainer = CreateContainer("TestIniGeneral", iniConfigTest);
+            await iniContainer.ReloadAsync();
+
+            //Assert.Contains(new Uri("http://1.dapplo.net"), iniTest.MyUris);
+
+            Assert.Equal(185u, iniConfigTest.Height);
+            iniConfigTest.Height++;
+            Assert.Equal(186u, iniConfigTest.Height);
+            iniConfigTest.Height = 185;
+            Assert.Equal(185u, iniConfigTest.Height);
+            Assert.Equal(16, iniConfigTest.PropertySize.Width);
+            Assert.Equal(100, iniConfigTest.PropertyArea.Width);
+            Assert.True(iniConfigTest.WindowCornerCutShape.Count > 0);
+            Assert.Equal("It works!", iniConfigTest.SubValuewithDefault);
+            Assert.Equal(IniConfigTestValues.Value2, iniConfigTest.TestWithEnum);
+            iniConfigTest.RestoreToDefault("TestWithEnum");
+            Assert.Equal(IniConfigTestValues.Value2, iniConfigTest.TestWithEnum);
+            Assert.Equal(IniConfigTestValues.Value2, iniConfigTest.TestWithEnumSubValue);
         }
     }
 }

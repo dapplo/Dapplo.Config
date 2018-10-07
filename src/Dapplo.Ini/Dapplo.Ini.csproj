@@ -11,16 +11,14 @@
     <FileVersion>1.0.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="IniConfig.cs" />
     <Compile Remove="IniRest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="IniConfig.cs" />
     <None Include="IniRest.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoProperties.Fody" Version="1.14.0">
+    <PackageReference Include="AutoProperties.Fody" Version="1.15.0">
       <PrivateAssets>all</PrivateAssets>
       <!--IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets-->
     </PackageReference>

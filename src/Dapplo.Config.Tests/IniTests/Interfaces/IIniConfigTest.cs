@@ -29,6 +29,8 @@ using System.Runtime.Serialization;
 using Dapplo.Ini;
 using Dapplo.Ini.Converters;
 using Dapplo.Config.Interfaces;
+using Dapplo.Ini.Attributes;
+using Dapplo.Windows.Common.Structs;
 
 #endregion
 
@@ -45,7 +47,7 @@ namespace Dapplo.Config.Tests.IniTests.Interfaces
     /// </summary>
     [IniSection("Test")]
     [Description("Test Configuration")]
-    public interface IIniConfigTest : IIniConfigSubInterfaceTest, IIniSection, IDefaultValue, IHasChanges
+    public interface IIniConfigTest : IIniConfigSubInterfaceTest, IIniSection
     {
         [DefaultValue(21)]
         [DataMember(EmitDefaultValue = true)]
@@ -65,7 +67,7 @@ namespace Dapplo.Config.Tests.IniTests.Interfaces
         IDictionary<string, Uri> ListOfUris { get; set; }
 
         [DefaultValue("")]
-        Size MySize { get; set; }
+        NativeSize MySize { get; set; }
 
         [Description("Name of the person")]
         string Name { get; set; }
@@ -74,10 +76,10 @@ namespace Dapplo.Config.Tests.IniTests.Interfaces
         string NotWritten { get; set; }
 
         [DefaultValue("16,16,100,100")]
-        Rectangle PropertyArea { get; set; }
+        NativeRect PropertyArea { get; set; }
 
         [DefaultValue("16,16")]
-        Size PropertySize { get; set; }
+        NativeSize PropertySize { get; set; }
 
         [Description("Here are some values")]
         IDictionary<string, int> SomeValues { get; set; }
