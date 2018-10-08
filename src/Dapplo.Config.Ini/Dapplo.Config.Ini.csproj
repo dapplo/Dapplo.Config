@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Description>Dapplo.Ini adds ini configuration with static type support to your project.</Description>
     <AssemblyTitle>Dapplo.Ini</AssemblyTitle>
-    <TargetFrameworks>net461</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <AssemblyName>Dapplo.Config.Ini</AssemblyName>
     <PackageId>Dapplo.Ini</PackageId>
 	<PackageTags>dapplo ini config</PackageTags>
@@ -11,12 +11,6 @@
     <FileVersion>1.0.0</FileVersion>
     <RootNamespace>Dapplo.Config.Ini</RootNamespace>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Remove="IniRest.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Rest\IniRest.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoProperties.Fody" Version="1.15.0">
