@@ -68,7 +68,6 @@ namespace Dapplo.Config.Tests.RestTests
 			var iniTest = new IniRestTestImpl();
 			var iniContainer = CreateContainer("TestIniRest", iniTest);
 
-			var listToTest = iniTest.WindowCornerCutShape;
 			iniTest.Name = Name;
 			iniTest.SomeValues.Add("Answer", 42);
 
@@ -118,6 +117,7 @@ namespace Dapplo.Config.Tests.RestTests
 			Assert.False(iniTest.SomeValues.ContainsKey("Stop"));
 
             // Test remove from list
+			var listToTest = iniTest.WindowCornerCutShape;
 			Assert.Equal(5, listToTest.First());
 			var removeCutShapeUri = new Uri("dummy:///IniConfig/remove/Dapplo/dapplo/Test/WindowCornerCutShape?5&1");
 			IniRest.ProcessRestUri(removeCutShapeUri, iniContainer);

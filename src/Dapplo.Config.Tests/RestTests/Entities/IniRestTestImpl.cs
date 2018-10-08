@@ -19,41 +19,17 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-using System;
 using System.Collections.Generic;
-using AutoProperties;
 using Dapplo.Config.Ini;
-using Dapplo.Config.Tests.IniTests.Interfaces;
-using Dapplo.Windows.Common.Structs;
+using Dapplo.Config.Tests.RestTests.Interfaces;
 
 namespace Dapplo.Config.Tests.RestTests.Entities
 {
-    public class IniRestTestImpl : IniSectionBase<IIniConfigTest>, IIniConfigTest
+    public class IniRestTestImpl : IniSectionBase<IIniRestTest>, IIniRestTest
     {
-        public long Age { get; set; }
-        public IDictionary<string, IList<int>> DictionaryOfLists { get; set; }
-        public string FirstName { get; set; }
-        public uint Height { get; set; }
-        public IDictionary<string, Uri> ListOfUris { get; set; }
-        public NativeSize MySize { get; set; }
-        public string Name { get; set; }
-        public string NotWritten { get; set; }
-        public NativeRect PropertyArea { get; set; }
-        public NativeSize PropertySize { get; set; }
-        public IDictionary<string, int> SomeValues { get; set; }
-        public IList<IniConfigTestValues> TestEnums { get; set; }
-        public IniConfigTestValues TestWithEnum { get; set; }
         public IList<int> WindowCornerCutShape { get; set; }
-        public Uri[] MyUris { get; set; }
-        public string SubValue { get; set; }
-        public string SubValuewithDefault { get; set; }
-        public IniConfigTestValues TestWithEnumSubValue { get; set; }
-
-        [InterceptIgnore]
-        public Action<IIniConfigTest> OnLoad { get; set; }
-        public override void AfterLoad()
-        {
-            OnLoad?.Invoke(this);
-        }
+        public IDictionary<string, int> SomeValues { get; set; }
+        public string Name { get; set; }
+        public string FirstName { get; set; }
     }
 }
