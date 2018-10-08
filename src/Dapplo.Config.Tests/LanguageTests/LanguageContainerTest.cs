@@ -120,6 +120,8 @@ namespace Dapplo.Config.Tests.LanguageTests
 			// Test using the raw property name with the indexer
 			Assert.Equal("Afbreken", languageContainer["test"]["test_value"]);
 			Assert.Equal("cool", languageContainer["test"]["dapplo"]);
+
+			// Test if translations without matching properties are available
 			Assert.Contains("dapplo", languageContainer["test"].Keys());
 		}
 
