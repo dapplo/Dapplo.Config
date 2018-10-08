@@ -45,52 +45,36 @@ namespace Dapplo.Config.Language
     ///     The language loader should be used to fill ILanguage interfaces.
     ///     It is possible to specify the directory locations, in order, where files with certain patterns should be located.
     /// </summary>
-    public sealed class LanguageLoader : IServiceProvider, IDisposable, IEnumerable<ILanguage>
+    public sealed class LanguageContainer : IDisposable, IEnumerable<ILanguage>
     {
+        private readonly LanguageConfig _languageConfig;
         private static readonly LogSource Log = new LogSource();
-        private static readonly IDictionary<string, LanguageLoader> LoaderStore = new Dictionary<string, LanguageLoader>(AbcComparer.Instance);
         private readonly IDictionary<string, IDictionary<string, string>> _allTranslations = new Dictionary<string, IDictionary<string, string>>(AbcComparer.Instance);
-        private readonly string _applicationName;
         private readonly AsyncLock _asyncLock = new AsyncLock();
         private readonly Regex _filePattern;
         private readonly IDictionary<string, ILanguage> _languageConfigs = new Dictionary<string, ILanguage>(AbcComparer.Instance);
-        private readonly IDictionary<Type, ILanguage> _languageTypeConfigs = new Dictionary<Type, ILanguage>();
         private bool _initialReadDone;
 
         /// <summary>
         ///     Create a LanguageLoader, this is your container for all the ILanguage implementing interfaces.
         ///     You can supply a default language right away.
         /// </summary>
-        /// <param name="applicationName"></param>
-        /// <param name="defaultLanguage"></param>
-        /// <param name="filePatern">Pattern for the filename, the ietf group needs to be in there!</param>
-        /// <param name="checkStartupDirectory"></param>
-        /// <param name="checkAppDataDirectory"></param>
-        /// <param name="specifiedDirectories"></param>
-        public LanguageLoader(string applicationName, string defaultLanguage = "en-US",
-            string filePatern = @"language(_(?<module>[a-zA-Z0-9]*))?-(?<IETF>[a-zA-Z]{2}(-[a-zA-Z]+)?-[a-zA-Z]+)\.(ini|xml)", bool checkStartupDirectory = true,
-            bool checkAppDataDirectory = true, ICollection<string> specifiedDirectories = null)
+        public LanguageContainer(LanguageConfig languageConfig, IEnumerable<ILanguage> languageInterfaces)
         {
-            lock (LoaderStore)
+            _languageConfig = languageConfig;
+            foreach (var languageInterface in languageInterfaces)
             {
-                if (LoaderStore.ContainsKey(applicationName))
-                {
-                    throw new InvalidOperationException($"{applicationName} was already created!");
-                }
-                CurrentLanguage = defaultLanguage;
-                _filePattern = new Regex(filePatern, RegexOptions.Compiled);
-                _applicationName = applicationName;
-                ScanFiles(checkStartupDirectory, checkAppDataDirectory, specifiedDirectories);
-                Log.Debug().WriteLine("Adding {0}", applicationName);
-                LoaderStore[applicationName] = this;
+                _languageConfigs[languageInterface.PrefixName()] = languageInterface;
             }
+            CurrentLanguage = languageConfig.DefaultLanguage;
+            _filePattern = new Regex(languageConfig.FileNamePattern, RegexOptions.Compiled);
+            ScanFiles(languageConfig);
         }
 
         /// <summary>
         ///     All languages that were found in the files during the scan.
         /// </summary>
         public IDictionary<string, string> AvailableLanguages { get; private set; }
-
 
         /// <summary>
         ///     Get the IETF of the current language.
@@ -108,45 +92,7 @@ namespace Dapplo.Config.Language
         /// </summary>
         /// <param name="prefix">ILanguage prefix to look for</param>
         /// <returns>ILanguage</returns>
-        public ILanguage this[string prefix]
-        {
-            get
-            {
-                lock (_languageConfigs)
-                {
-                    return _languageConfigs[prefix];
-                }
-            }
-        }
-
-        /// <summary>
-        ///     IServiceProvider implementation
-        ///     Gets the language object of the specified language type.
-        /// </summary>
-        /// <param name="languageType">An object that specifies the type of language  or languagePart object to get. </param>
-        /// <returns>
-        ///     A IniConfig of type <paramref name="languageType" />.-or- null if there is no service object of type
-        ///     <paramref name="languageType" />.
-        /// </returns>
-        public object GetService(Type languageType)
-        {
-            // We cannot provide ILanguage itself
-            if (typeof(ILanguage) == languageType)
-            {
-                return null;
-            }
-            // Logic to resolve ILanguage
-            if (typeof(ILanguage).IsAssignableFrom(languageType))
-            {
-                return Get(languageType);
-            }
-            // Logic to resolve ILanguagePart
-            if (typeof(ILanguagePart).IsAssignableFrom(languageType))
-            {
-                return GetPart(languageType);
-            }
-            return null;
-        }
+        public ILanguage this[string prefix] => _languageConfigs[prefix];
 
         /// <summary>
         ///     Change the language, this will only do something if the language actually changed.
@@ -227,118 +173,49 @@ namespace Dapplo.Config.Language
         /// <param name="language"></param>
         private void FillLanguageConfig(ILanguage language)
         {
-            var prefix = language.PrefixName();
-            // ReSharper disable once SuspiciousTypeConversion.Global
-            var defaultValueInterface = language as IDefaultValue;
-
-            if (!(language is IExtensibleInterceptor interceptor) || defaultValueInterface is null)
+            var configurationBase = language as ConfigurationBase<string>;
+            if (configurationBase == null)
             {
-                throw new InvalidOperationException("Should not happen.");
+                throw new NotSupportedException("Implementation behind the ILanguage is not a ConfigurationBase");
             }
+
+            var prefix = language.PrefixName();
+
             if (!_allTranslations.TryGetValue(prefix, out var sectionTranslations))
             {
                 // No values, reset all (only available via the PropertyTypes dictionary
-                foreach (var key in interceptor.PropertyTypes.Keys.ToList())
+                foreach (var key in language.Keys().ToList())
                 {
-                    defaultValueInterface.RestoreToDefault(key);
+                    language.RestoreToDefault(key);
                 }
                 return;
             }
 
             // Use PropertyTypes.Keys to get ALL possible properties.
-            foreach (var key in interceptor.PropertyTypes.Keys.ToList())
+            foreach (var key in language.Keys().ToList())
             {
                 if (sectionTranslations.TryGetValue(key, out var translation))
                 {
-                    interceptor.Set(key, translation);
+                    configurationBase.Setter(key, translation);
                     sectionTranslations.Remove(key);
                 }
                 else
                 {
-                    defaultValueInterface.RestoreToDefault(key);
+                    language.RestoreToDefault(key);
                 }
             }
 
             // Add all unprocessed values
             foreach (var key in sectionTranslations.Keys.ToList())
             {
-                interceptor.Properties[key] = sectionTranslations[key];
+                var translation = sectionTranslations[key];
+                configurationBase.Setter(key, translation);
             }
 
             // Generate the language changed event
             // Added for Dapplo.Config/issues/10
-            var languageInternal = language as ILanguageInternal;
+            var languageInternal = (ILanguageInternal) language;
             languageInternal?.OnLanguageChanged();
-        }
-
-        /// <summary>
-        ///     Get or register/get Interface to this language loader, this method will return the filled property object
-        /// </summary>
-        /// <param name="type">ILanguage Type</param>
-        /// <returns>object (which is a ILanguage)</returns>
-        public object Get(Type type)
-        {
-            
-            ILanguage language;
-            // Make sure we lock, to prevent double adding
-            lock (_languageTypeConfigs)
-            {
-                if (_languageTypeConfigs.TryGetValue(type, out language))
-                {
-                    // Already filled type
-                    return language;
-                }
-                // TODO: scan the location of the assembly where the type is, if it hasn't been scanned, for language files.
-                // TODO: Also scan the embedded resource of the ILanguage containing assembly
-                language = (ILanguage) InterceptorFactory.New(type);
-                _languageTypeConfigs.Add(type, language);
-                _languageConfigs[language.PrefixName()] = language;
-            }
-            if (_initialReadDone)
-            {
-                FillLanguageConfig(language);
-            }
-
-            return language;
-        }
-
-
-        /// <summary>
-        ///     Get or register/get Interface to this language loader, this method will return the filled property object
-        /// </summary>
-        /// <typeparam name="T">ILanguage</typeparam>
-        /// <returns>T</returns>
-        public T Get<T>() where T : ILanguage
-        {
-            var type = typeof(T);
-            return (T) Get(type);
-        }
-
-        /// <summary>
-        ///     Get the ILanguage which contains the specified ILanguagePart.
-        /// </summary>
-        /// <returns>ILanguage</returns>
-        public ILanguage GetPart(Type type)
-        {
-            if (type == typeof(ILanguage))
-            {
-                throw new ArgumentException("Cannot be of type ILanguage", nameof(type));
-            }
-            lock (_languageTypeConfigs)
-            {
-                return _languageTypeConfigs.Values.FirstOrDefault(type.IsInstanceOfType);
-            }
-        }
-
-        /// <summary>
-        ///     Get the ILanguage which contains the specified ILanguagePart.
-        /// </summary>
-        /// <typeparam name="T">Type which extends ISubSection</typeparam>
-        /// <returns>T</returns>
-        public T GetPart<T>() where T : ILanguagePart
-        {
-            var type = typeof(T);
-            return (T)GetPart(type);
         }
 
         /// <summary>
@@ -376,20 +253,6 @@ namespace Dapplo.Config.Language
         }
 
         /// <summary>
-        ///     Register a Property Interface to this ini config, this method will return the property object
-        /// </summary>
-        /// <typeparam name="T">Your property interface, which extends IIniSection</typeparam>
-        /// <returns>instance of type T</returns>
-        public async Task<T> RegisterAndGetAsync<T>(CancellationToken cancellationToken = default) where T : ILanguage
-        {
-            using (await _asyncLock.LockAsync(cancellationToken).ConfigureAwait(false))
-            {
-                await LoadIfNeededAsync(cancellationToken);
-                return Get<T>();
-            }
-        }
-
-        /// <summary>
         ///     This is reloading all the .ini files, and will refill the language objects.
         /// </summary>
         /// <param name="cancellationToken">CancellationToken</param>
@@ -402,13 +265,8 @@ namespace Dapplo.Config.Language
             }
             _initialReadDone = true;
 
-            IList<ILanguage> languageObjectsToFill;
-            lock (_languageTypeConfigs)
-            {
-                languageObjectsToFill = _languageTypeConfigs.Values.ToList();
-            }
             // Reset the sections that have already been registered
-            foreach (var language in languageObjectsToFill)
+            foreach (var language in _languageConfigs.Values)
             {
                 FillLanguageConfig(language);
             }
@@ -460,17 +318,14 @@ namespace Dapplo.Config.Language
         /// <summary>
         ///     Helper to create the location of a file
         /// </summary>
-        /// <param name="checkStartupDirectory"></param>
-        /// <param name="checkAppDataDirectory"></param>
-        /// <param name="specifiedDirectories">Specify your own directory</param>
-        private void ScanFiles(bool checkStartupDirectory, bool checkAppDataDirectory = true, ICollection<string> specifiedDirectories = null)
+        private void ScanFiles(LanguageConfig languageConfig)
         {
             var directories = new List<string>();
-            if (specifiedDirectories != null)
+            if (languageConfig.SpecifiedDirectories != null)
             {
-                directories.AddRange(specifiedDirectories);
+                directories.AddRange(languageConfig.SpecifiedDirectories);
             }
-            if (checkStartupDirectory)
+            if (languageConfig.CheckStartupDirectory)
             {
                 var startupDirectory = FileLocations.StartupDirectory;
                 if (startupDirectory != null)
@@ -478,9 +333,9 @@ namespace Dapplo.Config.Language
                     directories.Add(Path.Combine(startupDirectory, "languages"));
                 }
             }
-            if (checkAppDataDirectory)
+            if (languageConfig.CheckAppDataDirectory)
             {
-                var appDataDirectory = FileLocations.RoamingAppDataDirectory(_applicationName);
+                var appDataDirectory = FileLocations.RoamingAppDataDirectory(languageConfig.ApplicationName);
                 if (appDataDirectory != null)
                 {
                     directories.Add(Path.Combine(appDataDirectory, "languages"));
@@ -518,49 +373,6 @@ namespace Dapplo.Config.Language
             }
         }
 
-        #region Static
-
-        /// <summary>
-        ///     Static helper to retrieve the LanguageLoader that was created with the supplied parameters
-        /// </summary>
-        /// <param name="applicationName"></param>
-        /// <returns>LanguageLoader</returns>
-        public static LanguageLoader Get(string applicationName)
-        {
-            lock (LoaderStore)
-            {
-                return LoaderStore[applicationName];
-            }
-        }
-
-        /// <summary>
-        ///     Static helper to retrieve the first LanguageLoader that was created
-        /// </summary>
-        /// <returns>LanguageLoader or null</returns>
-        public static LanguageLoader Current => LoaderStore.FirstOrDefault().Value;
-
-        /// <summary>
-        ///     Delete the Language objects for the specified application, mostly used in tests
-        /// </summary>
-        /// <param name="applicationName"></param>
-        public static void Delete(string applicationName)
-        {
-            Log.Debug().WriteLine("Removing {0}", applicationName);
-            lock (LoaderStore)
-            {
-                if (!LoaderStore.ContainsKey(applicationName))
-                {
-                    return;
-                }
-                var loader = LoaderStore[applicationName];
-                // Make sure the AsyncLock is disposed
-                loader.Dispose();
-                LoaderStore.Remove(applicationName);
-            }
-        }
-
-        #endregion
-
         #region IDisposable Support
 
         // To detect redundant Dispose calls
@@ -584,10 +396,7 @@ namespace Dapplo.Config.Language
         /// <inheritdoc />
         public IEnumerator<ILanguage> GetEnumerator()
         {
-            lock (_languageConfigs)
-            {
-                return _languageConfigs.Values.ToList().GetEnumerator();
-            }
+            return _languageConfigs.Values.ToList().GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

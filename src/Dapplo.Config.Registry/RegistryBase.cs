@@ -35,7 +35,7 @@ namespace Dapplo.Config.Registry
     /// This implements a window into the registry based on an interface
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class RegistryBase<T> : ConfigurationBase, IRegistry
+    public abstract class RegistryBase<T> : ConfigurationBase<object>, IRegistry
     {
         private readonly RegistryAttribute _registryAttribute = typeof(T).GetAttribute<RegistryAttribute>() ?? new RegistryAttribute();
         private readonly IDictionary<string, RegistryAttribute> _registryAttributes = new Dictionary<string, RegistryAttribute>();
@@ -54,7 +54,7 @@ namespace Dapplo.Config.Registry
         /// </summary>
         /// <param name="getInfo">GetInfo</param>
         [InterceptOrder(GetterOrders.Dictionary)]
-        private void FromRegistryGetter(GetInfo getInfo)
+        private void FromRegistryGetter(GetInfo<object> getInfo)
         {
             var propertyName = getInfo.PropertyInfo.Name;
             if (!_registryAttributes.TryGetValue(propertyName, out var registryPropertyAttribute) || registryPropertyAttribute is null)
@@ -116,7 +116,7 @@ namespace Dapplo.Config.Registry
         /// </summary>
         /// <param name="setInfo">GetInfo</param>
         [InterceptOrder(SetterOrders.Dictionary)]
-        private void ToDictionarySetter(SetInfo setInfo)
+        private void ToDictionarySetter(SetInfo<object> setInfo)
         {
             var propertyName = setInfo.PropertyInfo.Name;
             var newValue = setInfo.NewValue;

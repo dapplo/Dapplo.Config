@@ -24,7 +24,7 @@ namespace Dapplo.Config.Intercepting
     /// <summary>
     /// This provides the value for a get interceptor
     /// </summary>
-    public class GetInfo : GetSetInfo
+    public class GetInfo<TProperty> : GetSetInfo
     {
         /// <summary>
         ///     The value of the property
@@ -34,6 +34,6 @@ namespace Dapplo.Config.Intercepting
         /// <summary>
         ///     The value of the property
         /// </summary>
-        public object Value { get; set; }
+        public TProperty Value { get; set; }
     }
 }

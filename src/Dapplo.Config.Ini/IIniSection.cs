@@ -31,7 +31,7 @@ namespace Dapplo.Config.Ini
 	/// <summary>
 	///     By making your property proxy interface extend this, you will be able to write the property to an ini file
 	/// </summary>
-	public interface IIniSection : IConfiguration
+	public interface IIniSection : IConfiguration<object>
 	{
 		/// <summary>
 		///     This is called after the loading of the IniSection is finished and can be used to modify certain values before they are being used.

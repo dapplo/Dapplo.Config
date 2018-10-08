@@ -66,7 +66,7 @@ namespace Dapplo.Config.Intercepting
                         continue;
                     }
                     var parameterType = parameters[0].ParameterType;
-                    if (parameterType != typeof(GetInfo) && parameterType != typeof(SetInfo))
+                    if (parameterType.BaseType != typeof(GetSetInfo))
                     {
                         continue;
                     }

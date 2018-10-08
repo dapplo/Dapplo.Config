@@ -34,7 +34,7 @@ namespace Dapplo.Config.Ini
     /// This is the base class for an IniSection, it bases on the ConfigurationBase and should be used as the base for an ini-section.
     /// </summary>
     /// <typeparam name="T">The interface which this configuration implements</typeparam>
-    public class IniSectionBase<T> : DictionaryConfigurationBase<T>, IIniSection
+    public class IniSectionBase<T> : DictionaryConfigurationBase<T, object>, IIniSection
     {
         private readonly IDictionary<string, IniValue> _iniValues = new Dictionary<string, IniValue>(AbcComparer.Instance);
         private readonly IniSectionAttribute _iniSectionAttribute;

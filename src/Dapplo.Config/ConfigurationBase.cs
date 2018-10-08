@@ -38,7 +38,7 @@ namespace Dapplo.Config
     /// If you want to extend the functionality, extend this (or other classes) and implement
     /// a void xxxxxxxGetter(GetInfo) or void xxxxxxxxSetter(SetInfo) which has a InterceptOrderAttribute
     /// </summary>
-    public abstract class ConfigurationBase : IShallowCloneable, ITransactionalProperties, IDescription, ITagging
+    public abstract class ConfigurationBase<TProperty> : IShallowCloneable, ITransactionalProperties, IDescription, ITagging
     {
         /// <summary>
         /// The base logged for all the Configuration classes
@@ -80,7 +80,7 @@ namespace Dapplo.Config
         [SetInterceptor]
         public virtual void Setter(string propertyName, object newValue)
         {
-            SetValue(PropertyInfoFor(propertyName), newValue);
+            SetValue(PropertyInfoFor(propertyName), (TProperty)newValue);
         }
         #endregion
 
@@ -135,11 +135,11 @@ namespace Dapplo.Config
         /// </summary>
         /// <param name="propertyName">string</param>
         /// <returns>GetInfo</returns>
-        protected GetInfo GetValue(string propertyName)
+        protected GetInfo<TProperty> GetValue(string propertyName)
         {
             var propertyInfo = PropertyInfoFor(propertyName);
 
-            var getInfo = new GetInfo
+            var getInfo = new GetInfo<TProperty>
             {
                 PropertyInfo = propertyInfo
             };
@@ -159,16 +159,26 @@ namespace Dapplo.Config
         /// <summary>
         /// Set the backing value for the specified property
         /// </summary>
+        /// <param name="propertyName">string</param>
+        /// <param name="newValue">object</param>
+        protected virtual void SetValue(string propertyName, TProperty newValue)
+        {
+            SetValue(PropertyInfoFor(propertyName), newValue);
+        }
+
+        /// <summary>
+        /// Set the backing value for the specified property
+        /// </summary>
         /// <param name="propertyInfo">PropertyInfo</param>
         /// <param name="newValue">object</param>
-        protected void SetValue(PropertyInfo propertyInfo, object newValue)
+        protected virtual void SetValue(PropertyInfo propertyInfo, TProperty newValue)
         {
             propertyInfo.PropertyType.ConvertOrCastValueToType(newValue);
 
-            var setInfo = new SetInfo
+            var setInfo = new SetInfo<TProperty>
             {
                 PropertyInfo = propertyInfo,
-                NewValue = propertyInfo.PropertyType.ConvertOrCastValueToType(newValue)
+                NewValue = (TProperty)propertyInfo.PropertyType.ConvertOrCastValueToType(newValue)
             };
 
             try
@@ -196,7 +206,7 @@ namespace Dapplo.Config
 
         #region Implementation of ITransactionalProperties
         // A store for the values that are set during the transaction
-        private readonly IDictionary<string, object> _transactionProperties = new Dictionary<string, object>(new AbcComparer());
+        private readonly IDictionary<string, TProperty> _transactionProperties = new Dictionary<string, TProperty>(new AbcComparer());
         // This boolean has the value true if we are currently in a transaction
         private bool _inTransaction;
 
@@ -205,7 +215,7 @@ namespace Dapplo.Config
         /// </summary>
         /// <param name="getInfo">GetInfo with all the information on the get call</param>
         [InterceptOrder(GetterOrders.Transaction)]
-        private void TransactionalGetter(GetInfo getInfo)
+        private void TransactionalGetter(GetInfo<TProperty> getInfo)
         {
             // Lock to prevent rollback etc to run parallel
             lock (_transactionProperties)
@@ -232,7 +242,7 @@ namespace Dapplo.Config
         /// </summary>
         /// <param name="setInfo">SetInfo with all the information on the set call</param>
         [InterceptOrder(SetterOrders.Transaction)]
-        private void TransactionalSetter(SetInfo setInfo)
+        private void TransactionalSetter(SetInfo<TProperty> setInfo)
         {
             // Lock to prevent rollback etc to run parallel
             lock (_transactionProperties)
@@ -251,7 +261,7 @@ namespace Dapplo.Config
                 else
                 {
                     _transactionProperties.Add(setInfo.PropertyInfo.Name, setInfo.NewValue);
-                    setInfo.OldValue = null;
+                    setInfo.OldValue = default;
                     setInfo.HasOldValue = false;
                 }
 
@@ -391,10 +401,10 @@ namespace Dapplo.Config
         public void RestoreToDefault(string propertyName)
         {
             var propertyInfo = PropertyInfoFor(propertyName);
-            object defaultValue;
+            TProperty defaultValue;
             try
             {
-                defaultValue = GetConvertedDefaultValue(propertyInfo);
+                defaultValue = (TProperty)GetConvertedDefaultValue(propertyInfo);
             }
             catch (Exception ex)
             {
@@ -409,7 +419,7 @@ namespace Dapplo.Config
             }
             try
             {
-                defaultValue = propertyInfo.PropertyType.CreateInstance();
+                defaultValue = (TProperty)propertyInfo.PropertyType.CreateInstance();
                 SetValue(propertyInfo, defaultValue);
             }
             catch (Exception ex)
@@ -440,7 +450,7 @@ namespace Dapplo.Config
         /// <inheritdoc />
         public virtual object ShallowClone()
         {
-            var clonedValue = Activator.CreateInstance(GetType()) as ConfigurationBase;
+            var clonedValue = Activator.CreateInstance(GetType()) as ConfigurationBase<TProperty>;
             clonedValue?.Initialize(GetType());
             return clonedValue;
         }

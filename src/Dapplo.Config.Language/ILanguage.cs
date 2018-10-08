@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using Dapplo.Config.Interfaces;
 
 #endregion
 
@@ -35,7 +36,7 @@ namespace Dapplo.Config.Language
 	///     This extends IDefaultValue, as this it is very common to start with default translations.
 	///     These defaults, usually en-US, can be set with the DefaultValueAttribute
 	/// </summary>
-	public interface ILanguage
+	public interface ILanguage : IConfiguration<string>
 	{
 		/// <summary>
 		///     Get the translation for a key
@@ -44,13 +45,13 @@ namespace Dapplo.Config.Language
 		/// <returns>string or null for the translation</returns>
 		string this[string languageKey] { get; }
 
-		/// <summary>
-		///     Get all the language keys, this includes also the ones that don't have an access property.
-		///     This is a method, could have been a property, but this differentiates it from the properties in the extending
-		///     interface.
-		/// </summary>
-		/// <returns></returns>
-		ICollection<string> Keys();
+        /// <summary>
+        ///     Get all the language keys, this includes also the ones that don't have an access property.
+        ///     This is a method, could have been a property, but this differentiates it from the properties in the extending
+        ///     interface.
+        /// </summary>
+        /// <returns>IEnumerable of string</returns>
+        IEnumerable<string> Keys();
 
 		/// <summary>
 		///     This event is triggered after the language has been changed

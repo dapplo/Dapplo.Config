@@ -31,7 +31,7 @@ namespace Dapplo.Config.Tests.LanguageTests.Interfaces
 	[Language("TestFail")]
 	public interface ILanguageLoaderFailTest : ILanguage
 	{
-		[DefaultValue(LanguageLoaderTest.Ok)]
+		[DefaultValue(LanguageContainerTest.Ok)]
 		string Ok { get;
 			// Set is not allowed!
 			set; }

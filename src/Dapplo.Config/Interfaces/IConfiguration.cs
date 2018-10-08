@@ -28,12 +28,12 @@ namespace Dapplo.Config.Interfaces
     /// <summary>
     /// The base interface for configuration classes
     /// </summary>
-    public interface IConfiguration : IDescription, IWriteProtectProperties, IHasChanges, IDefaultValue, INotifyPropertyChanged, INotifyPropertyChanging, ITransactionalProperties, ITagging, IShallowCloneable
+    public interface IConfiguration<TProperty> : IDescription, IWriteProtectProperties, IHasChanges, IDefaultValue, INotifyPropertyChanged, INotifyPropertyChanging, ITransactionalProperties, ITagging, IShallowCloneable
     {
         /// <summary>
         /// Return all properties with their current value
         /// </summary>
-        IEnumerable<KeyValuePair<string, object>> Properties();
+        IEnumerable<KeyValuePair<string, TProperty>> Properties();
 
         /// <summary>
         /// Returns all the property names

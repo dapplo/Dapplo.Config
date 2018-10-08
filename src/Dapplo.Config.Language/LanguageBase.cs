@@ -21,21 +21,20 @@
 
 #region using
 
+using Dapplo.Config.Language.Implementation;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Dapplo.InterfaceImpl;
-using Dapplo.InterfaceImpl.Implementation;
 
 #endregion
 
-namespace Dapplo.Config.Language.Implementation
+namespace Dapplo.Config.Language
 {
 	/// <summary>
 	///     Base Language functionality
 	/// </summary>
-	public class Language<T> : ExtensibleInterceptorImpl<T>, ILanguage, ILanguageInternal
-	{
+	public class LanguageBase<T> : DictionaryConfigurationBase<T, string>, ILanguage, ILanguageInternal
+    {
 		private readonly LanguageAttribute _languageAttribute = typeof(T).GetCustomAttribute<LanguageAttribute>();
 
 		/// <summary>
@@ -43,20 +42,10 @@ namespace Dapplo.Config.Language.Implementation
 		/// </summary>
 		public event EventHandler<EventArgs> LanguageChanged;
 
-		/// <inheritdoc />
-		string ILanguage.this[string key]
+	    /// <inheritdoc />
+		public IEnumerable<string> Keys()
 		{
-			get
-			{
-				Properties.TryGetValue(key, out var value);
-				return value as string;
-			}
-		}
-
-		/// <inheritdoc />
-		public ICollection<string> Keys()
-		{
-			return Properties.Keys;
+			return PropertyNames();
 		}
 
 		/// <inheritdoc />
@@ -74,15 +63,14 @@ namespace Dapplo.Config.Language.Implementation
 			LanguageChanged?.Invoke(this, new EventArgs());
 		}
 
-		/// <inheritdoc />
-		protected override void InitProperty(PropertyInfo propertyInfo, IEnumerable<IInterceptorExtension> extensions)
-		{
-			base.InitProperty(propertyInfo, extensions);
-			if (propertyInfo.CanWrite && propertyInfo.GetSetMethod(true).IsPublic)
-			{
-				throw new NotSupportedException(
-					$"Property {propertyInfo.DeclaringType}.{propertyInfo.Name} has defined a set, this is not allowed for {typeof(ILanguage).Name} derrived interfaces. Fix by removing the set for the property, leave the get.");
-			}
-		}
+	    protected override void PropertyInitializer(PropertyInfo propertyInfo)
+	    {
+		    base.PropertyInitializer(propertyInfo);
+		    if (propertyInfo.CanWrite && propertyInfo.GetSetMethod(true).IsPublic)
+		    {
+			    throw new NotSupportedException(
+				    $"Property {propertyInfo.DeclaringType}.{propertyInfo.Name} has defined a set, this is not allowed for {typeof(ILanguage).Name} derrived interfaces. Fix by removing the set for the property, leave the get.");
+		    }
+        }
 	}
 }

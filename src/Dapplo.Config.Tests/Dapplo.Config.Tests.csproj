@@ -12,10 +12,6 @@
   <ItemGroup>
     <Compile Remove="ConfigTests\HttpExtensionSettingsTest.cs" />
     <Compile Remove="ConfigTests\IniConfigTest.cs" />
-    <Compile Remove="LanguageTests\Interfaces\ILanguageLoaderFailTest.cs" />
-    <Compile Remove="LanguageTests\Interfaces\ILanguageLoaderPartTest.cs" />
-    <Compile Remove="LanguageTests\Interfaces\ILanguageLoaderTest.cs" />
-    <Compile Remove="LanguageTests\LanguageLoaderTest.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -95,10 +91,6 @@
     <None Include="Languages\Modules\language_mymodule-en-US.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="LanguageTests\Interfaces\ILanguageLoaderFailTest.cs" />
-    <None Include="LanguageTests\Interfaces\ILanguageLoaderPartTest.cs" />
-    <None Include="LanguageTests\Interfaces\ILanguageLoaderTest.cs" />
-    <None Include="LanguageTests\LanguageLoaderTest.cs" />
   </ItemGroup>
 
   <ItemGroup>

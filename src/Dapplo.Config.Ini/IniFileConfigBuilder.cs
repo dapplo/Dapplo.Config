@@ -59,9 +59,9 @@ namespace Dapplo.Config.Ini
         /// <summary>
         /// Build or finalize the configuration, so it can be used
         /// </summary>
-        /// <returns>ApplicationConfig</returns>
+        /// <returns>IniFileConfig</returns>
         [Pure]
-        public IniFileConfig BuildApplicationConfig()
+        public IniFileConfig BuildIniFileConfig()
         {
             if (IsBuild)
             {

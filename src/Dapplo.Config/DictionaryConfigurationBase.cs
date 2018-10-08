@@ -23,48 +23,56 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq.Expressions;
 using System.Reflection;
 using Dapplo.Config.Attributes;
 using Dapplo.Config.Interfaces;
 using Dapplo.Config.Intercepting;
 using Dapplo.Utils;
-using Dapplo.Utils.Extensions;
 
 namespace Dapplo.Config
 {
+
     /// <summary>
-    /// ConfigBase is a generic abstract configuration class
+    /// DictionaryConfigurationBase is a IDictionary based configuration store
     /// </summary>
-    /// <typeparam name="T">The type of the configuration interface this class implements</typeparam>
-    public abstract class DictionaryConfigurationBase<T> : ConfigurationBase, IConfiguration
+    /// <typeparam name="TInterface">The type of the configuration interface this class implements</typeparam>
+    public abstract class DictionaryConfigurationBase<TInterface> : DictionaryConfigurationBase<TInterface, object>
     {
-        private IDictionary<string, object> _properties;
+    }
+
+    /// <summary>
+    /// DictionaryConfigurationBase is a IDictionary based configuration store
+    /// </summary>
+    /// <typeparam name="TInterface">The type of the configuration interface this class implements</typeparam>
+    /// <typeparam name="TProperty">The type of the property value</typeparam>
+    public abstract class DictionaryConfigurationBase<TInterface, TProperty> : ConfigurationBase<TProperty>, IConfiguration<TProperty>
+    {
+        private IDictionary<string, TProperty> _properties;
 
         /// <inheritdoc />
         public DictionaryConfigurationBase()
         {
-            _properties = new ConcurrentDictionary<string, object>(AbcComparer.Instance);
-            Initialize(typeof(T));
+            _properties = new ConcurrentDictionary<string, TProperty>(AbcComparer.Instance);
+            Initialize(typeof(TInterface));
         }
 
         /// <summary>
         /// A way to specify the property values which need to be used
         /// </summary>
         /// <param name="properties">IDictionary with the properties to use</param>
-        protected DictionaryConfigurationBase(IDictionary<string, object> properties)
+        protected DictionaryConfigurationBase(IDictionary<string, TProperty> properties)
         {
-            _properties = new ConcurrentDictionary<string, object>(properties, AbcComparer.Instance);
-            Initialize(typeof(T));
+            _properties = new ConcurrentDictionary<string, TProperty>(properties, AbcComparer.Instance);
+            Initialize(typeof(TInterface));
         }
 
         /// <summary>
         /// Used for cloning or resetting values
         /// </summary>
         /// <param name="properties"></param>
-        protected void SetProperties(IDictionary<string, object> properties)
+        protected void SetProperties(IDictionary<string, TProperty> properties)
         {
-            _properties = new ConcurrentDictionary<string, object>(properties, AbcComparer.Instance);
+            _properties = new ConcurrentDictionary<string, TProperty>(properties, AbcComparer.Instance);
             foreach (var propertyInfo in PropertiesInformation.PropertyInfos.Values)
             {
                 if (_properties.TryGetValue(propertyInfo.Name, out var value) && value != null)
@@ -93,24 +101,24 @@ namespace Dapplo.Config
         /// </summary>
         /// <param name="key">string with key for the property to get</param>
         /// <returns>object or null if not available</returns>
-        public virtual object this[string key]
+        public virtual TProperty this[string key]
         {
-            get => Getter(key);
-            set => Setter(key, value);
+            get => GetValue(key).Value;
+            set => SetValue(key, value);
         }
 
         /// <inheritdoc />
-        public IEnumerable<KeyValuePair<string, object>> Properties() => _properties;
+        public IEnumerable<KeyValuePair<string, TProperty>> Properties() => _properties;
 
         /// <summary>
         /// Retrieves the value from the dictionary
         /// </summary>
         /// <param name="getInfo">GetInfo</param>
         [InterceptOrder(GetterOrders.Dictionary)]
-        private void FromDictionaryGetter(GetInfo getInfo)
+        private void FromDictionaryGetter(GetInfo<TProperty> getInfo)
         {
             var hasValue = _properties.TryGetValue(getInfo.PropertyInfo.Name, out var value);
-            getInfo.Value = hasValue ? value : GetConvertedDefaultValue(getInfo.PropertyInfo);
+            getInfo.Value = hasValue ? value : (TProperty)GetConvertedDefaultValue(getInfo.PropertyInfo);
             getInfo.HasValue = hasValue;
         }
 
@@ -119,7 +127,7 @@ namespace Dapplo.Config
         /// </summary>
         /// <param name="setInfo">GetInfo</param>
         [InterceptOrder(SetterOrders.Dictionary)]
-        private void ToDictionarySetter(SetInfo setInfo)
+        private void ToDictionarySetter(SetInfo<TProperty> setInfo)
         {
             _properties[setInfo.PropertyInfo.Name] = setInfo.NewValue;
         }
@@ -131,7 +139,7 @@ namespace Dapplo.Config
         /// </summary>
         /// <param name="setInfo">SetInfo with all the information on the set call</param>
         [InterceptOrder(SetterOrders.WriteProtect)]
-        private void WriteProtectSetter(SetInfo setInfo)
+        private void WriteProtectSetter(SetInfo<TProperty> setInfo)
         {
             if (_writeProtectedProperties.Contains(setInfo.PropertyInfo.Name))
             {
@@ -185,23 +193,6 @@ namespace Dapplo.Config
             _writeProtectedProperties.Add(propertyName);
         }
 
-        /// <inheritdoc />
-        public void DisableWriteProtect<TProp>(Expression<Func<T, TProp>> propertyExpression)
-        {
-            DisableWriteProtect(propertyExpression.GetMemberName());
-        }
-
-        /// <inheritdoc />
-        public bool IsWriteProtected<TProp>(Expression<Func<T, TProp>> propertyExpression)
-        {
-            return IsWriteProtected(propertyExpression.GetMemberName());
-        }
-
-        /// <inheritdoc />
-        public void WriteProtect<TProp>(Expression<Func<T, TProp>> propertyExpression)
-        {
-            WriteProtect(propertyExpression.GetMemberName());
-        }
 
         #endregion
 
@@ -216,7 +207,7 @@ namespace Dapplo.Config
         /// </summary>
         /// <param name="setInfo">SetInfo with all the information on the set call</param>
         [InterceptOrder(SetterOrders.HasChanges)]
-        private void HasChangesSetter(SetInfo setInfo)
+        private void HasChangesSetter(SetInfo<TProperty> setInfo)
         {
             var hasOldValue = _properties.TryGetValue(setInfo.PropertyInfo.Name, out var oldValue);
             setInfo.HasOldValue = hasOldValue;
@@ -243,12 +234,6 @@ namespace Dapplo.Config
         public void DoNotTrackChanges()
         {
             _trackChanges = false;
-        }
-
-        /// <inheritdoc />
-        public bool IsChanged<TProp>(Expression<Func<T, TProp>> propertyExpression)
-        {
-            return IsChanged(propertyExpression.GetMemberName());
         }
 
         /// <inheritdoc />
@@ -297,7 +282,7 @@ namespace Dapplo.Config
         /// </summary>
         /// <param name="setInfo">SetInfo with all the set call information</param>
         [InterceptOrder(SetterOrders.NotifyPropertyChanged)]
-        private void NotifyPropertyChangedSetter(SetInfo setInfo)
+        private void NotifyPropertyChangedSetter(SetInfo<TProperty> setInfo)
         {
             // Fast exit when no listeners.
             if (PropertyChanged is null)
@@ -336,7 +321,7 @@ namespace Dapplo.Config
         /// </summary>
         /// <param name="setInfo">SetInfo with all the set call information</param>
         [InterceptOrder(SetterOrders.NotifyPropertyChanging)]
-        private void NotifyPropertyChangingSetter(SetInfo setInfo)
+        private void NotifyPropertyChangingSetter(SetInfo<TProperty> setInfo)
         {
             if (PropertyChanging is null)
             {
@@ -358,7 +343,7 @@ namespace Dapplo.Config
         public override object ShallowClone()
         {
             var type = GetType();
-            var clonedValue = (DictionaryConfigurationBase<T>) Activator.CreateInstance(type);
+            var clonedValue = (DictionaryConfigurationBase<TInterface, TProperty>) Activator.CreateInstance(type);
             clonedValue.SetProperties(_properties);
             return clonedValue;
         }

@@ -57,7 +57,7 @@ namespace Dapplo.Config.Tests.RestTests
 				.WithFilename(iniFileName)
 				.WithoutSaveOnExit()
 				.WithFixedDirectory(@"RestTests\IniTestFiles")
-				.BuildApplicationConfig();
+				.BuildIniFileConfig();
 
 			return new IniFileContainer(iniFileConfig, new[] { iniSection });
 		}
