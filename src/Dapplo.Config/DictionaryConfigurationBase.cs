@@ -99,12 +99,12 @@ namespace Dapplo.Config
         ///     Get the value for a property.
         /// Note: This needs to be virtual otherwise the interface isn't implemented
         /// </summary>
-        /// <param name="key">string with key for the property to get</param>
+        /// <param name="propertyName">string with key for the property to get</param>
         /// <returns>object or null if not available</returns>
-        public virtual TProperty this[string key]
+        public virtual TProperty this[string propertyName]
         {
-            get => GetValue(key).Value;
-            set => SetValue(key, value);
+            get => GetValue(propertyName).Value;
+            set => SetValue(propertyName, value);
         }
 
         /// <inheritdoc />

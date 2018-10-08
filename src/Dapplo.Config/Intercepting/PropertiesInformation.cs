@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
+using Dapplo.Utils;
 
 namespace Dapplo.Config.Intercepting
 {
@@ -44,7 +45,7 @@ namespace Dapplo.Config.Intercepting
         {
             var types = new[] { interfaceType }.Concat(interfaceType.GetInterfaces());
 
-            var propertyInfos = new Dictionary<string, PropertyInfo>();
+            var propertyInfos = new Dictionary<string, PropertyInfo>(AbcComparer.Instance);
             foreach (var type in types)
             {
                 foreach (var propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))

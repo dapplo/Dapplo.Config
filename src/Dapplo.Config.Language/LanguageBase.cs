@@ -22,8 +22,10 @@
 #region using
 
 using Dapplo.Config.Language.Implementation;
+using Dapplo.Utils;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 #endregion
@@ -36,16 +38,67 @@ namespace Dapplo.Config.Language
 	public class LanguageBase<T> : DictionaryConfigurationBase<T, string>, ILanguage, ILanguageInternal
     {
 		private readonly LanguageAttribute _languageAttribute = typeof(T).GetCustomAttribute<LanguageAttribute>();
+        private readonly IDictionary<string, string> _translationsWithoutPropery = new Dictionary<string, string>(AbcComparer.Instance);
 
-		/// <summary>
-		///     This event is triggered after the language has been changed
-		/// </summary>
-		public event EventHandler<EventArgs> LanguageChanged;
+        /// <summary>
+        /// Set via the DictionaryConfigurationBase when supported by a property
+        /// or use the _translationsWithoutPropery if not.
+        /// </summary>
+        /// <param name="propertyName">string</param>
+        /// <param name="newValue">object</param>
+        public override void Setter(string propertyName, object newValue)
+        {
+            var translation = (string)newValue;
+            if (TryGetPropertyInfoFor(propertyName, out var propertyInfo))
+            {
+                SetValue(PropertyInfoFor(propertyName), translation);
+                return;
+            }
+
+            // Store values which do not have a property
+            _translationsWithoutPropery[propertyName] = translation;
+        }
+
+        /// <summary>
+        /// Override for the getter, which takes care of properties without backing property
+        /// </summary>
+        /// <param name="propertyName">string</param>
+        /// <returns>object</returns>
+        public override object Getter(string propertyName)
+        {
+            if (TryGetPropertyInfoFor(propertyName, out var propertyInfo))
+            {
+                return GetValue(propertyInfo).Value;
+            }
+
+            if (_translationsWithoutPropery.TryGetValue(propertyName, out var translation)) 
+            {
+                return translation;
+            }
+            throw new NotSupportedException($"No property with the name {propertyName} found");
+        }
+
+        /// <summary>
+        ///     Get the value for a property.
+        /// Note: This needs to be virtual otherwise the interface isn't implemented
+        /// </summary>
+        /// <param name="propertyName">string with propertyName for the property to get</param>
+        /// <returns>object or null if not available</returns>
+        public override string this[string propertyName]
+        {
+            get => (string)Getter(propertyName);
+            set => Setter(propertyName, value);
+        }
+
+        /// <summary>
+        ///     This event is triggered after the language has been changed
+        /// </summary>
+        public event EventHandler<EventArgs> LanguageChanged;
 
 	    /// <inheritdoc />
 		public IEnumerable<string> Keys()
 		{
-			return PropertyNames();
+			return PropertyNames().Concat(_translationsWithoutPropery.Keys);
 		}
 
 		/// <inheritdoc />

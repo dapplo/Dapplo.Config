@@ -173,8 +173,7 @@ namespace Dapplo.Config.Language
         /// <param name="language"></param>
         private void FillLanguageConfig(ILanguage language)
         {
-            var configurationBase = language as ConfigurationBase<string>;
-            if (configurationBase == null)
+            if (!(language is ConfigurationBase<string> configurationBase))
             {
                 throw new NotSupportedException("Implementation behind the ILanguage is not a ConfigurationBase");
             }
@@ -184,7 +183,7 @@ namespace Dapplo.Config.Language
             if (!_allTranslations.TryGetValue(prefix, out var sectionTranslations))
             {
                 // No values, reset all (only available via the PropertyTypes dictionary
-                foreach (var key in language.Keys().ToList())
+                foreach (var key in language.PropertyNames().ToList())
                 {
                     language.RestoreToDefault(key);
                 }
@@ -192,7 +191,7 @@ namespace Dapplo.Config.Language
             }
 
             // Use PropertyTypes.Keys to get ALL possible properties.
-            foreach (var key in language.Keys().ToList())
+            foreach (var key in language.PropertyNames().ToList())
             {
                 if (sectionTranslations.TryGetValue(key, out var translation))
                 {

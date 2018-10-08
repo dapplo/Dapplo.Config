@@ -124,6 +124,17 @@ namespace Dapplo.Config
         public IEnumerable<string> PropertyNames() => PropertiesInformation.PropertyInfos.Keys;
 
         /// <summary>
+        /// Try get the PropertyInfo for the specified propertyName
+        /// </summary>
+        /// <param name="propertyName">string</param>
+        /// <param name="propertyInfo">PropertyInfo</param>
+        /// <returns>bool telling if the try worked</returns>
+        protected bool TryGetPropertyInfoFor(string propertyName, out PropertyInfo propertyInfo)
+        {
+            return PropertiesInformation.PropertyInfos.TryGetValue(propertyName, out propertyInfo);
+        }
+
+        /// <summary>
         /// Helper method to get the property info for a property
         /// </summary>
         /// <param name="propertyName"></param>
@@ -135,10 +146,23 @@ namespace Dapplo.Config
         /// </summary>
         /// <param name="propertyName">string</param>
         /// <returns>GetInfo</returns>
-        protected GetInfo<TProperty> GetValue(string propertyName)
+        protected virtual GetInfo<TProperty> GetValue(string propertyName)
         {
-            var propertyInfo = PropertyInfoFor(propertyName);
+            if (!TryGetPropertyInfoFor(propertyName, out var propertyInfo))
+            {
+                return null;
+            }
+            
+            return GetValue(propertyInfo);
+        }
 
+        /// <summary>
+        /// This is the internal way of getting information for a property
+        /// </summary>
+        /// <param name="propertyInfo">PropertyInfo</param>
+        /// <returns>GetInfo</returns>
+        protected GetInfo<TProperty> GetValue(PropertyInfo propertyInfo)
+        {
             var getInfo = new GetInfo<TProperty>
             {
                 PropertyInfo = propertyInfo
@@ -147,7 +171,7 @@ namespace Dapplo.Config
             // Call all defined Getter methods the the correct order
             foreach (var methodInfo in InterceptInformation.GetterMethods)
             {
-                methodInfo.Invoke(this, new object[] {getInfo});
+                methodInfo.Invoke(this, new object[] { getInfo });
                 if (!getInfo.CanContinue)
                 {
                     break;
@@ -155,6 +179,7 @@ namespace Dapplo.Config
             }
             return getInfo;
         }
+
 
         /// <summary>
         /// Set the backing value for the specified property
