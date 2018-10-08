@@ -207,7 +207,7 @@ namespace Dapplo.Config
 
         #region Implementation of IHasChanges
 
-        private bool _trackChanges = false;
+        private bool _trackChanges;
         // This boolean has the value true if we have changes since the last "reset"
         private readonly ISet<string> _changedValues = new HashSet<string>(new AbcComparer());
 

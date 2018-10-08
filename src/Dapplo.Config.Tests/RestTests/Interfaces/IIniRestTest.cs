@@ -26,13 +26,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.Serialization;
 using Dapplo.Config.Ini;
-using Dapplo.Config.Ini.Converters;
 using Dapplo.Config.Ini.Attributes;
+using Dapplo.Config.Ini.Converters;
+using Dapplo.Config.Tests.IniTests.Interfaces;
 using Dapplo.Windows.Common.Structs;
 
 #endregion
 
-namespace Dapplo.Config.Tests.IniTests.Interfaces
+namespace Dapplo.Config.Tests.RestTests.Interfaces
 {
     public enum IniConfigTestValues
     {

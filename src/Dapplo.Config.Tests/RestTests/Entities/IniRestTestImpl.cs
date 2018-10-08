@@ -19,16 +19,16 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-using AutoProperties;
-using Dapplo.Config.Tests.IniTests.Interfaces;
-using Dapplo.Config.Ini;
-using Dapplo.Windows.Common.Structs;
 using System;
 using System.Collections.Generic;
+using AutoProperties;
+using Dapplo.Config.Ini;
+using Dapplo.Config.Tests.IniTests.Interfaces;
+using Dapplo.Windows.Common.Structs;
 
-namespace Dapplo.Config.Tests.IniTests.Entities
+namespace Dapplo.Config.Tests.RestTests.Entities
 {
-    public class IniConfigTestImpl : IniSectionBase<IIniConfigTest>, IIniConfigTest
+    public class IniRestTestImpl : IniSectionBase<IIniConfigTest>, IIniConfigTest
     {
         public long Age { get; set; }
         public IDictionary<string, IList<int>> DictionaryOfLists { get; set; }

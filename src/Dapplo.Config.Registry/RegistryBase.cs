@@ -23,11 +23,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Dapplo.Config;
 using Dapplo.Log;
 using Dapplo.Utils.Extensions;
 using Microsoft.Win32;
-using AutoProperties;
 using Dapplo.Config.Attributes;
 using Dapplo.Config.Intercepting;
 

@@ -19,35 +19,18 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-#region using
-
 using System.Collections.Generic;
 using Dapplo.Config.Registry;
-using Microsoft.Win32;
+using Dapplo.Config.Tests.RegistryTests.Interfaces;
 
-#endregion
-
-namespace Dapplo.Config.Tests.ConfigTests.Interfaces
+namespace Dapplo.Config.Tests.RegistryTests.Entities
 {
-	/// <summary>
-	///     This is the interface under test
-	/// </summary>
-	[Registry(@"Software\Microsoft\Windows\CurrentVersion", Hive = RegistryHive.CurrentUser, View = RegistryView.Registry32)]
-	public interface IRegistryTest : IRegistry
-	{
-		[Registry(@"Run")]
-		IDictionary<string, object> CuRun32 { get; set; }
-
-		[Registry(@"Run", View = RegistryView.Registry64)]
-		IDictionary<string, object> CuRun64 { get; set; }
-
-		[Registry(@"Run", Hive = RegistryHive.LocalMachine)]
-		IDictionary<string, object> LmRun32 { get; set; }
-
-		[Registry(@"Run", Hive = RegistryHive.LocalMachine, View = RegistryView.Registry64)]
-		IDictionary<string, object> LmRun64 { get; set; }
-
-		[Registry(@"\Software\Microsoft\Windows NT\CurrentVersion", "ProductName", IgnoreBasePath = true, Hive = RegistryHive.LocalMachine, View = RegistryView.Default)]
-		string ProductName { get; set; }
-	}
+    public class RegistryTestImpl : RegistryBase<IRegistryTest>, IRegistryTest
+    {
+        public IDictionary<string, object> CuRun32 { get; set; }
+        public IDictionary<string, object> CuRun64 { get; set; }
+        public IDictionary<string, object> LmRun32 { get; set; }
+        public IDictionary<string, object> LmRun64 { get; set; }
+        public string ProductName { get; set; }
+    }
 }

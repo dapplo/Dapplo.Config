@@ -81,7 +81,7 @@ namespace Dapplo.Config.Intercepting
                     }
                 }
                 currentType = currentType.BaseType;
-            } while (currentType != typeof(object));
+            } while (currentType != null && currentType != typeof(object));
 
             GetterMethods = getterMethods
                 .OrderBy(methodInfo => methodInfo.GetAttribute<InterceptOrderAttribute>().Order)

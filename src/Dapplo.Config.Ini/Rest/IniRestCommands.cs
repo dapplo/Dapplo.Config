@@ -19,18 +19,36 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-using System.Collections.Generic;
-using Dapplo.Config.Tests.ConfigTests.Interfaces;
-using Dapplo.Config.Registry;
-
-namespace Dapplo.Config.Tests.ConfigTests.Entities
+namespace Dapplo.Config.Ini.Rest
 {
-    public class RegistryTestImpl : RegistryBase<IRegistryTest>, IRegistryTest
+    /// <summary>
+    ///     The supported commands for the ini-REST api
+    /// </summary>
+    public enum IniRestCommands
     {
-        public IDictionary<string, object> CuRun32 { get; set; }
-        public IDictionary<string, object> CuRun64 { get; set; }
-        public IDictionary<string, object> LmRun32 { get; set; }
-        public IDictionary<string, object> LmRun64 { get; set; }
-        public string ProductName { get; set; }
+        /// <summary>
+        ///     Set a value
+        /// </summary>
+        Set,
+
+        /// <summary>
+        ///     Get a value
+        /// </summary>
+        Get,
+
+        /// <summary>
+        ///     Reset a value (to it's default)
+        /// </summary>
+        Reset,
+
+        /// <summary>
+        ///     Add a value to a collection
+        /// </summary>
+        Add,
+
+        /// <summary>
+        ///     Remove a value from a collection
+        /// </summary>
+        Remove
     }
 }

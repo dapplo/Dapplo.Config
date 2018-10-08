@@ -92,6 +92,13 @@ namespace Dapplo.Config.Ini
         }
 
         /// <summary>
+        ///     Indexer for Ini sections
+        /// </summary>
+        /// <param name="iniSectionName">string</param>
+        /// <returns>IIniSection</returns>
+        public IIniSection this[string iniSectionName] => _iniSections[iniSectionName];
+
+        /// <summary>
         /// Check if this IniFileContainer has changes which were not written yet
         /// </summary>
         /// <returns>bool</returns>

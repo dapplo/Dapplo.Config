@@ -15,7 +15,7 @@
     <Compile Remove="IniRest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="IniRest.cs" />
+    <None Include="Rest\IniRest.cs" />
   </ItemGroup>
 
   <ItemGroup>

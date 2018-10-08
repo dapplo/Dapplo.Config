@@ -12,7 +12,6 @@
   <ItemGroup>
     <Compile Remove="ConfigTests\HttpExtensionSettingsTest.cs" />
     <Compile Remove="ConfigTests\IniConfigTest.cs" />
-    <Compile Remove="ConfigTests\IniRestTest.cs" />
     <Compile Remove="LanguageTests\Interfaces\ILanguageLoaderFailTest.cs" />
     <Compile Remove="LanguageTests\Interfaces\ILanguageLoaderPartTest.cs" />
     <Compile Remove="LanguageTests\Interfaces\ILanguageLoaderTest.cs" />
@@ -81,7 +80,6 @@
   <ItemGroup>
     <None Include="ConfigTests\HttpExtensionSettingsTest.cs" />
     <None Include="ConfigTests\IniConfigTest.cs" />
-    <None Include="ConfigTests\IniRestTest.cs" />
     <None Include="Languages\language-de-DE.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -104,14 +102,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="IniTestFiles\TestIniAfterLoad.ini">
+    <None Update="IniTests\IniTestFiles\TestIniAfterLoad.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="IniTestFiles\TestIniFromFile.ini">
+    <None Update="IniTests\IniTestFiles\TestIniFromFile.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="IniTestFiles\TestIniGeneral.ini">
+    <None Update="IniTests\IniTestFiles\TestIniGeneral.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="RestTests\IniTestFiles\TestIniRest.ini">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ConfigTests\Entities\" />
   </ItemGroup>
 </Project>

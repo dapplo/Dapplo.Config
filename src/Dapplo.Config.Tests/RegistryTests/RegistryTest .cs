@@ -21,8 +21,8 @@
 
 #region using
 
-using Dapplo.Config.Tests.ConfigTests.Entities;
-using Dapplo.Config.Tests.ConfigTests.Interfaces;
+using Dapplo.Config.Tests.RegistryTests.Entities;
+using Dapplo.Config.Tests.RegistryTests.Interfaces;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
 using Xunit;
@@ -30,7 +30,7 @@ using Xunit.Abstractions;
 
 #endregion
 
-namespace Dapplo.Config.Tests.ConfigTests
+namespace Dapplo.Config.Tests.RegistryTests
 {
 	/// <summary>
 	///     This test class tests the registry capabilities of the proxy

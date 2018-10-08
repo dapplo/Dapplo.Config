@@ -38,10 +38,6 @@ namespace Dapplo.Config.Tests.IniTests
 {
     public sealed class IniContainerTests
     {
-        private const string Name = "Dapplo";
-        private const string FirstName = "Robin";
-        private const string TestValueForNonSerialized = "Hello!";
-
         public IniContainerTests(ITestOutputHelper testOutputHelper)
         {
             LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
@@ -49,7 +45,7 @@ namespace Dapplo.Config.Tests.IniTests
             StringEncryptionTypeConverter.RgbKey = "ljew3lJfrS0rlddlfeelOekfekcvbAwE";
         }
 
-        private async Task ConfigureMemoryStreamAsync(IniFileContainer iniFileContainer)
+        private async Task LoadFromMemoryStreamAsync(IniFileContainer iniFileContainer)
         {
             using (var testMemoryStream = new MemoryStream())
             {
@@ -63,7 +59,7 @@ namespace Dapplo.Config.Tests.IniTests
                 .WithApplicationName("Dapplo")
                 .WithFilename(iniFileName)
                 .WithoutSaveOnExit()
-                .WithFixedDirectory("IniTestFiles")
+                .WithFixedDirectory(@"IniTests\IniTestFiles")
                 .BuildApplicationConfig();
 
             return new IniFileContainer(iniFileConfig, new []{ iniSection });
@@ -86,7 +82,7 @@ namespace Dapplo.Config.Tests.IniTests
                     x.SomeValues.Add("dapplo", 2015);
                 }
             };
-            await ConfigureMemoryStreamAsync(iniContainer);
+            await LoadFromMemoryStreamAsync(iniContainer);
 
             Assert.True(iniConfigTest.SomeValues.ContainsKey("dapplo"));
             Assert.True(iniConfigTest.SomeValues["dapplo"] == 2015);

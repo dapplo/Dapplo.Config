@@ -29,7 +29,7 @@ using Dapplo.Log;
 
 #endregion
 
-namespace Dapplo.Config.Ini
+namespace Dapplo.Config.Ini.Rest
 {
 	/// <summary>
 	///     This class implements a "REST" API for the Ini configuration
@@ -38,14 +38,14 @@ namespace Dapplo.Config.Ini
 	{
 		private static readonly LogSource Log = new LogSource();
 
-		/// <summary>
-		///     Process the supplied IniRestCommand
-		/// </summary>
-		/// <param name="restCommand">IniRestCommand to process</param>
-		public static void ProcessRestCommand(IniRestCommand restCommand)
+        /// <summary>
+        ///     Process the supplied IniRestCommand
+        /// </summary>
+        /// <param name="restCommand">IniRestCommand to process</param>
+        /// <param name="iniFileContainer">IniFileContainer</param>
+        public static void ProcessRestCommand(IniRestCommand restCommand, IniFileContainer iniFileContainer)
 		{
-			var iniConfig = IniConfig.Get(restCommand.Application, restCommand.File);
-			var iniSection = iniConfig[restCommand.Section];
+			var iniSection = iniFileContainer[restCommand.Section];
 
 			if (restCommand.Command == IniRestCommands.Add || restCommand.Command == IniRestCommands.Remove)
 			{
@@ -55,7 +55,7 @@ namespace Dapplo.Config.Ini
 					Log.Error().WriteLine(message);
 					throw new ArgumentException(message);
 				}
-				var iniValue = iniSection[restCommand.Target];
+				var iniValue = iniSection.GetIniValue(restCommand.Target);
 				restCommand.Results.Add(iniValue);
 				var iniValueType = iniValue.Value?.GetType() ?? iniValue.ValueType;
 				var removeMethodInfo = iniValueType.GetMethod("Remove");
@@ -120,7 +120,7 @@ namespace Dapplo.Config.Ini
 
 			foreach (var key in restCommand.Target != null ? new[] {restCommand.Target} : restCommand.Values.Keys)
 			{
-				var iniValue = iniSection[key];
+				var iniValue = iniSection.GetIniValue(key);
 				if (iniValue is null)
 				{
 					continue;
@@ -141,27 +141,28 @@ namespace Dapplo.Config.Ini
 			}
 		}
 
-		/// <summary>
-		///     Process an Rest URI, this can be used to read or write values via e.g. a HttpListener
-		///     format:
-		///     schema://hostname:port/IniConfig/Command/Applicationname/Configname/Section/Property/NewValue(optional)?query
-		///     schema is not important, this can be an application specific thing
-		///     hostname is not important, this can be an application specific thing
-		///     port is not important, this can be an application specific thing
-		///     The command is get/set/add/remove/reset
-		///     the Applicationname and Configname must be registered by new IniConfig(Applicationname,Configname)
-		///     The Section is that which is used in the IniSection
-		///     The property needs to be available
-		///     NewValue is optional (read) can be used to set the property (write)
-		///     The query can be used to add values to lists (?item1&amp;item2&amp;item2) or dictionaries (?key1=value1&amp;
-		///     key2=value2)
-		///     Or when removing from lists (?item1&amp;item2&amp;item2) or dictionaries (?key1&amp;key2)
-		///     P.S.
-		///     You can use the ProtocolHandler to register a custom URL protocol.
-		/// </summary>
-		/// <param name="restUri"></param>
-		/// <returns>IniRestCommand with all details and the result</returns>
-		public static IniRestCommand ProcessRestUri(Uri restUri)
+        /// <summary>
+        ///     Process an Rest URI, this can be used to read or write values via e.g. a HttpListener
+        ///     format:
+        ///     schema://hostname:port/IniConfig/Command/Applicationname/Configname/Section/Property/NewValue(optional)?query
+        ///     schema is not important, this can be an application specific thing
+        ///     hostname is not important, this can be an application specific thing
+        ///     port is not important, this can be an application specific thing
+        ///     The command is get/set/add/remove/reset
+        ///     the Applicationname and Configname must be registered by new IniConfig(Applicationname,Configname)
+        ///     The Section is that which is used in the IniSection
+        ///     The property needs to be available
+        ///     NewValue is optional (read) can be used to set the property (write)
+        ///     The query can be used to add values to lists (?item1&amp;item2&amp;item2) or dictionaries (?key1=value1&amp;
+        ///     key2=value2)
+        ///     Or when removing from lists (?item1&amp;item2&amp;item2) or dictionaries (?key1&amp;key2)
+        ///     P.S.
+        ///     You can use the ProtocolHandler to register a custom URL protocol.
+        /// </summary>
+        /// <param name="restUri">Uri</param>
+        /// <param name="iniFileContainer">IniFileContainer</param>
+        /// <returns>IniRestCommand with all details and the result</returns>
+        public static IniRestCommand ProcessRestUri(Uri restUri, IniFileContainer iniFileContainer)
 		{
 			Log.Debug().WriteLine("Processing REST uri: {0}", restUri);
 
@@ -171,10 +172,11 @@ namespace Dapplo.Config.Ini
 			var segments = (from segment in restUri.Segments.Skip(1)
 				select removeSlash.Replace(segment, string.Empty)).ToList();
 
-			if (segments[0] != "IniConfig")
+			if ("ini".Equals(segments[0], StringComparison.OrdinalIgnoreCase))
 			{
-				return null;
+				throw new ArgumentException("Doesn't contain a ini link", nameof(restUri));
 			}
+
 			segments.RemoveAt(0);
 			if (!Enum.TryParse(segments[0], true, out IniRestCommands command))
 			{
@@ -221,7 +223,7 @@ namespace Dapplo.Config.Ini
 					restCommand.Values.Add(Uri.UnescapeDataString(splitItem[0]), splitItem.Length > 1 ? Uri.UnescapeDataString(splitItem[1]) : null);
 				}
 			}
-			ProcessRestCommand(restCommand);
+			ProcessRestCommand(restCommand, iniFileContainer);
 			return restCommand;
 		}
 	}
