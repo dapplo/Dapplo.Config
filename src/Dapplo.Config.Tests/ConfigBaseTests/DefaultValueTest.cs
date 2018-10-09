@@ -51,6 +51,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
         {
             Assert.Equal(21, _defaultValueTest.Age);
             Assert.Equal(3, _defaultValueTest.Ages.Count);
+            Assert.Equal(25, _defaultValueTest.Age2);
         }
 
         [Fact]

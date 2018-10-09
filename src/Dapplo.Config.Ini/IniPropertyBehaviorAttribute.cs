@@ -25,7 +25,7 @@ using System;
 
 #endregion
 
-namespace Dapplo.Config.Ini.Attributes
+namespace Dapplo.Config.Ini
 {
 	/// <summary>
 	///     Use this attribute on Properties where you want to influence the ini config behavior.

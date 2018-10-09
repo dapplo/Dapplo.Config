@@ -27,7 +27,6 @@ using System.ComponentModel;
 using System.Runtime.Serialization;
 using Dapplo.Config.Ini;
 using Dapplo.Config.Ini.Converters;
-using Dapplo.Config.Ini.Attributes;
 using Dapplo.Windows.Common.Structs;
 
 #endregion

@@ -9,5 +9,6 @@ namespace Dapplo.Config.Tests.ConfigBaseTests.Entities
         public int Age { get; set; }
         public IList<int> Ages { get; set; }
         public IList<Uri> MyUris { get; set; }
+        public int Age2 { get; set; }
     }
 }

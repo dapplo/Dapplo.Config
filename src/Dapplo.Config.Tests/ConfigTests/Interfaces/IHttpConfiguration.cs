@@ -24,7 +24,6 @@
 using System.ComponentModel;
 using Dapplo.HttpExtensions;
 using Dapplo.Config.Ini;
-using Dapplo.Config.Ini.Attributes;
 
 #endregion
 

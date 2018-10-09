@@ -22,36 +22,19 @@
 #region using
 
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 
 #endregion
 
-namespace Dapplo.Config.Ini.Attributes
+namespace Dapplo.Config.Tests.ConfigBaseTests.Interfaces
 {
 	/// <summary>
-	///     Specify the 
+	///     This is the interface under test
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Interface)]
-	public class IniFileAttribute : Attribute
-	{
-		/// <summary>
-		///     Constructor
-		/// </summary>
-		/// <param name="name">Name of the ini-section</param>
-		public IniFileAttribute(string name)
-		{
-			Name = name;
-			IgnoreErrors = true;
-		}
-
-		/// <summary>
-		///     Set ignore errors to false, if you want an exception when a parse error occurs.
-		///     Default this is set to true, which will cause the property to have the "default" value.
-		/// </summary>
-		public bool IgnoreErrors { get; set; }
-
-		/// <summary>
-		///     Name of the section in the ini file
-		/// </summary>
-		public string Name { get; }
-	}
+	public interface ISubValue
+    {
+		[DefaultValue(25)]
+		int Age2 { get; set; }
+    }
 }

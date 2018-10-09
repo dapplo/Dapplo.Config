@@ -24,7 +24,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using Dapplo.Config.Ini;
-using Dapplo.Config.Ini.Attributes;
 
 #endregion
 

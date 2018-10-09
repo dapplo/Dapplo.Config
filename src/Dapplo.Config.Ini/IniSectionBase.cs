@@ -23,7 +23,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
-using Dapplo.Config.Ini.Attributes;
 using Dapplo.Config.Ini.Extensions;
 using Dapplo.Utils;
 using Dapplo.Utils.Extensions;
