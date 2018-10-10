@@ -115,6 +115,7 @@ namespace Dapplo.Config
         /// </summary>
         /// <param name="getInfo">GetInfo</param>
         [InterceptOrder(GetterOrders.Dictionary)]
+        // ReSharper disable once UnusedMember.Local as this is processed via reflection
         private void FromDictionaryGetter(GetInfo<TProperty> getInfo)
         {
             var hasValue = _properties.TryGetValue(getInfo.PropertyInfo.Name, out var value);
@@ -127,6 +128,7 @@ namespace Dapplo.Config
         /// </summary>
         /// <param name="setInfo">GetInfo</param>
         [InterceptOrder(SetterOrders.Dictionary)]
+        // ReSharper disable once UnusedMember.Local as this is processed via reflection
         private void ToDictionarySetter(SetInfo<TProperty> setInfo)
         {
             _properties[setInfo.PropertyInfo.Name] = setInfo.NewValue;
@@ -139,6 +141,7 @@ namespace Dapplo.Config
         /// </summary>
         /// <param name="setInfo">SetInfo with all the information on the set call</param>
         [InterceptOrder(SetterOrders.WriteProtect)]
+        // ReSharper disable once UnusedMember.Local as this is processed via reflection
         private void WriteProtectSetter(SetInfo<TProperty> setInfo)
         {
             if (_writeProtectedProperties.Contains(setInfo.PropertyInfo.Name))
@@ -207,6 +210,7 @@ namespace Dapplo.Config
         /// </summary>
         /// <param name="setInfo">SetInfo with all the information on the set call</param>
         [InterceptOrder(SetterOrders.HasChanges)]
+        // ReSharper disable once UnusedMember.Local as this is processed via reflection
         private void HasChangesSetter(SetInfo<TProperty> setInfo)
         {
             var hasOldValue = _properties.TryGetValue(setInfo.PropertyInfo.Name, out var oldValue);
@@ -282,6 +286,7 @@ namespace Dapplo.Config
         /// </summary>
         /// <param name="setInfo">SetInfo with all the set call information</param>
         [InterceptOrder(SetterOrders.NotifyPropertyChanged)]
+        // ReSharper disable once UnusedMember.Local as this is processed via reflection
         private void NotifyPropertyChangedSetter(SetInfo<TProperty> setInfo)
         {
             // Fast exit when no listeners.
@@ -321,6 +326,7 @@ namespace Dapplo.Config
         /// </summary>
         /// <param name="setInfo">SetInfo with all the set call information</param>
         [InterceptOrder(SetterOrders.NotifyPropertyChanging)]
+        // ReSharper disable once UnusedMember.Local as this is processed via reflection
         private void NotifyPropertyChangingSetter(SetInfo<TProperty> setInfo)
         {
             if (PropertyChanging is null)

@@ -14,7 +14,7 @@ namespace Dapplo.Config.Tests.LanguageTests.Entities
 
         #region Implementation of ILanguageLoaderTest
 
-        public string Ok { get; }
+        public string Ok { get; set; }
         public string OnlydeDe { get; }
         public string OnlyenUs { get; }
         public string OnlynlNl { get; }

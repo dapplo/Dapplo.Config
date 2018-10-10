@@ -38,7 +38,7 @@ namespace Dapplo.Config.Language
 	public class LanguageBase<T> : DictionaryConfigurationBase<T, string>, ILanguage, ILanguageInternal
     {
 		private readonly LanguageAttribute _languageAttribute = typeof(T).GetCustomAttribute<LanguageAttribute>();
-        private readonly IDictionary<string, string> _translationsWithoutPropery = new Dictionary<string, string>(AbcComparer.Instance);
+        private readonly IDictionary<string, string> _translationsWithoutProperty = new Dictionary<string, string>(AbcComparer.Instance);
 
         /// <summary>
         /// Set via the DictionaryConfigurationBase when supported by a property
@@ -49,14 +49,16 @@ namespace Dapplo.Config.Language
         public override void Setter(string propertyName, object newValue)
         {
             var translation = (string)newValue;
+
+			// Check if the property is backed by a Property by checking if it has a matching PropertyInfo, if so use the SetValue to let the chain of setters work
             if (TryGetPropertyInfoFor(propertyName, out var propertyInfo))
             {
-                SetValue(PropertyInfoFor(propertyName), translation);
+                SetValue(propertyInfo, translation);
                 return;
             }
 
             // Store values which do not have a property
-            _translationsWithoutPropery[propertyName] = translation;
+            _translationsWithoutProperty[propertyName] = translation;
         }
 
         /// <summary>
@@ -66,12 +68,14 @@ namespace Dapplo.Config.Language
         /// <returns>object</returns>
         public override object Getter(string propertyName)
         {
+	        // Check if the property has a matching PropertyInfo, if so use the GetValue to let the chain of getters work
             if (TryGetPropertyInfoFor(propertyName, out var propertyInfo))
             {
                 return GetValue(propertyInfo).Value;
             }
 
-            if (_translationsWithoutPropery.TryGetValue(propertyName, out var translation)) 
+			// This property is not backed by a Property, use the local dictionary
+            if (_translationsWithoutProperty.TryGetValue(propertyName, out var translation)) 
             {
                 return translation;
             }
@@ -98,7 +102,7 @@ namespace Dapplo.Config.Language
 	    /// <inheritdoc />
 		public IEnumerable<string> Keys()
 		{
-			return PropertyNames().Concat(_translationsWithoutPropery.Keys);
+			return PropertyNames().Concat(_translationsWithoutProperty.Keys);
 		}
 
 		/// <inheritdoc />
@@ -122,7 +126,7 @@ namespace Dapplo.Config.Language
 		    if (propertyInfo.CanWrite && propertyInfo.GetSetMethod(true).IsPublic)
 		    {
 			    throw new NotSupportedException(
-				    $"Property {propertyInfo.DeclaringType}.{propertyInfo.Name} has defined a set, this is not allowed for {typeof(ILanguage).Name} derrived interfaces. Fix by removing the set for the property, leave the get.");
+				    $"Property {propertyInfo.DeclaringType}.{propertyInfo.Name} has defined a set, this is not allowed for {typeof(ILanguage).Name} derived interfaces. Fix by removing the set for the property, leave the get.");
 		    }
         }
 	}

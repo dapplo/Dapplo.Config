@@ -32,7 +32,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Dapplo.Config.Interfaces;
 using Dapplo.Config.Language.Implementation;
 using Dapplo.Log;
 using Dapplo.Utils;
@@ -47,7 +46,6 @@ namespace Dapplo.Config.Language
     /// </summary>
     public sealed class LanguageContainer : IDisposable, IEnumerable<ILanguage>
     {
-        private readonly LanguageConfig _languageConfig;
         private static readonly LogSource Log = new LogSource();
         private readonly IDictionary<string, IDictionary<string, string>> _allTranslations = new Dictionary<string, IDictionary<string, string>>(AbcComparer.Instance);
         private readonly AsyncLock _asyncLock = new AsyncLock();
@@ -61,7 +59,6 @@ namespace Dapplo.Config.Language
         /// </summary>
         public LanguageContainer(LanguageConfig languageConfig, IEnumerable<ILanguage> languageInterfaces)
         {
-            _languageConfig = languageConfig;
             foreach (var languageInterface in languageInterfaces)
             {
                 _languageConfigs[languageInterface.PrefixName()] = languageInterface;
@@ -214,11 +211,11 @@ namespace Dapplo.Config.Language
             // Generate the language changed event
             // Added for Dapplo.Config/issues/10
             var languageInternal = (ILanguageInternal) language;
-            languageInternal?.OnLanguageChanged();
+            languageInternal.OnLanguageChanged();
         }
 
         /// <summary>
-        ///     Start the intial load, but if none was made yet
+        ///     Start the initial load, but if none was made yet
         /// </summary>
         /// <param name="cancellationToken">CancellationToken</param>
         /// <returns>Task</returns>

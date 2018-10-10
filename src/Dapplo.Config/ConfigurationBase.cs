@@ -33,12 +33,9 @@ using AutoProperties;
 namespace Dapplo.Config
 {
     /// <summary>
-    /// An abstract non generic ConfigurationBase.
-    /// This defines the API for the configuration based implementations.
-    /// If you want to extend the functionality, extend this (or other classes) and implement
-    /// a void xxxxxxxGetter(GetInfo) or void xxxxxxxxSetter(SetInfo) which has a InterceptOrderAttribute
+    /// Genericless base class, making sure we only define the statics once
     /// </summary>
-    public abstract class ConfigurationBase<TProperty> : IShallowCloneable, ITransactionalProperties, IDescription, ITagging
+    public abstract class ConfigurationBase
     {
         /// <summary>
         /// The base logged for all the Configuration classes
@@ -46,9 +43,18 @@ namespace Dapplo.Config
         protected static readonly LogSource Log = new LogSource();
 
         // Cached values so this only needs to be calculated once
-        private static readonly IDictionary<Type, GetSetInterceptInformation> _interceptInformations = new Dictionary<Type, GetSetInterceptInformation>();
-        private static readonly IDictionary<Type, PropertiesInformation> _propertiesInformation = new Dictionary<Type, PropertiesInformation>();
+        protected static readonly IDictionary<Type, GetSetInterceptInformation> InterceptInformationCache = new Dictionary<Type, GetSetInterceptInformation>();
+        protected static readonly IDictionary<Type, PropertiesInformation> PropertiesInformationCache = new Dictionary<Type, PropertiesInformation>();
+    }
 
+    /// <summary>
+    /// An abstract non generic ConfigurationBase.
+    /// This defines the API for the configuration based implementations.
+    /// If you want to extend the functionality, extend this (or other classes) and implement
+    /// a void xxxxxxxGetter(GetInfo) or void xxxxxxxxSetter(SetInfo) which has a InterceptOrderAttribute
+    /// </summary>
+    public abstract class ConfigurationBase<TProperty> : ConfigurationBase, IShallowCloneable, ITransactionalProperties, IDescription, ITagging, IDefaultValue
+    {
         /// <summary>
         /// This is the information for the properties, so we don't need a IDictionary lookup each time
         /// </summary>
@@ -91,14 +97,14 @@ namespace Dapplo.Config
         protected void Initialize(Type typeToInitializeFor)
         {
             var thisType = GetType();
-            if (!_interceptInformations.TryGetValue(thisType, out InterceptInformation))
+            if (!InterceptInformationCache.TryGetValue(thisType, out InterceptInformation))
             {
-                _interceptInformations[thisType] = InterceptInformation = new GetSetInterceptInformation(thisType);
+                InterceptInformationCache[thisType] = InterceptInformation = new GetSetInterceptInformation(thisType);
             }
             
-            if (!_propertiesInformation.TryGetValue(typeToInitializeFor, out PropertiesInformation))
+            if (!PropertiesInformationCache.TryGetValue(typeToInitializeFor, out PropertiesInformation))
             {
-                _propertiesInformation[thisType] = PropertiesInformation = new PropertiesInformation(typeToInitializeFor);
+                PropertiesInformationCache[thisType] = PropertiesInformation = new PropertiesInformation(typeToInitializeFor);
             }
             // Give extended classes a way to initialize
             foreach (var propertyInfo in PropertiesInformation.PropertyInfos.Values)
@@ -240,6 +246,7 @@ namespace Dapplo.Config
         /// </summary>
         /// <param name="getInfo">GetInfo with all the information on the get call</param>
         [InterceptOrder(GetterOrders.Transaction)]
+        // ReSharper disable once UnusedMember.Local as this is processed via reflection
         private void TransactionalGetter(GetInfo<TProperty> getInfo)
         {
             // Lock to prevent rollback etc to run parallel
@@ -267,6 +274,7 @@ namespace Dapplo.Config
         /// </summary>
         /// <param name="setInfo">SetInfo with all the information on the set call</param>
         [InterceptOrder(SetterOrders.Transaction)]
+        // ReSharper disable once UnusedMember.Local as this is processed via reflection
         private void TransactionalSetter(SetInfo<TProperty> setInfo)
         {
             // Lock to prevent rollback etc to run parallel

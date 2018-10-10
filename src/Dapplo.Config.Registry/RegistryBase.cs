@@ -54,6 +54,7 @@ namespace Dapplo.Config.Registry
         /// </summary>
         /// <param name="getInfo">GetInfo</param>
         [InterceptOrder(GetterOrders.Dictionary)]
+        // ReSharper disable once UnusedMember.Local as this is processed via reflection
         private void FromRegistryGetter(GetInfo<object> getInfo)
         {
             var propertyName = getInfo.PropertyInfo.Name;
@@ -116,6 +117,7 @@ namespace Dapplo.Config.Registry
         /// </summary>
         /// <param name="setInfo">GetInfo</param>
         [InterceptOrder(SetterOrders.Dictionary)]
+        // ReSharper disable once UnusedMember.Local as this is processed via reflection
         private void ToDictionarySetter(SetInfo<object> setInfo)
         {
             var propertyName = setInfo.PropertyInfo.Name;

@@ -22,8 +22,6 @@
 #region using
 
 using System.ComponentModel;
-using Dapplo.Config.Language;
-
 #endregion
 
 namespace Dapplo.Config.Tests.LanguageTests.Interfaces

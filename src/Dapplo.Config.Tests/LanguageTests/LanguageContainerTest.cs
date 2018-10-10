@@ -21,12 +21,9 @@
 
 #region using
 
-using System;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Dapplo.Config.Ini;
 using Dapplo.Config.Tests.LanguageTests.Interfaces;
 using Dapplo.Config.Language;
 using Dapplo.Config.Tests.LanguageTests.Entities;
