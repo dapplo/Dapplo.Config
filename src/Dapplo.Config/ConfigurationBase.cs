@@ -42,8 +42,13 @@ namespace Dapplo.Config
         /// </summary>
         protected static readonly LogSource Log = new LogSource();
 
-        // Cached values so this only needs to be calculated once
+        /// <summary>
+        /// Cached values for the GetSetInterceptInformation so this only needs to be calculated once per type
+        /// </summary>
         protected static readonly IDictionary<Type, GetSetInterceptInformation> InterceptInformationCache = new Dictionary<Type, GetSetInterceptInformation>();
+        /// <summary>
+        /// Cached values for the PropertiesInformation so this only needs to be calculated once per type
+        /// </summary>
         protected static readonly IDictionary<Type, PropertiesInformation> PropertiesInformationCache = new Dictionary<Type, PropertiesInformation>();
     }
 

@@ -120,6 +120,7 @@ namespace Dapplo.Config.Language
 			LanguageChanged?.Invoke(this, new EventArgs());
 		}
 
+	    /// <inheritdoc />
 	    protected override void PropertyInitializer(PropertyInfo propertyInfo)
 	    {
 		    base.PropertyInitializer(propertyInfo);

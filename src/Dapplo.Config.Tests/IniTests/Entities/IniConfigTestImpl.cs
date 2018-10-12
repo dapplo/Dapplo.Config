@@ -28,7 +28,7 @@ using System.Collections.Generic;
 
 namespace Dapplo.Config.Tests.IniTests.Entities
 {
-    public class IniConfigTestImpl : IniSectionBase<IIniConfigTest>, IIniConfigTest
+    internal class IniConfigTestImpl : IniSectionBase<IIniConfigTest>, IIniConfigTest
     {
         public long Age { get; set; }
         public IDictionary<string, IList<int>> DictionaryOfLists { get; set; }

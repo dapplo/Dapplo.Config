@@ -25,7 +25,7 @@ using Dapplo.Config.Tests.RegistryTests.Interfaces;
 
 namespace Dapplo.Config.Tests.RegistryTests.Entities
 {
-    public class RegistryTestImpl : RegistryBase<IRegistryTest>, IRegistryTest
+    internal class RegistryTestImpl : RegistryBase<IRegistryTest>, IRegistryTest
     {
         public IDictionary<string, object> CuRun32 { get; set; }
         public IDictionary<string, object> CuRun64 { get; set; }

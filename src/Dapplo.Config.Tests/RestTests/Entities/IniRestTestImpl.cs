@@ -25,7 +25,7 @@ using Dapplo.Config.Tests.RestTests.Interfaces;
 
 namespace Dapplo.Config.Tests.RestTests.Entities
 {
-    public class IniRestTestImpl : IniSectionBase<IIniRestTest>, IIniRestTest
+    internal class IniRestTestImpl : IniSectionBase<IIniRestTest>, IIniRestTest
     {
         public IList<int> WindowCornerCutShape { get; set; }
         public IDictionary<string, int> SomeValues { get; set; }

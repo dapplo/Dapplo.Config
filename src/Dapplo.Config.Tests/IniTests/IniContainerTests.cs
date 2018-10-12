@@ -126,5 +126,12 @@ namespace Dapplo.Config.Tests.IniTests
             Assert.Equal(IniConfigTestValues.Value2, iniConfigTest.TestWithEnum);
             Assert.Equal(IniConfigTestValues.Value2, iniConfigTest.TestWithEnumSubValue);
         }
+
+        [Fact]
+        public void TestIniNoLoading_Defaults()
+        {
+            var iniConfigTest = new IniConfigTestImpl();
+            Assert.Equal(IniConfigTestValues.Value2, iniConfigTest.TestWithEnum);
+        }
     }
 }
