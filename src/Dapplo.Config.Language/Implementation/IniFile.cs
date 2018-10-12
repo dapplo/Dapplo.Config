@@ -28,6 +28,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapplo.Log;
+using Dapplo.Utils;
 
 #endregion
 
@@ -84,7 +85,7 @@ namespace Dapplo.Config.Language.Implementation
 
 			// Do not dispose the reader, this will close the supplied stream and that is not our job!
 			var reader = new StreamReader(stream, encoding);
-			var nameValues = new Dictionary<string, string>();
+			var nameValues = new Dictionary<string, string>(AbcComparer.Instance);
 			while (!reader.EndOfStream && !cancellationToken.IsCancellationRequested)
 			{
 				var line = await reader.ReadLineAsync().ConfigureAwait(false);

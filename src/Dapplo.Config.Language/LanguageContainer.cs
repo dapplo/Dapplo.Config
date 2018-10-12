@@ -157,7 +157,7 @@ namespace Dapplo.Config.Language
                         continue;
                     }
                     // Add missing translation
-                    Log.Verbose().WriteLine("Added missing file {0}", file);
+                    Log.Verbose().WriteLine("Added missing file {0} for {1}", file, ietf);
                     Files[ietf].Add(file);
                 }
             }
@@ -234,9 +234,11 @@ namespace Dapplo.Config.Language
         /// <returns>name - values sorted to module</returns>
         private static IDictionary<string, IDictionary<string, string>> ReadXmlResources(string languageFile)
         {
+            Log.Verbose().WriteLine("Reading xml file from {0}", languageFile);
             var xElement = XDocument.Load(languageFile).Root;
             if (xElement is null)
             {
+                Log.Verbose().WriteLine("Empty xml file {0}?", languageFile);
                 return null;
             }
             return (from resourcesElement in xElement.Elements("resources")
@@ -273,7 +275,7 @@ namespace Dapplo.Config.Language
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns>Task</returns>
-        private async Task LoadLanguageFiles(CancellationToken cancellationToken)
+        private async Task LoadLanguageFiles(CancellationToken cancellationToken = default)
         {
             foreach (var languageFile in Files[CurrentLanguage].ToList())
             {
