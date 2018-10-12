@@ -53,7 +53,7 @@ namespace Dapplo.Config.Tests.LanguageTests
 	    {
 		    var languageConfig = LanguageConfigBuilder.Create()
 			    .WithApplicationName("Dapplo")
-			    .WithSpecificDirectories(@"IniTests\IniTestFiles")
+			    .WithSpecificDirectories(@"LanguageTests\LanguageTestFiles")
 			    .BuildLanguageConfig();
 
 		    var result = new LanguageContainer(languageConfig, new[] { language });
@@ -158,11 +158,12 @@ namespace Dapplo.Config.Tests.LanguageTests
 		[Fact]
 		public async Task TestModules()
 		{
-			var languageLoaderTest = new LanguageLoaderTestImpl();
-			var languageContainer = await CreateContainer(languageLoaderTest);
-            // Make sure that the module (for testing) is available, we count all file-path which end with the filename 
-            var count = languageContainer.Files["en-US"].Count(file => file.EndsWith("language-en-US.ini"));
+			ILanguageLoaderMyModuleTest loaderMyModuleTest = new LanguageLoaderMyModuleTestImpl();
+			var languageContainer = await CreateContainer(loaderMyModuleTest);
+			// Make sure that the module (for testing) is available, we count all file-path which end with the filename 
+			var count = languageContainer.Files["en-US"].Count(file => file.EndsWith("language_mymodule-en-US.ini"));
 			Assert.True(count > 0);
+			Assert.Equal("Some value", loaderMyModuleTest.ModuleSettings);
 		}
 
 		[Fact]

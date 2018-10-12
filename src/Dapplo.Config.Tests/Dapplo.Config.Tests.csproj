@@ -74,21 +74,6 @@
   <ItemGroup>
     <None Include="ConfigTests\HttpExtensionSettingsTest.cs" />
     <None Include="ConfigTests\IniConfigTest.cs" />
-    <None Include="Languages\language-de-DE.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Languages\language-en-US.ini">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Languages\language-nl-NL.ini">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Languages\language-sr-Cyrl-RS.ini">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Languages\Modules\language_mymodule-en-US.ini">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -99,6 +84,21 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="IniTests\IniTestFiles\TestIniGeneral.ini">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="LanguageTests\LanguageTestFiles\language-de-DE.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="LanguageTests\LanguageTestFiles\language-en-US.ini">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="LanguageTests\LanguageTestFiles\language-nl-NL.ini">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="LanguageTests\LanguageTestFiles\language-sr-Cyrl-RS.ini">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="LanguageTests\LanguageTestFiles\Modules\language_mymodule-en-US.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="RestTests\IniTestFiles\TestIniRest.ini">
