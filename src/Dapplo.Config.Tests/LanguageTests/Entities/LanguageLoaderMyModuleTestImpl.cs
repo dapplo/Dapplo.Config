@@ -19,11 +19,13 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
+using System.Diagnostics.CodeAnalysis;
 using Dapplo.Config.Language;
 using Dapplo.Config.Tests.LanguageTests.Interfaces;
 
 namespace Dapplo.Config.Tests.LanguageTests.Entities
 {
+    [SuppressMessage("ReSharper", "UnassignedGetOnlyAutoProperty")]
     internal class LanguageLoaderMyModuleTestImpl : LanguageBase<ILanguageLoaderMyModuleTest>, ILanguageLoaderMyModuleTest
     {
         public string ModuleSettings { get; }

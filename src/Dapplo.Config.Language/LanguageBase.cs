@@ -69,16 +69,10 @@ namespace Dapplo.Config.Language
         public override object Getter(string propertyName)
         {
 	        // Check if the property has a matching PropertyInfo, if so use the GetValue to let the chain of getters work
-            if (TryGetPropertyInfoFor(propertyName, out var propertyInfo))
-            {
-                return GetValue(propertyInfo).Value;
-            }
-
-			// This property is not backed by a Property, use the local dictionary
-            if (_translationsWithoutProperty.TryGetValue(propertyName, out var translation)) 
-            {
-                return translation;
-            }
+	        if (TryGetTranslation(propertyName, out var translation))
+	        {
+		        return translation;
+	        }
             throw new NotSupportedException($"No property with the name {propertyName} found");
         }
 
@@ -100,13 +94,37 @@ namespace Dapplo.Config.Language
         public event EventHandler<EventArgs> LanguageChanged;
 
 	    /// <inheritdoc />
+	    public bool TryGetTranslation(string languageKey, out string translation)
+	    {
+		    if (TryGetPropertyInfoFor(languageKey, out var propertyInfo))
+		    {
+			    translation = GetValue(propertyInfo).Value;
+			    return true;
+		    }
+
+		    // This property is not backed by a Property, use the local dictionary
+		    if (_translationsWithoutProperty.TryGetValue(languageKey, out translation))
+		    {
+			    return true;
+            }
+
+		    return false;
+	    }
+
+	    /// <inheritdoc />
 		public IEnumerable<string> Keys()
 		{
 			return PropertyNames().Concat(_translationsWithoutProperty.Keys);
 		}
 
-		/// <inheritdoc />
-		public string PrefixName()
+	    /// <inheritdoc />
+	    public IEnumerable<string> PropertyFreeKeys()
+	    {
+		    return _translationsWithoutProperty.Keys;
+	    }
+
+        /// <inheritdoc />
+        public string PrefixName()
 		{
 			return _languageAttribute?.Prefix ?? typeof(T).Name;
 		}

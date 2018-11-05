@@ -45,6 +45,14 @@ namespace Dapplo.Config.Language
 		/// <returns>string or null for the translation</returns>
 		string this[string languageKey] { get; }
 
+		/// <summary>
+        /// Tries to get a translation
+        /// </summary>
+        /// <param name="languageKey">key to translate</param>
+        /// <param name="translation">value for the translation</param>
+        /// <returns>bool true if the key was available, false if not</returns>
+        bool TryGetTranslation(string languageKey, out string translation);
+
         /// <summary>
         ///     Get all the language keys, this includes also the ones that don't have an access property.
         ///     This is a method, could have been a property, but this differentiates it from the properties in the extending
@@ -54,15 +62,21 @@ namespace Dapplo.Config.Language
         IEnumerable<string> Keys();
 
 		/// <summary>
-		///     This event is triggered after the language has been changed
-		///     Added for Dapplo.Config/issues/10
+		///     Get all the language keys which don't have an access property.
 		/// </summary>
-		event EventHandler<EventArgs> LanguageChanged;
+		/// <returns>IEnumerable of string</returns>
+        IEnumerable<string> PropertyFreeKeys();
+
+        /// <summary>
+        ///     This event is triggered after the language has been changed
+        ///     Added for Dapplo.Config/issues/10
+        /// </summary>
+        event EventHandler<EventArgs> LanguageChanged;
 
 		/// <summary>
 		///     Get the prefix / module name of this ILanguage
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>string</returns>
 		string PrefixName();
 	}
 }

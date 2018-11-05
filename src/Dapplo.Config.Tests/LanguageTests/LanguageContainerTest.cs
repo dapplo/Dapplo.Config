@@ -29,6 +29,7 @@ using Dapplo.Config.Language;
 using Dapplo.Config.Tests.LanguageTests.Entities;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
+using Dapplo.Utils;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -91,7 +92,7 @@ namespace Dapplo.Config.Tests.LanguageTests
 		public async Task TestExtension()
 		{
 			var languageLoaderTest = new LanguageLoaderTestImpl();
-			var languageContainer = await CreateContainer(languageLoaderTest);
+			var _ = await CreateContainer(languageLoaderTest);
 
             ILanguageLoaderTest test = null;
 			// ReSharper disable once ExpressionIsAlwaysNull
@@ -117,9 +118,12 @@ namespace Dapplo.Config.Tests.LanguageTests
 			// Test using the raw property name with the indexer
 			Assert.Equal("Afbreken", languageContainer["test"]["test_value"]);
 			Assert.Equal("cool", languageContainer["test"]["dapplo"]);
-
-			// Test if translations without matching properties are available
-			Assert.Contains("dapplo", languageContainer["test"].Keys());
+			Assert.Equal("cool", languageLoaderTest["dapplo"]);
+			Assert.Equal("cool", languageLoaderTest["dapplo_"]);
+			Assert.Contains("dapplo", languageLoaderTest.PropertyFreeKeys());
+			Assert.Contains("dapplo_", languageLoaderTest.PropertyFreeKeys());
+            // Test if translations without matching properties are available
+            Assert.Contains("dapplo", languageContainer["test"].Keys());
 		}
 
 		[Fact]
@@ -148,9 +152,9 @@ namespace Dapplo.Config.Tests.LanguageTests
 		public async Task TestLanguagePart()
 		{
 			var languageLoaderTest = new LanguageLoaderTestImpl();
-			var languageContainer = await CreateContainer(languageLoaderTest);
+			var _ = await CreateContainer(languageLoaderTest);
 
-			var partType = languageLoaderTest as ILanguageLoaderPartTest;
+			var partType = (ILanguageLoaderPartTest) languageLoaderTest;
 			Assert.NotNull(partType);
 			Assert.Equal("Ok", partType.Ok2);
 		}
