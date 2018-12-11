@@ -308,7 +308,7 @@ namespace Dapplo.Config
             {
                 return;
             }
-            var propertyChangedEventArgs = new PropertyChangedEventArgs(setInfo.PropertyInfo.Name);
+            var propertyChangedEventArgs = new PropertyChangedEventArgsEx(setInfo.PropertyInfo.Name, setInfo.OldValue, setInfo.NewValue);
             InvokePropertyChanged(this, propertyChangedEventArgs);
         }
 
@@ -347,7 +347,7 @@ namespace Dapplo.Config
             {
                 return;
             }
-            var propertyChangingEventArgs = new PropertyChangingEventArgs(setInfo.PropertyInfo.Name);
+            var propertyChangingEventArgs = new PropertyChangingEventArgsEx(setInfo.PropertyInfo.Name, setInfo.OldValue, setInfo.NewValue);
             InvokePropertyChanging(this, propertyChangingEventArgs);
         }
         #endregion
