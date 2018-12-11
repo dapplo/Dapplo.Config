@@ -148,7 +148,7 @@ namespace Dapplo.Config
         /// <summary>
         /// Helper method to get the property info for a property
         /// </summary>
-        /// <param name="propertyName"></param>
+        /// <param name="propertyName">string</param>
         /// <returns></returns>
         protected PropertyInfo PropertyInfoFor(string propertyName) => PropertiesInformation.PropertyInfoFor(propertyName);
 
@@ -250,7 +250,7 @@ namespace Dapplo.Config
         ///     This is the implementation of the getter logic for a transactional proxy
         /// </summary>
         /// <param name="getInfo">GetInfo with all the information on the get call</param>
-        [InterceptOrder(GetterOrders.Transaction)]
+        [GetSetInterceptor(GetterOrders.Transaction)]
         // ReSharper disable once UnusedMember.Local as this is processed via reflection
         private void TransactionalGetter(GetInfo<TProperty> getInfo)
         {
@@ -278,7 +278,7 @@ namespace Dapplo.Config
         ///     This is the implementation of the set logic
         /// </summary>
         /// <param name="setInfo">SetInfo with all the information on the set call</param>
-        [InterceptOrder(SetterOrders.Transaction)]
+        [GetSetInterceptor(SetterOrders.Transaction, true)]
         // ReSharper disable once UnusedMember.Local as this is processed via reflection
         private void TransactionalSetter(SetInfo<TProperty> setInfo)
         {
@@ -427,6 +427,7 @@ namespace Dapplo.Config
         }
 
         #endregion
+
         #region Implementation of IDefaultValue
 
         /// <inheritdoc />
@@ -485,6 +486,8 @@ namespace Dapplo.Config
         }
 
         #endregion
+
+        #region Implementation of IShallowCloneable
         /// <inheritdoc />
         public virtual object ShallowClone()
         {
@@ -492,5 +495,6 @@ namespace Dapplo.Config
             clonedValue?.Initialize(GetType());
             return clonedValue;
         }
+        #endregion
     }
 }

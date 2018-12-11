@@ -114,7 +114,7 @@ namespace Dapplo.Config
         /// Retrieves the value from the dictionary
         /// </summary>
         /// <param name="getInfo">GetInfo</param>
-        [InterceptOrder(GetterOrders.Dictionary)]
+        [GetSetInterceptor(GetterOrders.Dictionary)]
         // ReSharper disable once UnusedMember.Local as this is processed via reflection
         private void FromDictionaryGetter(GetInfo<TProperty> getInfo)
         {
@@ -124,10 +124,23 @@ namespace Dapplo.Config
         }
 
         /// <summary>
+        /// Make sure the SetInfo is correctly filled
+        /// </summary>
+        /// <param name="setInfo">SetInfo</param>
+        [GetSetInterceptor(SetterOrders.SetInfoInitializer, true)]
+        // ReSharper disable once UnusedMember.Local as this is processed via reflection
+        private void SetInfoInitializer(SetInfo<TProperty> setInfo)
+        {
+            var hasOldValue = _properties.TryGetValue(setInfo.PropertyInfo.Name, out var oldValue);
+            setInfo.HasOldValue = hasOldValue;
+            setInfo.OldValue = oldValue;
+        }
+
+        /// <summary>
         /// Retrieves the value from the dictionary
         /// </summary>
-        /// <param name="setInfo">GetInfo</param>
-        [InterceptOrder(SetterOrders.Dictionary)]
+        /// <param name="setInfo">SetInfo</param>
+        [GetSetInterceptor(SetterOrders.Dictionary, true)]
         // ReSharper disable once UnusedMember.Local as this is processed via reflection
         private void ToDictionarySetter(SetInfo<TProperty> setInfo)
         {
@@ -140,7 +153,7 @@ namespace Dapplo.Config
         ///     This is the implementation of the set logic
         /// </summary>
         /// <param name="setInfo">SetInfo with all the information on the set call</param>
-        [InterceptOrder(SetterOrders.WriteProtect)]
+        [GetSetInterceptor(SetterOrders.WriteProtect, true)]
         // ReSharper disable once UnusedMember.Local as this is processed via reflection
         private void WriteProtectSetter(SetInfo<TProperty> setInfo)
         {
@@ -209,14 +222,10 @@ namespace Dapplo.Config
         ///     This is the implementation of the set logic
         /// </summary>
         /// <param name="setInfo">SetInfo with all the information on the set call</param>
-        [InterceptOrder(SetterOrders.HasChanges)]
+        [GetSetInterceptor(SetterOrders.HasChanges, true)]
         // ReSharper disable once UnusedMember.Local as this is processed via reflection
         private void HasChangesSetter(SetInfo<TProperty> setInfo)
         {
-            var hasOldValue = _properties.TryGetValue(setInfo.PropertyInfo.Name, out var oldValue);
-            setInfo.HasOldValue = hasOldValue;
-            setInfo.OldValue = oldValue;
-
             if (!_trackChanges)
             {
                 return;
@@ -285,7 +294,7 @@ namespace Dapplo.Config
         ///     This creates a NPC event if the values are changed
         /// </summary>
         /// <param name="setInfo">SetInfo with all the set call information</param>
-        [InterceptOrder(SetterOrders.NotifyPropertyChanged)]
+        [GetSetInterceptor(SetterOrders.NotifyPropertyChanged, true)]
         // ReSharper disable once UnusedMember.Local as this is processed via reflection
         private void NotifyPropertyChangedSetter(SetInfo<TProperty> setInfo)
         {
@@ -325,7 +334,7 @@ namespace Dapplo.Config
         ///     This creates a NPC event if the values are changing
         /// </summary>
         /// <param name="setInfo">SetInfo with all the set call information</param>
-        [InterceptOrder(SetterOrders.NotifyPropertyChanging)]
+        [GetSetInterceptor(SetterOrders.NotifyPropertyChanging, true)]
         // ReSharper disable once UnusedMember.Local as this is processed via reflection
         private void NotifyPropertyChangingSetter(SetInfo<TProperty> setInfo)
         {

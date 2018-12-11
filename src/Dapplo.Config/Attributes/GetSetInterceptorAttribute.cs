@@ -31,20 +31,27 @@ namespace Dapplo.Config.Attributes
     ///     This attribute should be used to mark a method as a getter, which in fact needs to be protected (or public)
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
-	public class InterceptOrderAttribute : Attribute
+	public class GetSetInterceptorAttribute : Attribute
 	{
         /// <summary>
         ///     Constructor
         /// </summary>
         /// <param name="order">The order of the getter method</param>
-        public InterceptOrderAttribute(object order)
+        /// <param name="isSetter">bool</param>
+        public GetSetInterceptorAttribute(object order, bool isSetter = false)
 		{
 			Order = Convert.ToInt32(order);
+			IsSetter = isSetter;
 		}
 
+        /// <summary>
+        ///     Order for the getter
+        /// </summary>
+        public int Order { get; private set; }
+
 		/// <summary>
-		///     Order for the getter
+		///     Is this interceptor a setter or getter
 		/// </summary>
-		public int Order { get; private set; }
+		public bool IsSetter { get; private set; }
 	}
 }

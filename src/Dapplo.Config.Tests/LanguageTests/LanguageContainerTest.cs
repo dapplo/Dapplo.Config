@@ -29,7 +29,6 @@ using Dapplo.Config.Language;
 using Dapplo.Config.Tests.LanguageTests.Entities;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
-using Dapplo.Utils;
 using Xunit;
 using Xunit.Abstractions;
 

@@ -53,7 +53,7 @@ namespace Dapplo.Config.Registry
         /// Retrieves the value from the registry
         /// </summary>
         /// <param name="getInfo">GetInfo</param>
-        [InterceptOrder(GetterOrders.Dictionary)]
+        [GetSetInterceptor(GetterOrders.Dictionary)]
         // ReSharper disable once UnusedMember.Local as this is processed via reflection
         private void FromRegistryGetter(GetInfo<object> getInfo)
         {
@@ -116,7 +116,7 @@ namespace Dapplo.Config.Registry
         /// Retrieves the value from the dictionary
         /// </summary>
         /// <param name="setInfo">GetInfo</param>
-        [InterceptOrder(SetterOrders.Dictionary)]
+        [GetSetInterceptor(SetterOrders.Dictionary, true)]
         // ReSharper disable once UnusedMember.Local as this is processed via reflection
         private void ToDictionarySetter(SetInfo<object> setInfo)
         {

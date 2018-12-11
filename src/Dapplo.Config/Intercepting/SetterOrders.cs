@@ -31,24 +31,28 @@ namespace Dapplo.Config.Intercepting
         /// </summary>
         WriteProtect = int.MinValue,
         /// <summary>
-        /// This is the order for the setter which implements the ITransactionalProperties
+        /// This is the order for the setter which implements the INotifyPropertyChanging
         /// </summary>
-        Transaction = 0,
-        /// <summary>
-        /// This is the order for the setter which implements the IHasChanges
-        /// </summary>
-        HasChanges = 1000,
+        SetInfoInitializer = 0,
         /// <summary>
         /// This is the order for the setter which implements the INotifyPropertyChanging
         /// </summary>
-        NotifyPropertyChanging = 2000,
+        NotifyPropertyChanging = 1000,
+        /// <summary>
+        /// This is the order for the setter which implements the ITransactionalProperties
+        /// </summary>
+        Transaction = 2000,
+        /// <summary>
+        /// This is the order for the setter which implements the IHasChanges
+        /// </summary>
+        HasChanges = 3000,
         /// <summary>
         /// This is the order for the setter which places the value into the dictionary
         /// </summary>
-        Dictionary = 3000,
+        Dictionary = 4000,
         /// <summary>
         /// This is the order for the setter which implements the INotifyPropertyChanged
         /// </summary>
-        NotifyPropertyChanged = 4000
+        NotifyPropertyChanged = 5000
     }
 }

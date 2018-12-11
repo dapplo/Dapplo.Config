@@ -49,45 +49,31 @@ namespace Dapplo.Config.Intercepting
         /// <param name="containingType">Type</param>
         public GetSetInterceptInformation(Type containingType)
         {
-            var setterMethods = new List<MethodInfo>();
-            var getterMethods = new List<MethodInfo>();
+            var methods = new List<Tuple<MethodInfo, GetSetInterceptorAttribute>>();
             var currentType = containingType;
             do
             {
                 foreach(var methodInfo in currentType.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance))
                 {
-                    if (methodInfo.Name.Length < 7 && !methodInfo.Name.EndsWith("etter"))
+                    var interceptAttribute = methodInfo.GetAttribute<GetSetInterceptorAttribute>();
+                    if (interceptAttribute == null)
                     {
                         continue;
                     }
-                    var parameters = methodInfo.GetParameters();
-                    if (parameters.Length != 1)
-                    {
-                        continue;
-                    }
-                    var parameterType = parameters[0].ParameterType;
-                    if (parameterType.BaseType != typeof(GetSetInfo))
-                    {
-                        continue;
-                    }
-                    var gOrS = methodInfo.Name[methodInfo.Name.Length - 6];
-                    if (gOrS == 'G')
-                    {
-                        getterMethods.Add(methodInfo);
-                    }
-                    else if(gOrS == 'S')
-                    {
-                        setterMethods.Add(methodInfo);
-                    }
+                    methods.Add(new Tuple<MethodInfo, GetSetInterceptorAttribute>(methodInfo, interceptAttribute));
                 }
                 currentType = currentType.BaseType;
             } while (currentType != null && currentType != typeof(object));
 
-            GetterMethods = getterMethods
-                .OrderBy(methodInfo => methodInfo.GetAttribute<InterceptOrderAttribute>().Order)
+            GetterMethods = methods
+                .Where(method => !method.Item2.IsSetter)
+                .OrderBy(method => method.Item2.Order)
+                .Select(method => method.Item1)
                 .ToArray();
-            SetterMethods = setterMethods
-                .OrderBy(methodInfo => methodInfo.GetAttribute<InterceptOrderAttribute>().Order)
+            SetterMethods = methods
+                .Where(method => method.Item2.IsSetter)
+                .OrderBy(method => method.Item2.Order)
+                .Select(method => method.Item1)
                 .ToArray();
         }
     }
