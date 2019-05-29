@@ -1,6 +1,6 @@
 version: 0.0.{build}
 skip_tags: true
-os: Visual Studio 2017
+os: Visual Studio 2019
 configuration: Release
 platform: Any CPU
 test: off
@@ -12,6 +12,9 @@ environment:
     secure: Rbs5lhh1vnIkleZR7LR5bq/EdRst4drUHr78SBrNjxIDf/KhH9S4sAn7xF4Q/LrZ
   NuGetApiKey:
     secure: Fu7vXeOuWmvDK7WGNsEbTIV2vhDV4P6PiK5k1+UZOmwldhCfvUvkA4HOkml+ZE/n
+install:
+- ps: Invoke-WebRequest https://download.microsoft.com/download/9/0/1/901B684B-659E-4CBD-BEC8-B3F06967C2E7/NDP471-DevPack-ENU.exe -OutFile NDP471-DevPack-ENU.exe
+- ps: Start-Process -FilePath "NDP471-DevPack-ENU.exe" -ArgumentList "/q","/norestart" -Wait
 build_script:
 - ps: .\build.ps1 --settings_skipverification=true
 cache:
