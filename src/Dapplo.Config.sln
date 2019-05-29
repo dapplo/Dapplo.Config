@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapplo.Config.Language", "D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapplo.Config", "Dapplo.Config\Dapplo.Config.csproj", "{AE237020-0D96-43D7-AE50-A4CAA6BF89F2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapplo.Config.BenchmarkTests", "Dapplo.Config.BenchmarkTests\Dapplo.Config.BenchmarkTests.csproj", "{14CEFBC2-FAD1-48CA-ADF0-DB95D52E585C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{AE237020-0D96-43D7-AE50-A4CAA6BF89F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE237020-0D96-43D7-AE50-A4CAA6BF89F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE237020-0D96-43D7-AE50-A4CAA6BF89F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14CEFBC2-FAD1-48CA-ADF0-DB95D52E585C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14CEFBC2-FAD1-48CA-ADF0-DB95D52E585C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14CEFBC2-FAD1-48CA-ADF0-DB95D52E585C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14CEFBC2-FAD1-48CA-ADF0-DB95D52E585C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

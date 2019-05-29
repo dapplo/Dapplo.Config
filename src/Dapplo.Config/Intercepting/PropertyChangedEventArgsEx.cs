@@ -1,5 +1,5 @@
 ﻿//  Dapplo - building blocks for desktop applications
-//  Copyright (C) 2016-2018 Dapplo
+//  Copyright (C) 2016-2019 Dapplo
 // 
 //  For more information see: http://dapplo.net/
 //  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -38,6 +38,12 @@ namespace Dapplo.Config.Intercepting
         /// </summary>
         public object NewValue { get; }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="propertyName">string</param>
+        /// <param name="oldValue">object</param>
+        /// <param name="newValue">object</param>
         public PropertyChangedEventArgsEx(string propertyName, object oldValue, object newValue) : base(propertyName)
         {
             OldValue = oldValue;

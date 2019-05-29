@@ -1,5 +1,5 @@
 ﻿//  Dapplo - building blocks for desktop applications
-//  Copyright (C) 2016-2018 Dapplo
+//  Copyright (C) 2016-2019 Dapplo
 // 
 //  For more information see: http://dapplo.net/
 //  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -116,7 +116,9 @@ namespace Dapplo.Config
         /// <param name="getInfo">GetInfo</param>
         [GetSetInterceptor(GetterOrders.Dictionary)]
         // ReSharper disable once UnusedMember.Local as this is processed via reflection
+#pragma warning disable IDE0051 // Remove unused private members
         private void FromDictionaryGetter(GetInfo<TProperty> getInfo)
+#pragma warning restore IDE0051 // Remove unused private members
         {
             var hasValue = _properties.TryGetValue(getInfo.PropertyInfo.Name, out var value);
             getInfo.Value = hasValue ? value : (TProperty)GetConvertedDefaultValue(getInfo.PropertyInfo);
@@ -129,7 +131,9 @@ namespace Dapplo.Config
         /// <param name="setInfo">SetInfo</param>
         [GetSetInterceptor(SetterOrders.SetInfoInitializer, true)]
         // ReSharper disable once UnusedMember.Local as this is processed via reflection
+#pragma warning disable IDE0051 // Remove unused private members
         private void SetInfoInitializer(SetInfo<TProperty> setInfo)
+#pragma warning restore IDE0051 // Remove unused private members
         {
             var hasOldValue = _properties.TryGetValue(setInfo.PropertyInfo.Name, out var oldValue);
             setInfo.HasOldValue = hasOldValue;
@@ -142,7 +146,9 @@ namespace Dapplo.Config
         /// <param name="setInfo">SetInfo</param>
         [GetSetInterceptor(SetterOrders.Dictionary, true)]
         // ReSharper disable once UnusedMember.Local as this is processed via reflection
+#pragma warning disable IDE0051 // Remove unused private members
         private void ToDictionarySetter(SetInfo<TProperty> setInfo)
+#pragma warning restore IDE0051 // Remove unused private members
         {
             _properties[setInfo.PropertyInfo.Name] = setInfo.NewValue;
         }
@@ -155,7 +161,9 @@ namespace Dapplo.Config
         /// <param name="setInfo">SetInfo with all the information on the set call</param>
         [GetSetInterceptor(SetterOrders.WriteProtect, true)]
         // ReSharper disable once UnusedMember.Local as this is processed via reflection
+#pragma warning disable IDE0051 // Remove unused private members
         private void WriteProtectSetter(SetInfo<TProperty> setInfo)
+#pragma warning restore IDE0051 // Remove unused private members
         {
             if (_writeProtectedProperties.Contains(setInfo.PropertyInfo.Name))
             {
@@ -224,7 +232,9 @@ namespace Dapplo.Config
         /// <param name="setInfo">SetInfo with all the information on the set call</param>
         [GetSetInterceptor(SetterOrders.HasChanges, true)]
         // ReSharper disable once UnusedMember.Local as this is processed via reflection
+#pragma warning disable IDE0051 // Remove unused private members
         private void HasChangesSetter(SetInfo<TProperty> setInfo)
+#pragma warning restore IDE0051 // Remove unused private members
         {
             if (!_trackChanges)
             {
@@ -296,7 +306,9 @@ namespace Dapplo.Config
         /// <param name="setInfo">SetInfo with all the set call information</param>
         [GetSetInterceptor(SetterOrders.NotifyPropertyChanged, true)]
         // ReSharper disable once UnusedMember.Local as this is processed via reflection
+#pragma warning disable IDE0051 // Remove unused private members
         private void NotifyPropertyChangedSetter(SetInfo<TProperty> setInfo)
+#pragma warning restore IDE0051 // Remove unused private members
         {
             // Fast exit when no listeners.
             if (PropertyChanged is null)
@@ -336,7 +348,9 @@ namespace Dapplo.Config
         /// <param name="setInfo">SetInfo with all the set call information</param>
         [GetSetInterceptor(SetterOrders.NotifyPropertyChanging, true)]
         // ReSharper disable once UnusedMember.Local as this is processed via reflection
+#pragma warning disable IDE0051 // Remove unused private members
         private void NotifyPropertyChangingSetter(SetInfo<TProperty> setInfo)
+#pragma warning restore IDE0051 // Remove unused private members
         {
             if (PropertyChanging is null)
             {

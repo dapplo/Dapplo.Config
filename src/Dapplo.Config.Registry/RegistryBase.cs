@@ -1,5 +1,5 @@
 ﻿//  Dapplo - building blocks for desktop applications
-//  Copyright (C) 2016-2018 Dapplo
+//  Copyright (C) 2016-2019 Dapplo
 // 
 //  For more information see: http://dapplo.net/
 //  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -55,7 +55,9 @@ namespace Dapplo.Config.Registry
         /// <param name="getInfo">GetInfo</param>
         [GetSetInterceptor(GetterOrders.Dictionary)]
         // ReSharper disable once UnusedMember.Local as this is processed via reflection
+#pragma warning disable IDE0051 // Remove unused private members
         private void FromRegistryGetter(GetInfo<object> getInfo)
+#pragma warning restore IDE0051 // Remove unused private members
         {
             var propertyName = getInfo.PropertyInfo.Name;
             if (!_registryAttributes.TryGetValue(propertyName, out var registryPropertyAttribute) || registryPropertyAttribute is null)
@@ -118,7 +120,9 @@ namespace Dapplo.Config.Registry
         /// <param name="setInfo">GetInfo</param>
         [GetSetInterceptor(SetterOrders.Dictionary, true)]
         // ReSharper disable once UnusedMember.Local as this is processed via reflection
+#pragma warning disable IDE0051 // Remove unused private members
         private void ToDictionarySetter(SetInfo<object> setInfo)
+#pragma warning restore IDE0051 // Remove unused private members
         {
             var propertyName = setInfo.PropertyInfo.Name;
             var newValue = setInfo.NewValue;

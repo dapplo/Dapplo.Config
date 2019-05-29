@@ -1,5 +1,5 @@
 ﻿//  Dapplo - building blocks for desktop applications
-//  Copyright (C) 2016-2018 Dapplo
+//  Copyright (C) 2016-2019 Dapplo
 // 
 //  For more information see: http://dapplo.net/
 //  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -252,7 +252,9 @@ namespace Dapplo.Config
         /// <param name="getInfo">GetInfo with all the information on the get call</param>
         [GetSetInterceptor(GetterOrders.Transaction)]
         // ReSharper disable once UnusedMember.Local as this is processed via reflection
+#pragma warning disable IDE0051 // Remove unused private members
         private void TransactionalGetter(GetInfo<TProperty> getInfo)
+#pragma warning restore IDE0051 // Remove unused private members
         {
             // Lock to prevent rollback etc to run parallel
             lock (_transactionProperties)
@@ -280,7 +282,9 @@ namespace Dapplo.Config
         /// <param name="setInfo">SetInfo with all the information on the set call</param>
         [GetSetInterceptor(SetterOrders.Transaction, true)]
         // ReSharper disable once UnusedMember.Local as this is processed via reflection
+#pragma warning disable IDE0051 // Remove unused private members
         private void TransactionalSetter(SetInfo<TProperty> setInfo)
+#pragma warning restore IDE0051 // Remove unused private members
         {
             // Lock to prevent rollback etc to run parallel
             lock (_transactionProperties)

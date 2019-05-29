@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Description>Dapplo.Config.Registry brings strongly typed interfaces over your registry.</Description>
     <AssemblyTitle>Dapplo.Config.Registry</AssemblyTitle>
-    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net471</TargetFrameworks>
     <AssemblyName>Dapplo.Config.Registry</AssemblyName>
     <PackageId>Dapplo.Config.Registry</PackageId>
 	<PackageTags>dapplo registry config</PackageTags>
@@ -18,10 +18,10 @@
   </ItemGroup>
   
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="Microsoft.Windows.Compatibility" Version="2.0.1" />
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="2.1.1" />
   </ItemGroup>
   
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net471' ">
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />

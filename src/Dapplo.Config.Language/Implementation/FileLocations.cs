@@ -1,7 +1,5 @@
-﻿#region Dapplo 2016 - 2018 - GNU Lesser General Public License
-
-// Dapplo - building blocks for .NET applications
-// Copyright (C) 2016-2018 Dapplo
+﻿// Dapplo - building blocks for .NET applications
+// Copyright (C) 2016-2019 Dapplo
 // 
 // For more information see: http://dapplo.net/
 // Dapplo repositories are hosted on GitHub: https://github.com/dapplo
@@ -20,8 +18,6 @@
 // 
 // You should have a copy of the GNU Lesser General Public License
 // along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
-
-#endregion
 
 #region Usings
 
