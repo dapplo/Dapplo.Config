@@ -103,14 +103,19 @@ namespace Dapplo.Config
     /// An abstract non generic ConfigurationBase.
     /// This defines the API for the configuration based implementations.
     /// If you want to extend the functionality, extend this (or other classes) and implement
-    /// a void xxxxxxxGetter(GetInfo) or void xxxxxxxxSetter(SetInfo) which has a InterceptOrderAttribute
+    /// a void xxxxxxxxGetter(GetInfo) or void xxxxxxxxSetter(SetInfo) which has a InterceptOrderAttribute
     /// </summary>
     public abstract class ConfigurationBase<TProperty> : ConfigurationBase, IShallowCloneable, ITransactionalProperties, IDescription, ITagging, IDefaultValue
     {
         /// <inheritdoc />
         public override object Getter(string propertyName)
         {
-            return GetValue(propertyName).Value;
+            var getInfo = GetValue(propertyName);
+            if (getInfo == null)
+            {
+                return null;
+            }
+            return getInfo.Value;
         }
 
         /// <inheritdoc />
@@ -160,12 +165,13 @@ namespace Dapplo.Config
         /// <returns>GetInfo</returns>
         protected virtual GetInfo<TProperty> GetValue(string propertyName)
         {
-            if (!TryGetPropertyInfoFor(propertyName, out var propertyInfo))
+            if (TryGetPropertyInfoFor(propertyName, out var propertyInfo))
             {
-                return null;
+                return GetValue(propertyInfo);
             }
-            
-            return GetValue(propertyInfo);
+            Log.Warn().WriteLine("Couldn't find a property called {0}", propertyName);
+            return null;
+
         }
 
         /// <summary>

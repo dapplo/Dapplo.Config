@@ -180,7 +180,7 @@ namespace Dapplo.Config.Extensions
 			var displayAttribute = propertyInfo.GetAttribute<DisplayAttribute>();
 			return displayAttribute?.Description;
 #else
-            return descriptionAttribute.Description;
+            return descriptionAttribute?.Description;
 #endif
 		}
 
