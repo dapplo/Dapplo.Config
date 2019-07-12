@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Description>Dapplo.Config provides an easy to use configuration class, assisted by AutoProperties.Fody</Description>
+    <Description>Dapplo.Config provides an easy to use configuration</Description>
     <AssemblyTitle>Dapplo.Config</AssemblyTitle>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <AssemblyName>Dapplo.Config</AssemblyName>

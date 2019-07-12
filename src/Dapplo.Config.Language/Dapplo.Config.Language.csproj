@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Description>DDapplo.Config.Language uses xml or ini translations which are accessible via an interface (with NPC).</Description>
+    <Description>Dapplo.Config.Language uses xml or ini translations which are accessible via an interface (with NPC).</Description>
     <AssemblyTitle>Dapplo.Config.Language</AssemblyTitle>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <AssemblyName>Dapplo.Config.Language</AssemblyName>
