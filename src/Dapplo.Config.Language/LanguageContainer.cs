@@ -32,9 +32,9 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Dapplo.Config.Intercepting;
 using Dapplo.Config.Language.Implementation;
 using Dapplo.Log;
-using Dapplo.Utils;
 
 #endregion
 
@@ -47,10 +47,10 @@ namespace Dapplo.Config.Language
     public sealed class LanguageContainer : IDisposable, IEnumerable<ILanguage>
     {
         private static readonly LogSource Log = new LogSource();
-        private readonly IDictionary<string, IDictionary<string, string>> _allTranslations = new Dictionary<string, IDictionary<string, string>>(AbcComparer.Instance);
-        private readonly AsyncLock _asyncLock = new AsyncLock();
+        private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
+        private readonly Dictionary<string, IDictionary<string, string>> _allTranslations = new Dictionary<string, IDictionary<string, string>>(AbcComparer.Instance);
         private readonly Regex _filePattern;
-        private readonly IDictionary<string, ILanguage> _languageConfigs = new Dictionary<string, ILanguage>(AbcComparer.Instance);
+        private readonly Dictionary<string, ILanguage> _languageConfigs = new Dictionary<string, ILanguage>(AbcComparer.Instance);
         private bool _initialReadDone;
 
         /// <summary>
@@ -170,10 +170,12 @@ namespace Dapplo.Config.Language
         /// <param name="language"></param>
         private void FillLanguageConfig(ILanguage language)
         {
-            if (!(language is ConfigurationBase<string> configurationBase))
+            if (!(language is ConfigProxy configProxy))
             {
-                throw new NotSupportedException("Implementation behind the ILanguage is not a ConfigurationBase");
+                throw new NotSupportedException("Implementation behind the ILanguage is not a ConfigProxy");
             }
+
+            var configurationBase = configProxy.Target;
 
             var prefix = language.PrefixName();
 
@@ -210,7 +212,7 @@ namespace Dapplo.Config.Language
 
             // Generate the language changed event
             // Added for Dapplo.Config/issues/10
-            var languageInternal = (ILanguageInternal) language;
+            var languageInternal = (ILanguageInternal)configurationBase;
             languageInternal.OnLanguageChanged();
         }
 
@@ -256,17 +258,25 @@ namespace Dapplo.Config.Language
         /// <param name="cancellationToken">CancellationToken</param>
         public async Task ReloadAsync(CancellationToken cancellationToken = default)
         {
-            _allTranslations.Clear();
-            if (Files.ContainsKey(CurrentLanguage))
+            try
             {
-                await LoadLanguageFiles(cancellationToken);
-            }
-            _initialReadDone = true;
+                await _semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
+                _allTranslations.Clear();
+                if (Files.ContainsKey(CurrentLanguage))
+                {
+                    await LoadLanguageFiles(cancellationToken);
+                }
+                _initialReadDone = true;
 
-            // Reset the sections that have already been registered
-            foreach (var language in _languageConfigs.Values)
+                // Reset the sections that have already been registered
+                foreach (var language in _languageConfigs.Values)
+                {
+                    FillLanguageConfig(language);
+                }
+            }
+            finally
             {
-                FillLanguageConfig(language);
+                _semaphoreSlim.Release();
             }
         }
 
@@ -385,7 +395,6 @@ namespace Dapplo.Config.Language
             {
                 return;
             }
-            _asyncLock?.Dispose();
             _disposedValue = true;
         }
 

@@ -21,7 +21,7 @@
 
 #region using
 
-using Dapplo.Config.Tests.RegistryTests.Entities;
+using Dapplo.Config.Registry;
 using Dapplo.Config.Tests.RegistryTests.Interfaces;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
@@ -45,7 +45,7 @@ namespace Dapplo.Config.Tests.RegistryTests
 		[Fact]
 		public void TestRegistryRead()
 		{
-            IRegistryTest registryTest = new RegistryTestImpl();
+            IRegistryTest registryTest = RegistryBase<IRegistryTest>.Create();
 
 			// assume that the product name is set
 			Assert.NotNull(registryTest.ProductName);

@@ -21,7 +21,6 @@
 
 #region using
 
-using Dapplo.Config.Tests.ConfigBaseTests.Entities;
 using Dapplo.Config.Tests.ConfigBaseTests.Interfaces;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
@@ -40,8 +39,8 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		public DescriptionTest(ITestOutputHelper testOutputHelper)
 		{
 			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-			_descriptionTest = new DescriptionImpl();
-		}
+            _descriptionTest = DictionaryConfigurationBase<IDescriptionTest>.Create();
+        }
 
 		[Fact]
 		public void TestDescriptionAttribute()

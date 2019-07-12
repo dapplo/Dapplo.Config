@@ -22,11 +22,11 @@
 #region using
 
 using Dapplo.Config.Language.Implementation;
-using Dapplo.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Dapplo.Config.Intercepting;
 
 #endregion
 
@@ -35,10 +35,27 @@ namespace Dapplo.Config.Language
 	/// <summary>
 	///     Base Language functionality
 	/// </summary>
-	public class LanguageBase<T> : DictionaryConfigurationBase<T, string>, ILanguage, ILanguageInternal
+	public class LanguageBase<TInterface> : DictionaryConfigurationBase<TInterface, string>, ILanguage, ILanguageInternal
     {
-		private readonly LanguageAttribute _languageAttribute = typeof(T).GetCustomAttribute<LanguageAttribute>();
+		private readonly LanguageAttribute _languageAttribute = typeof(TInterface).GetCustomAttribute<LanguageAttribute>();
         private readonly IDictionary<string, string> _translationsWithoutProperty = new Dictionary<string, string>(AbcComparer.Instance);
+
+        /// <summary>
+        /// Factory for IniSectionBase implementations
+        /// </summary>
+        /// <returns>TInterface</returns>
+        public static TInterface Create()
+        {
+	        return ConfigProxy.Create<TInterface>(new LanguageBase<TInterface>());
+        }
+
+        /// <summary>
+        /// Prevent new-ing
+        /// </summary>
+        protected LanguageBase()
+        {
+
+        }
 
         /// <summary>
         /// Set via the DictionaryConfigurationBase when supported by a property
@@ -126,7 +143,7 @@ namespace Dapplo.Config.Language
         /// <inheritdoc />
         public string PrefixName()
 		{
-			return _languageAttribute?.Prefix ?? typeof(T).Name;
+			return _languageAttribute?.Prefix ?? typeof(TInterface).Name;
 		}
 
 		/// <summary>

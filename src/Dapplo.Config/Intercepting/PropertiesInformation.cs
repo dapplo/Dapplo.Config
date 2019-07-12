@@ -23,7 +23,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
-using Dapplo.Utils;
 
 namespace Dapplo.Config.Intercepting
 {

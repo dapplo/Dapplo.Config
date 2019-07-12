@@ -21,7 +21,6 @@
 
 #region using
 
-using Dapplo.Config.Tests.ConfigBaseTests.Entities;
 using Dapplo.Config.Tests.ConfigBaseTests.Interfaces;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
@@ -49,7 +48,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		public TagAttributeTest(ITestOutputHelper testOutputHelper)
 		{
 			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-			_tagAttributeTest = new TagAttributeImpl();
+			_tagAttributeTest = DictionaryConfigurationBase<ITagAttributeTest>.Create();
 		}
 
 		[Fact]

@@ -21,7 +21,7 @@
 
 #region using
 
-using Dapplo.Config.Tests.ConfigBaseTests.Entities;
+using Dapplo.Config.Intercepting;
 using Dapplo.Config.Tests.ConfigBaseTests.Interfaces;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
@@ -35,12 +35,14 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
     public class IndexerTest
 	{
 		private readonly IIndexerTest _indexerTest;
-        private readonly IndexerImpl _indexerImpl;
+        private readonly ConfigurationBase _indexerImpl;
 
         public IndexerTest(ITestOutputHelper testOutputHelper)
 		{
 			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-			_indexerTest = _indexerImpl = new IndexerImpl();
+			_indexerTest = DictionaryConfigurationBase<IIndexerTest>.Create();
+
+			_indexerImpl = (_indexerTest as ConfigProxy).Target;
 		}
 
 		[Fact]

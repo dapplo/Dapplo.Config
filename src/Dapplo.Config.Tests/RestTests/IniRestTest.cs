@@ -27,7 +27,7 @@ using System.Threading.Tasks;
 using Dapplo.Config.Ini;
 using Dapplo.Config.Ini.Converters;
 using Dapplo.Config.Ini.Rest;
-using Dapplo.Config.Tests.RestTests.Entities;
+using Dapplo.Config.Tests.RestTests.Interfaces;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
 using Xunit;
@@ -65,7 +65,7 @@ namespace Dapplo.Config.Tests.RestTests
 		[Fact]
 		public async Task TestIniRest()
 		{
-			var iniTest = new IniRestTestImpl();
+			var iniTest = IniSectionBase<IIniRestTest>.Create();
 			var iniContainer = CreateContainer("TestIniRest", iniTest);
 
 			iniTest.Name = Name;

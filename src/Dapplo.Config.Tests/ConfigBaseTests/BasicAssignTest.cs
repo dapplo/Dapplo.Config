@@ -21,7 +21,6 @@
 
 #region using
 
-using Dapplo.Config.Tests.ConfigBaseTests.Entities;
 using Dapplo.Config.Tests.ConfigBaseTests.Interfaces;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
@@ -39,8 +38,8 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		public BassicAssignTest(ITestOutputHelper testOutputHelper)
 		{
 			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-			_bassicAssignTest = new BassicAssignImpl();
-		}
+			_bassicAssignTest = DictionaryConfigurationBase<IBassicAssignTest>.Create();
+        }
 
 		[Fact]
 		public void TestAssign()

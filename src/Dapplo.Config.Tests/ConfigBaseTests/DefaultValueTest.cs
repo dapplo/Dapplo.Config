@@ -22,7 +22,8 @@
 #region using
 
 using System;
-using Dapplo.Config.Tests.ConfigBaseTests.Entities;
+using System.Globalization;
+using System.Threading;
 using Dapplo.Config.Tests.ConfigBaseTests.Interfaces;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
@@ -42,8 +43,10 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 
         public DefaultValueTest(ITestOutputHelper testOutputHelper)
         {
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
             LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-            _defaultValueTest = new DefaultValueImpl();
+            _defaultValueTest = DictionaryConfigurationBase<IDefaultValueTest>.Create();
         }
 
         [Fact]
@@ -57,7 +60,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
         [Fact]
         public void TestDefaultValueOverwrite()
         {
-            var defaultValueOverwriteTest = new DefaultValueOverwriteImpl();
+            var defaultValueOverwriteTest = DictionaryConfigurationBase<IDefaultValueOverwriteTest>.Create();
             Assert.Equal(42, defaultValueOverwriteTest.Age);
         }
 
@@ -88,11 +91,8 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
         [Fact]
         public void TestDefaultValueWithError()
         {
-            // Used to be:
-            //var ex = Assert.Throws<InvalidCastException>(() => ProxyBuilder.CreateProxy<IDefaultValueWithErrorTest>());
-            // Now it should run without error
             // TODO: Is this correct?
-            IDefaultValueWithErrorTest value = new DefaultValueWithErrorImpl();
+            IDefaultValueWithErrorTest value = DictionaryConfigurationBase<IDefaultValueWithErrorTest>.Create();
             // Should be the default enum value
             Assert.Equal(SimpleEnum.Value1, value.MyEnum);
         }

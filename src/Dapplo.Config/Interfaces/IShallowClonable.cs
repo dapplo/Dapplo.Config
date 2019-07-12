@@ -19,12 +19,30 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-using Dapplo.Config.Tests.ConfigBaseTests.Interfaces;
-
-namespace Dapplo.Config.Tests.ConfigBaseTests.Entities
+namespace Dapplo.Config.Interfaces
 {
-    internal class TransactionImpl : DictionaryConfigurationBase<ITransactionTest>, ITransactionTest
+    /// <summary>
+    /// The interface for the ShallowClone method.
+    /// </summary>
+    public interface IShallowCloneable
     {
-        public int Age { get; set; }
+        /// <summary>
+        /// Make a memberwise clone of the object, this is "shallow".
+        /// </summary>
+        /// <returns>"Shallow" Cloned instance</returns>
+        object ShallowClone();
+    }
+
+    /// <summary>
+    /// The interface for the generic ShallowClone method.
+    /// </summary>
+    /// <typeparam name="T">Type of the copy which is returned</typeparam>
+    public interface IShallowCloneable<out T> where T : class
+    {
+        /// <summary>
+        /// Make a memberwise clone of the object, this is "shallow".
+        /// </summary>
+        /// <returns>"Shallow" Cloned instance of type T</returns>
+        T ShallowClone();
     }
 }

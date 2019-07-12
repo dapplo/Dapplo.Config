@@ -22,8 +22,7 @@
 using Dapplo.Config.Interfaces;
 using Dapplo.Config.Ini.Implementation;
 using Dapplo.Log;
-using Dapplo.Utils;
-using Dapplo.Utils.Extensions;
+using Dapplo.Config.Extensions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -41,13 +40,14 @@ namespace Dapplo.Config.Ini
     public class IniFileContainer
     {
         private static readonly LogSource Log = new LogSource();
+        private readonly SemaphoreSlim _semaphoreSlim = new SemaphoreSlim(1, 1);
         /// <summary>
         /// All the ini sections for this file
         /// </summary>
         private readonly IDictionary<string, IIniSection> _iniSections = new Dictionary<string, IIniSection>(AbcComparer.Instance);
         private readonly IniFileConfig _iniFileConfig;
         private readonly Timer _saveTimer;
-        private readonly AsyncLock _asyncLock = new AsyncLock();
+        //private readonly AsyncLock _asyncLock = new AsyncLock();
         private FileSystemWatcher _configFileWatcher;
         private IDictionary<string, IDictionary<string, string>> _constants;
         private IDictionary<string, IDictionary<string, string>> _defaults;
@@ -240,7 +240,7 @@ namespace Dapplo.Config.Ini
             }
 
             // After load
-            iniSection.AfterLoad();
+            iniSection.AfterLoad?.Invoke(iniSection);
 
             iniSection.ResetHasChanges();
 
@@ -338,9 +338,14 @@ namespace Dapplo.Config.Ini
         /// <param name="cancellationToken">CancellationToken</param>
         public async Task ReloadAsync(bool reset = true, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.LockAsync(cancellationToken).ConfigureAwait(false))
+            try
             {
+                await _semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
                 await ReloadInternalAsync(reset, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
             }
         }
 
@@ -384,9 +389,14 @@ namespace Dapplo.Config.Ini
         /// </summary>
         public async Task ResetAsync(CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.LockAsync(cancellationToken).ConfigureAwait(false))
+            try
             {
+                await _semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
                 ResetInternal();
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
             }
         }
 
@@ -405,8 +415,7 @@ namespace Dapplo.Config.Ini
                         // TODO: Do we need to skip read/write protected values here?
                         defaultValueInterface.RestoreToDefault(propertyName);
                     }
-
-                    iniSection.AfterLoad();
+                    iniSection.AfterLoad?.Invoke(iniSection);
                 }
             }
         }
@@ -420,9 +429,9 @@ namespace Dapplo.Config.Ini
         /// </summary>
         public async Task WriteAsync(CancellationToken cancellationToken = default)
         {
-            // Make sure only one write to file is running, other request will have to wait
-            using (await _asyncLock.LockAsync(cancellationToken).ConfigureAwait(false))
+            try
             {
+                await _semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
                 var path = Path.GetDirectoryName(IniLocation);
 
                 // Create the directory to write to, if it doesn't exist yet
@@ -445,6 +454,10 @@ namespace Dapplo.Config.Ini
                 // Enable the File-Watcher so we get events again
                 EnableFileWatcher(true);
             }
+            finally
+            {
+                _semaphoreSlim.Release();
+            }
         }
 
         /// <summary>
@@ -455,9 +468,14 @@ namespace Dapplo.Config.Ini
         /// <returns>Task</returns>
         public async Task WriteToStreamAsync(Stream stream, CancellationToken cancellationToken = default)
         {
-            using (await _asyncLock.LockAsync(cancellationToken).ConfigureAwait(false))
+            try
             {
+                await _semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
                 await WriteToStreamInternalAsync(stream, cancellationToken);
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
             }
         }
 
@@ -474,7 +492,7 @@ namespace Dapplo.Config.Ini
             // Loop over the "registered" sections
             foreach (var iniSection in _iniSections.Values)
             {
-                iniSection.BeforeSave();
+                iniSection.BeforeSave?.Invoke(iniSection);
                 
                 try
                 {
@@ -482,7 +500,7 @@ namespace Dapplo.Config.Ini
                 }
                 finally
                 {
-                    iniSection.AfterSave();
+                    iniSection.AfterSave?.Invoke(iniSection);
                 }
             }
             await IniFile.WriteAsync(stream, _iniFileConfig.FileEncoding, _ini, iniSectionsComments, cancellationToken).ConfigureAwait(false);

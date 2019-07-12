@@ -21,7 +21,6 @@
 
 #region using
 
-using Dapplo.Config.Tests.ConfigBaseTests.Entities;
 using Dapplo.Config.Tests.ConfigBaseTests.Interfaces;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
@@ -42,7 +41,8 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		public HasChangesTests(ITestOutputHelper testOutputHelper)
 		{
 			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-			_hasChangesTest = new HasChangesImpl();
+			_hasChangesTest = DictionaryConfigurationBase<IHasChangesTest>.Create();
+			_hasChangesTest.TrackChanges();
 		}
 
 		[Fact]

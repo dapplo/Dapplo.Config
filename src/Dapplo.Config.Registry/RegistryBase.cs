@@ -24,29 +24,38 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Dapplo.Log;
-using Dapplo.Utils.Extensions;
 using Microsoft.Win32;
 using Dapplo.Config.Attributes;
 using Dapplo.Config.Intercepting;
+using Dapplo.Config.Extensions;
 
 namespace Dapplo.Config.Registry
 {
     /// <summary>
     /// This implements a window into the registry based on an interface
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public abstract class RegistryBase<T> : ConfigurationBase<object>, IRegistry
+    /// <typeparam name="TInterface">Interface for the registry values</typeparam>
+    public class RegistryBase<TInterface> : ConfigurationBase<object>, IRegistry
     {
-        private readonly RegistryAttribute _registryAttribute = typeof(T).GetAttribute<RegistryAttribute>() ?? new RegistryAttribute();
+        private readonly RegistryAttribute _registryAttribute = typeof(TInterface).GetAttribute<RegistryAttribute>() ?? new RegistryAttribute();
         private readonly IDictionary<string, RegistryAttribute> _registryAttributes = new Dictionary<string, RegistryAttribute>();
 
         // TODO: Add registry monitoring from Dapplo.Windows.Advapi32
         // RegistryMonitor.ObserveChanges(RegistryHive.LocalMachine, subkey)
 
-        /// <inheritdoc />
-        public RegistryBase()
+        /// <summary>
+        /// Factory for IniSectionBase implementations
+        /// </summary>
+        /// <returns>TInterface</returns>
+        public static TInterface Create()
         {
-            Initialize(typeof(T));
+            return ConfigProxy.Create<TInterface>(new RegistryBase<TInterface>());
+        }
+
+        /// <inheritdoc />
+        protected RegistryBase()
+        {
+            Initialize(typeof(TInterface));
         }
 
         /// <summary>

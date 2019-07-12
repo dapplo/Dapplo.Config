@@ -27,7 +27,6 @@ using System.Reflection;
 using Dapplo.Config.Attributes;
 using Dapplo.Config.Interfaces;
 using Dapplo.Config.Intercepting;
-using Dapplo.Utils;
 
 namespace Dapplo.Config
 {
@@ -36,8 +35,16 @@ namespace Dapplo.Config
     /// DictionaryConfigurationBase is a IDictionary based configuration store
     /// </summary>
     /// <typeparam name="TInterface">The type of the configuration interface this class implements</typeparam>
-    public abstract class DictionaryConfigurationBase<TInterface> : DictionaryConfigurationBase<TInterface, object>
+    public class DictionaryConfigurationBase<TInterface> : DictionaryConfigurationBase<TInterface, object>
     {
+        /// <summary>
+        /// Factory for DictionaryConfigurationBase implementations
+        /// </summary>
+        /// <returns>TInterface</returns>
+        public static TInterface Create()
+        {
+            return ConfigProxy.Create<TInterface>(new DictionaryConfigurationBase<TInterface>());
+        }
     }
 
     /// <summary>
@@ -45,24 +52,14 @@ namespace Dapplo.Config
     /// </summary>
     /// <typeparam name="TInterface">The type of the configuration interface this class implements</typeparam>
     /// <typeparam name="TProperty">The type of the property value</typeparam>
-    public abstract class DictionaryConfigurationBase<TInterface, TProperty> : ConfigurationBase<TProperty>, IConfiguration<TProperty>
+    public class DictionaryConfigurationBase<TInterface, TProperty> : ConfigurationBase<TProperty>, IConfiguration<TProperty>
     {
         private IDictionary<string, TProperty> _properties;
 
         /// <inheritdoc />
-        public DictionaryConfigurationBase()
+        protected DictionaryConfigurationBase()
         {
             _properties = new ConcurrentDictionary<string, TProperty>(AbcComparer.Instance);
-            Initialize(typeof(TInterface));
-        }
-
-        /// <summary>
-        /// A way to specify the property values which need to be used
-        /// </summary>
-        /// <param name="properties">IDictionary with the properties to use</param>
-        protected DictionaryConfigurationBase(IDictionary<string, TProperty> properties)
-        {
-            _properties = new ConcurrentDictionary<string, TProperty>(properties, AbcComparer.Instance);
             Initialize(typeof(TInterface));
         }
 
@@ -374,7 +371,7 @@ namespace Dapplo.Config
             var type = GetType();
             var clonedValue = (DictionaryConfigurationBase<TInterface, TProperty>) Activator.CreateInstance(type);
             clonedValue.SetProperties(_properties);
-            return clonedValue;
+            return ConfigProxy.Create<TInterface>(clonedValue);
         }
 
         #endregion

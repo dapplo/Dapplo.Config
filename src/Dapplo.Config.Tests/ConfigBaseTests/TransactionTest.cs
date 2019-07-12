@@ -21,7 +21,6 @@
 
 #region using
 
-using Dapplo.Config.Tests.ConfigBaseTests.Entities;
 using Dapplo.Config.Tests.ConfigBaseTests.Interfaces;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
@@ -43,8 +42,8 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		{
 			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
 
-			_transactionTest = new TransactionImpl();
-		}
+			_transactionTest = DictionaryConfigurationBase<ITransactionTest>.Create();
+        }
 
 		[Fact]
 		public void TestTransactionCommit()

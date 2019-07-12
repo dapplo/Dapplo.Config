@@ -21,7 +21,6 @@
 
 #region using
 
-using Dapplo.Config.Tests.ConfigBaseTests.Entities;
 using Dapplo.Config.Tests.ConfigBaseTests.Interfaces;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
@@ -42,8 +41,8 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		public CloneableTest(ITestOutputHelper testOutputHelper)
 		{
 			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-			_cloneableTest = new CloneableImpl();
-		}
+			_cloneableTest = DictionaryConfigurationBase<ICloneableTest>.Create();
+        }
 
 		[Fact]
 		public void TestClone()

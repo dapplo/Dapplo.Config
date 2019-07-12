@@ -23,7 +23,6 @@
 
 using System.IO;
 using System.Threading.Tasks;
-using Dapplo.Config.Tests.IniTests.Entities;
 using Dapplo.Config.Tests.IniTests.Interfaces;
 using Dapplo.Config.Ini;
 using Dapplo.Config.Ini.Converters;
@@ -72,14 +71,17 @@ namespace Dapplo.Config.Tests.IniTests
         [Fact]
         public async Task TestIniAfterLoad()
         {
-            var iniConfigTest = new IniConfigTestImpl();
+            var iniConfigTest = IniSectionBase<IIniConfigTest>.Create();
             var iniContainer = CreateContainer("TestIniAfterLoad", iniConfigTest);
 
-            iniConfigTest.OnLoad = x =>
+            iniConfigTest.AfterLoad = x =>
             {
-                if (!x.SomeValues.ContainsKey("dapplo"))
+                if (x is IIniConfigTest iniConfig)
                 {
-                    x.SomeValues.Add("dapplo", 2015);
+                    if (!iniConfig.SomeValues.ContainsKey("dapplo"))
+                    {
+                        iniConfig.SomeValues.Add("dapplo", 2015);
+                    }
                 }
             };
             await LoadFromMemoryStreamAsync(iniContainer);
@@ -94,7 +96,7 @@ namespace Dapplo.Config.Tests.IniTests
         [Fact]
         public async Task TestIniFromFile()
         {
-            var iniConfigTest = new IniConfigTestImpl();
+            var iniConfigTest = IniSectionBase<IIniConfigTest>.Create();
             var iniContainer = CreateContainer("TestIniFromFile", iniConfigTest);
             await iniContainer.ReloadAsync();
 
@@ -106,7 +108,7 @@ namespace Dapplo.Config.Tests.IniTests
         [Fact]
         public async Task TestIniGeneral()
         {
-            var iniConfigTest = new IniConfigTestImpl();
+            var iniConfigTest = IniSectionBase<IIniConfigTest>.Create();
             var iniContainer = CreateContainer("TestIniGeneral", iniConfigTest);
             await iniContainer.ReloadAsync();
 
@@ -130,7 +132,7 @@ namespace Dapplo.Config.Tests.IniTests
         [Fact]
         public void TestIniNoLoading_Defaults()
         {
-            var iniConfigTest = new IniConfigTestImpl();
+            var iniConfigTest = IniSectionBase<IIniConfigTest>.Create();
             Assert.Equal(IniConfigTestValues.Value2, iniConfigTest.TestWithEnum);
         }
     }
