@@ -30,6 +30,7 @@ using Dapplo.Log;
 using Dapplo.Log.XUnit;
 using Xunit;
 using Xunit.Abstractions;
+using Dapplo.Config.Ini.Extensions;
 
 #endregion
 
@@ -71,23 +72,38 @@ namespace Dapplo.Config.Tests.IniTests
         [Fact]
         public async Task TestIniAfterLoad()
         {
-            var iniConfigTest = IniSectionBase<IIniConfigTest>.Create();
-            var iniContainer = CreateContainer("TestIniAfterLoad", iniConfigTest);
+            var iniConfigTest = IniSectionBase<IIniConfigTest>.Create()
+                .RegisterAfterLoad(x => {
+                    if (!(x is IIniConfigTest iniConfig))
+                    {
+                        return;
+                    }
 
-            iniConfigTest.AfterLoad = x =>
-            {
-                if (x is IIniConfigTest iniConfig)
-                {
                     if (!iniConfig.SomeValues.ContainsKey("dapplo"))
                     {
                         iniConfig.SomeValues.Add("dapplo", 2015);
                     }
-                }
-            };
+                })
+                .RegisterAfterLoad(x =>
+                {
+                    if (!(x is IIniConfigTest iniConfig))
+                    {
+                        return;
+                    }
+
+                    if (!iniConfig.SomeValues.ContainsKey("dapplo2"))
+                    {
+                        iniConfig.SomeValues.Add("dapplo2", 2016);
+                    }
+                });
+            var iniContainer = CreateContainer("TestIniAfterLoad", iniConfigTest);
+
+           
             await LoadFromMemoryStreamAsync(iniContainer);
 
             Assert.True(iniConfigTest.SomeValues.ContainsKey("dapplo"));
             Assert.True(iniConfigTest.SomeValues["dapplo"] == 2015);
+            Assert.True(iniConfigTest.SomeValues["dapplo2"] == 2016);
         }
 
         /// <summary>

@@ -24,7 +24,7 @@
 using System.Collections.Generic;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
-using Dapplo.Utils.Extensions;
+using Dapplo.Config.Extensions;
 using Xunit;
 using Xunit.Abstractions;
 
