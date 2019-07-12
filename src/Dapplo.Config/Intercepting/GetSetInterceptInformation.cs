@@ -23,7 +23,7 @@ using System;
 using System.Reflection;
 using System.Linq;
 using Dapplo.Config.Attributes;
-using Dapplo.Utils.Extensions;
+using Dapplo.Config.Extensions;
 using System.Collections.Generic;
 
 namespace Dapplo.Config.Intercepting

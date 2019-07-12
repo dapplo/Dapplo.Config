@@ -21,6 +21,7 @@
 
 #region using
 
+using System;
 using System.Collections.Generic;
 using Dapplo.Config.Interfaces;
 
@@ -34,26 +35,26 @@ namespace Dapplo.Config.Ini
 	public interface IIniSection : IConfiguration<object>
 	{
 		/// <summary>
-		///     This is called after the loading of the IniSection is finished and can be used to modify certain values before they are being used.
-		/// </summary>
-		void AfterLoad();
+        /// This action is called after loading
+        /// </summary>
+		Action<IIniSection> AfterLoad { get; set; }
 
-		/// <summary>
-		///     This is called after the saving of the IniSection is finished and can be used to modify certain values
-		/// </summary>
-		void AfterSave();
+        /// <summary>
+        ///     This is called after the saving of the IniSection is finished and can be used to modify certain values
+        /// </summary>
+        Action<IIniSection> AfterSave { get; set; }
 
-		/// <summary>
-		///     This is called before the saving of the IniSection is started and can be used to modify certain values
-		/// </summary>
-		void BeforeSave();
+        /// <summary>
+        ///     This is called before the saving of the IniSection is started and can be used to modify certain values
+        /// </summary>
+        Action<IIniSection> BeforeSave { get; set; }
 
-		/// <summary>
-		///     Get the IniValue for a property, this is quicker and uses less memory than to iterate over the GetIniValues result
-		/// </summary>
-		/// <param name="propertyName">Name of the property</param>
-		/// <returns>IniValue</returns>
-		IniValue GetIniValue(string propertyName);
+        /// <summary>
+        ///     Get the IniValue for a property, this is quicker and uses less memory than to iterate over the GetIniValues result
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <returns>IniValue</returns>
+        IniValue GetIniValue(string propertyName);
 
 		/// <summary>
 		///     Retrieve all the ini values

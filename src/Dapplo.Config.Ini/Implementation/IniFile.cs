@@ -28,7 +28,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapplo.Log;
-using Dapplo.Utils;
 
 #endregion
 
@@ -44,10 +43,7 @@ namespace Dapplo.Config.Ini.Implementation
 		private const string Comment = ";";
 		private static readonly LogSource Log = new LogSource();
 
-		private static readonly char[] Assignment =
-		{
-			'='
-		};
+		private static readonly char[] Assignment = { '=' };
 
 		/// <summary>
 		///     Read an ini file to a Dictionary, each key is a iniSection and the value is a Dictionary with name and values.
@@ -116,17 +112,17 @@ namespace Dapplo.Config.Ini.Implementation
 				}
 				else
 				{
-					var keyvalueSplitter = line.Split(Assignment, 2);
-					var name = keyvalueSplitter[0];
-					var inivalue = keyvalueSplitter.Length > 1 ? keyvalueSplitter[1] : null;
-					inivalue = ReadEscape(inivalue);
+					var keyValueSplitter = line.Split(Assignment, 2);
+					var name = keyValueSplitter[0];
+					var iniValue = keyValueSplitter.Length > 1 ? keyValueSplitter[1] : null;
+					iniValue = ReadEscape(iniValue);
 					if (nameValues.ContainsKey(name))
 					{
-						nameValues[name] = inivalue;
+						nameValues[name] = iniValue;
 					}
 					else
 					{
-						nameValues.Add(name, inivalue);
+						nameValues.Add(name, iniValue);
 					}
 				}
 			}

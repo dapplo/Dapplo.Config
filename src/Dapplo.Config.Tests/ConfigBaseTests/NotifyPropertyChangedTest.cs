@@ -23,7 +23,6 @@
 
 using System;
 using System.ComponentModel;
-using Dapplo.Config.Tests.ConfigBaseTests.Entities;
 using Dapplo.Config.Tests.ConfigBaseTests.Interfaces;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
@@ -46,7 +45,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		public NotifyPropertyChangedTest(ITestOutputHelper testOutputHelper)
 		{
 			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-			_notifyPropertyChangedTest = new NotifyPropertyChangedImpl();
+			_notifyPropertyChangedTest = DictionaryConfigurationBase<INotifyPropertyChangedTest>.Create();
 		}
 
 		/// <summary>

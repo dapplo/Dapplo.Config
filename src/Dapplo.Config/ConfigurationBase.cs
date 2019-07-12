@@ -25,15 +25,15 @@ using System.Reflection;
 using Dapplo.Config.Attributes;
 using Dapplo.Config.Interfaces;
 using Dapplo.Config.Intercepting;
+using Dapplo.Config.Extensions;
 using Dapplo.Log;
-using Dapplo.Utils;
-using Dapplo.Utils.Extensions;
-using AutoProperties;
+
+using IShallowCloneable = Dapplo.Config.Interfaces.IShallowCloneable;
 
 namespace Dapplo.Config
 {
     /// <summary>
-    /// Genericless base class, making sure we only define the statics once
+    /// Generic-less base class, solving an issue that static members are created per generic type
     /// </summary>
     public abstract class ConfigurationBase
     {
@@ -42,24 +42,6 @@ namespace Dapplo.Config
         /// </summary>
         protected static readonly LogSource Log = new LogSource();
 
-        /// <summary>
-        /// Cached values for the GetSetInterceptInformation so this only needs to be calculated once per type
-        /// </summary>
-        protected static readonly IDictionary<Type, GetSetInterceptInformation> InterceptInformationCache = new Dictionary<Type, GetSetInterceptInformation>();
-        /// <summary>
-        /// Cached values for the PropertiesInformation so this only needs to be calculated once per type
-        /// </summary>
-        protected static readonly IDictionary<Type, PropertiesInformation> PropertiesInformationCache = new Dictionary<Type, PropertiesInformation>();
-    }
-
-    /// <summary>
-    /// An abstract non generic ConfigurationBase.
-    /// This defines the API for the configuration based implementations.
-    /// If you want to extend the functionality, extend this (or other classes) and implement
-    /// a void xxxxxxxGetter(GetInfo) or void xxxxxxxxSetter(SetInfo) which has a InterceptOrderAttribute
-    /// </summary>
-    public abstract class ConfigurationBase<TProperty> : ConfigurationBase, IShallowCloneable, ITransactionalProperties, IDescription, ITagging, IDefaultValue
-    {
         /// <summary>
         /// This is the information for the properties, so we don't need a IDictionary lookup each time
         /// </summary>
@@ -70,30 +52,72 @@ namespace Dapplo.Config
         /// </summary>
         protected GetSetInterceptInformation InterceptInformation;
 
-        #region Interceptor
+        /// <summary>
+        /// Cached values for the GetSetInterceptInformation so this only needs to be calculated once per type
+        /// </summary>
+        protected static readonly IDictionary<Type, GetSetInterceptInformation> InterceptInformationCache = new Dictionary<Type, GetSetInterceptInformation>();
+        /// <summary>
+        /// Cached values for the PropertiesInformation so this only needs to be calculated once per type
+        /// </summary>
+        protected static readonly IDictionary<Type, PropertiesInformation> PropertiesInformationCache = new Dictionary<Type, PropertiesInformation>();
+
+        /// <summary>
+        /// Get all the property names
+        /// </summary>
+        public IEnumerable<string> PropertyNames() => PropertiesInformation.PropertyInfos.Keys;
+
+        /// <summary>
+        /// Try get the PropertyInfo for the specified propertyName
+        /// </summary>
+        /// <param name="propertyName">string</param>
+        /// <param name="propertyInfo">PropertyInfo</param>
+        /// <returns>bool telling if the try worked</returns>
+        protected bool TryGetPropertyInfoFor(string propertyName, out PropertyInfo propertyInfo)
+        {
+            return PropertiesInformation.PropertyInfos.TryGetValue(propertyName, out propertyInfo);
+        }
+
+        /// <summary>
+        /// Helper method to get the property info for a property
+        /// </summary>
+        /// <param name="propertyName">string</param>
+        /// <returns></returns>
+        protected PropertyInfo PropertyInfoFor(string propertyName) => PropertiesInformation.PropertyInfoFor(propertyName);
 
         /// <summary>
         /// Get the backing value for the specified property
         /// </summary>
         /// <param name="propertyName">string</param>
         /// <returns>TProperty</returns>
-        [GetInterceptor]
-        public virtual object Getter(string propertyName)
-        {
-            return GetValue(propertyName).Value;
-        }
+        public abstract object Getter(string propertyName);
 
         /// <summary>
         /// Set the backing value for the specified property
         /// </summary>
         /// <param name="propertyName">string</param>
         /// <param name="newValue">object</param>
-        [SetInterceptor]
-        public virtual void Setter(string propertyName, object newValue)
+        public abstract void Setter(string propertyName, object newValue);
+    }
+
+    /// <summary>
+    /// An abstract non generic ConfigurationBase.
+    /// This defines the API for the configuration based implementations.
+    /// If you want to extend the functionality, extend this (or other classes) and implement
+    /// a void xxxxxxxGetter(GetInfo) or void xxxxxxxxSetter(SetInfo) which has a InterceptOrderAttribute
+    /// </summary>
+    public abstract class ConfigurationBase<TProperty> : ConfigurationBase, IShallowCloneable, ITransactionalProperties, IDescription, ITagging, IDefaultValue
+    {
+        /// <inheritdoc />
+        public override object Getter(string propertyName)
+        {
+            return GetValue(propertyName).Value;
+        }
+
+        /// <inheritdoc />
+        public override void Setter(string propertyName, object newValue)
         {
             SetValue(PropertyInfoFor(propertyName), (TProperty)newValue);
         }
-        #endregion
 
         /// <summary>
         /// Initialize the whole thing, this should be called from the final class
@@ -128,29 +152,6 @@ namespace Dapplo.Config
         {
 
         }
-
-        /// <summary>
-        /// Get all the property names
-        /// </summary>
-        public IEnumerable<string> PropertyNames() => PropertiesInformation.PropertyInfos.Keys;
-
-        /// <summary>
-        /// Try get the PropertyInfo for the specified propertyName
-        /// </summary>
-        /// <param name="propertyName">string</param>
-        /// <param name="propertyInfo">PropertyInfo</param>
-        /// <returns>bool telling if the try worked</returns>
-        protected bool TryGetPropertyInfoFor(string propertyName, out PropertyInfo propertyInfo)
-        {
-            return PropertiesInformation.PropertyInfos.TryGetValue(propertyName, out propertyInfo);
-        }
-
-        /// <summary>
-        /// Helper method to get the property info for a property
-        /// </summary>
-        /// <param name="propertyName">string</param>
-        /// <returns></returns>
-        protected PropertyInfo PropertyInfoFor(string propertyName) => PropertiesInformation.PropertyInfoFor(propertyName);
 
         /// <summary>
         /// This is the internal way of getting information for a property
@@ -190,7 +191,6 @@ namespace Dapplo.Config
             }
             return getInfo;
         }
-
 
         /// <summary>
         /// Set the backing value for the specified property
@@ -497,6 +497,7 @@ namespace Dapplo.Config
         {
             var clonedValue = Activator.CreateInstance(GetType()) as ConfigurationBase<TProperty>;
             clonedValue?.Initialize(GetType());
+
             return clonedValue;
         }
         #endregion

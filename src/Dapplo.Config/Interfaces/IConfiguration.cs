@@ -21,7 +21,6 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
-using Dapplo.Utils;
 
 namespace Dapplo.Config.Interfaces
 {

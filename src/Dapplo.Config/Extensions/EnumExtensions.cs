@@ -19,12 +19,34 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-using Dapplo.Config.Tests.ConfigBaseTests.Interfaces;
 
-namespace Dapplo.Config.Tests.ConfigBaseTests.Entities
+using System;
+using System.Reflection;
+using System.Runtime.Serialization;
+
+namespace Dapplo.Config.Extensions
 {
-    internal class DescriptionImpl : DictionaryConfigurationBase<IDescriptionTest>, IDescriptionTest
-    {
-        public string Name { get; set; }
-    }
+	/// <summary>
+	///     Extensions for enums
+	/// </summary>
+	public static class EnumExtensions
+	{
+		/// <summary>
+		///     The returns the Value from the EnumMemberAttribute, or a ToString on the element.
+		///     This can be used to create a lookup from string to enum element
+		/// </summary>
+		/// <param name="enumerationItem">Enum</param>
+		/// <returns>string</returns>
+		public static string EnumValueOf(this Enum enumerationItem)
+		{
+			if (enumerationItem == null)
+			{
+				return null;
+			}
+
+			var enumString = enumerationItem.ToString();
+			var attribute = enumerationItem.GetType().GetRuntimeField(enumString)?.GetAttribute<EnumMemberAttribute>(false);
+			return attribute != null ? attribute.Value : enumString;
+		}
+	}
 }

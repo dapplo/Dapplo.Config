@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>Dapplo.Config provides an easy to use configuration class, assisted by AutoProperties.Fody</Description>
     <AssemblyTitle>Dapplo.Config</AssemblyTitle>
@@ -13,10 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="Dapplo.Log" Version="1.3.21" />
-    <PackageReference Include="Dapplo.Utils" Version="1.1.21" />
-    <PackageReference Include="AutoProperties.Fody" Version="1.21.0">
-      <IncludeAssets>all</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="System.Reflection.DispatchProxy" Version="4.5.1" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
@@ -26,6 +23,12 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.Serialization" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.1\Microsoft.VisualBasic.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

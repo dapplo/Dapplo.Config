@@ -12,16 +12,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoProperties.Fody" Version="1.21.0" />
     <PackageReference Include="Dapplo.Log" Version="1.3.21" />
-    <PackageReference Include="Dapplo.Utils" Version="1.1.21" />
   </ItemGroup>
   
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="2.1.1" />
   </ItemGroup>
   
-    <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461' OR '$(TargetFramework)' == 'net471'">
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
@@ -31,16 +29,6 @@
     <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net471' ">
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.VisualBasic" />
-    <Reference Include="System" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Caching" />
-    <Reference Include="System.Runtime.Serialization" />
-  </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Dapplo.Config\Dapplo.Config.csproj" />
   </ItemGroup>

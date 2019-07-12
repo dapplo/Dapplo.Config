@@ -22,7 +22,6 @@
 #region using
 
 using System.ComponentModel;
-using Dapplo.Config.Tests.ConfigBaseTests.Entities;
 using Dapplo.Config.Tests.ConfigBaseTests.Interfaces;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
@@ -44,7 +43,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		public NotifyPropertyChangingTest(ITestOutputHelper testOutputHelper)
 		{
 			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-			_notifyPropertyChangingTest = new NotifyPropertyChangingImpl();
+			_notifyPropertyChangingTest = DictionaryConfigurationBase<INotifyPropertyChangingTest>.Create();
 		}
 
 		[Fact]

@@ -22,7 +22,6 @@
 #region using
 
 using System;
-using Dapplo.Config.Tests.ConfigBaseTests.Entities;
 using Dapplo.Config.Tests.ConfigBaseTests.Interfaces;
 using Dapplo.Log;
 using Dapplo.Log.XUnit;
@@ -44,8 +43,8 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		public WriteProtectTest(ITestOutputHelper testOutputHelper)
 		{
 			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-			_writeProtectTest = new WriteProtectImpl();
-		}
+			_writeProtectTest = DictionaryConfigurationBase<IWriteProtectTest>.Create();
+        }
 
 		[Fact]
 		public void TestAccessViolation()
