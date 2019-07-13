@@ -32,23 +32,23 @@ namespace Dapplo.Config
 {
 
     /// <summary>
-    /// DictionaryConfigurationBase is a IDictionary based configuration store
+    /// DictionaryConfiguration is a IDictionary based configuration store
     /// </summary>
     /// <typeparam name="TInterface">The type of the configuration interface this class implements</typeparam>
-    public class DictionaryConfigurationBase<TInterface> : DictionaryConfigurationBase<TInterface, object>
+    public class DictionaryConfiguration<TInterface> : DictionaryConfigurationBase<TInterface, object>
     {
         /// <summary>
-        /// Factory for DictionaryConfigurationBase implementations
+        /// Factory for DictionaryConfiguration implementations
         /// </summary>
         /// <returns>TInterface</returns>
         public static TInterface Create()
         {
-            return ConfigProxy.Create<TInterface>(new DictionaryConfigurationBase<TInterface>());
+            return ConfigProxy.Create<TInterface>(new DictionaryConfiguration<TInterface>());
         }
     }
 
     /// <summary>
-    /// DictionaryConfigurationBase is a IDictionary based configuration store
+    /// DictionaryConfiguration is a IDictionary based configuration store
     /// </summary>
     /// <typeparam name="TInterface">The type of the configuration interface this class implements</typeparam>
     /// <typeparam name="TProperty">The type of the property value</typeparam>

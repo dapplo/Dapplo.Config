@@ -41,7 +41,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		public HasChangesTests(ITestOutputHelper testOutputHelper)
 		{
 			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-			_hasChangesTest = DictionaryConfigurationBase<IHasChangesTest>.Create();
+			_hasChangesTest = DictionaryConfiguration<IHasChangesTest>.Create();
 			_hasChangesTest.TrackChanges();
 		}
 

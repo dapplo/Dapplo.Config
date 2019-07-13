@@ -30,6 +30,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Dapplo.Config.Intercepting;
 using Timer = System.Timers.Timer;
 
 namespace Dapplo.Config.Ini
@@ -240,7 +241,9 @@ namespace Dapplo.Config.Ini
             }
 
             // After load
-            iniSection.AfterLoad?.Invoke(iniSection);
+            var configProxy = iniSection as ConfigProxy;
+            var implementation = configProxy.Target as IIniSectionInternal;
+            implementation.AfterLoad(iniSection);
 
             iniSection.ResetHasChanges();
 
@@ -415,7 +418,9 @@ namespace Dapplo.Config.Ini
                         // TODO: Do we need to skip read/write protected values here?
                         defaultValueInterface.RestoreToDefault(propertyName);
                     }
-                    iniSection.AfterLoad?.Invoke(iniSection);
+                    var configProxy = iniSection as ConfigProxy;
+                    var implementation = configProxy.Target as IIniSectionInternal;
+                    implementation.AfterLoad(iniSection);
                 }
             }
         }
@@ -492,15 +497,17 @@ namespace Dapplo.Config.Ini
             // Loop over the "registered" sections
             foreach (var iniSection in _iniSections.Values)
             {
-                iniSection.BeforeSave?.Invoke(iniSection);
-                
+                var configProxy = iniSection as ConfigProxy;
+                var implementation = configProxy.Target as IIniSectionInternal;
+                implementation.BeforeSave(iniSection);
+
                 try
                 {
                     CreateSaveValues(iniSection, iniSectionsComments);
                 }
                 finally
                 {
-                    iniSection.AfterSave?.Invoke(iniSection);
+                    implementation.BeforeSave(iniSection);
                 }
             }
             await IniFile.WriteAsync(stream, _iniFileConfig.FileEncoding, _ini, iniSectionsComments, cancellationToken).ConfigureAwait(false);

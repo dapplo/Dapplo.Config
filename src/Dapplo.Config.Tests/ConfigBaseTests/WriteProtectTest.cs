@@ -43,7 +43,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		public WriteProtectTest(ITestOutputHelper testOutputHelper)
 		{
 			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-			_writeProtectTest = DictionaryConfigurationBase<IWriteProtectTest>.Create();
+			_writeProtectTest = DictionaryConfiguration<IWriteProtectTest>.Create();
         }
 
 		[Fact]

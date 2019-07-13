@@ -42,7 +42,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		{
 			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
 
-			_transactionTest = DictionaryConfigurationBase<ITransactionTest>.Create();
+			_transactionTest = DictionaryConfiguration<ITransactionTest>.Create();
         }
 
 		[Fact]

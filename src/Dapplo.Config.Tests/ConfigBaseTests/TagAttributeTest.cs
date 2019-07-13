@@ -48,7 +48,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		public TagAttributeTest(ITestOutputHelper testOutputHelper)
 		{
 			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-			_tagAttributeTest = DictionaryConfigurationBase<ITagAttributeTest>.Create();
+			_tagAttributeTest = DictionaryConfiguration<ITagAttributeTest>.Create();
 		}
 
 		[Fact]

@@ -46,7 +46,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
             LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-            _defaultValueTest = DictionaryConfigurationBase<IDefaultValueTest>.Create();
+            _defaultValueTest = DictionaryConfiguration<IDefaultValueTest>.Create();
         }
 
         [Fact]
@@ -60,7 +60,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
         [Fact]
         public void TestDefaultValueOverwrite()
         {
-            var defaultValueOverwriteTest = DictionaryConfigurationBase<IDefaultValueOverwriteTest>.Create();
+            var defaultValueOverwriteTest = DictionaryConfiguration<IDefaultValueOverwriteTest>.Create();
             Assert.Equal(42, defaultValueOverwriteTest.Age);
         }
 
@@ -92,7 +92,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
         public void TestDefaultValueWithError()
         {
             // TODO: Is this correct?
-            IDefaultValueWithErrorTest value = DictionaryConfigurationBase<IDefaultValueWithErrorTest>.Create();
+            IDefaultValueWithErrorTest value = DictionaryConfiguration<IDefaultValueWithErrorTest>.Create();
             // Should be the default enum value
             Assert.Equal(SimpleEnum.Value1, value.MyEnum);
         }

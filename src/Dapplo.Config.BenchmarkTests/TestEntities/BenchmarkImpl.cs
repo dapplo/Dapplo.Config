@@ -2,7 +2,7 @@
 
 namespace Dapplo.Config.BenchmarkTests.TestEntities
 {
-    public class BenchmarkImpl : DictionaryConfigurationBase<IBenchmarkInterface>, IBenchmarkInterface
+    public class BenchmarkImpl : DictionaryConfiguration<IBenchmarkInterface>, IBenchmarkInterface
     {
         #region Implementation of IBenchmarkInterface
 

@@ -43,7 +43,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		public NotifyPropertyChangingTest(ITestOutputHelper testOutputHelper)
 		{
 			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-			_notifyPropertyChangingTest = DictionaryConfigurationBase<INotifyPropertyChangingTest>.Create();
+			_notifyPropertyChangingTest = DictionaryConfiguration<INotifyPropertyChangingTest>.Create();
 		}
 
 		[Fact]

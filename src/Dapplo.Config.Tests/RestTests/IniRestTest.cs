@@ -65,7 +65,7 @@ namespace Dapplo.Config.Tests.RestTests
 		[Fact]
 		public async Task TestIniRest()
 		{
-			var iniTest = IniSectionBase<IIniRestTest>.Create();
+			var iniTest = IniSection<IIniRestTest>.Create();
 			var iniContainer = CreateContainer("TestIniRest", iniTest);
 
 			iniTest.Name = Name;

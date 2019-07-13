@@ -25,9 +25,17 @@ using System.ComponentModel;
 namespace Dapplo.Config.Interfaces
 {
     /// <summary>
+    /// Marker interface
+    /// </summary>
+    public interface IConfiguration
+    {
+
+    }
+
+    /// <summary>
     /// The base interface for configuration classes
     /// </summary>
-    public interface IConfiguration<TProperty> : IDescription, IWriteProtectProperties, IHasChanges, IDefaultValue, INotifyPropertyChanged, INotifyPropertyChanging, ITransactionalProperties, ITagging, IShallowCloneable
+    public interface IConfiguration<TProperty> : IConfiguration, IDescription, IWriteProtectProperties, IHasChanges, IDefaultValue, INotifyPropertyChanged, INotifyPropertyChanging, ITransactionalProperties, ITagging, IShallowCloneable
     {
         /// <summary>
         /// Return all properties with their current value

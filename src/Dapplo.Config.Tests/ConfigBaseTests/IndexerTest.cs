@@ -40,7 +40,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
         public IndexerTest(ITestOutputHelper testOutputHelper)
 		{
 			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-			_indexerTest = DictionaryConfigurationBase<IIndexerTest>.Create();
+			_indexerTest = DictionaryConfiguration<IIndexerTest>.Create();
 
 			_indexerImpl = (_indexerTest as ConfigProxy).Target;
 		}

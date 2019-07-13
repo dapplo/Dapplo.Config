@@ -66,7 +66,7 @@ namespace Dapplo.Config.Tests.LanguageTests
         [Fact]
 		public async Task Test_LanguageChanged()
         {
-	        var languageLoaderTest = LanguageBase<ILanguageLoaderTest>.Create();
+	        var languageLoaderTest = Language<ILanguageLoaderTest>.Create();
             var languageContainer = await CreateContainer(languageLoaderTest);
 			var changed = false;
 			var eventRegistration = languageLoaderTest.OnLanguageChanged(sender => changed = true);
@@ -79,7 +79,7 @@ namespace Dapplo.Config.Tests.LanguageTests
 	    [Fact]
 	    public async Task Test_Enumerable()
 	    {
-		    var languageLoaderTest = LanguageBase<ILanguageLoaderTest>.Create();
+		    var languageLoaderTest = Language<ILanguageLoaderTest>.Create();
             var languageContainer = await CreateContainer(languageLoaderTest);
             var prefixes = languageContainer.Select(l => l.PrefixName()).ToList();
             Assert.Contains("Test", prefixes);
@@ -89,7 +89,7 @@ namespace Dapplo.Config.Tests.LanguageTests
         [Fact]
 		public async Task TestExtension()
 		{
-			var languageLoaderTest = LanguageBase<ILanguageLoaderTest>.Create();
+			var languageLoaderTest = Language<ILanguageLoaderTest>.Create();
             var _ = await CreateContainer(languageLoaderTest);
 
             ILanguageLoaderTest test = null;
@@ -108,7 +108,7 @@ namespace Dapplo.Config.Tests.LanguageTests
 		[Fact]
 		public async Task TestIndexer()
 		{
-			var languageLoaderTest = LanguageBase<ILanguageLoaderTest>.Create();
+			var languageLoaderTest = Language<ILanguageLoaderTest>.Create();
             var languageContainer = await CreateContainer(languageLoaderTest);
 			await languageContainer.ChangeLanguageAsync("nl-NL");
 			var afbreken = languageLoaderTest["TestValue"];
@@ -127,7 +127,7 @@ namespace Dapplo.Config.Tests.LanguageTests
 		[Fact]
 		public async Task TestINotifyPropertyChanged()
 		{
-			var languageLoaderTest = LanguageBase<ILanguageLoaderTest>.Create();
+			var languageLoaderTest = Language<ILanguageLoaderTest>.Create();
             var languageContainer = await CreateContainer(languageLoaderTest);
 			var hasChanges = false;
 			var propChanged = new PropertyChangedEventHandler((sender, eventArgs) =>
@@ -149,7 +149,7 @@ namespace Dapplo.Config.Tests.LanguageTests
 		[Fact]
 		public async Task TestLanguagePart()
 		{
-			var languageLoaderTest = LanguageBase<ILanguageLoaderTest>.Create();
+			var languageLoaderTest = Language<ILanguageLoaderTest>.Create();
             var _ = await CreateContainer(languageLoaderTest);
 
 			var partType = (ILanguageLoaderPartTest) languageLoaderTest;
@@ -160,7 +160,7 @@ namespace Dapplo.Config.Tests.LanguageTests
 		[Fact]
 		public async Task TestModules()
 		{
-			ILanguageLoaderMyModuleTest loaderMyModuleTest = LanguageBase<ILanguageLoaderMyModuleTest>.Create();
+			ILanguageLoaderMyModuleTest loaderMyModuleTest = Language<ILanguageLoaderMyModuleTest>.Create();
 			var languageContainer = await CreateContainer(loaderMyModuleTest);
 			// Make sure that the module (for testing) is available, we count all file-path which end with the filename 
 			var count = languageContainer.Files["en-US"].Count(file => file.EndsWith("language_mymodule-en-US.ini"));
@@ -171,7 +171,7 @@ namespace Dapplo.Config.Tests.LanguageTests
 		[Fact]
 		public async Task TestTranslations()
 		{
-			var languageLoaderTest = LanguageBase<ILanguageLoaderTest>.Create();
+			var languageLoaderTest = Language<ILanguageLoaderTest>.Create();
             var languageContainer = await CreateContainer(languageLoaderTest);
 
 			Assert.True(languageContainer.AvailableLanguages.ContainsKey("nl-NL"));

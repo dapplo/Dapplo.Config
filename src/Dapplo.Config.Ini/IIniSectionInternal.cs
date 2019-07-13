@@ -19,34 +19,27 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-#region using
-
-using Dapplo.Config.Tests.ConfigBaseTests.Interfaces;
-using Dapplo.Log;
-using Dapplo.Log.XUnit;
-using Xunit;
-using Xunit.Abstractions;
-
-#endregion
-
-namespace Dapplo.Config.Tests.ConfigBaseTests
+namespace Dapplo.Config.Ini
 {
-	public class BassicAssignTest
-	{
-		private readonly IBassicAssignTest _bassicAssignTest;
+	/// <summary>
+	///     By making your property proxy interface extend this, you will be able to write the property to an ini file
+	/// </summary>
+	public interface IIniSectionInternal
+    {
 
-		public BassicAssignTest(ITestOutputHelper testOutputHelper)
-		{
-			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-			_bassicAssignTest = DictionaryConfiguration<IBassicAssignTest>.Create();
-        }
+        /// <summary>
+        ///     This is called after the loading of the IniSection is finished and can be used to modify certain values before they are being used.
+        /// </summary>
+        void AfterLoad(IIniSection iniSection);
 
-		[Fact]
-		public void TestAssign()
-		{
-			const string testValue = "Robin";
-			_bassicAssignTest.Name = testValue;
-			Assert.Equal(testValue, _bassicAssignTest.Name);
-		}
-	}
+        /// <summary>
+        ///     This is called after the saving of the IniSection is finished and can be used to modify certain values
+        /// </summary>
+        void AfterSave(IIniSection iniSection);
+
+        /// <summary>
+        ///     This is called before the saving of the IniSection is started and can be used to modify certain values
+        /// </summary>
+        void BeforeSave(IIniSection iniSection);
+    }
 }

@@ -19,8 +19,6 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-#region using
-
 using Dapplo.Config.Language.Implementation;
 using System;
 using System.Collections.Generic;
@@ -28,14 +26,12 @@ using System.Linq;
 using System.Reflection;
 using Dapplo.Config.Intercepting;
 
-#endregion
-
 namespace Dapplo.Config.Language
 {
 	/// <summary>
 	///     Base Language functionality
 	/// </summary>
-	public class LanguageBase<TInterface> : DictionaryConfigurationBase<TInterface, string>, ILanguage, ILanguageInternal
+	public class Language<TInterface> : DictionaryConfigurationBase<TInterface, string>, ILanguage, ILanguageInternal
     {
 		private readonly LanguageAttribute _languageAttribute = typeof(TInterface).GetCustomAttribute<LanguageAttribute>();
         private readonly IDictionary<string, string> _translationsWithoutProperty = new Dictionary<string, string>(AbcComparer.Instance);
@@ -46,19 +42,19 @@ namespace Dapplo.Config.Language
         /// <returns>TInterface</returns>
         public static TInterface Create()
         {
-	        return ConfigProxy.Create<TInterface>(new LanguageBase<TInterface>());
+	        return ConfigProxy.Create<TInterface>(new Language<TInterface>());
         }
 
         /// <summary>
         /// Prevent new-ing
         /// </summary>
-        protected LanguageBase()
+        protected Language()
         {
 
         }
 
         /// <summary>
-        /// Set via the DictionaryConfigurationBase when supported by a property
+        /// Set via the DictionaryConfiguration when supported by a property
         /// or use the _translationsWithoutPropery if not.
         /// </summary>
         /// <param name="propertyName">string</param>

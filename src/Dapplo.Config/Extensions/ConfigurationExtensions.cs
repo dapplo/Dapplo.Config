@@ -19,34 +19,32 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-#region using
+using Dapplo.Config.Intercepting;
+using Dapplo.Config.Interfaces;
 
-using Dapplo.Config.Tests.ConfigBaseTests.Interfaces;
-using Dapplo.Log;
-using Dapplo.Log.XUnit;
-using Xunit;
-using Xunit.Abstractions;
-
-#endregion
-
-namespace Dapplo.Config.Tests.ConfigBaseTests
+namespace Dapplo.Config.Extensions
 {
-	public class BassicAssignTest
-	{
-		private readonly IBassicAssignTest _bassicAssignTest;
+    /// <summary>
+    ///     Configuration extensions
+    /// </summary>
+    public static class ConfigurationExtensions
+    {
+        /// <summary>
+        /// A convenience extension to get the target typed. 
+        /// </summary>
+        /// <typeparam name="TTarget">Type of the target</typeparam>
+        /// <param name="configuration">IConfiguration</param>
+        /// <returns>TConfig</returns>
+        public static TTarget Target<TTarget>(this IConfiguration configuration)
+            where TTarget : ConfigurationBase
+        {
+            // ReSharper disable once SuspiciousTypeConversion.Global
+            if (configuration is ConfigProxy configProxy)
+            {
+                return configProxy.Target as TTarget;
+            }
 
-		public BassicAssignTest(ITestOutputHelper testOutputHelper)
-		{
-			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-			_bassicAssignTest = DictionaryConfiguration<IBassicAssignTest>.Create();
+            return null;
         }
-
-		[Fact]
-		public void TestAssign()
-		{
-			const string testValue = "Robin";
-			_bassicAssignTest.Name = testValue;
-			Assert.Equal(testValue, _bassicAssignTest.Name);
-		}
-	}
+    }
 }

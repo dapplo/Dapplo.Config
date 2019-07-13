@@ -39,7 +39,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		public DescriptionTest(ITestOutputHelper testOutputHelper)
 		{
 			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-            _descriptionTest = DictionaryConfigurationBase<IDescriptionTest>.Create();
+            _descriptionTest = DictionaryConfiguration<IDescriptionTest>.Create();
         }
 
 		[Fact]

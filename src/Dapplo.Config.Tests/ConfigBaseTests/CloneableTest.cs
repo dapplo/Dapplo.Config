@@ -41,7 +41,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		public CloneableTest(ITestOutputHelper testOutputHelper)
 		{
 			LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-			_cloneableTest = DictionaryConfigurationBase<ICloneableTest>.Create();
+			_cloneableTest = DictionaryConfiguration<ICloneableTest>.Create();
         }
 
 		[Fact]

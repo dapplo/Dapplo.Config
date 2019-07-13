@@ -19,8 +19,6 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-#region using
-
 using System.IO;
 using System.Threading.Tasks;
 using Dapplo.Config.Tests.IniTests.Interfaces;
@@ -30,12 +28,10 @@ using Dapplo.Log;
 using Dapplo.Log.XUnit;
 using Xunit;
 using Xunit.Abstractions;
-using Dapplo.Config.Ini.Extensions;
-
-#endregion
 
 namespace Dapplo.Config.Tests.IniTests
 {
+
     public sealed class IniContainerTests
     {
         public IniContainerTests(ITestOutputHelper testOutputHelper)
@@ -72,8 +68,9 @@ namespace Dapplo.Config.Tests.IniTests
         [Fact]
         public async Task TestIniAfterLoad()
         {
-            var iniConfigTest = IniSectionBase<IIniConfigTest>.Create()
-                .RegisterAfterLoad(x => {
+            var iniConfigTest = IniConfigTest.Create(out var iniConfigTestTarget);
+            iniConfigTestTarget.OnAfterLoad = x =>
+                {
                     if (!(x is IIniConfigTest iniConfig))
                     {
                         return;
@@ -83,19 +80,8 @@ namespace Dapplo.Config.Tests.IniTests
                     {
                         iniConfig.SomeValues.Add("dapplo", 2015);
                     }
-                })
-                .RegisterAfterLoad(x =>
-                {
-                    if (!(x is IIniConfigTest iniConfig))
-                    {
-                        return;
-                    }
+                };
 
-                    if (!iniConfig.SomeValues.ContainsKey("dapplo2"))
-                    {
-                        iniConfig.SomeValues.Add("dapplo2", 2016);
-                    }
-                });
             var iniContainer = CreateContainer("TestIniAfterLoad", iniConfigTest);
 
            
@@ -103,7 +89,6 @@ namespace Dapplo.Config.Tests.IniTests
 
             Assert.True(iniConfigTest.SomeValues.ContainsKey("dapplo"));
             Assert.True(iniConfigTest.SomeValues["dapplo"] == 2015);
-            Assert.True(iniConfigTest.SomeValues["dapplo2"] == 2016);
         }
 
         /// <summary>
@@ -112,7 +97,7 @@ namespace Dapplo.Config.Tests.IniTests
         [Fact]
         public async Task TestIniFromFile()
         {
-            var iniConfigTest = IniSectionBase<IIniConfigTest>.Create();
+            var iniConfigTest = IniSection<IIniConfigTest>.Create();
             var iniContainer = CreateContainer("TestIniFromFile", iniConfigTest);
             await iniContainer.ReloadAsync();
 
@@ -124,7 +109,7 @@ namespace Dapplo.Config.Tests.IniTests
         [Fact]
         public async Task TestIniGeneral()
         {
-            var iniConfigTest = IniSectionBase<IIniConfigTest>.Create();
+            var iniConfigTest = IniSection<IIniConfigTest>.Create();
             var iniContainer = CreateContainer("TestIniGeneral", iniConfigTest);
             await iniContainer.ReloadAsync();
 
@@ -148,7 +133,7 @@ namespace Dapplo.Config.Tests.IniTests
         [Fact]
         public void TestIniNoLoading_Defaults()
         {
-            var iniConfigTest = IniSectionBase<IIniConfigTest>.Create();
+            var iniConfigTest = IniSection<IIniConfigTest>.Create();
             Assert.Equal(IniConfigTestValues.Value2, iniConfigTest.TestWithEnum);
         }
     }

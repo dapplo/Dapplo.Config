@@ -19,7 +19,6 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -34,25 +33,25 @@ namespace Dapplo.Config.Ini
     /// This is the base class for an IniSection, it bases on the ConfigurationBase and should be used as the base for an ini-section.
     /// </summary>
     /// <typeparam name="TInterface">The interface which this configuration implements</typeparam>
-    public class IniSectionBase<TInterface> : DictionaryConfigurationBase<TInterface, object>, IIniSection where TInterface : IIniSection
+    public class IniSection<TInterface> : DictionaryConfigurationBase<TInterface, object>, IIniSection, IIniSectionInternal where TInterface : IIniSection
     {
         private readonly IDictionary<string, IniValue> _iniValues = new Dictionary<string, IniValue>(AbcComparer.Instance);
         private readonly IniSectionAttribute _iniSectionAttribute = typeof(TInterface).GetAttribute<IniSectionAttribute>();
         private readonly DescriptionAttribute _descriptionAttribute = typeof(TInterface).GetAttribute<DescriptionAttribute>();
 
         /// <summary>
-        /// Factory for IniSectionBase implementations
+        /// Factory for IniSection implementations
         /// </summary>
         /// <returns>TInterface</returns>
         public static TInterface Create()
         {
-            return ConfigProxy.Create<TInterface>(new IniSectionBase<TInterface>());
+            return ConfigProxy.Create<TInterface>(new IniSection<TInterface>());
         }
 
         /// <summary>
         /// Constructor for the IniSection based objects
         /// </summary>
-        protected IniSectionBase()
+        protected IniSection()
         {
         }
 
@@ -85,17 +84,23 @@ namespace Dapplo.Config.Ini
         /// <summary>
         ///     This is called after the loading of the IniSection is finished and can be used to modify certain values before they are being used.
         /// </summary>
-        public Action<IIniSection> AfterLoad { get; set; }
+        public virtual void AfterLoad(IIniSection iniSection)
+        {
+        }
 
         /// <summary>
         ///     This is called after the saving of the IniSection is finished and can be used to modify certain values
         /// </summary>
-        public Action<IIniSection> AfterSave { get; set; }
+        public virtual void AfterSave(IIniSection iniSection)
+        {
+        }
 
         /// <summary>
         ///     This is called before the saving of the IniSection is started and can be used to modify certain values
         /// </summary>
-        public Action<IIniSection> BeforeSave { get; set; }
+        public virtual void BeforeSave(IIniSection iniSection)
+        {
+        }
 
         /// <inheritdoc />
         public IniValue GetIniValue(string propertyName)

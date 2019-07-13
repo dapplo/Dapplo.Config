@@ -19,13 +19,9 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-#region using
-
-using System;
 using System.Collections.Generic;
 using Dapplo.Config.Interfaces;
 
-#endregion
 
 namespace Dapplo.Config.Ini
 {
@@ -34,21 +30,6 @@ namespace Dapplo.Config.Ini
 	/// </summary>
 	public interface IIniSection : IConfiguration<object>
 	{
-		/// <summary>
-        /// This action is called after loading
-        /// </summary>
-		Action<IIniSection> AfterLoad { get; set; }
-
-        /// <summary>
-        ///     This is called after the saving of the IniSection is finished and can be used to modify certain values
-        /// </summary>
-        Action<IIniSection> AfterSave { get; set; }
-
-        /// <summary>
-        ///     This is called before the saving of the IniSection is started and can be used to modify certain values
-        /// </summary>
-        Action<IIniSection> BeforeSave { get; set; }
-
         /// <summary>
         ///     Get the IniValue for a property, this is quicker and uses less memory than to iterate over the GetIniValues result
         /// </summary>
