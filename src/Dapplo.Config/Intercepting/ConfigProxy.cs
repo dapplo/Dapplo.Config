@@ -81,7 +81,10 @@ namespace Dapplo.Config.Intercepting
             var proxy = DispatchProxy.Create<TInterface, ConfigProxy>();
             if (proxy is ConfigProxy configProxy)
             {
+                // Make the target available to the proxy, 
                 configProxy.Target = target;
+                // Make the proxy available to the target, used for NotifyPropertyChang ed/ing events
+                target.Proxy = configProxy;
             }
 
             return proxy;

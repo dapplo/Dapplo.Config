@@ -43,6 +43,11 @@ namespace Dapplo.Config
         protected static readonly LogSource Log = new LogSource();
 
         /// <summary>
+        /// This is the proxy on which the user code is operating
+        /// </summary>
+        public ConfigProxy Proxy { get; internal set; }
+
+        /// <summary>
         /// This is the information for the properties, so we don't need a IDictionary lookup each time
         /// </summary>
         protected PropertiesInformation PropertiesInformation;

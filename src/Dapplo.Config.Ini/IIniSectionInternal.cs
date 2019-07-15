@@ -19,6 +19,8 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
+using System;
+
 namespace Dapplo.Config.Ini
 {
 	/// <summary>
@@ -26,20 +28,19 @@ namespace Dapplo.Config.Ini
 	/// </summary>
 	public interface IIniSectionInternal
     {
-
-        /// <summary>
+	    /// <summary>
         ///     This is called after the loading of the IniSection is finished and can be used to modify certain values before they are being used.
         /// </summary>
-        void AfterLoad(IIniSection iniSection);
+        Action<IIniSection> OnAfterLoad { get; }
 
         /// <summary>
         ///     This is called after the saving of the IniSection is finished and can be used to modify certain values
         /// </summary>
-        void AfterSave(IIniSection iniSection);
+        Action<IIniSection> OnAfterSave { get; }
 
         /// <summary>
         ///     This is called before the saving of the IniSection is started and can be used to modify certain values
         /// </summary>
-        void BeforeSave(IIniSection iniSection);
+        Action<IIniSection> OnBeforeSave { get; }
     }
 }

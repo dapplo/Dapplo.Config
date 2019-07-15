@@ -68,19 +68,19 @@ namespace Dapplo.Config.Tests.IniTests
         [Fact]
         public async Task TestIniAfterLoad()
         {
-            var iniConfigTest = IniConfigTest.Create(out var iniConfigTestTarget);
-            iniConfigTestTarget.OnAfterLoad = x =>
+            var iniConfigTest = IniSection<IIniConfigTest>.Create();
+            iniConfigTest.RegisterAfterLoad(x =>
+            {
+                if (!(x is IIniConfigTest iniConfig))
                 {
-                    if (!(x is IIniConfigTest iniConfig))
-                    {
-                        return;
-                    }
+                    return;
+                }
 
-                    if (!iniConfig.SomeValues.ContainsKey("dapplo"))
-                    {
-                        iniConfig.SomeValues.Add("dapplo", 2015);
-                    }
-                };
+                if (!iniConfig.SomeValues.ContainsKey("dapplo"))
+                {
+                    iniConfig.SomeValues.Add("dapplo", 2015);
+                }
+            });
 
             var iniContainer = CreateContainer("TestIniAfterLoad", iniConfigTest);
 

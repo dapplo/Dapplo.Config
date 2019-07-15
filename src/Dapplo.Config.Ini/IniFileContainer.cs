@@ -243,7 +243,7 @@ namespace Dapplo.Config.Ini
             // After load
             var configProxy = iniSection as ConfigProxy;
             var implementation = configProxy.Target as IIniSectionInternal;
-            implementation.AfterLoad(iniSection);
+            implementation?.OnAfterLoad?.Invoke(iniSection);
 
             iniSection.ResetHasChanges();
 
@@ -420,7 +420,7 @@ namespace Dapplo.Config.Ini
                     }
                     var configProxy = iniSection as ConfigProxy;
                     var implementation = configProxy.Target as IIniSectionInternal;
-                    implementation.AfterLoad(iniSection);
+                    implementation?.OnAfterLoad?.Invoke(iniSection);
                 }
             }
         }
@@ -499,7 +499,7 @@ namespace Dapplo.Config.Ini
             {
                 var configProxy = iniSection as ConfigProxy;
                 var implementation = configProxy.Target as IIniSectionInternal;
-                implementation.BeforeSave(iniSection);
+                implementation?.OnBeforeSave?.Invoke(iniSection);
 
                 try
                 {
@@ -507,7 +507,7 @@ namespace Dapplo.Config.Ini
                 }
                 finally
                 {
-                    implementation.BeforeSave(iniSection);
+                    implementation?.OnAfterSave?.Invoke(iniSection);
                 }
             }
             await IniFile.WriteAsync(stream, _iniFileConfig.FileEncoding, _ini, iniSectionsComments, cancellationToken).ConfigureAwait(false);

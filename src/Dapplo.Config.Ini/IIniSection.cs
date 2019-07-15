@@ -19,6 +19,7 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
+using System;
 using System.Collections.Generic;
 using Dapplo.Config.Interfaces;
 
@@ -75,5 +76,20 @@ namespace Dapplo.Config.Ini
         /// <param name="propertyName">string</param>
         /// <returns>object</returns>
         object Getter(string propertyName);
-    }
+
+        /// <summary>
+        ///     This is called after the loading of the IniSection is finished and can be used to modify certain values before they are being used.
+        /// </summary>
+        void RegisterAfterLoad(Action<IIniSection> onAfterLoad);
+
+        /// <summary>
+        ///     This is called after the saving of the IniSection is finished and can be used to modify certain values
+        /// </summary>
+        void RegisterAfterSave(Action<IIniSection> onAfterSave);
+
+        /// <summary>
+        ///     This is called before the saving of the IniSection is started and can be used to modify certain values
+        /// </summary>
+        void RegisterBeforeSave(Action<IIniSection> onBeforeSave);
+	}
 }

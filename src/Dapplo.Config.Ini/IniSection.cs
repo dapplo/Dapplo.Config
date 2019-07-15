@@ -19,6 +19,7 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -81,25 +82,26 @@ namespace Dapplo.Config.Ini
 
         #endregion
 
-        /// <summary>
-        ///     This is called after the loading of the IniSection is finished and can be used to modify certain values before they are being used.
-        /// </summary>
-        public virtual void AfterLoad(IIniSection iniSection)
+        public Action<IIniSection> OnAfterLoad { get; private set; }
+        public Action<IIniSection> OnAfterSave { get; private set; }
+        public Action<IIniSection> OnBeforeSave { get; private set; }
+
+        /// <inheritdoc />
+        public void RegisterAfterLoad(Action<IIniSection> onAfterLoad)
         {
+            OnAfterLoad += onAfterLoad;
         }
 
-        /// <summary>
-        ///     This is called after the saving of the IniSection is finished and can be used to modify certain values
-        /// </summary>
-        public virtual void AfterSave(IIniSection iniSection)
+        /// <inheritdoc />
+        public void RegisterAfterSave(Action<IIniSection> onAfterSave)
         {
+            OnAfterSave += onAfterSave;
         }
 
-        /// <summary>
-        ///     This is called before the saving of the IniSection is started and can be used to modify certain values
-        /// </summary>
-        public virtual void BeforeSave(IIniSection iniSection)
+        /// <inheritdoc />
+        public void RegisterBeforeSave(Action<IIniSection> onBeforeSave)
         {
+            OnBeforeSave += onBeforeSave;
         }
 
         /// <inheritdoc />

@@ -66,9 +66,11 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 		public void TestNotifyPropertyChanged()
 		{
 			string changedPropertyName = null;
+			object senderCheck = null;
 			var propChanged = new PropertyChangedEventHandler((sender, eventArgs) =>
 			{
-				changedPropertyName = eventArgs.PropertyName;
+				senderCheck = sender;
+                changedPropertyName = eventArgs.PropertyName;
 				Log.Debug().WriteLine("Property change notification for {0}", eventArgs.PropertyName);
 			});
             _notifyPropertyChangedTest.PropertyChanged += propChanged;
@@ -87,6 +89,7 @@ namespace Dapplo.Config.Tests.ConfigBaseTests
 			changedPropertyName = NoChange;
 			_notifyPropertyChangedTest.Name = TestValue2;
 			Assert.Equal(NoChange, changedPropertyName);
+			Assert.Equal(_notifyPropertyChangedTest, senderCheck);
 		}
 	}
 }
