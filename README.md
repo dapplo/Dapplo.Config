@@ -25,41 +25,40 @@ The section in the .ini file will have the name of the interface or you can use 
 
 Example of a simple section interface:
 ```
+[IniSection("Core")]
+[Description("Core Configuration")]
 public interface ICoreConfiguration : IIniSection
 {
+  [DefaultValue("Dapplo")]
   string MyProperty {get;set;}
 }
 ```
 
-Every application needs a IniConfig instance, this represent the .ini which is read/written.
-As soon as you have an instance of IniConfig, you will **need** to register your interface(s) with it.
+Every application needs a IniFileContainer instance, you will **need** to register your interface(s) with it, his represent the .ini which is read/written.
 This way the properties can be serialized to or deserialized from the file.
 
 An example of your initial code:
 ```
-var iniConfig = new IniConfig("<application>", "<ini-file-name-without-extension>");
-var coreConfiguration = await iniConfig.RegisterAndGetAsync<ICoreConfiguration>().ConfigureAwait(false);
+var iniConfig =  IniSection<ICoreConfiguration>.Create();
+
+// Example of using this directly
+var iniFileConfig = IniFileConfigBuilder.Create()
+                .WithApplicationName("Dapplo")
+                .WithFilename("myIniFile")
+                .WithoutSaveOnExit()
+                .BuildIniFileConfig();
+var iniFileContainer = new IniFileContainer(iniFileConfig, new []{ iniConfig });
+await iniFileContainer.ReloadAsync();
+
 ```
-As the file needs to be read from a filesystem, we don't want to block so the RegisterAndGetAsync method is Async.
+As the file needs to be read from a filesystem, we don't want to block so the ReloadAsync method is Async.
 There are many ways to do this, but I just want to describe a simple how-to.
 
 Now the important parts:
-RegisterAndGetAsync will give you an **instance** of your ICoreConfiguration. What? Yes!!
+IniSection<ICoreConfiguration>.Create() will give you an **instance** of your ICoreConfiguration. What? Yes!!
 You will get an implementation which is generated for you, this has many advantanges as the framework can add additional functionality. (later more).
 
-Second: the instance you get is a singleton, you will get always get the same instance, no mather how often you ask for it.
-You can have classes assign the instance to a static variable which you can use to read and write to the properties:
-```
-public class MyClass {
-  private static readonly ICoreConfiguration CoreConfiguration = IniConfig.Current().Get<>(ICoreConfiguration);
-  
-  public void MyMethod() {
-    Debug.WriteLine(CoreConfiguration.MyProperty);
-  }
-```
-In this part IniConfig.Current() is used to get a reference to the one and only instance of IniConfig which was created, this won't work when you have multiples... in this case you will need to call Get("<application>", "<ini-file-name-without-extension>").
-
-Now you can also read and write values via the CoreConfiguration variable!
+Second: The code is optimized for usage with IoC.
 
 ## Auto save
 
