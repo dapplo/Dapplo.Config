@@ -35,7 +35,7 @@ namespace Dapplo.Config
     /// DictionaryConfiguration is a IDictionary based configuration store
     /// </summary>
     /// <typeparam name="TInterface">The type of the configuration interface this class implements</typeparam>
-    public class DictionaryConfiguration<TInterface> : DictionaryConfigurationBase<TInterface, object>
+    public class DictionaryConfiguration<TInterface> : DictionaryConfiguration<TInterface, object>
     {
         /// <summary>
         /// Factory for DictionaryConfiguration implementations
@@ -52,12 +52,12 @@ namespace Dapplo.Config
     /// </summary>
     /// <typeparam name="TInterface">The type of the configuration interface this class implements</typeparam>
     /// <typeparam name="TProperty">The type of the property value</typeparam>
-    public class DictionaryConfigurationBase<TInterface, TProperty> : ConfigurationBase<TProperty>, IConfiguration<TProperty>
+    public class DictionaryConfiguration<TInterface, TProperty> : ConfigurationBase<TProperty>, IConfiguration<TProperty>
     {
         private IDictionary<string, TProperty> _properties;
 
         /// <inheritdoc />
-        protected DictionaryConfigurationBase()
+        protected DictionaryConfiguration()
         {
             _properties = new ConcurrentDictionary<string, TProperty>(AbcComparer.Instance);
             Initialize(typeof(TInterface));
@@ -150,226 +150,13 @@ namespace Dapplo.Config
             _properties[setInfo.PropertyInfo.Name] = setInfo.NewValue;
         }
 
-        #region Implementation of IWriteProtectProperties
-
-        /// <summary>
-        ///     This is the implementation of the set logic
-        /// </summary>
-        /// <param name="setInfo">SetInfo with all the information on the set call</param>
-        [GetSetInterceptor(SetterOrders.WriteProtect, true)]
-        // ReSharper disable once UnusedMember.Local as this is processed via reflection
-#pragma warning disable IDE0051 // Remove unused private members
-        private void WriteProtectSetter(SetInfo<TProperty> setInfo)
-#pragma warning restore IDE0051 // Remove unused private members
-        {
-            if (_writeProtectedProperties.Contains(setInfo.PropertyInfo.Name))
-            {
-                setInfo.CanContinue = false;
-                throw new AccessViolationException($"Property {setInfo.PropertyInfo.Name} is write protected");
-            }
-            if (_isProtecting)
-            {
-                _writeProtectedProperties.Add(setInfo.PropertyInfo.Name);
-            }
-        }
-
-        // A store for the values that are write protected
-        private readonly ISet<string> _writeProtectedProperties = new HashSet<string>(AbcComparer.Instance);
-        private bool _isProtecting;
-
-        /// <inheritdoc />
-        public void DisableWriteProtect(string propertyName)
-        {
-            _writeProtectedProperties.Remove(propertyName);
-        }
-
-        /// <inheritdoc />
-        public bool IsWriteProtected(string propertyName)
-        {
-            return _writeProtectedProperties.Contains(propertyName);
-        }
-
-        /// <inheritdoc />
-        public void RemoveWriteProtection()
-        {
-            _isProtecting = false;
-            _writeProtectedProperties.Clear();
-        }
-
-        /// <inheritdoc />
-        public void StartWriteProtecting()
-        {
-            _isProtecting = true;
-        }
-
-        /// <inheritdoc />
-        public void StopWriteProtecting()
-        {
-            _isProtecting = false;
-        }
-
-        /// <inheritdoc />
-        public void WriteProtect(string propertyName)
-        {
-            _writeProtectedProperties.Add(propertyName);
-        }
-
-
-        #endregion
-
-        #region Implementation of IHasChanges
-
-        private bool _trackChanges;
-        // This boolean has the value true if we have changes since the last "reset"
-        private readonly ISet<string> _changedValues = new HashSet<string>(new AbcComparer());
-
-        /// <summary>
-        ///     This is the implementation of the set logic
-        /// </summary>
-        /// <param name="setInfo">SetInfo with all the information on the set call</param>
-        [GetSetInterceptor(SetterOrders.HasChanges, true)]
-        // ReSharper disable once UnusedMember.Local as this is processed via reflection
-#pragma warning disable IDE0051 // Remove unused private members
-        private void HasChangesSetter(SetInfo<TProperty> setInfo)
-#pragma warning restore IDE0051 // Remove unused private members
-        {
-            if (!_trackChanges)
-            {
-                return;
-            }
-
-            if (!setInfo.HasOldValue || !Equals(setInfo.NewValue, setInfo.OldValue))
-            {
-                _changedValues.Add(setInfo.PropertyInfo.Name.ToLowerInvariant());
-            }
-        }
-
-        /// <inheritdoc />
-        public void TrackChanges()
-        {
-            _trackChanges = true;
-        }
-
-        /// <inheritdoc />
-        public void DoNotTrackChanges()
-        {
-            _trackChanges = false;
-        }
-
-        /// <inheritdoc />
-        public bool HasChanges()
-        {
-            return _changedValues.Count > 0;
-        }
-
-        /// <inheritdoc />
-        public void ResetHasChanges()
-        {
-            _changedValues.Clear();
-        }
-
-        /// <inheritdoc />
-        public ISet<string> Changes()
-        {
-            return new HashSet<string>(_changedValues, new AbcComparer());
-        }
-
-        /// <inheritdoc />
-        public bool IsChanged(string propertyName)
-        {
-            return _changedValues.Contains(propertyName);
-        }
-
-        #endregion
-
-        #region Implementation of INotifyPropertyChanged
-
-        /// <inheritdoc />
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        /// <summary>
-        ///     This is the logic which is called to invoke the event.
-        /// </summary>
-        /// <param name="sender">object</param>
-        /// <param name="eventArgs">PropertyChangedEventArgs</param>
-        private void InvokePropertyChanged(object sender, PropertyChangedEventArgs eventArgs)
-        {
-            PropertyChanged?.Invoke(sender, eventArgs);
-        }
-
-        /// <summary>
-        ///     This creates a NPC event if the values are changed
-        /// </summary>
-        /// <param name="setInfo">SetInfo with all the set call information</param>
-        [GetSetInterceptor(SetterOrders.NotifyPropertyChanged, true)]
-        // ReSharper disable once UnusedMember.Local as this is processed via reflection
-#pragma warning disable IDE0051 // Remove unused private members
-        private void NotifyPropertyChangedSetter(SetInfo<TProperty> setInfo)
-#pragma warning restore IDE0051 // Remove unused private members
-        {
-            // Fast exit when no listeners.
-            if (PropertyChanged is null)
-            {
-                return;
-            }
-            // Create the event if the property changed
-            if (setInfo.HasOldValue && Equals(setInfo.NewValue, setInfo.OldValue))
-            {
-                return;
-            }
-            var propertyChangedEventArgs = new PropertyChangedEventArgsEx(setInfo.PropertyInfo.Name, setInfo.OldValue, setInfo.NewValue);
-            InvokePropertyChanged(Proxy, propertyChangedEventArgs);
-        }
-
-        #endregion
-
-        #region Implementation of INotifyPropertyChanging
-
-        /// <inheritdoc />
-        public event PropertyChangingEventHandler PropertyChanging;
-
-
-        /// <summary>
-        ///     This is the logic which is called to invoke the event.
-        /// </summary>
-        /// <param name="sender">object</param>
-        /// <param name="eventArgs">PropertyChangingEventArgs</param>
-        private void InvokePropertyChanging(object sender, PropertyChangingEventArgs eventArgs)
-        {
-            PropertyChanging?.Invoke(sender, eventArgs);
-        }
-
-        /// <summary>
-        ///     This creates a NPC event if the values are changing
-        /// </summary>
-        /// <param name="setInfo">SetInfo with all the set call information</param>
-        [GetSetInterceptor(SetterOrders.NotifyPropertyChanging, true)]
-        // ReSharper disable once UnusedMember.Local as this is processed via reflection
-#pragma warning disable IDE0051 // Remove unused private members
-        private void NotifyPropertyChangingSetter(SetInfo<TProperty> setInfo)
-#pragma warning restore IDE0051 // Remove unused private members
-        {
-            if (PropertyChanging is null)
-            {
-                return;
-            }
-            // Create the event if the property is changing
-            if (setInfo.HasOldValue && Equals(setInfo.NewValue, setInfo.OldValue))
-            {
-                return;
-            }
-            var propertyChangingEventArgs = new PropertyChangingEventArgsEx(setInfo.PropertyInfo.Name, setInfo.OldValue, setInfo.NewValue);
-            InvokePropertyChanging(Proxy, propertyChangingEventArgs);
-        }
-        #endregion
-
         #region Implementation of IShallowCloneable
 
         /// <inheritdoc />
         public override object ShallowClone()
         {
             var type = GetType();
-            var clonedValue = (DictionaryConfigurationBase<TInterface, TProperty>) Activator.CreateInstance(type);
+            var clonedValue = (DictionaryConfiguration<TInterface, TProperty>) Activator.CreateInstance(type);
             clonedValue.SetProperties(_properties);
             return ConfigProxy.Create<TInterface>(clonedValue);
         }

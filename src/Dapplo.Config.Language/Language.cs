@@ -31,7 +31,7 @@ namespace Dapplo.Config.Language
 	/// <summary>
 	///     Base Language functionality
 	/// </summary>
-	public class Language<TInterface> : DictionaryConfigurationBase<TInterface, string>, ILanguage, ILanguageInternal
+	public class Language<TInterface> : DictionaryConfiguration<TInterface, string>, ILanguage, ILanguageInternal
     {
 		private readonly LanguageAttribute _languageAttribute = typeof(TInterface).GetCustomAttribute<LanguageAttribute>();
         private readonly IDictionary<string, string> _translationsWithoutProperty = new Dictionary<string, string>(AbcComparer.Instance);
