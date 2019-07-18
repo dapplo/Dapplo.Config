@@ -22,13 +22,9 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Dapplo.Config.Attributes;
-using Dapplo.Config.Interfaces;
 using Dapplo.Config.Intercepting;
 using Dapplo.Config.Extensions;
 using Dapplo.Log;
-
-using IShallowCloneable = Dapplo.Config.Interfaces.IShallowCloneable;
 
 namespace Dapplo.Config
 {
@@ -46,6 +42,8 @@ namespace Dapplo.Config
         /// This is the proxy on which the user code is operating
         /// </summary>
         public ConfigProxy Proxy { get; internal set; }
+
+        public Type ProxyFor { get; internal set; }
 
         /// <summary>
         /// This is the information for the properties, so we don't need a IDictionary lookup each time
@@ -110,7 +108,7 @@ namespace Dapplo.Config
     /// If you want to extend the functionality, extend this (or other classes) and implement
     /// a void xxxxxxxxGetter(GetInfo) or void xxxxxxxxSetter(SetInfo) which has a InterceptOrderAttribute
     /// </summary>
-    public abstract class ConfigurationBase<TProperty> : ConfigurationBase, IShallowCloneable, IDescription, ITagging, IDefaultValue
+    public abstract class ConfigurationBase<TProperty> : ConfigurationBase
     {
         /// <inheritdoc />
         public override object Getter(string propertyName)
@@ -148,8 +146,6 @@ namespace Dapplo.Config
             // Give extended classes a way to initialize
             foreach (var propertyInfo in PropertiesInformation.PropertyInfos.Values)
             {
-                // In theory we could check if the typeToInitializeFor extends ITagging
-                InitTagProperty(propertyInfo);
                 PropertyInitializer(propertyInfo);
             }
         }
@@ -176,7 +172,6 @@ namespace Dapplo.Config
             }
             Log.Warn().WriteLine("Couldn't find a property called {0}", propertyName);
             return null;
-
         }
 
         /// <summary>
@@ -184,7 +179,7 @@ namespace Dapplo.Config
         /// </summary>
         /// <param name="propertyInfo">PropertyInfo</param>
         /// <returns>GetInfo</returns>
-        protected GetInfo<TProperty> GetValue(PropertyInfo propertyInfo)
+        public GetInfo<TProperty> GetValue(PropertyInfo propertyInfo)
         {
             var getInfo = new GetInfo<TProperty>
             {
@@ -250,136 +245,5 @@ namespace Dapplo.Config
                 throw;
             }
         }
-
-        #region Implementation of ITagging
-        // The set of tagged properties
-        private readonly IDictionary<string, IDictionary<object, object>> _taggedProperties = new Dictionary<string, IDictionary<object, object>>(new AbcComparer());
-
-        /// <summary>
-        ///     Process the property, in our case get the tags
-        /// </summary>
-        /// <param name="propertyInfo">PropertyInfo</param>
-        private void InitTagProperty(PropertyInfo propertyInfo)
-        {
-            foreach (var tagAttribute in propertyInfo.GetAttributes<TagAttribute>())
-            {
-                if (!_taggedProperties.TryGetValue(propertyInfo.Name, out var tags))
-                {
-                    tags = new Dictionary<object, object>();
-                    _taggedProperties.Add(propertyInfo.Name, tags);
-                }
-                tags[tagAttribute.Tag] = tagAttribute.TagValue;
-            }
-        }
-
-        /// <inheritdoc />
-        public object GetTagValue(string propertyName, object tag)
-        {
-            if (!_taggedProperties.TryGetValue(propertyName, out var tags))
-            {
-                return null;
-            }
-            var hasTag = tags.ContainsKey(tag);
-            object returnValue = null;
-            if (hasTag)
-            {
-                returnValue = tags[tag];
-            }
-            return returnValue;
-        }
-
-        /// <inheritdoc />
-        public bool IsTaggedWith(string propertyName, object tag)
-        {
-            if (_taggedProperties.TryGetValue(propertyName, out var tags))
-            {
-                return tags.ContainsKey(tag);
-            }
-
-            return false;
-        }
-
-        #endregion
-
-        #region Implementation of IDescription
-        /// <summary>
-        ///     Return the description for a property
-        /// </summary>
-        public string DescriptionFor(string propertyName)
-        {
-            return PropertyInfoFor(propertyName).GetDescription();
-        }
-
-        #endregion
-
-        #region Implementation of IDefaultValue
-
-        /// <inheritdoc />
-        public object DefaultValueFor(string propertyName)
-        {
-            return GetConvertedDefaultValue(PropertyInfoFor(propertyName));
-        }
-
-        /// <inheritdoc />
-        public void RestoreToDefault(string propertyName)
-        {
-            var propertyInfo = PropertyInfoFor(propertyName);
-            TProperty defaultValue;
-            try
-            {
-                defaultValue = (TProperty)GetConvertedDefaultValue(propertyInfo);
-            }
-            catch (Exception ex)
-            {
-                Log.Warn().WriteLine(ex.Message);
-                throw;
-            }
-
-            if (defaultValue != null)
-            {
-                SetValue(propertyInfo, defaultValue);
-                return;
-            }
-            try
-            {
-                defaultValue = (TProperty)propertyInfo.PropertyType.CreateInstance();
-                SetValue(propertyInfo, defaultValue);
-            }
-            catch (Exception ex)
-            {
-                // Ignore creating the default type, this might happen if there is no default constructor.
-                Log.Warn().WriteLine(ex.Message);
-            }
-        }
-
-        /// <summary>
-        ///     Retrieve the default value, using the TypeConverter
-        /// </summary>
-        /// <param name="propertyInfo">Property to get the default value for</param>
-        /// <returns>object with the type converted default value</returns>
-        protected static object GetConvertedDefaultValue(PropertyInfo propertyInfo)
-        {
-            var defaultValue = propertyInfo.GetDefaultValue();
-            if (defaultValue != null)
-            {
-                var typeConverter = propertyInfo.GetTypeConverter();
-                var targetType = propertyInfo.PropertyType;
-                defaultValue = targetType.ConvertOrCastValueToType(defaultValue, typeConverter);
-            }
-            return defaultValue;
-        }
-
-        #endregion
-
-        #region Implementation of IShallowCloneable
-        /// <inheritdoc />
-        public virtual object ShallowClone()
-        {
-            var clonedValue = Activator.CreateInstance(GetType()) as ConfigurationBase<TProperty>;
-            clonedValue?.Initialize(GetType());
-
-            return clonedValue;
-        }
-        #endregion
     }
 }

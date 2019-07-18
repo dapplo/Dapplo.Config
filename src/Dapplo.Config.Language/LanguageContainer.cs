@@ -182,7 +182,7 @@ namespace Dapplo.Config.Language
             if (!_allTranslations.TryGetValue(prefix, out var sectionTranslations))
             {
                 // No values, reset all (only available via the PropertyTypes dictionary
-                foreach (var key in language.PropertyNames().ToList())
+                foreach (var key in language.Keys().ToList())
                 {
                     language.RestoreToDefault(key);
                 }
@@ -190,7 +190,7 @@ namespace Dapplo.Config.Language
             }
 
             // Use PropertyTypes.Keys to get ALL possible properties.
-            foreach (var key in language.PropertyNames().ToList())
+            foreach (var key in language.Keys().ToList())
             {
                 if (sectionTranslations.TryGetValue(key, out var translation))
                 {

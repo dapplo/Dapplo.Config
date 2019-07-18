@@ -59,7 +59,7 @@ namespace Dapplo.Config.ConfigExtensions
                 return;
             }
             var propertyChangedEventArgs = new PropertyChangedEventArgsEx(setInfo.PropertyInfo.Name, setInfo.OldValue, setInfo.NewValue);
-            InvokePropertyChanged(Proxy, propertyChangedEventArgs);
+            InvokePropertyChanged(_parent.Proxy, propertyChangedEventArgs);
         }
     }
 }

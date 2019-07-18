@@ -85,6 +85,7 @@ namespace Dapplo.Config.Intercepting
                 configProxy.Target = target;
                 // Make the proxy available to the target, used for NotifyPropertyChang ed/ing events
                 target.Proxy = configProxy;
+                target.ProxyFor = typeof(TInterface);
             }
 
             return proxy;

@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using Dapplo.Config.Interfaces;
 
 #endregion
@@ -31,12 +32,12 @@ namespace Dapplo.Config.Language
 {
 	/// <summary>
 	///     The base interface for all language objects.
-	///     My advice is that you extend your inteface with this, and the INotifyPropertyChanged,
+	///     My advice is that you extend your interface with this, and the INotifyPropertyChanged,
 	///     so language changes are directly reflected in the UI.
 	///     This extends IDefaultValue, as this it is very common to start with default translations.
 	///     These defaults, usually en-US, can be set with the DefaultValueAttribute
 	/// </summary>
-	public interface ILanguage : IConfiguration<string>
+	public interface ILanguage
 	{
 		/// <summary>
 		///     Get the translation for a key

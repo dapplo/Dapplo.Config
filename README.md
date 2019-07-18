@@ -113,7 +113,7 @@ All values are parsed into "IniValue" instances, which have many details on the 
 If the ICoreConfiguration interface had a IniSectionAttribute to specify the section name "Core", you could access your properties like this:
 
 ```
-iniConfig["Core"]["MyProperty"].Value = "a new value for MyProperty";
+iniFileContainer["Core"]["MyProperty"].Value = "a new value for MyProperty";
 ```
 There are also enumerating possiblities, to foreach over all IIniSections and their properties.
 
@@ -132,10 +132,9 @@ This is work in progress, but the same idea as having an .NET interface map to a
 More to come...
 
 
-# Managed Extension Framework (MEF) Support
+# IoC Support
 
-There is another Dapplo repository (Dapplo.Addons](https://github.com/dapplo/Dapplo.Addons) which makes it possible to import IIniSection interfaces into your MEF controlled classes. The idea of that project is making it easy to add extensions to your application. In this case MEF can really help...
-For this you will need to add an ServiceProviderExportProvider with the LanguageLoader or IniConfig to the Mef bootstrapper.
+
 
 Notice:
 **This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.**

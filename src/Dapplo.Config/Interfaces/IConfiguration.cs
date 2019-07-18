@@ -20,7 +20,6 @@
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
 using System.Collections.Generic;
-using System.ComponentModel;
 
 namespace Dapplo.Config.Interfaces
 {
@@ -35,7 +34,7 @@ namespace Dapplo.Config.Interfaces
     /// <summary>
     /// The base interface for configuration classes
     /// </summary>
-    public interface IConfiguration<TProperty> : IConfiguration, IDescription, IWriteProtectProperties, IHasChanges, IDefaultValue, INotifyPropertyChanged, INotifyPropertyChanging, ITransactionalProperties, ITagging, IShallowCloneable
+    public interface IConfiguration<TProperty> : IConfiguration
     {
         /// <summary>
         /// Return all properties with their current value

@@ -22,9 +22,9 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Reflection;
 using Dapplo.Config.Attributes;
+using Dapplo.Config.ConfigExtensions;
 using Dapplo.Config.Interfaces;
 using Dapplo.Config.Intercepting;
 
@@ -55,12 +55,15 @@ namespace Dapplo.Config
     public class DictionaryConfiguration<TInterface, TProperty> : ConfigurationBase<TProperty>, IConfiguration<TProperty>
     {
         private IDictionary<string, TProperty> _properties;
+        // TODO: Get rid of this!!
+        private DefaultValueExtension<TProperty> _defaultValueExtension;
 
         /// <inheritdoc />
         protected DictionaryConfiguration()
         {
             _properties = new ConcurrentDictionary<string, TProperty>(AbcComparer.Instance);
             Initialize(typeof(TInterface));
+            _defaultValueExtension = new DefaultValueExtension<TProperty>(this);
         }
 
         /// <summary>
@@ -77,7 +80,7 @@ namespace Dapplo.Config
                     continue;
                 }
                 // Set a default
-                RestoreToDefault(propertyInfo.Name);
+                _defaultValueExtension.RestoreToDefault(propertyInfo.Name);
             }
         }
 
@@ -89,7 +92,7 @@ namespace Dapplo.Config
         protected override void PropertyInitializer(PropertyInfo propertyInfo)
         {
             // Set a default
-            RestoreToDefault(propertyInfo.Name);
+            _defaultValueExtension.RestoreToDefault(propertyInfo.Name);
         }
 
         /// <summary>
@@ -118,7 +121,7 @@ namespace Dapplo.Config
 #pragma warning restore IDE0051 // Remove unused private members
         {
             var hasValue = _properties.TryGetValue(getInfo.PropertyInfo.Name, out var value);
-            getInfo.Value = hasValue ? value : (TProperty)GetConvertedDefaultValue(getInfo.PropertyInfo);
+            getInfo.Value = hasValue ? value : (TProperty)DefaultValueExtension<TProperty>.GetConvertedDefaultValue(getInfo.PropertyInfo);
             getInfo.HasValue = hasValue;
         }
 
@@ -153,7 +156,8 @@ namespace Dapplo.Config
         #region Implementation of IShallowCloneable
 
         /// <inheritdoc />
-        public override object ShallowClone()
+        // TODO: Move / delete
+        public object ShallowClone()
         {
             var type = GetType();
             var clonedValue = (DictionaryConfiguration<TInterface, TProperty>) Activator.CreateInstance(type);

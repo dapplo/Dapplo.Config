@@ -19,22 +19,19 @@
 //  You should have a copy of the GNU Lesser General Public License
 //  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
 
-using Dapplo.Config.Language.Implementation;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Dapplo.Config.Intercepting;
+using Dapplo.Config.Language.ConfigExtensions;
 
 namespace Dapplo.Config.Language
 {
 	/// <summary>
 	///     Base Language functionality
 	/// </summary>
-	public class Language<TInterface> : DictionaryConfiguration<TInterface, string>, ILanguage, ILanguageInternal
-    {
-		private readonly LanguageAttribute _languageAttribute = typeof(TInterface).GetCustomAttribute<LanguageAttribute>();
-        private readonly IDictionary<string, string> _translationsWithoutProperty = new Dictionary<string, string>(AbcComparer.Instance);
+	public class Language<TInterface> : DictionaryConfiguration<TInterface, string>
+	{
+		private readonly LanguageExtension<string> _languageExtension;
 
         /// <summary>
         /// Factory for IniSectionBase implementations
@@ -50,12 +47,12 @@ namespace Dapplo.Config.Language
         /// </summary>
         protected Language()
         {
-
+	        _languageExtension = new LanguageExtension<string>(this);
         }
 
         /// <summary>
         /// Set via the DictionaryConfiguration when supported by a property
-        /// or use the _translationsWithoutPropery if not.
+        /// or use the _translationsWithoutProperty if not.
         /// </summary>
         /// <param name="propertyName">string</param>
         /// <param name="newValue">object</param>
@@ -69,9 +66,7 @@ namespace Dapplo.Config.Language
                 SetValue(propertyInfo, translation);
                 return;
             }
-
-            // Store values which do not have a property
-            _translationsWithoutProperty[propertyName] = translation;
+			_languageExtension.SetPropertyFreeTranslation(propertyName, translation);
         }
 
         /// <summary>
@@ -82,74 +77,12 @@ namespace Dapplo.Config.Language
         public override object Getter(string propertyName)
         {
 	        // Check if the property has a matching PropertyInfo, if so use the GetValue to let the chain of getters work
-	        if (TryGetTranslation(propertyName, out var translation))
+	        if (_languageExtension.TryGetTranslation(propertyName, out var translation))
 	        {
 		        return translation;
 	        }
             throw new NotSupportedException($"No property with the name {propertyName} found");
         }
-
-        /// <summary>
-        ///     Get the value for a property.
-        /// Note: This needs to be virtual otherwise the interface isn't implemented
-        /// </summary>
-        /// <param name="propertyName">string with propertyName for the property to get</param>
-        /// <returns>object or null if not available</returns>
-        public override string this[string propertyName]
-        {
-            get => (string)Getter(propertyName);
-            set => Setter(propertyName, value);
-        }
-
-        /// <summary>
-        ///     This event is triggered after the language has been changed
-        /// </summary>
-        public event EventHandler<EventArgs> LanguageChanged;
-
-	    /// <inheritdoc />
-	    public bool TryGetTranslation(string languageKey, out string translation)
-	    {
-		    if (TryGetPropertyInfoFor(languageKey, out var propertyInfo))
-		    {
-			    translation = GetValue(propertyInfo).Value;
-			    return true;
-		    }
-
-		    // This property is not backed by a Property, use the local dictionary
-		    if (_translationsWithoutProperty.TryGetValue(languageKey, out translation))
-		    {
-			    return true;
-            }
-
-		    return false;
-	    }
-
-	    /// <inheritdoc />
-		public IEnumerable<string> Keys()
-		{
-			return PropertyNames().Concat(_translationsWithoutProperty.Keys);
-		}
-
-	    /// <inheritdoc />
-	    public IEnumerable<string> PropertyFreeKeys()
-	    {
-		    return _translationsWithoutProperty.Keys;
-	    }
-
-        /// <inheritdoc />
-        public string PrefixName()
-		{
-			return _languageAttribute?.Prefix ?? typeof(TInterface).Name;
-		}
-
-		/// <summary>
-		///     Generate a LanguageChanged event, this is from ILanguageInternal
-		///     Added for Dapplo.Config/issues/10
-		/// </summary>
-		public void OnLanguageChanged()
-		{
-			LanguageChanged?.Invoke(this, new EventArgs());
-		}
 
 	    /// <inheritdoc />
 	    protected override void PropertyInitializer(PropertyInfo propertyInfo)
