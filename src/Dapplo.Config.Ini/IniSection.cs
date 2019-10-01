@@ -63,7 +63,8 @@ namespace Dapplo.Config.Ini
         {
             base.PropertyInitializer(propertyInfo);
 
-            var iniValue = new IniValue(this, propertyInfo)
+            // ReSharper disable once SuspiciousTypeConversion.Global
+            var iniValue = new IniValue((IIniSection)Proxy, propertyInfo)
             {
                 IniPropertyName = propertyInfo.GetDataMemberName() ?? propertyInfo.Name,
                 EmitDefaultValue = propertyInfo.GetEmitDefaultValue(),
@@ -86,25 +87,25 @@ namespace Dapplo.Config.Ini
         public Action<IIniSection> OnAfterSave { get; private set; }
         public Action<IIniSection> OnBeforeSave { get; private set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="IIniSection"/>
         public void RegisterAfterLoad(Action<IIniSection> onAfterLoad)
         {
             OnAfterLoad += onAfterLoad;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="IIniSection"/>
         public void RegisterAfterSave(Action<IIniSection> onAfterSave)
         {
             OnAfterSave += onAfterSave;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="IIniSection"/>
         public void RegisterBeforeSave(Action<IIniSection> onBeforeSave)
         {
             OnBeforeSave += onBeforeSave;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="IIniSection"/>
         public IniValue GetIniValue(string propertyName)
         {
             if (_iniValues.TryGetValue(propertyName, out var value))
@@ -114,19 +115,19 @@ namespace Dapplo.Config.Ini
             return null;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="IIniSection"/>
         public IReadOnlyDictionary<string, IniValue> GetIniValues()
         {
             return new ReadOnlyDictionary<string, IniValue>(_iniValues);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="IIniSection"/>
         public string GetSectionDescription() => _descriptionAttribute?.Description;
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="IIniSection"/>
         public string GetSectionName() => _iniSectionAttribute?.Name;
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="IIniSection"/>
         public bool TryGetIniValue(string propertyName, out IniValue value)
         {
             return _iniValues.TryGetValue(propertyName, out value);

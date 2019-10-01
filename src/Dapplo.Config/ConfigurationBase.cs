@@ -131,7 +131,7 @@ namespace Dapplo.Config
         /// Initialize the whole thing, this should be called from the final class
         /// </summary>
         /// <param name="typeToInitializeFor">Type to analyze the properties on</param>
-        protected void Initialize(Type typeToInitializeFor)
+        protected internal void Initialize(Type typeToInitializeFor)
         {
             var thisType = GetType();
             if (!InterceptInformationCache.TryGetValue(thisType, out InterceptInformation))

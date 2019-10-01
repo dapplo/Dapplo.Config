@@ -55,15 +55,12 @@ namespace Dapplo.Config
     public class DictionaryConfiguration<TInterface, TProperty> : ConfigurationBase<TProperty>, IConfiguration<TProperty>
     {
         private IDictionary<string, TProperty> _properties;
-        // TODO: Get rid of this!!
-        private DefaultValueExtension<TProperty> _defaultValueExtension;
 
         /// <inheritdoc />
         protected DictionaryConfiguration()
         {
             _properties = new ConcurrentDictionary<string, TProperty>(AbcComparer.Instance);
             Initialize(typeof(TInterface));
-            _defaultValueExtension = new DefaultValueExtension<TProperty>(this);
         }
 
         /// <summary>
@@ -73,14 +70,18 @@ namespace Dapplo.Config
         protected void SetProperties(IDictionary<string, TProperty> properties)
         {
             _properties = new ConcurrentDictionary<string, TProperty>(properties, AbcComparer.Instance);
-            foreach (var propertyInfo in PropertiesInformation.PropertyInfos.Values)
+            if (Proxy is IDefaultValue defaultValue)
             {
-                if (_properties.TryGetValue(propertyInfo.Name, out var value) && value != null)
+                foreach (var propertyInfo in PropertiesInformation.PropertyInfos.Values)
                 {
-                    continue;
+                    if (_properties.TryGetValue(propertyInfo.Name, out var value) && value != null)
+                    {
+                        continue;
+                    }
+
+                    // Set a default
+                    defaultValue.RestoreToDefault(propertyInfo.Name);
                 }
-                // Set a default
-                _defaultValueExtension.RestoreToDefault(propertyInfo.Name);
             }
         }
 
@@ -91,8 +92,11 @@ namespace Dapplo.Config
         /// <param name="propertyInfo">PropertyInfo</param>
         protected override void PropertyInitializer(PropertyInfo propertyInfo)
         {
-            // Set a default
-            _defaultValueExtension.RestoreToDefault(propertyInfo.Name);
+            if (Proxy is IDefaultValue defaultValue)
+            {
+                // Set a default
+                defaultValue.RestoreToDefault(propertyInfo.Name);
+            }
         }
 
         /// <summary>

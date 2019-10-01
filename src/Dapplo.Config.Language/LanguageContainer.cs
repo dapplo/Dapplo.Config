@@ -33,6 +33,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Dapplo.Config.Intercepting;
+using Dapplo.Config.Interfaces;
 using Dapplo.Config.Language.Implementation;
 using Dapplo.Log;
 
@@ -179,12 +180,17 @@ namespace Dapplo.Config.Language
 
             var prefix = language.PrefixName();
 
+            var defaultValue = configProxy as IDefaultValue;
+
             if (!_allTranslations.TryGetValue(prefix, out var sectionTranslations))
             {
-                // No values, reset all (only available via the PropertyTypes dictionary
-                foreach (var key in language.Keys().ToList())
+                if (defaultValue != null)
                 {
-                    language.RestoreToDefault(key);
+                    // No values, reset all (only available via the PropertyTypes dictionary
+                    foreach (var key in language.Keys().ToList())
+                    {
+                        defaultValue.RestoreToDefault(key);
+                    }
                 }
                 return;
             }
@@ -199,7 +205,7 @@ namespace Dapplo.Config.Language
                 }
                 else
                 {
-                    language.RestoreToDefault(key);
+                    defaultValue.RestoreToDefault(key);
                 }
             }
 

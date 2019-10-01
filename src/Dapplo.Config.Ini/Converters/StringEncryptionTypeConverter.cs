@@ -190,7 +190,7 @@ namespace Dapplo.Config.Ini.Converters
 		///     A simply encryption, can be used to store passwords
 		/// </summary>
 		/// <param name="clearText">the string to call upon</param>
-		/// <returns>an encryped string in base64 form</returns>
+		/// <returns>an encrypted string in base64 form</returns>
 		private static string Encrypt(string clearText)
 		{
 			string returnValue;

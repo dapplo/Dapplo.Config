@@ -43,10 +43,8 @@ namespace Dapplo.Config.Tests.IniTests
 
         private async Task LoadFromMemoryStreamAsync(IniFileContainer iniFileContainer)
         {
-            using (var testMemoryStream = new MemoryStream())
-            {
-                await iniFileContainer.ReadFromStreamAsync(testMemoryStream).ConfigureAwait(false);
-            }
+            using var testMemoryStream = new MemoryStream();
+            await iniFileContainer.ReadFromStreamAsync(testMemoryStream).ConfigureAwait(false);
         }
 
         private IniFileContainer CreateContainer(string iniFileName, IIniSection iniSection)

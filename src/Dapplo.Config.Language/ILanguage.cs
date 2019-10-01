@@ -38,7 +38,7 @@ namespace Dapplo.Config.Language
 	///     These defaults, usually en-US, can be set with the DefaultValueAttribute
 	/// </summary>
 	public interface ILanguage
-	{
+    {
 		/// <summary>
 		///     Get the translation for a key
 		/// </summary>

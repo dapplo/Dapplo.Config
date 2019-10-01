@@ -29,7 +29,7 @@ using Dapplo.Config.Language;
 namespace Dapplo.Config.Tests.LanguageTests.Interfaces
 {
 	[Language("Test")]
-	public interface ILanguageLoaderTest : ILanguage, ILanguageLoaderPartTest
+	public interface ILanguageLoaderTest : ILanguage, ILanguageLoaderPartTest, INotifyPropertyChanged
 	{
 		[DefaultValue(LanguageContainerTest.Ok)]
 		string Ok { get; }

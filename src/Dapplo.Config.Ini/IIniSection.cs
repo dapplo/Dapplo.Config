@@ -23,7 +23,6 @@ using System;
 using System.Collections.Generic;
 using Dapplo.Config.Interfaces;
 
-
 namespace Dapplo.Config.Ini
 {
 	/// <summary>
@@ -38,30 +37,30 @@ namespace Dapplo.Config.Ini
         /// <returns>IniValue</returns>
         IniValue GetIniValue(string propertyName);
 
-		/// <summary>
-		///     Retrieve all the ini values
-		/// </summary>
-		/// <returns>readonly dictionary</returns>
-		IReadOnlyDictionary<string, IniValue> GetIniValues();
+        /// <summary>
+        ///     Retrieve all the ini values
+        /// </summary>
+        /// <returns>readonly dictionary</returns>
+        IReadOnlyDictionary<string, IniValue> GetIniValues();
 
-		/// <summary>
-		///     Get the Description of the Ini-Section
-		/// </summary>
-		string GetSectionDescription();
+        /// <summary>
+        ///     Get the Description of the Ini-Section
+        /// </summary>
+        string GetSectionDescription();
 
-		/// <summary>
-		///     Name of the Ini-Section, should be set on your property interface with
-		/// </summary>
-		string GetSectionName();
+        /// <summary>
+        ///     Name of the Ini-Section, should be set on your property interface with
+        /// </summary>
+        string GetSectionName();
 
-		/// <summary>
-		///     Try to get the IniValue for a property, this is quicker and uses less memory than to iterate over the GetIniValues
-		///     result
-		/// </summary>
-		/// <param name="propertyName">Name of the property</param>
-		/// <param name="value">out IniValue</param>
-		/// <returns>bool with true if found</returns>
-		bool TryGetIniValue(string propertyName, out IniValue value);
+        /// <summary>
+        ///     Try to get the IniValue for a property, this is quicker and uses less memory than to iterate over the GetIniValues
+        ///     result
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <param name="value">out IniValue</param>
+        /// <returns>bool with true if found</returns>
+        bool TryGetIniValue(string propertyName, out IniValue value);
 
         /// <summary>
         /// This is the setter of the configuration base, made public
@@ -91,5 +90,5 @@ namespace Dapplo.Config.Ini
         ///     This is called before the saving of the IniSection is started and can be used to modify certain values
         /// </summary>
         void RegisterBeforeSave(Action<IIniSection> onBeforeSave);
-	}
+    }
 }

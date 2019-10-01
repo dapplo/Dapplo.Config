@@ -59,7 +59,7 @@ namespace Dapplo.Config.Extensions
 		/// <returns>string with the member name</returns>
 		public static string GetMemberName(this LambdaExpression memberSelector)
 		{
-			string NameSelector(Expression e)
+			static string NameSelector(Expression e)
 			{
 				//or move the entire thing to a separate recursive method
 				switch (e.NodeType)
