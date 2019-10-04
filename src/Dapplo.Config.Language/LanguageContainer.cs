@@ -396,6 +396,7 @@ namespace Dapplo.Config.Language
                 return;
             }
             _disposedValue = true;
+            _semaphoreSlim.Dispose();
         }
 
         #endregion

@@ -50,27 +50,28 @@ namespace Dapplo.Config.Tests.ConfigTests
                 .WithApplicationName("Dapplo")
                 .WithFilename("dapplo.httpextensions")
                 .WithoutSaveOnExit()
-                .BuildApplicationConfig();
+                .BuildIniFileConfig();
 
             // Important to disable the auto-save, otherwise we get test issues
-            var iniConfig = new IniConfig(iniFileConfig);
+            var httpConfiguration = IniSection<IHttpConfiguration>.Create();
+
+            var iniFileContainer = new IniFileContainer(iniFileConfig, new[] { httpConfiguration });
 			using (var testMemoryStream = new MemoryStream())
 			{
-				await IniConfig.Current.ReadFromStreamAsync(testMemoryStream).ConfigureAwait(false);
+				await iniFileContainer.ReadFromStreamAsync(testMemoryStream).ConfigureAwait(false);
 			}
-			var httpConfiguration = await iniConfig.RegisterAndGetAsync<IHttpConfiguration>();
 			Assert.NotNull(httpConfiguration);
 			using (var writeStream = new MemoryStream())
 			{
-				await iniConfig.WriteToStreamAsync(writeStream).ConfigureAwait(false);
+				await iniFileContainer.WriteToStreamAsync(writeStream).ConfigureAwait(false);
 				writeStream.Seek(0, SeekOrigin.Begin);
-				await iniConfig.ReadFromStreamAsync(writeStream).ConfigureAwait(false);
+				await iniFileContainer.ReadFromStreamAsync(writeStream).ConfigureAwait(false);
 				var behaviour = new HttpBehaviour
 				{
 					HttpSettings = httpConfiguration
 				};
 				behaviour.MakeCurrent();
-				HttpClientFactory.Create();
+                using var _ = HttpClientFactory.Create();
 			}
 		}
 	}

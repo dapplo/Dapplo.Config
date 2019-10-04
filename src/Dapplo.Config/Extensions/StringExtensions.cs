@@ -25,11 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-
-#if NET461
-using System.IO;
-using Microsoft.VisualBasic.FileIO;
-#endif
+using TinyCsvParser.Tokenizer.RFC4180;
 
 namespace Dapplo.Config.Extensions
 {
@@ -211,31 +207,8 @@ namespace Dapplo.Config.Extensions
 		/// <returns>IEnumerable with value</returns>
 		public static IEnumerable<string> SplitCsv(this string input, char delimiter = ',', bool trimWhiteSpace = true)
 		{
-#if NET461
-			using (var parser = new TextFieldParser(new StringReader(input))
-			{
-				HasFieldsEnclosedInQuotes = true,
-				TextFieldType = FieldType.Delimited,
-				CommentTokens = new[] {";"},
-				Delimiters = new[] {delimiter.ToString()},
-				TrimWhiteSpace = trimWhiteSpace
-			})
-			{
-				while (!parser.EndOfData)
-				{
-					var readFields = parser.ReadFields();
-					if (readFields != null)
-					{
-						foreach (var field in readFields)
-						{
-							yield return field;
-						}
-					}
-				}
-			}
-#else
-			return input.Split(delimiter).Select(x => x.Trim());
-#endif
+            var d = new RFC4180Tokenizer(new Options('"', '#', delimiter));
+            return d.Tokenize(input);
 		}
 
 		/// <summary>

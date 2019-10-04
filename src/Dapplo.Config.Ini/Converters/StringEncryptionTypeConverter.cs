@@ -171,7 +171,7 @@ namespace Dapplo.Config.Ini.Converters
 
 			using (var symmetricAlgorithm = SymmetricAlgorithm.Create(Algorithm))
 			{
-				var memoryStream = new MemoryStream();
+                var memoryStream = new MemoryStream();
 				var rgbIv = Encoding.ASCII.GetBytes(RgbIv);
 				var key = Encoding.ASCII.GetBytes(RgbKey);
 

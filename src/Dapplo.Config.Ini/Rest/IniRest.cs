@@ -58,7 +58,9 @@ namespace Dapplo.Config.Ini.Rest
 				var iniValue = iniSection.GetIniValue(restCommand.Target);
 				restCommand.Results.Add(iniValue);
 				var iniValueType = iniValue.Value?.GetType() ?? iniValue.ValueType;
-				var removeMethodInfo = iniValueType.GetMethod("Remove");
+                // IDictionary has 2 removes, this creates an ambiguous method exception.
+                // This is solved by taking a specific one, if this is not found take the generic one.
+                var removeMethodInfo = iniValueType.GetMethod("Remove", new[] { typeof(string) }) ?? iniValueType.GetMethod("Remove");
 				switch (restCommand.Command)
 				{
 					case IniRestCommands.Add:

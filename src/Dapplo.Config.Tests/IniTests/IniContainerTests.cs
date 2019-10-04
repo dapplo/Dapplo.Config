@@ -37,7 +37,7 @@ namespace Dapplo.Config.Tests.IniTests
         public IniContainerTests(ITestOutputHelper testOutputHelper)
         {
             LogSettings.RegisterDefaultLogger<XUnitLogger>(LogLevels.Verbose, testOutputHelper);
-            StringEncryptionTypeConverter.RgbIv = "fjr84hF49gp3911fFFg";
+            StringEncryptionTypeConverter.RgbIv = "fjr84hF49gp3911f";
             StringEncryptionTypeConverter.RgbKey = "ljew3lJfrS0rlddlfeelOekfekcvbAwE";
         }
 
