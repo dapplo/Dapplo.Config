@@ -8,7 +8,7 @@ stages:
   jobs:
   - job: Build
     pool:
-      vmImage: 'Windows-2019'
+      vmImage: 'Windows-latest'
 
     variables:
       solution: '**/src/*.sln'
@@ -19,10 +19,10 @@ stages:
     - task: NuGetToolInstaller@1
 
     - task: UseDotNet@2
-      displayName: 'Use .NET Core sdk 3.0'
+      displayName: 'Use .NET Core sdk 5.0'
       inputs:
         packageType: sdk
-        version: 3.0.100
+        version: 5.0.100
 
     - task: DotNetCoreCLI@2
       displayName: Test
@@ -51,7 +51,7 @@ stages:
     - task: PublishCodeCoverageResults@1
       inputs:
         codeCoverageTool: Cobertura
-        summaryFileLocation: 'src/**/coverage.cobertura.xml'
+        summaryFileLocation: 'src/**/coverage.*.xml'
         failIfCoverageEmpty: true
 
     - task: PublishPipelineArtifact@1
@@ -77,9 +77,9 @@ stages:
               artifact: 'drop'
 
           - task: NuGetToolInstaller@0
-            displayName: 'Use NuGet 5.2.0'
+            displayName: 'Use NuGet 5.4.0'
             inputs:
-              versionSpec: 5.2.0
+              versionSpec: 5.4.0
               checkLatest: true
 
           - task: NuGetCommand@2

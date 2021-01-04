@@ -1,23 +1,5 @@
-﻿//  Dapplo - building blocks for desktop applications
-//  Copyright (C) 2016-2019 Dapplo
-// 
-//  For more information see: http://dapplo.net/
-//  Dapplo repositories are hosted on GitHub: https://github.com/dapplo
-// 
-//  This file is part of Dapplo.Config
-// 
-//  Dapplo.Config is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU Lesser General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-// 
-//  Dapplo.Config is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU Lesser General Public License for more details.
-// 
-//  You should have a copy of the GNU Lesser General Public License
-//  along with Dapplo.Config. If not, see <http://www.gnu.org/licenses/lgpl.txt>.
+﻿// Copyright (c) Dapplo and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.Collections.Generic;
@@ -251,7 +233,6 @@ namespace Dapplo.Config
             }
         }
 
-        #region Implementation of ITransactionalProperties
         // A store for the values that are set during the transaction
         private readonly IDictionary<string, TProperty> _transactionProperties = new Dictionary<string, TProperty>(new AbcComparer());
         // This boolean has the value true if we are currently in a transaction
@@ -380,9 +361,6 @@ namespace Dapplo.Config
             }
         }
 
-        #endregion
-
-        #region Implementation of ITagging
         // The set of tagged properties
         private readonly IDictionary<string, IDictionary<object, object>> _taggedProperties = new Dictionary<string, IDictionary<object, object>>(new AbcComparer());
 
@@ -430,9 +408,6 @@ namespace Dapplo.Config
             return false;
         }
 
-        #endregion
-
-        #region Implementation of IDescription
         /// <summary>
         ///     Return the description for a property
         /// </summary>
@@ -440,10 +415,6 @@ namespace Dapplo.Config
         {
             return PropertyInfoFor(propertyName).GetDescription();
         }
-
-        #endregion
-
-        #region Implementation of IDefaultValue
 
         /// <inheritdoc />
         public object DefaultValueFor(string propertyName)
@@ -500,9 +471,6 @@ namespace Dapplo.Config
             return defaultValue;
         }
 
-        #endregion
-
-        #region Implementation of IShallowCloneable
         /// <inheritdoc />
         public virtual object ShallowClone()
         {
@@ -511,6 +479,5 @@ namespace Dapplo.Config
 
             return clonedValue;
         }
-        #endregion
     }
 }
