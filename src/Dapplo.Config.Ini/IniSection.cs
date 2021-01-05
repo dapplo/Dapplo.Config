@@ -60,8 +60,19 @@ namespace Dapplo.Config.Ini
             _iniValues[iniValue.PropertyName] = iniValue;
         }
 
+        /// <summary>
+        /// The action to run after the ini section is loaded
+        /// </summary>
         public Action<IIniSection> OnAfterLoad { get; private set; }
+
+        /// <summary>
+        /// The action to run after the ini section is stored
+        /// </summary>
         public Action<IIniSection> OnAfterSave { get; private set; }
+
+        /// <summary>
+        /// The action to run before the ini section is stored
+        /// </summary>
         public Action<IIniSection> OnBeforeSave { get; private set; }
 
         /// <inheritdoc />

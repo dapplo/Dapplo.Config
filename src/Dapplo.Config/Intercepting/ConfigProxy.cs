@@ -14,6 +14,10 @@ namespace Dapplo.Config.Intercepting
     public class ConfigProxy : DispatchProxy
     {
         private readonly Dictionary<MethodInfo, MethodInfo> _methodCache = new Dictionary<MethodInfo, MethodInfo>();
+
+        /// <summary>
+        /// This is the target for the proxy
+        /// </summary>
         public ConfigurationBase Target { get; private set; }
 
         /// <summary>

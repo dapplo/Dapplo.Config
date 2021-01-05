@@ -10,13 +10,12 @@ namespace Dapplo.Config.BenchmarkTests
     [MinColumn, MaxColumn, MemoryDiagnoser]
     public class BasicPerformance
     {
-        private readonly IBenchmarkInterface _benchmark = new BenchmarkImpl();
-
         [Benchmark]
         public void BasicConfig()
         {
-            _benchmark.Age = 10;
-            _benchmark.Name = "Dapplo";
+            IBenchmarkInterface benchmark = new BenchmarkImpl();
+            benchmark.Age = 10;
+            benchmark.Name = "Dapplo";
         }
     }
 }
