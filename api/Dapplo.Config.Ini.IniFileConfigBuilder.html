@@ -1,0 +1,792 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Class IniFileConfigBuilder
+   | Dapplo.Config </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Class IniFileConfigBuilder
+   | Dapplo.Config ">
+    <meta name="generator" content="docfx 2.56.7.0">
+    
+    <link rel="shortcut icon" href="../images/favicon.ico">
+    <link rel="stylesheet" href="../styles/docfx.vendor.css">
+    <link rel="stylesheet" href="../styles/docfx.css">
+    <link rel="stylesheet" href="../styles/main.css">
+    <meta property="docfx:navrel" content="../toc">
+    <meta property="docfx:tocrel" content="toc">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="../index.html">
+                <img id="logo" class="svg" src="../images/d.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+                <ul class="nav level1 navbar-nav">
+                  <li class="">
+                    <a href="../articles/intro.html" title="Articles" class="">Articles</a>
+                  </li>
+                  <li class="active">
+                    <a href="../api/index.html" title="Api Documentation" class="active">Api Documentation</a>
+                  </li>
+                </ul>
+            </div>
+          </div>
+        </nav>        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        <div class="sidenav hide-when-search">
+          <a class="btn toc-toggle collapse" data-toggle="collapse" href="#sidetoggle" aria-expanded="false" aria-controls="sidetoggle">Show / Hide Table of Contents</a>
+          <div class="sidetoggle collapse" id="sidetoggle">
+            <div>
+              <div class="sidefilter">
+                <form class="toc-filter">
+                  <span class="glyphicon glyphicon-filter filter-icon"></span>
+                  <input type="text" id="toc_filter_input" placeholder="Enter here to filter..." onkeypress="if(event.keyCode==13) {return false;}">
+                </form>
+              </div>
+              <div class="sidetoc">
+                <div class="toc" id="toc">
+                  
+                  <ul class="nav level1">
+                    <li class="">
+                      <span class="expand-stub"></span>
+                      <a href="Dapplo.Config.html" title="Dapplo.Config" class="">Dapplo.Config</a>
+                        
+                        <ul class="nav level2">
+                          <li class="">
+                            <a href="Dapplo.Config.AbcComparer.html" title="AbcComparer" class="">AbcComparer</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.ConfigurationBase.html" title="ConfigurationBase" class="">ConfigurationBase</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.ConfigurationBase-1.html" title="ConfigurationBase&lt;TProperty&gt;" class="">ConfigurationBase&lt;TProperty&gt;</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.DictionaryConfiguration-1.html" title="DictionaryConfiguration&lt;TInterface&gt;" class="">DictionaryConfiguration&lt;TInterface&gt;</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.DictionaryConfigurationBase-2.html" title="DictionaryConfigurationBase&lt;TInterface, TProperty&gt;" class="">DictionaryConfigurationBase&lt;TInterface, TProperty&gt;</a>
+                          </li>
+                        </ul>  </li>
+                    <li class="">
+                      <span class="expand-stub"></span>
+                      <a href="Dapplo.Config.Attributes.html" title="Dapplo.Config.Attributes" class="">Dapplo.Config.Attributes</a>
+                        
+                        <ul class="nav level2">
+                          <li class="">
+                            <a href="Dapplo.Config.Attributes.GetSetInterceptorAttribute.html" title="GetSetInterceptorAttribute" class="">GetSetInterceptorAttribute</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Attributes.TagAttribute.html" title="TagAttribute" class="">TagAttribute</a>
+                          </li>
+                        </ul>  </li>
+                    <li class="">
+                      <span class="expand-stub"></span>
+                      <a href="Dapplo.Config.Extensions.html" title="Dapplo.Config.Extensions" class="">Dapplo.Config.Extensions</a>
+                        
+                        <ul class="nav level2">
+                          <li class="">
+                            <a href="Dapplo.Config.Extensions.ConfigurationExtensions.html" title="ConfigurationExtensions" class="">ConfigurationExtensions</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Extensions.DictionaryExtensions.html" title="DictionaryExtensions" class="">DictionaryExtensions</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Extensions.EnumExtensions.html" title="EnumExtensions" class="">EnumExtensions</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Extensions.ExpressionExtensions.html" title="ExpressionExtensions" class="">ExpressionExtensions</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Extensions.PropertyInfoExtension.html" title="PropertyInfoExtension" class="">PropertyInfoExtension</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Extensions.StringExtensions.html" title="StringExtensions" class="">StringExtensions</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Extensions.TypeExtensions.html" title="TypeExtensions" class="">TypeExtensions</a>
+                          </li>
+                        </ul>  </li>
+                    <li class="">
+                      <span class="expand-stub"></span>
+                      <a href="Dapplo.Config.Ini.html" title="Dapplo.Config.Ini" class="">Dapplo.Config.Ini</a>
+                        
+                        <ul class="nav level2">
+                          <li class="">
+                            <a href="Dapplo.Config.Ini.IIniSection.html" title="IIniSection" class="">IIniSection</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Ini.IIniSectionInternal.html" title="IIniSectionInternal" class="">IIniSectionInternal</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Ini.IniFileConfig.html" title="IniFileConfig" class="">IniFileConfig</a>
+                          </li>
+                          <li class="active">
+                            <a href="Dapplo.Config.Ini.IniFileConfigBuilder.html" title="IniFileConfigBuilder" class="active">IniFileConfigBuilder</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Ini.IniFileContainer.html" title="IniFileContainer" class="">IniFileContainer</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Ini.IniPropertyBehaviorAttribute.html" title="IniPropertyBehaviorAttribute" class="">IniPropertyBehaviorAttribute</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Ini.IniSection-1.html" title="IniSection&lt;TInterface&gt;" class="">IniSection&lt;TInterface&gt;</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Ini.IniSectionAttribute.html" title="IniSectionAttribute" class="">IniSectionAttribute</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Ini.IniValue.html" title="IniValue" class="">IniValue</a>
+                          </li>
+                        </ul>  </li>
+                    <li class="">
+                      <span class="expand-stub"></span>
+                      <a href="Dapplo.Config.Ini.Converters.html" title="Dapplo.Config.Ini.Converters" class="">Dapplo.Config.Ini.Converters</a>
+                        
+                        <ul class="nav level2">
+                          <li class="">
+                            <a href="Dapplo.Config.Ini.Converters.StringEncryptionTypeConverter.html" title="StringEncryptionTypeConverter" class="">StringEncryptionTypeConverter</a>
+                          </li>
+                        </ul>  </li>
+                    <li class="">
+                      <span class="expand-stub"></span>
+                      <a href="Dapplo.Config.Ini.Implementation.html" title="Dapplo.Config.Ini.Implementation" class="">Dapplo.Config.Ini.Implementation</a>
+                        
+                        <ul class="nav level2">
+                          <li class="">
+                            <a href="Dapplo.Config.Ini.Implementation.IniFile.html" title="IniFile" class="">IniFile</a>
+                          </li>
+                        </ul>  </li>
+                    <li class="">
+                      <span class="expand-stub"></span>
+                      <a href="Dapplo.Config.Ini.Rest.html" title="Dapplo.Config.Ini.Rest" class="">Dapplo.Config.Ini.Rest</a>
+                        
+                        <ul class="nav level2">
+                          <li class="">
+                            <a href="Dapplo.Config.Ini.Rest.IniRest.html" title="IniRest" class="">IniRest</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Ini.Rest.IniRestCommand.html" title="IniRestCommand" class="">IniRestCommand</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Ini.Rest.IniRestCommands.html" title="IniRestCommands" class="">IniRestCommands</a>
+                          </li>
+                        </ul>  </li>
+                    <li class="">
+                      <span class="expand-stub"></span>
+                      <a href="Dapplo.Config.Intercepting.html" title="Dapplo.Config.Intercepting" class="">Dapplo.Config.Intercepting</a>
+                        
+                        <ul class="nav level2">
+                          <li class="">
+                            <a href="Dapplo.Config.Intercepting.ConfigProxy.html" title="ConfigProxy" class="">ConfigProxy</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Intercepting.GetInfo-1.html" title="GetInfo&lt;TProperty&gt;" class="">GetInfo&lt;TProperty&gt;</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Intercepting.GetSetInfo.html" title="GetSetInfo" class="">GetSetInfo</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Intercepting.GetSetInterceptInformation.html" title="GetSetInterceptInformation" class="">GetSetInterceptInformation</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Intercepting.GetterOrders.html" title="GetterOrders" class="">GetterOrders</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Intercepting.PropertiesInformation.html" title="PropertiesInformation" class="">PropertiesInformation</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Intercepting.PropertyChangedEventArgsEx.html" title="PropertyChangedEventArgsEx" class="">PropertyChangedEventArgsEx</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Intercepting.PropertyChangingEventArgsEx.html" title="PropertyChangingEventArgsEx" class="">PropertyChangingEventArgsEx</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Intercepting.SetInfo-1.html" title="SetInfo&lt;TProperty&gt;" class="">SetInfo&lt;TProperty&gt;</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Intercepting.SetterOrders.html" title="SetterOrders" class="">SetterOrders</a>
+                          </li>
+                        </ul>  </li>
+                    <li class="">
+                      <span class="expand-stub"></span>
+                      <a href="Dapplo.Config.Interfaces.html" title="Dapplo.Config.Interfaces" class="">Dapplo.Config.Interfaces</a>
+                        
+                        <ul class="nav level2">
+                          <li class="">
+                            <a href="Dapplo.Config.Interfaces.IConfiguration.html" title="IConfiguration" class="">IConfiguration</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Interfaces.IConfiguration-1.html" title="IConfiguration&lt;TProperty&gt;" class="">IConfiguration&lt;TProperty&gt;</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Interfaces.IDefaultValue.html" title="IDefaultValue" class="">IDefaultValue</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Interfaces.IDescription.html" title="IDescription" class="">IDescription</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Interfaces.IHasChanges.html" title="IHasChanges" class="">IHasChanges</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Interfaces.IShallowCloneable.html" title="IShallowCloneable" class="">IShallowCloneable</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Interfaces.IShallowCloneable-1.html" title="IShallowCloneable&lt;T&gt;" class="">IShallowCloneable&lt;T&gt;</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Interfaces.ITagging.html" title="ITagging" class="">ITagging</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Interfaces.ITransactionalProperties.html" title="ITransactionalProperties" class="">ITransactionalProperties</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Interfaces.IWriteProtectProperties.html" title="IWriteProtectProperties" class="">IWriteProtectProperties</a>
+                          </li>
+                        </ul>  </li>
+                    <li class="">
+                      <span class="expand-stub"></span>
+                      <a href="Dapplo.Config.Language.html" title="Dapplo.Config.Language" class="">Dapplo.Config.Language</a>
+                        
+                        <ul class="nav level2">
+                          <li class="">
+                            <a href="Dapplo.Config.Language.ILanguage.html" title="ILanguage" class="">ILanguage</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Language.Language-1.html" title="Language&lt;TInterface&gt;" class="">Language&lt;TInterface&gt;</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Language.LanguageAttribute.html" title="LanguageAttribute" class="">LanguageAttribute</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Language.LanguageConfig.html" title="LanguageConfig" class="">LanguageConfig</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Language.LanguageConfigBuilder.html" title="LanguageConfigBuilder" class="">LanguageConfigBuilder</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Language.LanguageContainer.html" title="LanguageContainer" class="">LanguageContainer</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Language.LanguageExtensions.html" title="LanguageExtensions" class="">LanguageExtensions</a>
+                          </li>
+                        </ul>  </li>
+                    <li class="">
+                      <span class="expand-stub"></span>
+                      <a href="Dapplo.Config.Language.Implementation.html" title="Dapplo.Config.Language.Implementation" class="">Dapplo.Config.Language.Implementation</a>
+                        
+                        <ul class="nav level2">
+                          <li class="">
+                            <a href="Dapplo.Config.Language.Implementation.IniFile.html" title="IniFile" class="">IniFile</a>
+                          </li>
+                        </ul>  </li>
+                    <li class="">
+                      <span class="expand-stub"></span>
+                      <a href="Dapplo.Config.Registry.html" title="Dapplo.Config.Registry" class="">Dapplo.Config.Registry</a>
+                        
+                        <ul class="nav level2">
+                          <li class="">
+                            <a href="Dapplo.Config.Registry.IRegistry.html" title="IRegistry" class="">IRegistry</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Registry.ProtocolHandler.html" title="ProtocolHandler" class="">ProtocolHandler</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Registry.RegistryAttribute.html" title="RegistryAttribute" class="">RegistryAttribute</a>
+                          </li>
+                          <li class="">
+                            <a href="Dapplo.Config.Registry.RegistryBase-1.html" title="RegistryBase&lt;TInterface&gt;" class="">RegistryBase&lt;TInterface&gt;</a>
+                          </li>
+                        </ul>  </li>
+                  </ul>        </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="article row grid-right">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="Dapplo.Config.Ini.IniFileConfigBuilder">
+  
+  
+  <h1 id="Dapplo_Config_Ini_IniFileConfigBuilder" data-uid="Dapplo.Config.Ini.IniFileConfigBuilder" class="text-break">Class IniFileConfigBuilder
+  </h1>
+  <div class="markdown level0 summary"><p>This is a builder for the IniFileConfig</p>
+</div>
+  <div class="markdown level0 conceptual"></div>
+  <div class="inheritance">
+    <h5>Inheritance</h5>
+    <div class="level0"><span class="xref">System.Object</span></div>
+    <div class="level1"><span class="xref">IniFileConfigBuilder</span></div>
+  </div>
+  <div class="inheritedMembers">
+    <h5>Inherited Members</h5>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.Equals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetHashCode()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.GetType()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.MemberwiseClone()</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ReferenceEquals(System.Object, System.Object)</span>
+    </div>
+    <div>
+      <span class="xref">System.Object.ToString()</span>
+    </div>
+  </div>
+  <h6><strong>Namespace</strong>: <a class="xref" href="Dapplo.Config.Ini.html">Dapplo.Config.Ini</a></h6>
+  <h6><strong>Assembly</strong>: Dapplo.Config.Ini.dll</h6>
+  <h5 id="Dapplo_Config_Ini_IniFileConfigBuilder_syntax">Syntax</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class IniFileConfigBuilder</code></pre>
+  </div>
+  <h3 id="properties">Properties
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/dapplo/Dapplo.Config/new/master/apiSpec/new?filename=Dapplo_Config_Ini_IniFileConfigBuilder_IsBuild.md&amp;value=---%0Auid%3A%20Dapplo.Config.Ini.IniFileConfigBuilder.IsBuild%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/dapplo/Dapplo.Config/blob/master/src/Dapplo.Config.Ini/IniFileConfigBuilder.cs/#L24">View Source</a>
+  </span>
+  <a id="Dapplo_Config_Ini_IniFileConfigBuilder_IsBuild_" data-uid="Dapplo.Config.Ini.IniFileConfigBuilder.IsBuild*"></a>
+  <h4 id="Dapplo_Config_Ini_IniFileConfigBuilder_IsBuild" data-uid="Dapplo.Config.Ini.IniFileConfigBuilder.IsBuild">IsBuild</h4>
+  <div class="markdown level1 summary"><p>True if the ApplicationConfig was already build.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public bool IsBuild { get; }</code></pre>
+  </div>
+  <h5 class="propertyValue">Property Value</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.Boolean</span></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <h3 id="methods">Methods
+  </h3>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/dapplo/Dapplo.Config/new/master/apiSpec/new?filename=Dapplo_Config_Ini_IniFileConfigBuilder_BuildIniFileConfig.md&amp;value=---%0Auid%3A%20Dapplo.Config.Ini.IniFileConfigBuilder.BuildIniFileConfig%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/dapplo/Dapplo.Config/blob/master/src/Dapplo.Config.Ini/IniFileConfigBuilder.cs/#L45">View Source</a>
+  </span>
+  <a id="Dapplo_Config_Ini_IniFileConfigBuilder_BuildIniFileConfig_" data-uid="Dapplo.Config.Ini.IniFileConfigBuilder.BuildIniFileConfig*"></a>
+  <h4 id="Dapplo_Config_Ini_IniFileConfigBuilder_BuildIniFileConfig" data-uid="Dapplo.Config.Ini.IniFileConfigBuilder.BuildIniFileConfig">BuildIniFileConfig()</h4>
+  <div class="markdown level1 summary"><p>Build or finalize the configuration, so it can be used</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[Pure]
+public IniFileConfig BuildIniFileConfig()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Dapplo.Config.Ini.IniFileConfig.html">IniFileConfig</a></td>
+        <td><p>IniFileConfig</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/dapplo/Dapplo.Config/new/master/apiSpec/new?filename=Dapplo_Config_Ini_IniFileConfigBuilder_Create.md&amp;value=---%0Auid%3A%20Dapplo.Config.Ini.IniFileConfigBuilder.Create%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/dapplo/Dapplo.Config/blob/master/src/Dapplo.Config.Ini/IniFileConfigBuilder.cs/#L38">View Source</a>
+  </span>
+  <a id="Dapplo_Config_Ini_IniFileConfigBuilder_Create_" data-uid="Dapplo.Config.Ini.IniFileConfigBuilder.Create*"></a>
+  <h4 id="Dapplo_Config_Ini_IniFileConfigBuilder_Create" data-uid="Dapplo.Config.Ini.IniFileConfigBuilder.Create">Create()</h4>
+  <div class="markdown level1 summary"><p>Factory</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">[Pure]
+public static IniFileConfigBuilder Create()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Dapplo.Config.Ini.IniFileConfigBuilder.html">IniFileConfigBuilder</a></td>
+        <td><p>IniFileConfigBuilder</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/dapplo/Dapplo.Config/new/master/apiSpec/new?filename=Dapplo_Config_Ini_IniFileConfigBuilder_WithApplicationName_System_String_.md&amp;value=---%0Auid%3A%20Dapplo.Config.Ini.IniFileConfigBuilder.WithApplicationName(System.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/dapplo/Dapplo.Config/blob/master/src/Dapplo.Config.Ini/IniFileConfigBuilder.cs/#L91">View Source</a>
+  </span>
+  <a id="Dapplo_Config_Ini_IniFileConfigBuilder_WithApplicationName_" data-uid="Dapplo.Config.Ini.IniFileConfigBuilder.WithApplicationName*"></a>
+  <h4 id="Dapplo_Config_Ini_IniFileConfigBuilder_WithApplicationName_System_String_" data-uid="Dapplo.Config.Ini.IniFileConfigBuilder.WithApplicationName(System.String)">WithApplicationName(String)</h4>
+  <div class="markdown level1 summary"><p>Change the application name</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IniFileConfigBuilder WithApplicationName(string applicationName)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">applicationName</span></td>
+        <td><p>string</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Dapplo.Config.Ini.IniFileConfigBuilder.html">IniFileConfigBuilder</a></td>
+        <td><p>ApplicationConfigBuilder</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/dapplo/Dapplo.Config/new/master/apiSpec/new?filename=Dapplo_Config_Ini_IniFileConfigBuilder_WithAutoSaveInterval_System_UInt32_.md&amp;value=---%0Auid%3A%20Dapplo.Config.Ini.IniFileConfigBuilder.WithAutoSaveInterval(System.UInt32)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/dapplo/Dapplo.Config/blob/master/src/Dapplo.Config.Ini/IniFileConfigBuilder.cs/#L165">View Source</a>
+  </span>
+  <a id="Dapplo_Config_Ini_IniFileConfigBuilder_WithAutoSaveInterval_" data-uid="Dapplo.Config.Ini.IniFileConfigBuilder.WithAutoSaveInterval*"></a>
+  <h4 id="Dapplo_Config_Ini_IniFileConfigBuilder_WithAutoSaveInterval_System_UInt32_" data-uid="Dapplo.Config.Ini.IniFileConfigBuilder.WithAutoSaveInterval(System.UInt32)">WithAutoSaveInterval(UInt32)</h4>
+  <div class="markdown level1 summary"><p>Specify the auto save interval</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IniFileConfigBuilder WithAutoSaveInterval(uint interval)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.UInt32</span></td>
+        <td><span class="parametername">interval</span></td>
+        <td><p>uint interval</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Dapplo.Config.Ini.IniFileConfigBuilder.html">IniFileConfigBuilder</a></td>
+        <td><p>IniFileConfigBuilder</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/dapplo/Dapplo.Config/new/master/apiSpec/new?filename=Dapplo_Config_Ini_IniFileConfigBuilder_WithFilename_System_String_.md&amp;value=---%0Auid%3A%20Dapplo.Config.Ini.IniFileConfigBuilder.WithFilename(System.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/dapplo/Dapplo.Config/blob/master/src/Dapplo.Config.Ini/IniFileConfigBuilder.cs/#L135">View Source</a>
+  </span>
+  <a id="Dapplo_Config_Ini_IniFileConfigBuilder_WithFilename_" data-uid="Dapplo.Config.Ini.IniFileConfigBuilder.WithFilename*"></a>
+  <h4 id="Dapplo_Config_Ini_IniFileConfigBuilder_WithFilename_System_String_" data-uid="Dapplo.Config.Ini.IniFileConfigBuilder.WithFilename(System.String)">WithFilename(String)</h4>
+  <div class="markdown level1 summary"><p>Specify the filename to use</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IniFileConfigBuilder WithFilename(string filename)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">filename</span></td>
+        <td><p>string</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Dapplo.Config.Ini.IniFileConfigBuilder.html">IniFileConfigBuilder</a></td>
+        <td><p>IniFileConfigBuilder</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/dapplo/Dapplo.Config/new/master/apiSpec/new?filename=Dapplo_Config_Ini_IniFileConfigBuilder_WithFixedDirectory_System_String_.md&amp;value=---%0Auid%3A%20Dapplo.Config.Ini.IniFileConfigBuilder.WithFixedDirectory(System.String)%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/dapplo/Dapplo.Config/blob/master/src/Dapplo.Config.Ini/IniFileConfigBuilder.cs/#L150">View Source</a>
+  </span>
+  <a id="Dapplo_Config_Ini_IniFileConfigBuilder_WithFixedDirectory_" data-uid="Dapplo.Config.Ini.IniFileConfigBuilder.WithFixedDirectory*"></a>
+  <h4 id="Dapplo_Config_Ini_IniFileConfigBuilder_WithFixedDirectory_System_String_" data-uid="Dapplo.Config.Ini.IniFileConfigBuilder.WithFixedDirectory(System.String)">WithFixedDirectory(String)</h4>
+  <div class="markdown level1 summary"><p>Specify a directory if you want to read and write from a specific directory, instead of using the default logic.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IniFileConfigBuilder WithFixedDirectory(string directory)</code></pre>
+  </div>
+  <h5 class="parameters">Parameters</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="xref">System.String</span></td>
+        <td><span class="parametername">directory</span></td>
+        <td><p>string</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Dapplo.Config.Ini.IniFileConfigBuilder.html">IniFileConfigBuilder</a></td>
+        <td><p>IniFileConfigBuilder</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/dapplo/Dapplo.Config/new/master/apiSpec/new?filename=Dapplo_Config_Ini_IniFileConfigBuilder_WithoutSaveOnExit.md&amp;value=---%0Auid%3A%20Dapplo.Config.Ini.IniFileConfigBuilder.WithoutSaveOnExit%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/dapplo/Dapplo.Config/blob/master/src/Dapplo.Config.Ini/IniFileConfigBuilder.cs/#L106">View Source</a>
+  </span>
+  <a id="Dapplo_Config_Ini_IniFileConfigBuilder_WithoutSaveOnExit_" data-uid="Dapplo.Config.Ini.IniFileConfigBuilder.WithoutSaveOnExit*"></a>
+  <h4 id="Dapplo_Config_Ini_IniFileConfigBuilder_WithoutSaveOnExit" data-uid="Dapplo.Config.Ini.IniFileConfigBuilder.WithoutSaveOnExit">WithoutSaveOnExit()</h4>
+  <div class="markdown level1 summary"><p>Disable SaveOnExit</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IniFileConfigBuilder WithoutSaveOnExit()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Dapplo.Config.Ini.IniFileConfigBuilder.html">IniFileConfigBuilder</a></td>
+        <td><p>IniFileConfigBuilder</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+  <span class="small pull-right mobile-hide">
+    <span class="divider">|</span>
+    <a href="https://github.com/dapplo/Dapplo.Config/new/master/apiSpec/new?filename=Dapplo_Config_Ini_IniFileConfigBuilder_WithoutWatchingChanges.md&amp;value=---%0Auid%3A%20Dapplo.Config.Ini.IniFileConfigBuilder.WithoutWatchingChanges%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">Improve this Doc</a>
+  </span>
+  <span class="small pull-right mobile-hide">
+    <a href="https://github.com/dapplo/Dapplo.Config/blob/master/src/Dapplo.Config.Ini/IniFileConfigBuilder.cs/#L120">View Source</a>
+  </span>
+  <a id="Dapplo_Config_Ini_IniFileConfigBuilder_WithoutWatchingChanges_" data-uid="Dapplo.Config.Ini.IniFileConfigBuilder.WithoutWatchingChanges*"></a>
+  <h4 id="Dapplo_Config_Ini_IniFileConfigBuilder_WithoutWatchingChanges" data-uid="Dapplo.Config.Ini.IniFileConfigBuilder.WithoutWatchingChanges">WithoutWatchingChanges()</h4>
+  <div class="markdown level1 summary"><p>Disable WatchFileChanges</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+  <h5 class="decalaration">Declaration</h5>
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public IniFileConfigBuilder WithoutWatchingChanges()</code></pre>
+  </div>
+  <h5 class="returns">Returns</h5>
+  <table class="table table-bordered table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a class="xref" href="Dapplo.Config.Ini.IniFileConfigBuilder.html">IniFileConfigBuilder</a></td>
+        <td><p>IniFileConfigBuilder</p>
+</td>
+      </tr>
+    </tbody>
+  </table>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/dapplo/Dapplo.Config/new/master/apiSpec/new?filename=Dapplo_Config_Ini_IniFileConfigBuilder.md&amp;value=---%0Auid%3A%20Dapplo.Config.Ini.IniFileConfigBuilder%0Asummary%3A%20'*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax'%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A" class="contribution-link">Improve this Doc</a>
+                  </li>
+                  <li>
+                    <a href="https://github.com/dapplo/Dapplo.Config/blob/master/src/Dapplo.Config.Ini/IniFileConfigBuilder.cs/#L13" class="contribution-link">View Source</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            Copyright © 2016-2018 Dapplo
+            
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="../styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="../styles/docfx.js"></script>
+    <script type="text/javascript" src="../styles/main.js"></script>
+  </body>
+</html>

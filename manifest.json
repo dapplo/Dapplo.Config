@@ -1,0 +1,996 @@
+{
+  "homepages": [],
+  "source_base_path": "D:/a/1/s/doc",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.AbcComparer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.AbcComparer.html",
+          "hash": "91d07W0mmYQJgbLnYNWGog=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Attributes.GetSetInterceptorAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Attributes.GetSetInterceptorAttribute.html",
+          "hash": "CABhriAMX0xv/xqop/8RTA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Attributes.TagAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Attributes.TagAttribute.html",
+          "hash": "Ep6jbQpVTa4pgnTn6MwsBg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Attributes.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Attributes.html",
+          "hash": "8i89QEFXVBId2XucBcspNQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.ConfigurationBase-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.ConfigurationBase-1.html",
+          "hash": "FXs5iAdY1Hk8D0vrTRsnvQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.ConfigurationBase.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.ConfigurationBase.html",
+          "hash": "SoMAXeN14Kbax1R5wBlKxQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.DictionaryConfiguration-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.DictionaryConfiguration-1.html",
+          "hash": "hJdNW3aj4cV3bnMPiGOsxA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.DictionaryConfigurationBase-2.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.DictionaryConfigurationBase-2.html",
+          "hash": "AIAs3k1BxywPNcxzjr3N4w=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Extensions.ConfigurationExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Extensions.ConfigurationExtensions.html",
+          "hash": "NVOh0ZLT1SPNhH1IZdFOAw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Extensions.DictionaryExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Extensions.DictionaryExtensions.html",
+          "hash": "Umr9faZVPN8I2GAWTZuhPw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Extensions.EnumExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Extensions.EnumExtensions.html",
+          "hash": "ORj4dJb1JpDs1Ze/gteFTA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Extensions.ExpressionExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Extensions.ExpressionExtensions.html",
+          "hash": "nlineF0xd/KrFos/p3vO9Q=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Extensions.PropertyInfoExtension.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Extensions.PropertyInfoExtension.html",
+          "hash": "uVe56EZjwIx2v86/4hKpdg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Extensions.StringExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Extensions.StringExtensions.html",
+          "hash": "2t2phSXz1Rvs0L7/G56Yvg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Extensions.TypeExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Extensions.TypeExtensions.html",
+          "hash": "UOj2A+IxxehS8kjq9FI4bw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Extensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Extensions.html",
+          "hash": "ciz2Avj/jHyrEC1hKQpxCw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Ini.Converters.StringEncryptionTypeConverter.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Ini.Converters.StringEncryptionTypeConverter.html",
+          "hash": "xiSb8/a17DuyE3Jk9NHMdQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Ini.Converters.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Ini.Converters.html",
+          "hash": "LJ/ojtzsv+1Y2r69rzQ8Ig=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Ini.IIniSection.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Ini.IIniSection.html",
+          "hash": "bHKDIOCq9q5FFRRrNbmuxw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Ini.IIniSectionInternal.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Ini.IIniSectionInternal.html",
+          "hash": "QD5++QhLJ2lHTk5gfU5/lg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Ini.Implementation.IniFile.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Ini.Implementation.IniFile.html",
+          "hash": "+oLKtV5cBASI9h37TrgEEg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Ini.Implementation.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Ini.Implementation.html",
+          "hash": "on4xzpJsYrgKBWt4Zlqp7w=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Ini.IniFileConfig.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Ini.IniFileConfig.html",
+          "hash": "jTMo66N3z8wCTwhy9sjVcg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Ini.IniFileConfigBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Ini.IniFileConfigBuilder.html",
+          "hash": "/lQ2ZHjhFlfMuJHRe7iQaw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Ini.IniFileContainer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Ini.IniFileContainer.html",
+          "hash": "Mkj5x/kHpEcKBvlZKqBljQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Ini.IniPropertyBehaviorAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Ini.IniPropertyBehaviorAttribute.html",
+          "hash": "sYN851WxtXcUSDdY1/+uUA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Ini.IniSection-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Ini.IniSection-1.html",
+          "hash": "PMac6zYgu0WvauxRJeU2ew=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Ini.IniSectionAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Ini.IniSectionAttribute.html",
+          "hash": "nN4hwTbGPxnz0CxI+JPxYg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Ini.IniValue.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Ini.IniValue.html",
+          "hash": "7+0RnL9P/VrNDAEVqaq9+g=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Ini.Rest.IniRest.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Ini.Rest.IniRest.html",
+          "hash": "kckdgOCf0c/kZrEDhtuLPQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Ini.Rest.IniRestCommand.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Ini.Rest.IniRestCommand.html",
+          "hash": "qhbXrdNd95UU0WGUeeHHvQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Ini.Rest.IniRestCommands.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Ini.Rest.IniRestCommands.html",
+          "hash": "CNgTY57+3oSKG2ZdT50RyQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Ini.Rest.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Ini.Rest.html",
+          "hash": "Dg2ZTrlGIaQ3zxPvUlK1/w=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Ini.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Ini.html",
+          "hash": "j7CqMm9EhKSDkJr30Tu/EQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Intercepting.ConfigProxy.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Intercepting.ConfigProxy.html",
+          "hash": "roLKty8BGJKKK4s7Rm39uw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Intercepting.GetInfo-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Intercepting.GetInfo-1.html",
+          "hash": "9S/2Fyexillx56TfUQxIcw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Intercepting.GetSetInfo.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Intercepting.GetSetInfo.html",
+          "hash": "SW3WoxXu0bzf3y9HRlbyhg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Intercepting.GetSetInterceptInformation.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Intercepting.GetSetInterceptInformation.html",
+          "hash": "pGqrtaD9IfO4Iqud7ifijw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Intercepting.GetterOrders.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Intercepting.GetterOrders.html",
+          "hash": "kvlJ8kK0lsZaV6ko4qQq1w=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Intercepting.PropertiesInformation.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Intercepting.PropertiesInformation.html",
+          "hash": "+x4jcI6Z5J72n9LheH7hCw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Intercepting.PropertyChangedEventArgsEx.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Intercepting.PropertyChangedEventArgsEx.html",
+          "hash": "T/dIIQ9sAmp9PqC82b2X/A=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Intercepting.PropertyChangingEventArgsEx.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Intercepting.PropertyChangingEventArgsEx.html",
+          "hash": "VvWkj7uiuoGmjZxjimcI6A=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Intercepting.SetInfo-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Intercepting.SetInfo-1.html",
+          "hash": "knI8Jnhi0KSOCW0ddnSglg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Intercepting.SetterOrders.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Intercepting.SetterOrders.html",
+          "hash": "S/soz/3wbKu1PjvaTkj5wQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Intercepting.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Intercepting.html",
+          "hash": "gnygLk68+Egy+1Cs5X1Syw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Interfaces.IConfiguration-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Interfaces.IConfiguration-1.html",
+          "hash": "WWGw89wBKtSXLRfaMpgiaw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Interfaces.IConfiguration.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Interfaces.IConfiguration.html",
+          "hash": "4rgeyOCuchxmHbCQB3rXZA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Interfaces.IDefaultValue.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Interfaces.IDefaultValue.html",
+          "hash": "ujy8Q9aqz/qOAo7mFXTlLw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Interfaces.IDescription.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Interfaces.IDescription.html",
+          "hash": "z6J3f5dSHTIuiJ4/a3FJBQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Interfaces.IHasChanges.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Interfaces.IHasChanges.html",
+          "hash": "JI3RDfi4UqLYbyWF+KYeKA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Interfaces.IShallowCloneable-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Interfaces.IShallowCloneable-1.html",
+          "hash": "4BWsVzM6ze6Mj/VvaY33Hg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Interfaces.IShallowCloneable.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Interfaces.IShallowCloneable.html",
+          "hash": "Fs5FSCnHc/7lDkYjSA1+lg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Interfaces.ITagging.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Interfaces.ITagging.html",
+          "hash": "MnqMMu2RfM8hK6lfZk0CVQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Interfaces.ITransactionalProperties.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Interfaces.ITransactionalProperties.html",
+          "hash": "zdYrpHLTrjJUzP1JRsvdQw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Interfaces.IWriteProtectProperties.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Interfaces.IWriteProtectProperties.html",
+          "hash": "g30C8leFgViKusSqK6OEjA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Interfaces.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Interfaces.html",
+          "hash": "G4+6Q9bvpK3ra5yNJZ0qSA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Language.ILanguage.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Language.ILanguage.html",
+          "hash": "Tl68PzeCpFOJRt/KircRDg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Language.Implementation.IniFile.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Language.Implementation.IniFile.html",
+          "hash": "VYmxc5+m/EaQCUP+sUaSVQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Language.Implementation.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Language.Implementation.html",
+          "hash": "6Wha6B7igvzvfch44L0mEQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Language.Language-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Language.Language-1.html",
+          "hash": "Z2Cg0PToip6SU6RninWF4Q=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Language.LanguageAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Language.LanguageAttribute.html",
+          "hash": "D2ZpL07EhspnFspeKb+JJw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Language.LanguageConfig.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Language.LanguageConfig.html",
+          "hash": "eidEV3aJX36/NvsR6NYacg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Language.LanguageConfigBuilder.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Language.LanguageConfigBuilder.html",
+          "hash": "SbA8B/YtfVF6wr8YeQz8/A=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Language.LanguageContainer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Language.LanguageContainer.html",
+          "hash": "dJbPPupUvlVH0Sdyj7SbZw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Language.LanguageExtensions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Language.LanguageExtensions.html",
+          "hash": "k+08qExjj8hAtT0ymc4a+g=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Language.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Language.html",
+          "hash": "gqA/usOgiCR39TXdCMdHdA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Registry.IRegistry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Registry.IRegistry.html",
+          "hash": "mc1zk8Ghw5pdRfYoSzGzkw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Registry.ProtocolHandler.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Registry.ProtocolHandler.html",
+          "hash": "oORyxBlqqtRBcdPzydCV/g=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Registry.RegistryAttribute.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Registry.RegistryAttribute.html",
+          "hash": "5OLFLKeODm0SAFsVTYJJjQ=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Registry.RegistryBase-1.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Registry.RegistryBase-1.html",
+          "hash": "o34DvZtPopoCI7me4gJzbA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.Registry.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.Registry.html",
+          "hash": "3gHu0iLJnqREhTRYJ4aEzg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/Dapplo.Config.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/Dapplo.Config.html",
+          "hash": "NwDX0yLBAr9a80DJ2FqvIg=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "api/index.md",
+      "output": {
+        ".html": {
+          "relative_path": "api/index.html",
+          "hash": "asKUYDfnFS1q73zig5Ayqw=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/intro.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/intro.html",
+          "hash": "hI/Ej3XegGijeybWMkC9cA=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "images/d.svg",
+      "output": {
+        "resource": {
+          "relative_path": "images/d.svg"
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "images/favicon.ico",
+      "output": {
+        "resource": {
+          "relative_path": "images/favicon.ico"
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "images/logo.svg",
+      "output": {
+        "resource": {
+          "relative_path": "images/logo.svg"
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html",
+          "hash": "UxZZf0u9msqcG2WLBp+V+w=="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    }
+  ],
+  "incremental_info": [
+    {
+      "status": {
+        "can_incremental": false,
+        "details": "Cannot build incrementally because last build info is missing.",
+        "incrementalPhase": "build",
+        "total_file_count": 0,
+        "skipped_file_count": 0,
+        "full_build_reason_code": "NoAvailableBuildCache"
+      },
+      "processors": {
+        "ConceptualDocumentProcessor": {
+          "can_incremental": false,
+          "incrementalPhase": "build",
+          "total_file_count": 3,
+          "skipped_file_count": 0
+        },
+        "ManagedReferenceDocumentProcessor": {
+          "can_incremental": false,
+          "incrementalPhase": "build",
+          "total_file_count": 72,
+          "skipped_file_count": 0
+        },
+        "ResourceDocumentProcessor": {
+          "can_incremental": false,
+          "details": "Processor ResourceDocumentProcessor cannot support incremental build because the processor doesn't implement ISupportIncrementalDocumentProcessor interface.",
+          "incrementalPhase": "build",
+          "total_file_count": 0,
+          "skipped_file_count": 0
+        },
+        "TocDocumentProcessor": {
+          "can_incremental": false,
+          "details": "Processor TocDocumentProcessor cannot support incremental build because the processor doesn't implement ISupportIncrementalDocumentProcessor interface.",
+          "incrementalPhase": "build",
+          "total_file_count": 0,
+          "skipped_file_count": 0
+        }
+      }
+    },
+    {
+      "status": {
+        "can_incremental": false,
+        "details": "Cannot support incremental post processing, the reason is: last post processor info is null.",
+        "incrementalPhase": "postProcessing",
+        "total_file_count": 0,
+        "skipped_file_count": 0
+      },
+      "processors": {}
+    }
+  ],
+  "version_info": {},
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}
