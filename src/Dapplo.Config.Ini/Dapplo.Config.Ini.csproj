@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>Dapplo.Config.Ini adds ini configuration with static type support to your project.</Description>
-    <TargetFrameworks>netstandard2.0;net461;net471;netcoreapp3.1;net5.0-windows</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net471;netcoreapp3.1;net6.0-windows</TargetFrameworks>
     <PackageTags>dapplo ini config</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapplo.Log" Version="[1.3.11,)" />
+    <PackageReference Include="Dapplo.Log" Version="2.0.1" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">

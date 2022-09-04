@@ -19,10 +19,12 @@ namespace Dapplo.Config.BenchmarkTests
         {
             LogSettings.RegisterDefaultLogger<NullLogger>(LogLevels.Info);
 
+            var jobCore60 = Job.Default.WithRuntime(CoreRuntime.Core60).WithPlatform(Platform.X64);
             var jobCore50 = Job.Default.WithRuntime(CoreRuntime.Core50).WithPlatform(Platform.X64);
             var jobCore31 = Job.Default.WithRuntime(CoreRuntime.Core31).WithPlatform(Platform.X64);
             var jobNet472 = Job.Default.WithRuntime(ClrRuntime.Net472).WithPlatform(Platform.X64);
             var config = DefaultConfig.Instance
+                .AddJob(jobCore60)
                 .AddJob(jobCore50)
                 .AddJob(jobCore31)
                 .AddJob(jobNet472);

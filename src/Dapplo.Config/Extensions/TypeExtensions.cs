@@ -370,7 +370,7 @@ namespace Dapplo.Config.Extensions
                 {
                     try
                     {
-#if !NET461
+#if !NET471
                         outValue = typeConverter.ConvertFromInvariantString(stringValue);
 #else
                         outValue = typeConverter.ConvertFromInvariantString(typeDescriptorContext, stringValue);
@@ -410,7 +410,7 @@ namespace Dapplo.Config.Extensions
                 {
                     try
                     {
-#if !NET461
+#if !NET471
                         outValue = typeConverter.ConvertToInvariantString(value);
 #else
                         outValue = typeConverter.ConvertToInvariantString(typeDescriptorContext, value);

@@ -1,13 +1,13 @@
 ﻿<Project>
   <PropertyGroup>
-    <Copyright>Copyright © Dapplo 2016-2021</Copyright>
+    <Copyright>Copyright © Dapplo 2016-2022</Copyright>
     <Authors>Dapplo</Authors>
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://github.com/dapplo/Dapplo.Config</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>http://www.dapplo.net/blocks/Dapplo.Config/</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <LangVersion>9</LangVersion>
+    <LangVersion>latest</LangVersion>
     <!-- Optional: Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <!-- Optional: Embed source files that are not tracked by the source control manager in the PDB -->
@@ -47,11 +47,11 @@
   </PropertyGroup>
   
   <ItemGroup Condition="!$(MSBuildProjectName.Contains('Tests')) And !$(MSBuildProjectName.Contains('Example'))">
-    <PackageReference Include="Nerdbank.GitVersioning" Version="3.3.37">
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.5.109">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
     <None Include="$(SolutionDir)\icon.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
 </Project>
