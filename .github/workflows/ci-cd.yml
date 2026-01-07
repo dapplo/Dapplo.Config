@@ -1,0 +1,111 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - '*'
+      - '!gh-pages'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history for all branches and tags
+        token: ${{ secrets.GITHUB_TOKEN }}  # Use GITHUB_TOKEN for gh-pages push
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '6.0.x'
+
+    - name: Setup NuGet
+      uses: nuget/setup-nuget@v2
+      with:
+        nuget-version: '6.3.0'
+
+    - name: Restore dependencies
+      run: dotnet restore src/*.sln
+
+    - name: Test
+      run: dotnet test src/*.sln --configuration Debug --no-restore /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
+
+    - name: Build
+      run: dotnet build src/*.sln --configuration Release --no-restore
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: src/**/coverage.cobertura.xml
+        fail_ci_if_error: true
+        slug: dapplo/Dapplo.Config
+
+    - name: Install docfx
+      run: choco install docfx -y
+
+    - name: Build documentation
+      run: docfx doc/docfx.json
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: |
+          src/**/bin/Release/*.nupkg
+          doc/_site
+
+    - name: Publish documentation to gh-pages
+      if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+      run: |
+        git config --local user.name "GitHub Actions"
+        git config --local user.email "actions@github.com"
+        git config --local core.autocrlf false
+        git config --local core.safecrlf false
+        
+        # Create a branch to work in
+        git checkout -b docfx
+        
+        # Remove the .gitignore to make sure this doesn't cause issues
+        Remove-Item .gitignore -Force -ErrorAction SilentlyContinue
+        
+        # Add all the files from the generated document
+        git add doc/_site
+        git commit -m "Generated documentation for ${{ github.run_number }}"
+        
+        # Create a local gh-pages branch containing the splitted output folder
+        git subtree split --prefix doc/_site -b gh-pages
+        
+        # Force push the gh-pages branch to the remote gh-pages branch at origin
+        git push -f origin gh-pages:gh-pages
+      shell: pwsh
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: windows-latest
+
+    steps:
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifacts
+
+    - name: Setup NuGet
+      uses: nuget/setup-nuget@v2
+      with:
+        nuget-version: '6.3.0'
+
+    - name: Push to NuGet
+      run: |
+        $packages = Get-ChildItem -Path . -Recurse -Filter *.nupkg | Where-Object { $_.Name -notlike "*.symbols.nupkg" }
+        foreach ($package in $packages) {
+          nuget push $package.FullName -ApiKey ${{ secrets.NUGET_API_KEY }} -Source https://api.nuget.org/v3/index.json -SkipDuplicate
+        }
+      shell: pwsh
