@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapplo.Config.BenchmarkTest
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapplo.Config.SourceGenerator", "Dapplo.Config.SourceGenerator\Dapplo.Config.SourceGenerator.csproj", "{9DCA3F96-1943-43CF-B3DD-CEA4AD5D43A7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapplo.Config.SourceGenerator.Tests", "Dapplo.Config.SourceGenerator.Tests\Dapplo.Config.SourceGenerator.Tests.csproj", "{04143585-238B-4CAA-A659-321658EAFCDC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -111,6 +113,18 @@ Global
 		{9DCA3F96-1943-43CF-B3DD-CEA4AD5D43A7}.Release|x64.Build.0 = Release|Any CPU
 		{9DCA3F96-1943-43CF-B3DD-CEA4AD5D43A7}.Release|x86.ActiveCfg = Release|Any CPU
 		{9DCA3F96-1943-43CF-B3DD-CEA4AD5D43A7}.Release|x86.Build.0 = Release|Any CPU
+		{04143585-238B-4CAA-A659-321658EAFCDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04143585-238B-4CAA-A659-321658EAFCDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04143585-238B-4CAA-A659-321658EAFCDC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{04143585-238B-4CAA-A659-321658EAFCDC}.Debug|x64.Build.0 = Debug|Any CPU
+		{04143585-238B-4CAA-A659-321658EAFCDC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{04143585-238B-4CAA-A659-321658EAFCDC}.Debug|x86.Build.0 = Debug|Any CPU
+		{04143585-238B-4CAA-A659-321658EAFCDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04143585-238B-4CAA-A659-321658EAFCDC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04143585-238B-4CAA-A659-321658EAFCDC}.Release|x64.ActiveCfg = Release|Any CPU
+		{04143585-238B-4CAA-A659-321658EAFCDC}.Release|x64.Build.0 = Release|Any CPU
+		{04143585-238B-4CAA-A659-321658EAFCDC}.Release|x86.ActiveCfg = Release|Any CPU
+		{04143585-238B-4CAA-A659-321658EAFCDC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
