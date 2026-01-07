@@ -2,13 +2,11 @@ name: CI/CD
 
 on:
   push:
-    branches:
-      - '**'
     branches-ignore:
       - 'gh-pages'
   pull_request:
-    branches:
-      - '**'
+    branches-ignore:
+      - 'gh-pages'
 
 jobs:
   build:
@@ -73,12 +71,12 @@ jobs:
         # Create a branch to work in
         git checkout -b docfx
         
-        # Remove the .gitignore to make sure this doesn't cause issues
-        Remove-Item .gitignore -Force -ErrorAction SilentlyContinue
-        
         # Add all the files from the generated document
-        git add doc/_site
+        git add -f doc/_site
         git commit -m "Generated documentation for ${{ github.run_number }}"
+        
+        # Delete local gh-pages branch if it exists
+        git branch -D gh-pages 2>&1 | Out-Null
         
         # Create a local gh-pages branch containing the splitted output folder
         git subtree split --prefix doc/_site -b gh-pages
