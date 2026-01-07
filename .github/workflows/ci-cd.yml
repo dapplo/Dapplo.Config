@@ -11,6 +11,10 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    permissions:
+      contents: write  # Required for git push to gh-pages
+      checks: write    # Required for test results
+      pull-requests: write  # Required for PR comments
 
     steps:
     - name: Checkout code
@@ -89,6 +93,8 @@ jobs:
     needs: build
     if: github.event_name != 'pull_request'
     runs-on: windows-latest
+    permissions:
+      contents: read  # Required to download artifacts
 
     steps:
     - name: Download build artifacts
