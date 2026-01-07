@@ -3,11 +3,12 @@ name: CI/CD
 on:
   push:
     branches:
-      - '*'
-      - '!gh-pages'
+      - '**'
+    branches-ignore:
+      - 'gh-pages'
   pull_request:
     branches:
-      - '*'
+      - '**'
 
 jobs:
   build:
