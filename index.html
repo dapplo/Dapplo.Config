@@ -1,0 +1,212 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Dapplo.Config | Dapplo.Config </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Dapplo.Config | Dapplo.Config ">
+    <meta name="generator" content="docfx 2.59.4.0">
+    
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="stylesheet" href="styles/docfx.vendor.css">
+    <link rel="stylesheet" href="styles/docfx.css">
+    <link rel="stylesheet" href="styles/main.css">
+    <meta property="docfx:navrel" content="toc">
+    <meta property="docfx:tocrel" content="toc">
+    
+    
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="index.html">
+                <img id="logo" class="svg" src="images/d.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+                <ul class="nav level1 navbar-nav">
+                  <li class="">
+                    <a href="articles/intro.html" title="Articles" class="">Articles</a>
+                  </li>
+                  <li class="">
+                    <a href="api/" title="Api Documentation" class="">Api Documentation</a>
+                  </li>
+                </ul>
+            </div>
+          </div>
+        </nav>        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div role="main" class="container body-content hide-when-search">
+        <div class="article row grid">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="dapploconfig">Dapplo.Config</h1>
+
+<ul>
+<li>Documentation can be found <a href="http://www.dapplo.net/blocks/Dapplo.Config">here</a> (soon)</li>
+<li>Current build status: <a href="https://ci.appveyor.com/project/dapplo/dapplo-config"><img src="https://ci.appveyor.com/api/projects/status/ujfvy3g49g6a1d1q?svg=true" alt="Build status"></a></li>
+<li>Coverage Status: <a href="https://coveralls.io/github/dapplo/Dapplo.Config?branch=master"><img src="https://coveralls.io/repos/github/dapplo/Dapplo.Config/badge.svg?branch=master" alt="Coverage Status"></a></li>
+<li>NuGet package: <a href="https://badge.fury.io/nu/Dapplo.Config"><img src="https://badge.fury.io/nu/Dapplo.Config.svg" alt="NuGet package"></a></li>
+</ul>
+<p>Dapplo.Config is a project which helps you to extend your application with a configuration.
+This can be found on NuGet!</p>
+<p>As it was build for <a href="https://github.com/greenshot/greenshot">Greenshot</a>, the main focus was on having .ini suport.
+It was also very important that Greenshot plug-ins are able to store their information into the same file, and keep the complexity for the developer as little as possible.</p>
+<h1 id="ini-files">Ini-files</h1>
+<h2 id="quick-start">Quick start:</h2>
+<p>An .ini has one or more sections, you can find details on this <a href="https://en.wikipedia.org/wiki/INI_file">here in Wikipedia</a>.
+These sections are represented by .NET interfaces which extend IIniSection.
+You will need to implement these interface and place the properties for your settings in here.
+You can have &quot;as many&quot; IIniSection implementing interfaces as you need, it makes sense to logically spread the information so they fit to a certain behaviour or function.
+The section in the .ini file will have the name of the interface or you can use an Attribute to specify this (adviced) </p>
+<p>Example of a simple section interface:</p>
+<pre><code>public interface ICoreConfiguration : IIniSection
+{
+  string MyProperty {get;set;}
+}
+</code></pre><p>Every application needs a IniConfig instance, this represent the .ini which is read/written.
+As soon as you have an instance of IniConfig, you will <strong>need</strong> to register your interface(s) with it.
+This way the properties can be serialized to or deserialized from the file.</p>
+<p>An example of your initial code:</p>
+<pre><code>var iniConfig = new IniConfig(&quot;&lt;application&gt;&quot;, &quot;&lt;ini-file-name-without-extension&gt;&quot;);
+var coreConfiguration = await iniConfig.RegisterAndGetAsync&lt;ICoreConfiguration&gt;().ConfigureAwait(false);
+</code></pre><p>As the file needs to be read from a filesystem, we don&#39;t want to block so the RegisterAndGetAsync method is Async.
+There are many ways to do this, but I just want to describe a simple how-to.</p>
+<p>Now the important parts:
+RegisterAndGetAsync will give you an <strong>instance</strong> of your ICoreConfiguration. What? Yes!!
+You will get an implementation which is generated for you, this has many advantanges as the framework can add additional functionality. (later more).</p>
+<p>Second: the instance you get is a singleton, you will get always get the same instance, no mather how often you ask for it.
+You can have classes assign the instance to a static variable which you can use to read and write to the properties:</p>
+<pre><code>public class MyClass {
+  private static readonly ICoreConfiguration CoreConfiguration = IniConfig.Current().Get&lt;&gt;(ICoreConfiguration);
+
+  public void MyMethod() {
+    Debug.WriteLine(CoreConfiguration.MyProperty);
+  }
+</code></pre><p>In this part IniConfig.Current() is used to get a reference to the one and only instance of IniConfig which was created, this won&#39;t work when you have multiples... in this case you will need to call Get(&quot;<application>&quot;, &quot;<ini-file-name-without-extension>&quot;).<p>
+<p>Now you can also read and write values via the CoreConfiguration variable!</p>
+<h2 id="auto-save">Auto save</h2>
+<p>The framework registers an event-handler on AppDomain.CurrentDomain.ProcessExit, which tries to save when your application stops.
+Although saving is done automatically after 1 second (is configurable) you should if possible make sure the WriteAsync() method is called on your IniConfig <strong>if</strong> you know you have changes. If a process is terminated, the framework can&#39;t write your changes.</p>
+<h2 id="the-properties-of-your-interfaces">The properties of your interfaces</h2>
+<p>The framework supports a lot of types for your properties:</p>
+<ul>
+<li>All primitives, like (u)int/(u)short/(u)long/bool etc</li>
+<li>strings ofcourse</li>
+<li>Enums</li>
+<li>Collections of primitives</li>
+<li>Dictionary of key/value with the primitives (yes)</li>
+<li>Interfaces for collections, the framework has a mapping of e.g. IList -&gt; List etc.</li>
+</ul>
+<p>Maybe you find something which really makes sense to have and doesn&#39;t work? Create an issue for it.</p>
+<h3 id="attributes-for-iinisection">Attributes for IIniSection</h3>
+<ul>
+<li>DescriptionAttribute: having this attribute on a property will create a comment about the section in the .ini, this can help IT staff or users to understand your settings.</li>
+<li>IniSectionAttribute: this Dapplo.Config attribute can be used to specify the name of the ini-section (so inside the file) and if any (de-)serialization errors should be ignored (default = false).</li>
+</ul>
+<h3 id="attributes-for-properties">Attributes for Properties</h3>
+<p>The way the properties are serialized/deserialized to your .ini file depends on attributes you annotate on your properties.
+You can assist by specifying converters, and if defaults need to be in the file.</p>
+<ul>
+<li>DefaultValueAttribute: As you cannot have initializers inside an interface, the DefaultValueAttribute can be used to specify what the default value(s) show be.</li>
+<li>DescriptionAttribute: having this attribute on a property will create a comment about the line in the .ini, this can help IT staff or users to understand your settings.</li>
+<li>DataMemberAttribute: this can be used to specify if a property with the default value should be written to the file. (use EmitDefaultValue=true)</li>
+<li>IniPropertyBehaviorAttribute: this is a Dapplo.Config Attribute, and can be used to suppress reading / writing, and ignore errors.</li>
+<li>TypeConverterAttribute: This can be used to specify which TypeConverter should be used to convert string -&gt; property when reading and property-&gt;string when writing.</li>
+</ul>
+<h2 id="additional-functionality">Additional functionality</h2>
+<p>As the framework generates an implementation of your interface, using Dapplo.InterfaceImpl, I added the possibility to extended this with additional functionality.
+You can use this simply by extending your interface with additional interfaces.</p>
+<p>Currently the following is available but can be extended:</p>
+<ul>
+<li>INotifyPropertyChanged: this will add the PropertyChanged event, and generate events for every property that you changed.</li>
+<li>INotifyPropertyChanging: this will add the PropertyChanging event, and generate events for every property that you are changing.</li>
+<li>IHasChanges: this will add a possibility to detect if you changed a value since the start or a reset.</li>
+<li>IDescription: this will add method to get the value of a DescriptionAttribute of a property.</li>
+</ul>
+<h2 id="weak-types-access">Weak-types access</h2>
+<p>You can also access the values in our .ini without going through the interfaces, this could be something you want to do when you want to have a settings UI (I will build one soon).</p>
+<p>All values are parsed into &quot;IniValue&quot; instances, which have many details on the value.
+If the ICoreConfiguration interface had a IniSectionAttribute to specify the section name &quot;Core&quot;, you could access your properties like this:</p>
+<pre><code>iniConfig[&quot;Core&quot;][&quot;MyProperty&quot;].Value = &quot;a new value for MyProperty&quot;;
+</code></pre><p>There are also enumerating possiblities, to foreach over all IIniSections and their properties.</p>
+<h1 id="language-text-resources">Language (text resources)</h1>
+<p>Additionally to .ini support, the framework was extended with functionality for translations.
+This was also written for Greenshot, and is already very usuable. Documentation will follow.
+The functionality is in the LanguageLoader, and in general the usage is similar to the IniConfig.
+Your interface needs to extend ILanguage, and only have getters.</p>
+<h1 id="registry-access">Registry access</h1>
+<p>This is work in progress, but the same idea as having an .NET interface map to a .ini, I also added a mapping into the registry.
+More to come...</p>
+<h1 id="managed-extension-framework-mef-support">Managed Extension Framework (MEF) Support</h1>
+<p>There is another Dapplo repository (Dapplo.Addons](<a href="https://github.com/dapplo/Dapplo.Addons">https://github.com/dapplo/Dapplo.Addons</a>) which makes it possible to import IIniSection interfaces into your MEF controlled classes. The idea of that project is making it easy to add extensions to your application. In this case MEF can really help...
+For this you will need to add an ServiceProviderExportProvider with the LanguageLoader or IniConfig to the Mef bootstrapper.</p>
+<p>Notice:
+<strong>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.</strong></p>
+</ini-file-name-without-extension></application></article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/dapplo/Dapplo.Config/blob/master/doc/index.md/#L1" class="contribution-link">Improve this Doc</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            Copyright © 2016-2018 Dapplo
+            
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="styles/docfx.js"></script>
+    <script type="text/javascript" src="styles/main.js"></script>
+  </body>
+</html>
