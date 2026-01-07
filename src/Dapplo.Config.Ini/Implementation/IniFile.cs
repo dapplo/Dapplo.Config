@@ -62,12 +62,12 @@ namespace Dapplo.Config.Ini.Implementation
 			// Do not dispose the reader, this will close the supplied stream and that is not our job!
 			var reader = new StreamReader(stream, encoding);
 			IDictionary<string, string> nameValues = new Dictionary<string, string>(AbcComparer.Instance);
-			while (!reader.EndOfStream && !cancellationToken.IsCancellationRequested)
+			while (!cancellationToken.IsCancellationRequested)
 			{
 				var line = await reader.ReadLineAsync().ConfigureAwait(false);
 				if (line is null)
 				{
-					continue;
+					break;
 				}
 				var cleanLine = line.Trim();
 				if (cleanLine.Length == 0 || cleanLine.StartsWith(Comment))

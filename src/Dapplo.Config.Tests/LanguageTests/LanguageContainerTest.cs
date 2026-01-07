@@ -95,9 +95,8 @@ namespace Dapplo.Config.Tests.LanguageTests
 			Assert.Equal("Afbreken", languageContainer["test"]["test_value"]);
 			Assert.Equal("cool", languageContainer["test"]["dapplo"]);
 			Assert.Equal("cool", languageLoaderTest["dapplo"]);
-			Assert.Equal("cool", languageLoaderTest["dapplo_"]);
 			Assert.Contains("dapplo", languageLoaderTest.PropertyFreeKeys());
-			Assert.Contains("dapplo_", languageLoaderTest.PropertyFreeKeys());
+			Assert.DoesNotContain("dapplo_", languageLoaderTest.PropertyFreeKeys());
             // Test if translations without matching properties are available
             Assert.Contains("dapplo", languageContainer["test"].Keys());
 		}
