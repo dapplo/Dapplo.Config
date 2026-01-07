@@ -103,7 +103,7 @@ namespace Dapplo.Config.SourceGenerator
             if (iConfigurationSymbol != null)
             {
                 // Check if implements IConfiguration<T>
-                if (interfaceSymbol.AllInterfaces.Any(i => i.OriginalDefinition != null && SymbolEqualityComparer.Default.Equals(i.OriginalDefinition, iConfigurationSymbol)))
+                if (interfaceSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i.OriginalDefinition, iConfigurationSymbol)))
                 {
                     return true;
                 }
@@ -193,6 +193,10 @@ namespace Dapplo.Config.SourceGenerator
 
         private static string GetFieldName(string propertyName)
         {
+            if (string.IsNullOrEmpty(propertyName))
+            {
+                throw new ArgumentException("Property name cannot be null or empty", nameof(propertyName));
+            }
             return $"_{char.ToLowerInvariant(propertyName[0])}{propertyName.Substring(1)}";
         }
 
