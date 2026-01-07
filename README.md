@@ -12,6 +12,17 @@ This can be found on NuGet!
 As it was build for [Greenshot](https://github.com/greenshot/greenshot), the main focus was on having .ini suport.
 It was also very important that Greenshot plug-ins are able to store their information into the same file, and keep the complexity for the developer as little as possible.
 
+## Source Generator Support (New!)
+
+Dapplo.Config now includes a **source generator** that eliminates runtime reflection for basic scenarios:
+- Generates lightweight POCO implementations at compile-time
+- Zero reflection for simple property storage and change notification
+- Ideal for AOT compilation and performance-critical scenarios
+
+See [Source Generator README](src/Dapplo.Config.SourceGenerator/README.md) for details and usage.
+
+**Note**: For full INI file persistence, transactions, and other advanced features, use the traditional reflection-based API.
+
 
 # Ini-files
 

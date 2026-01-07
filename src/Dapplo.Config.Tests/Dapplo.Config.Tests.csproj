@@ -12,6 +12,10 @@
     <ProjectReference Include="..\Dapplo.Config.Ini\Dapplo.Config.Ini.csproj" />
     <ProjectReference Include="..\Dapplo.Config.Language\Dapplo.Config.Language.csproj" />
     <ProjectReference Include="..\Dapplo.Config.Registry\Dapplo.Config.Registry.csproj" />
+    <!-- Add source generator as an analyzer -->
+    <ProjectReference Include="..\Dapplo.Config.SourceGenerator\Dapplo.Config.SourceGenerator.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
   
   <ItemGroup>
